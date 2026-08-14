@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al Hussain Restaurant - Advanced POS</title>
+    
+    <!-- Firebase SDKs for Cloud Sync -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <!-- QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fb; margin: 0; color: #334155; }
+        
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #4f46e5; display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
+        .login-box { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 350px; text-align: center; }
+        .login-box h2 { margin-top: 0; color: #4f46e5; margin-bottom: 25px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none; }
+        .btn-login { background: #4f46e5; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .error-msg { color: #ef4444; font-size: 14px; margin-top: 10px; display: none; font-weight: bold; }
+
+        .header { background: #4f46e5; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .header-title { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .header h2 { margin: 0; font-size: 18px; }
+        .badge { background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .btn-logout { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .btn-logout:hover { background: #ef4444; }
+        
+        .main-layout { display: flex; height: calc(100vh - 50px); padding: 10px; box-sizing: border-box; gap: 12px; }
+        .left-panel { flex: 6.5; display: flex; flex-direction: column; overflow: hidden; }
+        .right-panel { flex: 3.5; background: white; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; overflow-y: auto; padding: 12px; box-sizing: border-box; }
+        
+        @media (max-width: 900px) {
+            .main-layout { flex-direction: column; height: auto; overflow-y: auto; }
+            .left-panel { height: 500px; flex: none; }
+            .right-panel { height: auto; flex: none; margin-bottom: 20px; }
+        }
+
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
+        .search-container { display: flex; align-items: center; gap: 6px; width: 100%; max-width: 310px; }
+        .search-box { padding: 8px 12px; border-radius: 20px; border: 1px solid #cbd5e1; width: 100%; outline: none; font-size: 14px; }
+        .btn-menu-refresh { background: #0284c7; color: white; border: none; padding: 8px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+        .btn-menu-refresh:hover { background: #0284c7; opacity: 0.9; }
+
+        .category-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; width: 100%; }
+        .cat-btn { background: #e2e8f0; border: none; padding: 6px 14px; border-radius: 20px; color: #475569; font-weight: 600; cursor: pointer; white-space: nowrap; font-size: 13px; }
+        .cat-btn.active, .cat-btn:hover { background: #4f46e5; color: white; }
+
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; overflow-y: auto; padding-right: 5px; padding-bottom: 20px; }
+        .menu-card { background: white; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; position: relative; border: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; height: 100px; box-sizing: border-box; }
+        .menu-card:hover { border-color: #4f46e5; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1); }
+        .card-icon { position: absolute; top: 10px; right: 10px; font-size: 18px; }
+        .card-title { font-weight: 700; font-size: 13px; margin-top: 2px; color: #1e293b; width: 80%; }
+        .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; }
+        .card-price { font-weight: bold; font-size: 14px; color: #475569; }
+        .btn-add { background: #f8fafc; color: #4f46e5; border: 1px solid #e2e8f0; width: 26px; height: 26px; border-radius: 6px; font-size: 15px; display: flex; justify-content: center; align-items: center; font-weight: bold; }
+
+        h3 { margin-top: 0; color: #1e293b; font-size: 15px; margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; }
+        .order-controls { display: flex; gap: 8px; margin-bottom: 8px; }
+        .order-controls select { width: 50%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 13px; }
+        
+        .cart-table-wrapper { flex-grow: 1; overflow-y: visible; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; color: #64748b; padding: 8px 6px; text-align: left; font-size: 13px; }
+        td { padding: 10px 6px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+        
+        .cart-item-name { font-weight: 700; font-size: 14px; color: #0f172a; margin-bottom: 3px; }
+        
+        .note-checkboxes { display: flex; gap: 6px; margin-top: 4px; overflow-x: auto; white-space: nowrap; padding-bottom: 3px; width: 100%; max-width: 220px; }
+        .note-checkboxes::-webkit-scrollbar { height: 4px; }
+        .note-checkboxes::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        .note-label { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; flex-shrink: 0; display: inline-flex; align-items: center; gap: 3px; }
+        .note-label input { accent-color: #4f46e5; cursor: pointer; width: 13px; height: 13px; }
+        
+        .comment-input { width: 95%; padding: 4px 6px; margin-top: 3px; border: 1px dashed #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; }
+        .price-input { width: 65px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: right; font-weight: bold; font-size: 13px; outline: none; }
+        
+        .qty-controls { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+        .qty-btn { background: #e2e8f0; border: none; width: 26px; height: 26px; border-radius: 4px; cursor: pointer; font-weight: bold; color: #475569; font-size: 15px; }
+
+        .bill-summary { background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+        .summary-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 4px; align-items: center; }
+        .summary-row input { width: 75px; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: right; outline: none; }
+        .total-row { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: #0f172a; margin-top: 6px; border-top: 1px dashed #cbd5e1; padding-top: 6px; }
+        
+        .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; }
+        .btn-hold { flex: 1; background: #f59e0b; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .btn-kitchen { flex: 1; background: #0284c7; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .btn-print-bill { flex: 1; background: #3b82f6; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .btn-pay { flex: 1; background: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .btn-drawer { flex: 100%; background: #6366f1; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-top: 2px; }
+        
+        .admin-section { margin-top: 15px; display: none; background: #f8fafc; padding: 10px; border-radius: 8px; }
+        .btn-small { background: #4f46e5; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .btn-cat-add { background: #059669; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; white-space: nowrap; }
+        .stat-box { background: white; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #e2e8f0; margin-top: 6px; font-size: 15px; font-weight: bold; color: #4f46e5; }
+        
+        .visual-tables-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 140px; overflow-y: auto; }
+        .v-table-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; color: white; border: none; position: relative; }
+        .v-table-free { background: #10b981; }
+        .v-table-occupied { background: #ef4444; }
+
+        .visual-takeaway-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 140px; overflow-y: auto; }
+        .v-takeaway-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; color: white; background: #d97706; border: none; position: relative; }
+
+        .history-btn, .manage-menu-btn, .close-day-btn, .stock-btn, .qr-btn, .report-btn, .manage-cat-btn { background: #475569; color: white; border: none; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; width: 100%; margin-top: 6px; }
+        .manage-menu-btn { background: #0284c7; }
+        .manage-cat-btn { background: #7c3aed; }
+        .stock-btn { background: #8b5cf6; }
+        .qr-btn { background: #059669; }
+        .report-btn { background: #0d9488; }
+        .close-day-btn { background: #dc2626; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 15px; box-sizing: border-box; }
+        .modal-content { background: white; width: 100%; max-width: 750px; max-height: 85vh; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; box-sizing: border-box; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+        .modal-body { overflow-y: auto; margin-top: 8px; max-height: 65vh; }
+        .close-modal { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        .pay-modal-box { background: white; width: 100%; max-width: 420px; border-radius: 16px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.25); box-sizing: border-box; text-align: center; }
+        .pay-modal-box h2 { color: #4f46e5; margin-top: 0; margin-bottom: 20px; font-size: 22px; }
+        .pay-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; color: #334155; background: #f8fafc; padding: 12px 15px; border-radius: 10px; border: 1px solid #e2e8f0; }
+        .pay-row span.val { font-size: 24px; color: #0f172a; }
+        .pay-input-box { width: 100%; padding: 12px; font-size: 22px; font-weight: bold; text-align: right; border: 2px solid #4f46e5; border-radius: 10px; outline: none; box-sizing: border-box; color: #1e293b; background: #fff; margin-bottom: 15px; }
+        .pay-btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .pay-btn-confirm { flex: 1; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .pay-btn-cancel { flex: 1; background: #ef4444; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+
+        .qr-card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 10px; }
+        .qr-card { background: #fff; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; text-align: center; }
+        .qr-card h4 { margin: 5px 0 10px 0; color: #4f46e5; font-size: 16px; }
+        .qr-img-box { display: inline-block; background: white; padding: 5px; border-radius: 6px; }
+
+        #print-receipt, #print-kitchen, #print-drawer, #print-sales-history, #print-item-report, #print-qr-batch { display: none; }
+
+        @media print {
+            @page { size: auto; margin: 10mm; }
+            body { background: white !important; margin: 0 !important; padding: 0 !important; }
+            body * { visibility: hidden !important; }
+            
+            body.print-customer #print-receipt, body.print-customer #print-receipt * { visibility: visible !important; }
+            body.print-customer #print-receipt { 
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
+                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 16px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
+            }
+
+            body.print-kitchen-mode #print-kitchen, body.print-kitchen-mode #print-kitchen * { visibility: visible !important; }
+            body.print-kitchen-mode #print-kitchen { 
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
+                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
+            }
+
+            body.print-drawer-mode #print-drawer, body.print-drawer-mode #print-drawer * { visibility: visible !important; }
+            body.print-drawer-mode #print-drawer { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 16px !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
+
+            body.print-history-mode #print-sales-history, body.print-history-mode #print-sales-history * { visibility: visible !important; }
+            body.print-history-mode #print-sales-history { 
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
+                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
+            }
+
+            body.print-item-report-mode #print-item-report, body.print-item-report-mode #print-item-report * { visibility: visible !important; }
+            body.print-item-report-mode #print-item-report { 
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
+                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
+            }
+
+            body.print-qr-mode #print-qr-batch, body.print-qr-mode #print-qr-batch * { visibility: visible !important; }
+            body.print-qr-mode #print-qr-batch {
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: white !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-overlay">
+        <div class="login-box">
+            <h2>🔒 Secure Login</h2>
+            <form onsubmit="handleLogin(event)">
+                <input type="text" id="login-user" placeholder="Username (admin / user1 / user2)" required>
+                <input type="password" id="login-pass" placeholder="Password" required>
+                <button type="submit" class="btn-login">Login to POS</button>
+            </form>
+            <p id="login-error" class="error-msg">Invalid Username or Password!</p>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="main-app" style="display: none;">
+        <div class="header">
+            <div class="header-title">
+                <h2>Al Hussain Restaurant POS</h2>
+                <span class="badge" id="display-user">Admin</span>
+            </div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="main-layout">
+            <!-- LEFT PANEL: MENU -->
+            <div class="left-panel">
+                <div class="controls-bar">
+                    <div class="search-container">
+                        <input type="text" id="search-input" class="search-box" placeholder="Search menu..." onkeyup="renderMenu()" onclick="this.value=''; renderMenu();">
+                        <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">🔄 Refresh</button>
+                    </div>
+                    <div class="category-filters" id="category-filters"></div>
+                </div>
+                <div id="menu-grid" class="menu-grid"></div>
+            </div>
+
+            <!-- RIGHT PANEL: CART & TABLES -->
+            <div class="right-panel">
+                <h3>Current Order</h3>
+                
+                <div class="order-controls">
+                    <select id="order-type" onchange="onOrderTypeChange()">
+                        <option value="Dine-In">Dine-In</option>
+                        <option value="Takeaway">Takeaway</option>
+                    </select>
+                    <select id="table-no" onchange="onTableChange()">
+                        <option value="Table 1">Table 1</option><option value="Table 2">Table 2</option><option value="Table 3">Table 3</option>
+                        <option value="Table 4">Table 4</option><option value="Table 5">Table 5</option><option value="Table 6">Table 6</option>
+                        <option value="Table 7">Table 7</option><option value="Table 8">Table 8</option><option value="Table 9">Table 9</option>
+                        <option value="Table 10">Table 10</option><option value="Table 11">Table 11</option><option value="Table 12">Table 12</option><option value="Table 13">Table 13</option>
+                    </select>
+                </div>
+
+                <div class="cart-table-wrapper">
+                    <table>
+                        <thead><tr><th>Item & Notes</th><th>Qty</th><th style="text-align:right;">Price ($)</th></tr></thead>
+                        <tbody id="cart-items"></tbody>
+                    </table>
+                </div>
+
+                <div class="bill-summary" id="bill-summary-container">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>$<span id="sub-total">0.00</span></span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Discount ($):</span>
+                        <input type="number" id="discount-input" value="0.00" min="0" step="0.50" oninput="updateCart()">
+                    </div>
+                    <div class="total-row">
+                        <span>Grand Total:</span>
+                        <span>$<span id="total-amount">0.00</span></span>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+                        <span style="font-size: 13px; font-weight: 600; color: #475569;">Payment Method:</span>
+                        <select id="payment-method" style="padding: 5px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: bold; background: white; font-size: 13px;">
+                            <option value="Cash">Cash 💵</option>
+                            <option value="Card">Card 💳</option>
+                            <option value="QR Pay">QR Pay 📱</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn-hold" onclick="saveOrderToTable()">Hold</button>
+                    <button class="btn-kitchen" onclick="printKitchenKOT()">🍳 Kitchen</button>
+                    <button id="btn-print-bill-elem" class="btn-print-bill" onclick="printCustomerBillOnly()">🖨️ Print Bill</button>
+                    <button id="btn-pay-elem" class="btn-pay" onclick="openPaymentModal()">💵 Pay</button>
+                    <button id="btn-drawer-elem" class="btn-drawer" onclick="openCashDrawerOnly()">🔓 Open Cash Drawer</button>
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <h3 style="font-size: 14px; margin-bottom:4px;">🪑 Visual Tables (Dine-In)</h3>
+                    <div id="visual-tables-grid" class="visual-tables-grid"></div>
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <h3 style="font-size: 14px; margin-bottom:4px;">📦 Visual Takeaway Orders (<span id="takeaway-count">0</span>)</h3>
+                    <div id="visual-takeaway-grid" class="visual-takeaway-grid">
+                        <div style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 12px; padding: 6px;">No Active Takeaways</div>
+                    </div>
+                </div>
+
+                <!-- Admin Panel -->
+                <div id="admin-panel" class="admin-section">
+                    <h3>Admin Dashboard</h3>
+                    
+                    <div style="margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+                        <b style="font-size:13px; color:#475569;">➕ Add New Menu Item:</b>
+                        <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; align-items: center;">
+                            <input type="text" id="add-m-name" placeholder="Item Name" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 2; outline: none; font-size: 12px;">
+                            <select id="add-m-cat" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 2; outline: none; font-size: 12px; font-weight: bold; color: #4f46e5; background: white;"></select>
+                            <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; width: 55px; outline: none; font-size: 12px;">
+                            <button class="btn-small" onclick="addNewMenuItem()">Add</button>
+                        </div>
+                        <div style="margin-top: 6px; text-align: right;">
+                            <button class="btn-cat-add" onclick="addNewCategoryPrompt()">+ Add New Category</button>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:8px;">
+                        <div class="stat-box" style="flex:1;">
+                            <div style="font-size:11px; color:#64748b;">Today Sales</div>
+                            $<span id="stat-sales">0.00</span>
+                        </div>
+                        <div class="stat-box" style="flex:1; color:#ea580c;">
+                            <div style="font-size:11px; color:#64748b;">Expenses</div>
+                            $<span id="stat-expenses">0.00</span>
+                        </div>
+                    </div>
+                    <button class="manage-menu-btn" onclick="openMenuManagerModal()">⚙️ Manage Menu Items & Prices</button>
+                    <button class="manage-cat-btn" onclick="openCategoryManagerModal()">📁 Reorder Categories (Priority)</button>
+                    <button class="stock-btn" onclick="openStockModal()">📦 Manual Stock (Raw Materials)</button>
+                    <button class="report-btn" onclick="openItemReportModal()">📊 Daily Item Sold Report</button>
+                    <button class="qr-btn" onclick="openCustomerQRModal()">📱 Customer QR Ordering Link</button>
+                    <button class="history-btn" onclick="openHistoryModal()">📋 View Sales History</button>
+                    <button class="close-day-btn" onclick="closeDay()">🔒 Day Close (End of Day)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM LARGE PAYMENT MODAL -->
+    <div id="payment-modal" class="modal-overlay">
+        <div class="pay-modal-box">
+            <h2>💵 Complete Payment</h2>
+            
+            <div class="pay-row">
+                <span>Grand Total:</span>
+                <span class="val">$<span id="modal-grand-total">0.00</span></span>
+            </div>
+
+            <div style="text-align: left; font-size: 14px; font-weight: bold; color: #475569; margin-bottom: 5px;">Enter Customer Paid Amount:</div>
+            <input type="number" id="modal-paid-input" class="pay-input-box" step="0.50" oninput="calculateChangePreview()">
+
+            <div class="pay-row" style="background: #e0e7ff; border-color: #c7d2fe;">
+                <span style="color: #3730a3;">Return Change:</span>
+                <span class="val" style="color: #4338ca;">$<span id="modal-change-amount">0.00</span></span>
+            </div>
+
+            <div class="pay-btn-group">
+                <button class="pay-btn-cancel" onclick="closePaymentModal()">Cancel</button>
+                <button class="pay-btn-confirm" onclick="confirmPaymentProcess()">Confirm & Pay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR CODE GENERATOR MODAL -->
+    <div id="qr-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3>📱 Customer Table QR Codes (Self-Ordering)</h3>
+                <div>
+                    <button class="btn-small" onclick="printAllTableQRs()">🖨️ Print All QRs</button>
+                    <button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 12px; color: #64748b; margin-top: 0;">Scan these QR codes with a phone camera to open the ordering page for each specific table.</p>
+                <div id="qr-cards-grid" class="qr-card-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="menu-manager-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Manage Menu Items & Categories</h3>
+                <button class="close-modal" onclick="closeMenuManagerModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; flex-wrap: wrap;">
+                    <p style="font-size: 12px; color: #64748b; margin: 0;">You can search, edit item names, categories, or prices directly.</p>
+                    <input type="text" id="menu-manager-search" placeholder="🔍 Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; width: 220px; outline: none;">
+                </div>
+                <table style="width:100%; font-size:12px;">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th style="text-align:right;">Price ($)</th>
+                            <th style="text-align:center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="menu-manager-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- CATEGORY REORDER MODAL -->
+    <div id="category-manager-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>📁 Reorder Categories (Top Priority)</h3>
+                <button class="close-modal" onclick="closeCategoryManagerModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 12px; color: #64748b; margin-top: 0;">Use Up / Down buttons to set which category appears first on screen.</p>
+                <table style="width:100%; font-size:13px;">
+                    <thead><tr><th>Category Name</th><th style="text-align:right;">Priority Action</th></tr></thead>
+                    <tbody id="category-manager-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="stock-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📦 Manual Raw Material Stock</h3>
+                <button class="btn-small" onclick="addNewRawMaterial()">+ Add New Material</button>
+                <button class="close-modal" onclick="closeStockModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <table style="width:100%; font-size:12px;">
+                    <thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead>
+                    <tbody id="stock-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="item-report-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📊 Daily Item Sold Report</h3>
+                <button class="btn-small" onclick="printItemReport()">🖨️ Print Report</button>
+                <button class="close-modal" onclick="closeItemReportModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <table style="width:100%; font-size:12px;">
+                    <thead><tr><th>Menu Item Name</th><th style="text-align:right;">Total Qty Sold Today</th></tr></thead>
+                    <tbody id="item-report-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="history-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Sales History & Reprint</h3>
+                <button class="btn-small" onclick="printSalesHistory()">🖨️ Print Full Report</button>
+                <button class="close-modal" onclick="closeHistoryModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <table style="width:100%; font-size:12px;">
+                    <thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead>
+                    <tbody id="history-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Templates -->
+    <div id="print-receipt">
+        <div style="text-align: center; margin-bottom: 6px;">
+            <h2 style="margin: 0; font-size: 20px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
+            <p style="margin: 2px 0; font-size: 15px; font-weight: 900;">Nagara Brunei Darussalam.</p>
+            <hr style="border-top: 3px solid black; margin: 4px 0;">
+        </div>
+        <div style="font-size: 15px; font-weight: 900; margin-bottom: 6px;">
+            <div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" style="font-size: 17px; background: #000; color: #fff; padding: 0 4px;"></span></div>
+            <div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 15px; font-weight: 900; margin-bottom: 6px;">
+            <thead>
+                <tr style="border-bottom: 3px solid black;">
+                    <th style="text-align: left; padding: 2px 0; font-size: 15px;">Item</th>
+                    <th style="text-align: center; padding: 2px 0; font-size: 15px;">Qty</th>
+                    <th style="text-align: right; padding: 2px 0; font-size: 15px;">Price</th>
+                </tr>
+            </thead>
+            <tbody id="p-items"></tbody>
+        </table>
+        <hr style="border-top: 3px solid black; margin: 4px 0;">
+        <div style="font-size: 15px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 900; margin-top: 4px;">
+            <span>TOTAL:</span><span>$<span id="p-total">0.00</span></span>
+        </div>
+        <div style="font-size: 15px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;">
+            <div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 16px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div>
+        </div>
+        <div style="text-align: center; margin-top: 8px; font-size: 15px; font-weight: 900;"><p>Thank you! Please come again.</p></div>
+        <div style="display:none;">\x1B\x70\x00\x19\xFA</div>
+    </div>
+
+    <div id="print-kitchen">
+        <div style="text-align: center; margin-bottom: 6px;">
+            <h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER ***</h2>
+            <hr style="border-top: 4px solid black; margin: 4px 0;">
+        </div>
+        <div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;">
+            <div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" style="font-size: 22px; background: #000; color: #fff; padding: 0 4px;"></span></div>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;">
+            <thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px;">Item & Notes</th><th style="text-align: center; font-size: 20px;">Qty</th></tr></thead>
+            <tbody id="k-items"></tbody>
+        </table>
+    </div>
+
+    <div id="print-drawer">
+        <div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div>
+        <div style="display:none;">\x1B\x70\x00\x19\xFA</div>
+    </div>
+
+    <div id="print-sales-history">
+        <div style="text-align: center; margin-bottom: 6px;">
+            <h2 style="margin: 0; font-size: 18px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
+            <p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>SALES HISTORY REPORT</b></p>
+            <hr style="border-top: 3px solid black; margin: 4px 0;">
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900;">
+            <thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 13px;">Time / Ref</th><th style="text-align: right; font-size: 13px;">Amount</th></tr></thead>
+            <tbody id="print-history-items"></tbody>
+        </table>
+        <hr style="border-top: 3px solid black; margin: 4px 0;">
+        <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;">
+            <span>TOTAL:</span><span>$<span id="print-history-grand-total">0.00</span></span>
+        </div>
+    </div>
+
+    <div id="print-item-report">
+        <div style="text-align: center; margin-bottom: 6px;">
+            <h2 style="margin: 0; font-size: 18px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
+            <p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>DAILY ITEM SOLD REPORT</b></p>
+            <hr style="border-top: 3px solid black; margin: 4px 0;">
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900;">
+            <thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 13px;">Item Name</th><th style="text-align: right; font-size: 13px;">Qty Sold</th></tr></thead>
+            <tbody id="print-item-report-items"></tbody>
+        </table>
+    </div>
+
+    <div id="print-qr-batch">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h2>AL HUSSAIN RESTAURANT - TABLE QR CODES</h2>
+        </div>
+        <div id="print-qr-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;"></div>
+    </div>
+
+    <script>
+        // --- FIREBASE CLOUD SYNC CONFIGURATION ---
+        const firebaseConfig = {
+            databaseURL: "https://al-hussain-pos-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- AL HUSSAIN RESTAURANT COMPLETE MENU DATA ---
+        const defaultMenuData = [
+            // Roti
+            { id: 1, name: "Roti kosong", price: 0.80, category: "Roti", icon: "🫓" },
+            { id: 2, name: "Roti Kosong Cheese", price: 1.50, category: "Roti", icon: "🫓" },
+            { id: 3, name: "Roti Kosong Bawang", price: 1.20, category: "Roti", icon: "🫓" },
+            { id: 4, name: "Roti Telur", price: 1.40, category: "Roti", icon: "🫓" },
+            { id: 5, name: "Roti Telur Bawang", price: 1.70, category: "Roti", icon: "🫓" },
+            { id: 6, name: "Roti Telur Cheese", price: 2.00, category: "Roti", icon: "🫓" },
+            { id: 7, name: "Roti Jantan", price: 2.00, category: "Roti", icon: "🫓" },
+            { id: 8, name: "Roti plastar", price: 1.40, category: "Roti", icon: "🫓" },
+            { id: 9, name: "Roti Bomb", price: 1.50, category: "Roti", icon: "🫓" },
+            { id: 10, name: "Roti Tissue", price: 1.70, category: "Roti", icon: "🫓" },
+            { id: 11, name: "Roti Kuning Biasa", price: 1.00, category: "Roti", icon: "🫓" },
+            { id: 12, name: "Roti Kuning Cheese", price: 1.50, category: "Roti", icon: "🫓" },
+            { id: 13, name: "Roti Kuning plastar", price: 1.50, category: "Roti", icon: "🫓" },
+            { id: 14, name: "Roti Kahwin", price: 0.70, category: "Roti", icon: "🫓" },
+            { id: 15, name: "Roti Kahwin Cheese", price: 1.20, category: "Roti", icon: "🫓" },
+            { id: 16, name: "Roti John Telur", price: 2.00, category: "Roti", icon: "🫓" },
+            { id: 17, name: "Roti John Ayam", price: 3.00, category: "Roti", icon: "🫓" },
+            { id: 18, name: "Roti John Daging", price: 3.50, category: "Roti", icon: "🫓" },
+            { id: 19, name: "Roti John Ayam Cheese", price: 3.50, category: "Roti", icon: "🫓" },
+            { id: 20, name: "Roti John daging cheese", price: 4.00, category: "Roti", icon: "🫓" },
+            { id: 21, name: "Capati", price: 1.00, category: "Roti", icon: "🫓" },
+            { id: 22, name: "Roti Sarang Burung", price: 2.00, category: "Roti", icon: "🫓" },
+
+            // Dosai
+            { id: 263, name: "Plain Dosai", price: 1.20, category: "Dosai", icon: "🥞" },
+            { id: 264, name: "Masala Dosai", price: 2.50, category: "Dosai", icon: "🥞" },
+            { id: 265, name: "Egg Dosai", price: 2.00, category: "Dosai", icon: "🥞" },
+            { id: 266, name: "Cheese Dosai", price: 2.50, category: "Dosai", icon: "🥞" },
+            { id: 267, name: "Ghee Dosai", price: 2.20, category: "Dosai", icon: "🥞" },
+            { id: 268, name: "Paper Dosai", price: 2.00, category: "Dosai", icon: "🥞" },
+            { id: 269, name: "Rava Dosai", price: 2.50, category: "Dosai", icon: "🥞" },
+            { id: 270, name: "Tosai Bawang", price: 1.80, category: "Dosai", icon: "🥞" },
+
+            // Nasi Campur
+            { id: 300, name: "Ayam Kurma", price: 2.00, category: "Nasi Campur", icon: "🍛" },
+            { id: 301, name: "Ayam Kari", price: 2.00, category: "Nasi Campur", icon: "🍛" },
+            { id: 302, name: "Ayam Merah", price: 2.00, category: "Nasi Campur", icon: "🍛" },
+            { id: 303, name: "Kambing", price: 5.00, category: "Nasi Campur", icon: "🍛" },
+            { id: 304, name: "Daging", price: 3.00, category: "Nasi Campur", icon: "🍛" },
+            { id: 305, name: "Ikan", price: 3.00, category: "Nasi Campur", icon: "🐟" },
+            { id: 306, name: "Ikan Kepala (Cut Size)", price: 6.00, category: "Nasi Campur", icon: "🐟" },
+            { id: 307, name: "Ayam", price: 2.00, category: "Nasi Campur", icon: "🍗" },
+            { id: 308, name: "Ayam Small", price: 1.00, category: "Nasi Campur", icon: "🍗" },
+            { id: 309, name: "Ikan Asam Pedas", price: 3.00, category: "Nasi Campur", icon: "🐟" },
+            { id: 310, name: "Ayam Goreng", price: 2.00, category: "Nasi Campur", icon: "🍗" },
+            { id: 311, name: "Nasi Putih", price: 1.00, category: "Nasi Campur", icon: "🍚" },
+            { id: 312, name: "Nasi Putih Small", price: 0.50, category: "Nasi Campur", icon: "🍚" },
+            { id: 313, name: "Sayur", price: 1.00, category: "Nasi Campur", icon: "🥬" },
+            { id: 314, name: "Telur Rebus", price: 0.50, category: "Nasi Campur", icon: "🥚" },
+            { id: 315, name: "Telur Dadar", price: 0.80, category: "Nasi Campur", icon: "🍳" },
+            { id: 316, name: "Telur Mata", price: 0.50, category: "Nasi Campur", icon: "🍳" },
+
+            // Bruger
+            { id: 23, name: "Burger Telur", price: 1.50, category: "Bruger", icon: "🍔" },
+            { id: 24, name: "Burger Ayam", price: 2.50, category: "Bruger", icon: "🍔" },
+            { id: 25, name: "Burger Daging", price: 2.50, category: "Bruger", icon: "🍔" },
+            { id: 26, name: "Burger Telur Cheese", price: 2.00, category: "Bruger", icon: "🍔" },
+            { id: 27, name: "Burger Ayam Cheese", price: 3.00, category: "Bruger", icon: "🍔" },
+            { id: 28, name: "Burger Daging Cheese", price: 3.00, category: "Bruger", icon: "🍔" },
+            { id: 29, name: "Sandwich Telur", price: 1.50, category: "Bruger", icon: "🥪" },
+
+            // Nasi Goreng & Nasi
+            { id: 30, name: "Nasi Ayam Penyet", price: 4.00, category: "Nasi Goreng", icon: "🍗" },
+            { id: 31, name: "Nasi Ayam (Goreng)", price: 4.00, category: "Nasi Goreng", icon: "🍗" },
+            { id: 32, name: "Nasi Ayam (Steam)", price: 4.00, category: "Nasi Goreng", icon: "🍗" },
+            { id: 33, name: "Nasi Lemak Biasa", price: 1.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 34, name: "Nasi Lemak Ayam", price: 4.00, category: "Nasi Goreng", icon: "🍛" },
+            { id: 35, name: "Nasi Lemak Daging", price: 5.00, category: "Nasi Goreng", icon: "🍛" },
+            { id: 36, name: "Nasi Lemak Kambing", price: 6.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 37, name: "Nasi Goreng Biasa", price: 2.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 38, name: "Nasi Goreng Ayam", price: 4.00, category: "Nasi Goreng", icon: "🍛" },
+            { id: 39, name: "Nasi Goreng Daging", price: 5.00, category: "Nasi Goreng", icon: "🍛" },
+            { id: 40, name: "Nasi Goreng Seafood", price: 5.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 41, name: "Nasi Goreng pattaya Biasa", price: 3.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 42, name: "Nasi Goreng pattaya Ayam", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 43, name: "Nasi Goreng pattaya Daging", price: 5.00, category: "Nasi Goreng", icon: "🍛" },
+            { id: 44, name: "Nasi Goreng pattaya Kambing", price: 7.00, category: "Nasi Goreng", icon: "🍛" },
+            { id: 45, name: "Nasi Goreng Kampong", price: 4.00, category: "Nasi Goreng", icon: "🍛" },
+            { id: 46, name: "Nasi Goreng Cornbeef", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 47, name: "Nasi Goreng Ikan Masin", price: 3.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 48, name: "Nasi Goreng Belacan", price: 3.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 49, name: "Nasi Goreng Special", price: 6.00, category: "Nasi Goreng", icon: "🍛" },
+            { id: 50, name: "Nasi Goreng pattaya Special", price: 6.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 51, name: "Nasi Briyani Biasa", price: 3.00, category: "Nasi Goreng", icon: "🥘" },
+            { id: 52, name: "Nasi Briyani Ayam", price: 4.50, category: "Nasi Goreng", icon: "🥘" },
+            { id: 53, name: "Nasi Briyani Daging", price: 5.50, category: "Nasi Goreng", icon: "🥘" },
+            { id: 54, name: "Nasi Briyani Kambing", price: 7.00, category: "Nasi Goreng", icon: "🥘" },
+
+            // Murtabak
+            { id: 55, name: "Murtabak Ayam", price: 4.00, category: "Murtabak", icon: "🫓" },
+            { id: 56, name: "Murtabak Sardine", price: 4.50, category: "Murtabak", icon: "🫓" },
+            { id: 57, name: "Murtabak Daging", price: 5.00, category: "Murtabak", icon: "🫓" },
+            { id: 58, name: "Murtabak Sayur", price: 3.50, category: "Murtabak", icon: "🫓" },
+
+            // Mee Goreng
+            { id: 59, name: "Mee Goreng Biasa", price: 2.50, category: "Mee Goreng", icon: "🍝" },
+            { id: 60, name: "Mee Goreng Ayam", price: 4.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 61, name: "Mee Goreng Daging", price: 5.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 62, name: "Mee Goreng Seafood", price: 5.50, category: "Mee Goreng", icon: "🍝" },
+            { id: 63, name: "Mee Goreng Special", price: 6.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 64, name: "Mee Mamak Biasa", price: 3.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 65, name: "Mee Mamak Ayam", price: 4.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 66, name: "Mee Mamak Daging", price: 5.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 67, name: "Mee Mamak Seafood", price: 5.50, category: "Mee Goreng", icon: "🍝" },
+            { id: 68, name: "Mee Mamak Special", price: 6.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 69, name: "Mee Hoon Goreng Biasa", price: 2.50, category: "Mee Goreng", icon: "🍝" },
+            { id: 70, name: "Mee Hoon Goreng Ayam", price: 4.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 71, name: "Mee Hoon Goreng Daging", price: 5.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 72, name: "Mee Hoon Goreng Seafood", price: 5.50, category: "Mee Goreng", icon: "🍝" },
+            { id: 73, name: "Mee Hoon Goreng Special", price: 6.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 74, name: "Kueh Teow Goreng Biasa", price: 2.50, category: "Mee Goreng", icon: "🍝" },
+            { id: 75, name: "Kueh Teow Goreng Ayam", price: 4.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 76, name: "Kueh Teow Goreng Daging", price: 5.00, category: "Mee Goreng", icon: "🍝" },
+            { id: 77, name: "Kueh Teow Goreng Seafood", price: 5.50, category: "Mee Goreng", icon: "🍝" },
+            { id: 78, name: "Kueh Teow Goreng Special", price: 6.00, category: "Mee Goreng", icon: "🍝" },
+
+            // Mee Basah
+            { id: 79, name: "Mee Basah Biasa", price: 3.00, category: "Mee Basah", icon: "🍜" },
+            { id: 80, name: "Mee Basah Ayam", price: 4.50, category: "Mee Basah", icon: "🍜" },
+            { id: 81, name: "Mee Basah Daging", price: 5.00, category: "Mee Basah", icon: "🍜" },
+            { id: 82, name: "Mee Basah Seafood", price: 5.50, category: "Mee Basah", icon: "🍜" },
+            { id: 83, name: "Mee Basah Special", price: 6.00, category: "Mee Basah", icon: "🍜" },
+            { id: 84, name: "Mee Hoon Basah Biasa", price: 3.00, category: "Mee Basah", icon: "🍜" },
+            { id: 85, name: "Mee Hoon Basah Ayam", price: 4.50, category: "Mee Basah", icon: "🍜" },
+            { id: 86, name: "Mee Hoon Basah Daging", price: 5.00, category: "Mee Basah", icon: "🍜" },
+            { id: 87, name: "Mee Hoon Basah Seafood", price: 5.50, category: "Mee Basah", icon: "🍜" },
+            { id: 88, name: "Mee Hoon Basah Special", price: 6.00, category: "Mee Basah", icon: "🍜" },
+            { id: 89, name: "Kueh Tewo Basah Basah", price: 3.00, category: "Mee Basah", icon: "🍜" },
+            { id: 90, name: "Kueh Tewo Basah Ayam", price: 4.50, category: "Mee Basah", icon: "🍜" },
+            { id: 91, name: "Kueh Tewo Basah Daging", price: 5.00, category: "Mee Basah", icon: "🍜" },
+            { id: 92, name: "Kueh Tewo Basah Seafood", price: 5.50, category: "Mee Basah", icon: "🍜" },
+            { id: 93, name: "Kueh Tewo Basah Special", price: 6.00, category: "Mee Basah", icon: "🍜" },
+
+            // Rojak & Sayur
+            { id: 94, name: "Rojak Biasa", price: 3.00, category: "Rojak & Sayur", icon: "🥗" },
+            { id: 95, name: "Rojak Sotong", price: 4.00, category: "Rojak & Sayur", icon: "🦑" },
+            { id: 96, name: "Rojak Ayam", price: 4.00, category: "Rojak & Sayur", icon: "🍗" },
+            { id: 97, name: "Rojak Daging", price: 4.00, category: "Rojak & Sayur", icon: "🥩" },
+            { id: 98, name: "Sayur Campur", price: 3.00, category: "Rojak & Sayur", icon: "🥬" },
+            { id: 99, name: "Sayur Bayam", price: 3.00, category: "Rojak & Sayur", icon: "🥬" },
+            { id: 100, name: "Sayur Kacang panjang", price: 3.00, category: "Rojak & Sayur", icon: "🥬" },
+            { id: 101, name: "Sayur bendi", price: 3.00, category: "Rojak & Sayur", icon: "🥬" },
+
+            // Soto
+            { id: 102, name: "Soto Kuning Biasa", price: 2.50, category: "Soto", icon: "🍲" },
+            { id: 103, name: "Soto Kuning Ayam", price: 4.00, category: "Soto", icon: "🍲" },
+            { id: 104, name: "Soto Kuning Daging", price: 5.00, category: "Soto", icon: "🍲" },
+            { id: 105, name: "Soto Kuning Seafood", price: 5.50, category: "Soto", icon: "🍲" },
+            { id: 106, name: "Soto Kuning Special", price: 6.00, category: "Soto", icon: "🍲" },
+            { id: 107, name: "Soto putih Biasa", price: 2.50, category: "Soto", icon: "🍲" },
+            { id: 108, name: "Soto putih Ayam", price: 4.00, category: "Soto", icon: "🍲" },
+            { id: 109, name: "Soto putih Daging", price: 5.00, category: "Soto", icon: "🍲" },
+            { id: 110, name: "Soto putih Seafood", price: 5.50, category: "Soto", icon: "🍲" },
+            { id: 111, name: "Soto putih Special", price: 6.00, category: "Soto", icon: "🍲" },
+            { id: 112, name: "Soto Kahwin Biasa", price: 2.50, category: "Soto", icon: "🍲" },
+            { id: 113, name: "Soto Kahwin Ayam", price: 4.00, category: "Soto", icon: "🍲" },
+            { id: 114, name: "Soto Kahwin Daging", price: 5.00, category: "Soto", icon: "🍲" },
+            { id: 115, name: "Soto Kahwin Seafood", price: 5.50, category: "Soto", icon: "🍲" },
+            { id: 116, name: "Soto Kahwin Special", price: 6.00, category: "Soto", icon: "🍲" },
+
+            // Special
+            { id: 117, name: "Udang sambal", price: 6.00, category: "Special", icon: "🦐" },
+            { id: 118, name: "Udang Tomato", price: 6.00, category: "Special", icon: "🦐" },
+            { id: 119, name: "Buttermilk Chicken/Rice", price: 6.00, category: "Special", icon: "🍗" },
+            { id: 120, name: "BBQ Sauce Chicken/Rice", price: 6.00, category: "Special", icon: "🍗" },
+            { id: 121, name: "Black pepper Chicken/Rice", price: 6.00, category: "Special", icon: "🍗" },
+            { id: 122, name: "Butter Chicken", price: 6.00, category: "Special", icon: "🍗" },
+            { id: 123, name: "Chicken and Chip", price: 6.00, category: "Special", icon: "🍗" },
+            { id: 124, name: "Fish and Chips", price: 6.00, category: "Special", icon: "🐟" },
+            { id: 125, name: "Butter prawn", price: 7.00, category: "Special", icon: "🦐" },
+            { id: 126, name: "Buttermilk prawn", price: 7.00, category: "Special", icon: "🦐" },
+
+            // Soup
+            { id: 127, name: "Soup Sayur", price: 3.00, category: "Soup", icon: "🥣" },
+            { id: 128, name: "Soup Tulang", price: 5.00, category: "Soup", icon: "🥣" },
+            { id: 129, name: "Soup Ayam", price: 3.50, category: "Soup", icon: "🥣" },
+            { id: 130, name: "Soup Daging", price: 5.00, category: "Soup", icon: "🥣" },
+            { id: 131, name: "Soup Hatibuyah", price: 5.00, category: "Soup", icon: "🥣" },
+            { id: 132, name: "Soup Seafood", price: 5.50, category: "Soup", icon: "🥣" },
+
+            // Tom Yum
+            { id: 133, name: "Tom Yum Biasa", price: 3.00, category: "Tom Yum", icon: "🍲" },
+            { id: 134, name: "Tom Yum Ayam", price: 4.50, category: "Tom Yum", icon: "🍲" },
+            { id: 135, name: "Tom Yum Daging", price: 5.00, category: "Tom Yum", icon: "🍲" },
+            { id: 136, name: "Tom Yum Seafood", price: 5.50, category: "Tom Yum", icon: "🍲" },
+            { id: 137, name: "Tom Yum Special", price: 6.00, category: "Tom Yum", icon: "🍲" },
+
+            // Mee Soup, Mee Hoon Soup, Mee Kawin Soup
+            { id: 138, name: "Mee Soup Biasa", price: 3.50, category: "Mee Soup", icon: "🍜" },
+            { id: 139, name: "Mee Soup Ayam", price: 4.50, category: "Mee Soup", icon: "🍜" },
+            { id: 140, name: "Mee Soup Daging", price: 5.00, category: "Mee Soup", icon: "🍜" },
+            { id: 141, name: "Mee Soup Seafood", price: 5.50, category: "Mee Soup", icon: "🍜" },
+            { id: 142, name: "Mee Soup Special", price: 6.00, category: "Mee Soup", icon: "🍜" },
+            { id: 143, name: "Mee Hoon Soup Biasa", price: 3.50, category: "Mee Soup", icon: "🍜" },
+            { id: 144, name: "Mee Hoon Soup Ayam", price: 4.50, category: "Mee Soup", icon: "🍜" },
+            { id: 145, name: "Mee hoon Soup Daging", price: 5.00, category: "Mee Soup", icon: "🍜" },
+            { id: 146, name: "Mee hoon Soup Seafood", price: 5.50, category: "Mee Soup", icon: "🍜" },
+            { id: 147, name: "Mee hoon Soup Special", price: 6.00, category: "Mee Soup", icon: "🍜" },
+            { id: 148, name: "Mee Kawin Soup Biasa", price: 3.50, category: "Mee Soup", icon: "🍜" },
+            { id: 149, name: "Mee Kawin Soup Ayam", price: 4.50, category: "Mee Soup", icon: "🍜" },
+            { id: 150, name: "Mee Kawin Soup Daging", price: 5.00, category: "Mee Soup", icon: "🍜" },
+            { id: 151, name: "Mee Kawin Soup Seafood", price: 5.50, category: "Mee Soup", icon: "🍜" },
+            { id: 152, name: "Mee Kawin Soup Special", price: 6.00, category: "Mee Soup", icon: "🍜" },
+
+            // Kueh Teow Soup
+            { id: 153, name: "Kueh Teow Soup Biasa", price: 3.50, category: "Kueh Teow Soup", icon: "🍜" },
+            { id: 154, name: "Kueh Teow Soup Ayam", price: 4.50, category: "Kueh Teow Soup", icon: "🍜" },
+            { id: 155, name: "Kueh Teow Soup Daging", price: 5.00, category: "Kueh Teow Soup", icon: "🍜" },
+            { id: 156, name: "Kueh Teow Soup Seafood", price: 5.50, category: "Kueh Teow Soup", icon: "🍜" },
+            { id: 157, name: "Kueh Teow Soup Special", price: 6.00, category: "Kueh Teow Soup", icon: "🍜" },
+
+            // Kolo Mee
+            { id: 158, name: "Kolo Mee Biasa", price: 3.00, category: "Kolo Mee", icon: "🍝" },
+            { id: 159, name: "Kolo Mee Ayam", price: 4.50, category: "Kolo Mee", icon: "🍝" },
+            { id: 160, name: "Kolo Mee Daging", price: 5.00, category: "Kolo Mee", icon: "🍝" },
+            { id: 161, name: "Kolo Mee Seafood", price: 5.50, category: "Kolo Mee", icon: "🍝" },
+            { id: 162, name: "Kolo Mee Special", price: 6.00, category: "Kolo Mee", icon: "🍝" },
+
+            // Hot Drinks
+            { id: 163, name: "Tea", price: 1.00, category: "Hot Drinks", icon: "☕" },
+            { id: 164, name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "☕" },
+            { id: 165, name: "Tea Tarik India", price: 1.20, category: "Hot Drinks", icon: "☕" },
+            { id: 166, name: "Tea Tarik Halia", price: 1.30, category: "Hot Drinks", icon: "☕" },
+            { id: 167, name: "Tea Halia", price: 1.30, category: "Hot Drinks", icon: "☕" },
+            { id: 168, name: "Tea-C", price: 1.00, category: "Hot Drinks", icon: "☕" },
+            { id: 169, name: "Tea-C Tarik Halia", price: 1.30, category: "Hot Drinks", icon: "☕" },
+            { id: 170, name: "Tea-C Halia", price: 1.30, category: "Hot Drinks", icon: "☕" },
+            { id: 171, name: "Tea-O", price: 1.00, category: "Hot Drinks", icon: "🍵" },
+            { id: 172, name: "Tea-O Halia", price: 1.30, category: "Hot Drinks", icon: "🍵" },
+            { id: 173, name: "Tea-O Madu", price: 1.50, category: "Hot Drinks", icon: "🍵" },
+            { id: 174, name: "Kopi", price: 1.00, category: "Hot Drinks", icon: "☕" },
+            { id: 175, name: "Nescafe Tarik", price: 1.20, category: "Hot Drinks", icon: "☕" },
+            { id: 176, name: "Nescafe Tarik India", price: 1.50, category: "Hot Drinks", icon: "☕" },
+            { id: 177, name: "Nescafe-C", price: 1.20, category: "Hot Drinks", icon: "☕" },
+            { id: 178, name: "Nescafe-C Tarik India", price: 1.50, category: "Hot Drinks", icon: "☕" },
+            { id: 179, name: "Nescafe-O", price: 1.20, category: "Hot Drinks", icon: "☕" },
+            { id: 180, name: "Nescafe-O Halia", price: 1.50, category: "Hot Drinks", icon: "☕" },
+            { id: 181, name: "Nescafe-O Madu", price: 1.50, category: "Hot Drinks", icon: "☕" },
+            { id: 182, name: "Milo panas", price: 1.20, category: "Hot Drinks", icon: "🥛" },
+            { id: 183, name: "Kopi Tarik", price: 1.00, category: "Hot Drinks", icon: "☕" },
+            { id: 184, name: "Kopi Tarik India", price: 1.20, category: "Hot Drinks", icon: "☕" },
+            { id: 185, name: "Kopi Tarik Halia", price: 1.30, category: "Hot Drinks", icon: "☕" },
+            { id: 186, name: "Kopi Halia", price: 1.30, category: "Hot Drinks", icon: "☕" },
+            { id: 187, name: "Kopi-C", price: 1.00, category: "Hot Drinks", icon: "☕" },
+            { id: 188, name: "Kopi-C Tarik", price: 1.00, category: "Hot Drinks", icon: "☕" },
+            { id: 189, name: "Kopi-C Tarik India", price: 1.20, category: "Hot Drinks", icon: "☕" },
+            { id: 190, name: "Kopi-C Tarik Halia", price: 1.30, category: "Hot Drinks", icon: "☕" },
+            { id: 191, name: "Kopi-C Halia", price: 1.30, category: "Hot Drinks", icon: "☕" },
+            { id: 192, name: "Kopi-O", price: 1.00, category: "Hot Drinks", icon: "☕" },
+            { id: 193, name: "Kopi-O Halia", price: 1.30, category: "Hot Drinks", icon: "☕" },
+            { id: 194, name: "Kopi-O Madu", price: 1.50, category: "Hot Drinks", icon: "☕" },
+            { id: 195, name: "Kopi TongkatAli Cni", price: 1.20, category: "Hot Drinks", icon: "☕" },
+            { id: 196, name: "Kopi Susu Kambing", price: 1.20, category: "Hot Drinks", icon: "☕" },
+            { id: 197, name: "Kopi Radix", price: 1.20, category: "Hot Drinks", icon: "☕" },
+            { id: 198, name: "Nescafe", price: 1.20, category: "Hot Drinks", icon: "☕" },
+            { id: 199, name: "Milo Tarik", price: 1.20, category: "Hot Drinks", icon: "🥛" },
+            { id: 200, name: "Milo - O", price: 1.20, category: "Hot Drinks", icon: "🥛" },
+            { id: 201, name: "Milo - C", price: 1.20, category: "Hot Drinks", icon: "🥛" },
+            { id: 202, name: "Neslo panas", price: 1.50, category: "Hot Drinks", icon: "☕" },
+            { id: 203, name: "Neslo - C", price: 1.50, category: "Hot Drinks", icon: "☕" },
+            { id: 204, name: "Neslo - O", price: 1.30, category: "Hot Drinks", icon: "☕" },
+            { id: 205, name: "Horlicks panas", price: 1.20, category: "Hot Drinks", icon: "🥛" },
+            { id: 206, name: "Horlicks Tarik", price: 1.20, category: "Hot Drinks", icon: "🥛" },
+            { id: 207, name: "Horlicks - C", price: 1.20, category: "Hot Drinks", icon: "🥛" },
+            { id: 208, name: "Horlicks - O", price: 1.20, category: "Hot Drinks", icon: "🥛" },
+            { id: 209, name: "Lemon Tea panas", price: 1.20, category: "Hot Drinks", icon: "🍋" },
+            { id: 210, name: "Lemon Panas", price: 1.20, category: "Hot Drinks", icon: "🍋" },
+            { id: 211, name: "Lemon Panas Madu", price: 1.50, category: "Hot Drinks", icon: "🍋" },
+            { id: 212, name: "Kasturi Panas", price: 1.20, category: "Hot Drinks", icon: "🍋" },
+            { id: 213, name: "Kasturi Panas Madu", price: 1.50, category: "Hot Drinks", icon: "🍋" },
+
+            // Sejuk (Cold Drinks)
+            { id: 214, name: "Tea Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 215, name: "Tea-Tarik Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 216, name: "Tea-Tarik Ping India", price: 1.40, category: "Sejuk", icon: "🧊" },
+            { id: 217, name: "Tea-C Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 218, name: "Tea-C Tarik Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 219, name: "Tea-C Tarik India Ping", price: 1.70, category: "Sejuk", icon: "🧊" },
+            { id: 220, name: "Tea-O Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 221, name: "Tea-O Madu Ping", price: 1.70, category: "Sejuk", icon: "🧊" },
+            { id: 222, name: "Kopi-C Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 223, name: "Kopi-C Tarik Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 224, name: "Kopi-C Tarik India Ping", price: 1.50, category: "Sejuk", icon: "🧊" },
+            { id: 225, name: "Nescafe Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 226, name: "Nescafe-C Ping", price: 1.70, category: "Sejuk", icon: "🧊" },
+            { id: 227, name: "Nescafe-O Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 228, name: "Nescafe-O Madu Ping", price: 1.70, category: "Sejuk", icon: "🧊" },
+            { id: 229, name: "Milo Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 230, name: "Milo-C Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 231, name: "Milo-O Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 232, name: "Neslo Ping", price: 1.50, category: "Sejuk", icon: "🧊" },
+            { id: 233, name: "Neslo-C Ping", price: 1.50, category: "Sejuk", icon: "🧊" },
+            { id: 234, name: "Neslo-O Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 235, name: "Horlicks Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 236, name: "Horlicks-C Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 237, name: "Horlicks-O Ping", price: 1.30, category: "Sejuk", icon: "🧊" },
+            { id: 238, name: "Lemon Tea Ping", price: 1.30, category: "Sejuk", icon: "🍋" },
+            { id: 239, name: "Lemon Madu Ping", price: 1.80, category: "Sejuk", icon: "🍋" },
+            { id: 240, name: "Kasturi Ping", price: 1.30, category: "Sejuk", icon: "🍋" },
+            { id: 241, name: "Kasturi Madu Ping", price: 1.80, category: "Sejuk", icon: "🍋" },
+            { id: 242, name: "Tea C Special", price: 2.00, category: "Sejuk", icon: "🧊" },
+            { id: 243, name: "Air Bandung", price: 1.50, category: "Sejuk", icon: "🌹" },
+            { id: 244, name: "Orange Campur", price: 1.50, category: "Sejuk", icon: "🍊" },
+            { id: 245, name: "Air Manisan", price: 1.50, category: "Sejuk", icon: "🥤" },
+            { id: 246, name: "Soda Gembira", price: 2.50, category: "Sejuk", icon: "🥤" },
+
+            // Fresh Juice
+            { id: 247, name: "Fresh Apple Juice", price: 2.50, category: "Fresh Juice", icon: "🧃" },
+            { id: 248, name: "Fresh Lemon Juice", price: 2.50, category: "Fresh Juice", icon: "🍋" },
+            { id: 249, name: "Fresh Orange Juice", price: 2.50, category: "Fresh Juice", icon: "🍊" },
+            { id: 250, name: "Fresh Carrot Juice", price: 2.50, category: "Fresh Juice", icon: "🥕" },
+            { id: 251, name: "Fresh Watermelon Juice", price: 2.50, category: "Fresh Juice", icon: "🍉" },
+            { id: 252, name: "Sweet Lassi", price: 2.50, category: "Fresh Juice", icon: "🥛" },
+            { id: 253, name: "Mango Lassi", price: 2.50, category: "Fresh Juice", icon: "🥭" },
+            { id: 254, name: "Salt Lassi", price: 2.50, category: "Fresh Juice", icon: "🥛" },
+            { id: 255, name: "Orange Lassi", price: 2.50, category: "Fresh Juice", icon: "🍊" },
+            { id: 256, name: "Mixed Fruit Juice", price: 3.00, category: "Fresh Juice", icon: "🧃" },
+
+            // Milk Shake
+            { id: 257, name: "Vennila Milk Shake", price: 3.50, category: "Milk Shake", icon: "🥤" },
+            { id: 258, name: "Chocolate Milk Shake", price: 3.50, category: "Milk Shake", icon: "🍫" },
+            { id: 259, name: "Strawberry Milk Shake", price: 3.50, category: "Milk Shake", icon: "🍓" },
+            { id: 260, name: "Mango Milk Shake", price: 3.50, category: "Milk Shake", icon: "🥭" },
+            { id: 261, name: "Milo Milk Shake", price: 3.50, category: "Milk Shake", icon: "🥛" },
+            { id: 262, name: "Holicks Milk Shake", price: 3.50, category: "Milk Shake", icon: "🥤" }
+        ];
+
+        const defaultRawMaterials = [
+            { id: 1, name: "Rice (Bag / kg)", qty: 50 },
+            { id: 2, name: "Chicken (kg)", qty: 30 },
+            { id: 3, name: "Mutton (kg)", qty: 15 },
+            { id: 4, name: "Cooking Oil (Litre)", qty: 20 },
+            { id: 5, name: "Wheat Flour (kg)", qty: 40 }
+        ];
+
+        // --- SMART MERGE STORAGE LOGIC ---
+        let existingMenu = JSON.parse(localStorage.getItem('alhussain_menu'));
+        let menuData = [];
+        
+        if (!existingMenu || existingMenu.length === 0) {
+            menuData = defaultMenuData;
+        } else {
+            let existingMap = new Map(existingMenu.map(item => [item.name.toLowerCase().trim(), item]));
+            defaultMenuData.forEach(defItem => {
+                let key = defItem.name.toLowerCase().trim();
+                if (!existingMap.has(key)) {
+                    existingMenu.push(defItem);
+                }
+            });
+            menuData = existingMenu;
+        }
+        localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+
+        let rawMaterials = JSON.parse(localStorage.getItem('alhussain_materials')) || defaultRawMaterials;
+        
+        let categoryOrder = JSON.parse(localStorage.getItem('alhussain_cat_order')) || [
+            "Roti", "Dosai", "Nasi Campur", "Bruger", "Nasi Goreng", "Murtabak", "Mee Goreng", "Mee Basah", 
+            "Rojak & Sayur", "Soto", "Special", "Soup", "Tom Yum", "Mee Soup", 
+            "Kueh Teow Soup", "Kolo Mee", "Hot Drinks", "Sejuk", "Fresh Juice", "Milk Shake"
+        ];
+
+        let cart = [];
+        let activeOrders = {}; 
+        let completedSales = []; 
+        let currentCategory = "All";
+        let isPrinting = false;
+        let orderRunningNumber = parseInt(localStorage.getItem('alhussain_order_num')) || 1;
+
+        db.ref('activeOrders').on('value', (snapshot) => {
+            activeOrders = snapshot.val() || {};
+            renderVisualTables();
+            renderVisualTakeaways();
+        });
+
+        db.ref('sales').on('value', (snapshot) => {
+            completedSales = snapshot.val() || [];
+            updateStats();
+            renderMenu();
+        });
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value.trim();
+            
+            const adminPanel = document.getElementById('admin-panel');
+            const billSummaryContainer = document.getElementById('bill-summary-container');
+            const btnPrintBill = document.getElementById('btn-print-bill-elem');
+            const btnPay = document.getElementById('btn-pay-elem');
+            const btnDrawer = document.getElementById('btn-drawer-elem');
+
+            if (user === "admin" && pass === "admin123") {
+                adminPanel.style.display = "block";
+                billSummaryContainer.style.display = "block";
+                btnPrintBill.style.display = "block";
+                btnPay.style.display = "block";
+                btnDrawer.style.display = "block";
+                grantAccess("Admin Dashboard");
+            } 
+            else if (user === "user1" && pass === "1234") {
+                adminPanel.style.display = "none";
+                billSummaryContainer.style.display = "block";
+                btnPrintBill.style.display = "block";
+                btnPay.style.display = "block";
+                btnDrawer.style.display = "block";
+                grantAccess("Staff (User 1)");
+            }
+            else if (user === "user2" && pass === "1234") {
+                adminPanel.style.display = "none";
+                billSummaryContainer.style.display = "none";
+                btnPrintBill.style.display = "none";
+                btnPay.style.display = "none";
+                btnDrawer.style.display = "none";
+                grantAccess("Order Taker (User 2)");
+            } 
+            else {
+                document.getElementById('login-error').style.display = "block";
+            }
+        }
+
+        function grantAccess(role) {
+            document.getElementById('login-screen').style.display = "none";
+            document.getElementById('main-app').style.display = "block";
+            document.getElementById('display-user').innerText = role;
+            renderCategories();
+            populateCategoryDropdown();
+            renderMenu();
+            updateCart();
+            renderVisualTables();
+            renderVisualTakeaways();
+            updateStats();
+            toggleOrderTypeFields();
+        }
+
+        function logout() { location.reload(); }
+
+        function refreshMenuData() {
+            let freshMenu = JSON.parse(localStorage.getItem('alhussain_menu'));
+            if (freshMenu) {
+                menuData = freshMenu;
+            }
+            renderCategories();
+            populateCategoryDropdown();
+            renderMenu();
+            alert("🔄 Menu items refreshed successfully without logging out!");
+        }
+
+        function toggleOrderTypeFields() {
+            const orderType = document.getElementById('order-type').value;
+            const tableSelect = document.getElementById('table-no');
+            
+            tableSelect.innerHTML = '';
+            if (orderType === "Takeaway") {
+                tableSelect.innerHTML = `<option value="Order ${orderRunningNumber}">Order ${orderRunningNumber}</option>`;
+            } else {
+                for (let i = 1; i <= 13; i++) {
+                    tableSelect.innerHTML += `<option value="Table ${i}">Table ${i}</option>`;
+                }
+            }
+        }
+
+        function onOrderTypeChange() {
+            toggleOrderTypeFields();
+            cart = [];
+            document.getElementById('discount-input').value = "0.00";
+            updateCart();
+        }
+
+        function onTableChange() {
+            const selectedKey = document.getElementById('table-no').value;
+            if (activeOrders[selectedKey]) {
+                cart = JSON.parse(JSON.stringify(activeOrders[selectedKey].items));
+            } else {
+                cart = [];
+            }
+            document.getElementById('discount-input').value = "0.00";
+            updateCart();
+        }
+
+        function getAllCategories() {
+            let menuCats = menuData.map(i => i.category);
+            let combined = [...new Set([...categoryOrder, ...menuCats])];
+            return combined;
+        }
+
+        function populateCategoryDropdown() {
+            const select = document.getElementById('add-m-cat');
+            if(!select) return;
+            const cats = getAllCategories();
+            let currentSelected = select.value;
+            select.innerHTML = '';
+            cats.forEach(c => {
+                select.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+            if (currentSelected && cats.includes(currentSelected)) {
+                select.value = currentSelected;
+            }
+        }
+
+        function addNewCategoryPrompt() {
+            let newCat = prompt("Enter New Category Name:");
+            if (newCat && newCat.trim() !== "") {
+                let formattedCat = newCat.trim();
+                if (!categoryOrder.includes(formattedCat)) {
+                    categoryOrder.push(formattedCat);
+                    localStorage.setItem('alhussain_cat_order', JSON.stringify(categoryOrder));
+                }
+                populateCategoryDropdown();
+                renderCategories();
+                
+                const select = document.getElementById('add-m-cat');
+                if (select) {
+                    select.value = formattedCat;
+                }
+                
+                alert("✅ New Category added successfully and selected!");
+            }
+        }
+
+        function openCategoryManagerModal() {
+            const tbody = document.getElementById('category-manager-tbody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            let cats = getAllCategories();
+
+            cats.forEach((cat, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${cat}</b></td>
+                        <td style="text-align:right;">
+                            <button class="btn-small" onclick="moveCategory(${index}, -1)" ${index === 0 ? 'disabled style="opacity:0.5"' : ''}>⬆️ Up</button>
+                            <button class="btn-small" onclick="moveCategory(${index}, 1)" ${index === cats.length - 1 ? 'disabled style="opacity:0.5"' : ''}>⬇️ Down</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('category-manager-modal').style.display = 'flex';
+        }
+
+        function closeCategoryManagerModal() {
+            document.getElementById('category-manager-modal').style.display = 'none';
+            renderCategories();
+            populateCategoryDropdown();
+        }
+
+        function moveCategory(index, direction) {
+            let targetIndex = index + direction;
+            let currentCats = getAllCategories();
+            if (targetIndex < 0 || targetIndex >= currentCats.length) return;
+            
+            categoryOrder = [...currentCats];
+
+            let temp = categoryOrder[index];
+            categoryOrder[index] = categoryOrder[targetIndex];
+            categoryOrder[targetIndex] = temp;
+
+            localStorage.setItem('alhussain_cat_order', JSON.stringify(categoryOrder));
+            openCategoryManagerModal();
+            renderCategories();
+            populateCategoryDropdown();
+        }
+
+        function renderCategories() {
+            let categories = ["All", ...getAllCategories()];
+            const filterContainer = document.getElementById('category-filters');
+            if(!filterContainer) return;
+            filterContainer.innerHTML = '';
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `cat-btn ${currentCategory === cat ? 'active' : ''}`;
+                btn.innerText = cat;
+                btn.onclick = () => { currentCategory = cat; renderCategories(); renderMenu(); };
+                filterContainer.appendChild(btn);
+            });
+        }
+
+        function renderMenu() {
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            const grid = document.getElementById('menu-grid');
+            if(!grid) return;
+            grid.innerHTML = '';
+
+            let filtered = menuData.filter(item => item.name.toLowerCase().includes(searchText));
+            if (currentCategory !== "All") {
+                filtered = filtered.filter(item => item.category === currentCategory);
+            }
+
+            let itemSoldCount = {};
+            if (completedSales && completedSales.length > 0) {
+                completedSales.forEach(sale => {
+                    if (sale.items && Array.isArray(sale.items)) {
+                        sale.items.forEach(item => {
+                            if (item && item.name) {
+                                itemSoldCount[item.name] = (itemSoldCount[item.name] || 0) + (item.qty || 1);
+                            }
+                        });
+                    }
+                });
+            }
+
+            filtered.sort((a, b) => {
+                let countA = itemSoldCount[a.name] || 0;
+                let countB = itemSoldCount[b.name] || 0;
+                if (countB !== countA) {
+                    return countB - countA;
+                }
+                return a.name.localeCompare(b.name);
+            });
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'menu-card';
+                card.onclick = () => addToCart(item.id);
+                card.innerHTML = `
+                    <div class="card-icon">${item.icon || '🍽️'}</div>
+                    <div class="card-title">${item.name}</div>
+                    <div class="card-bottom">
+                        <div class="card-price">$${item.price.toFixed(2)}</div>
+                        <div class="btn-add">+</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function addNewMenuItem() {
+            const name = document.getElementById('add-m-name').value.trim();
+            const category = document.getElementById('add-m-cat').value;
+            const price = parseFloat(document.getElementById('add-m-price').value);
+
+            if (!name || !category || isNaN(price)) return alert("Please fill all fields correctly!");
+
+            const newId = menuData.length > 0 ? Math.max(...menuData.map(m => m.id)) + 1 : 1;
+            menuData.push({ id: newId, name: name, category: category, price: price, icon: "🍲" });
+            localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+
+            document.getElementById('add-m-name').value = '';
+            document.getElementById('add-m-price').value = '';
+            renderCategories();
+            populateCategoryDropdown();
+            renderMenu();
+            alert("✅ New Menu Item Added Successfully!");
+        }
+
+        function addToCart(id) {
+            const item = menuData.find(m => m.id === id);
+            const cartItem = cart.find(c => c.id === id);
+            if (cartItem) {
+                cartItem.qty += 1;
+            } else {
+                cart.push({ ...item, qty: 1, customPrice: item.price, selectedNotes: [], customComment: "" });
+            }
+            updateCart();
+        }
+
+        function toggleItemNoteCheckbox(id, noteName, checkboxElem) {
+            const cartItem = cart.find(c => c.id === id);
+            if (cartItem) {
+                if (!cartItem.selectedNotes) cartItem.selectedNotes = [];
+                if (checkboxElem.checked) {
+                    if (!cartItem.selectedNotes.includes(noteName)) {
+                        cartItem.selectedNotes.push(noteName);
+                    }
+                } else {
+                    cartItem.selectedNotes = cartItem.selectedNotes.filter(n => n !== noteName);
+                }
+                updateCart();
+            }
+        }
+
+        function updateCart() {
+            const tbody = document.getElementById('cart-items');
+            if(!tbody) return;
+            tbody.innerHTML = ''; 
+            let subtotal = 0;
+            cart.forEach(item => {
+                subtotal += item.customPrice * item.qty;
+                
+                let catLower = (item.category || "").toLowerCase();
+                let nameLower = (item.name || "").toLowerCase();
+                let isRotiOrDosaiOrMurtabak = (catLower.includes('roti') || catLower.includes('dosai') || catLower.includes('murtabak') || nameLower.includes('roti') || nameLower.includes('dosai') || nameLower.includes('tosai') || nameLower.includes('murtabak') || nameLower.includes('capati'));
+
+                let noteHtml = '';
+                if (isRotiOrDosaiOrMurtabak) {
+                    if (!item.selectedNotes) item.selectedNotes = [];
+                    let isAyamChecked = item.selectedNotes.includes('Curry Ayam') ? 'checked' : '';
+                    let isDhalChecked = item.selectedNotes.includes('Dhal') ? 'checked' : '';
+                    let isIkanChecked = item.selectedNotes.includes('Curry Ikan') ? 'checked' : '';
+
+                    noteHtml = `
+                        <div class="note-checkboxes">
+                            <label class="note-label"><input type="checkbox" ${isAyamChecked} onchange="toggleItemNoteCheckbox(${item.id}, 'Curry Ayam', this)"> Curry Ayam</label>
+                            <label class="note-label"><input type="checkbox" ${isDhalChecked} onchange="toggleItemNoteCheckbox(${item.id}, 'Dhal', this)"> Dhal</label>
+                            <label class="note-label"><input type="checkbox" ${isIkanChecked} onchange="toggleItemNoteCheckbox(${item.id}, 'Curry Ikan', this)"> Curry Ikan</label>
+                        </div>
+                        <input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value">
+                    `;
+                } else {
+                    noteHtml = `
+                        <input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value">
+                    `;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="cart-item-name">${item.name}</div>
+                            ${noteHtml}
+                        </td>
+                        <td>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="decreaseQty(${item.id})">-</button>
+                                <span>${item.qty}</span>
+                                <button class="qty-btn" onclick="increaseQty(${item.id})">+</button>
+                            </div>
+                        </td>
+                        <td style="text-align:right;">
+                            <input type="number" class="price-input" value="${item.customPrice.toFixed(2)}" step="0.50" min="0" oninput="updateItemPrice(${item.id}, this.value)">
+                        </td>
+                    </tr>
+                `;
+            });
+            let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
+            let total = subtotal - discount;
+            if(document.getElementById('sub-total')) document.getElementById('sub-total').innerText = subtotal.toFixed(2);
+            if(document.getElementById('total-amount')) document.getElementById('total-amount').innerText = (total < 0 ? 0 : total).toFixed(2);
+        }
+
+        function decreaseQty(id) {
+            const cartItem = cart.find(c => c.id === id);
+            if (cartItem) {
+                cartItem.qty -= 1;
+                if (cartItem.qty <= 0) {
+                    cart = cart.filter(c => c.id !== id);
+                }
+                updateCart();
+            }
+        }
+
+        function increaseQty(id) {
+            const cartItem = cart.find(c => c.id === id);
+            if (cartItem) {
+                cartItem.qty += 1;
+                updateCart();
+            }
+        }
+
+        function updateItemPrice(id, val) {
+            let p = parseFloat(val);
+            if (!isNaN(p) && p >= 0) {
+                const cartItem = cart.find(c => c.id === id);
+                if (cartItem) {
+                    cartItem.customPrice = p;
+                    let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
+                    let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
+                    let total = subtotal - discount;
+                    document.getElementById('sub-total').innerText = subtotal.toFixed(2);
+                    document.getElementById('total-amount').innerText = (total < 0 ? 0 : total).toFixed(2);
+                }
+            }
+        }
+
+        function getFormattedItemNotes(item) {
+            let parts = [];
+            if (item.selectedNotes && item.selectedNotes.length > 0) {
+                parts.push(item.selectedNotes.join(', '));
+            }
+            if (item.customComment && item.customComment.trim() !== '') {
+                parts.push(item.customComment.trim());
+            }
+            return parts.join(' | ');
+        }
+
+        function saveOrderToTable() {
+            if (cart.length === 0) return alert("Cart is empty!");
+            const orderType = document.getElementById('order-type').value;
+            let targetKey = document.getElementById('table-no').value;
+
+            activeOrders[targetKey] = { time: Date.now(), type: orderType, items: JSON.parse(JSON.stringify(cart)) };
+            db.ref('activeOrders').set(activeOrders);
+
+            cart = [];
+            document.getElementById('discount-input').value = "0.00";
+            updateCart();
+            renderVisualTables();
+            renderVisualTakeaways();
+            toggleOrderTypeFields();
+        }
+
+        function renderVisualTables() {
+            const container = document.getElementById('visual-tables-grid');
+            if(!container) return;
+            container.innerHTML = '';
+            for (let i = 1; i <= 13; i++) {
+                let tableName = `Table ${i}`;
+                let isOccupied = activeOrders[tableName] !== undefined;
+                let btnClass = isOccupied ? "v-table-card v-table-occupied" : "v-table-card v-table-free";
+                let statusText = isOccupied ? "Occupied 🔴" : "Free 🟢";
+
+                container.innerHTML += `
+                    <button class="${btnClass}" onclick="loadTable('${tableName}')">
+                        ${tableName}<br><small style="font-size:10px;">${statusText}</small>
+                    </button>
+                `;
+            }
+        }
+
+        function renderVisualTakeaways() {
+            const container = document.getElementById('visual-takeaway-grid');
+            const countBadge = document.getElementById('takeaway-count');
+            if(!container) return;
+            
+            container.innerHTML = '';
+            let takeawayKeys = Object.keys(activeOrders).filter(k => k.startsWith('Order '));
+            
+            if(countBadge) countBadge.innerText = takeawayKeys.length;
+
+            if (takeawayKeys.length === 0) {
+                container.innerHTML = `<div style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 12px; padding: 6px;">No Active Takeaways</div>`;
+                return;
+            }
+
+            takeawayKeys.forEach((key) => {
+                let order = activeOrders[key];
+                let itemCount = order.items ? order.items.reduce((sum, i) => sum + i.qty, 0) : 0;
+                
+                container.innerHTML += `
+                    <button class="v-takeaway-card" onclick="loadTakeawayOrder('${key}')">
+                        <b>${key}</b><br>
+                        <small style="font-size:10px;">Items: ${itemCount} 📦</small>
+                    </button>
+                `;
+            });
+        }
+
+        function loadTable(key) {
+            document.getElementById('order-type').value = "Dine-In";
+            toggleOrderTypeFields();
+            document.getElementById('table-no').value = key;
+            
+            if (activeOrders[key]) {
+                cart = JSON.parse(JSON.stringify(activeOrders[key].items));
+            } else {
+                cart = [];
+            }
+            document.getElementById('discount-input').value = "0.00";
+            updateCart();
+        }
+
+        function loadTakeawayOrder(key) {
+            document.getElementById('order-type').value = "Takeaway";
+            const tableSelect = document.getElementById('table-no');
+            tableSelect.innerHTML = `<option value="${key}">${key}</option>`;
+            tableSelect.value = key;
+
+            if (activeOrders[key]) {
+                cart = JSON.parse(JSON.stringify(activeOrders[key].items));
+            } else {
+                cart = [];
+            }
+            document.getElementById('discount-input').value = "0.00";
+            updateCart();
+        }
+
+        function safePrint(modeClass) {
+            if (isPrinting) return; 
+            isPrinting = true;
+            document.body.className = modeClass;
+            
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => {
+                    document.body.className = "";
+                    isPrinting = false;
+                }, 500);
+            }, 100);
+        }
+
+        function printKitchenKOT() {
+            if (cart.length === 0) return alert("Cart is empty!");
+            const orderType = document.getElementById('order-type').value;
+            const refName = document.getElementById('table-no').value;
+
+            document.getElementById('k-order-type').innerText = orderType;
+            document.getElementById('k-table').innerText = refName;
+            
+            const kItems = document.getElementById('k-items');
+            kItems.innerHTML = '';
+            cart.forEach(i => {
+                let noteStr = getFormattedItemNotes(i);
+                let noteHtml = noteStr ? `<br><span style="font-size:16px; font-weight:900; color:#000;">Note: ${noteStr}</span>` : '';
+                kItems.innerHTML += `<tr><td style="padding: 8px 0; border-bottom: 1px dashed #000;"><b>${i.name}</b>${noteHtml}</td><td style="text-align:center; vertical-align:top; font-size:22px; border-bottom: 1px dashed #000;"><b>${i.qty}</b></td></tr>`;
+            });
+
+            activeOrders[refName] = { time: Date.now(), type: orderType, items: JSON.parse(JSON.stringify(cart)) };
+            db.ref('activeOrders').set(activeOrders);
+            renderVisualTables();
+            renderVisualTakeaways();
+
+            safePrint("print-kitchen-mode");
+        }
+
+        function openCashDrawerOnly() {
+            safePrint("print-drawer-mode");
+        }
+
+        function printCustomerBillOnly() {
+            if (cart.length === 0) return alert("Cart is empty!");
+            let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
+            let discountAmount = parseFloat(document.getElementById('discount-input').value) || 0;
+            let grandTotal = subtotal - discountAmount;
+            if (grandTotal < 0) grandTotal = 0;
+
+            const orderType = document.getElementById('order-type').value;
+            const refName = document.getElementById('table-no').value;
+            const payMethod = document.getElementById('payment-method').value;
+            const timeStr = new Date().toLocaleString();
+
+            fillReceiptDetails(orderType, refName, payMethod, timeStr, subtotal, discountAmount, grandTotal, 0, 0, cart);
+            safePrint("print-customer");
+        }
+
+        let currentGrandTotalForPay = 0;
+
+        function openPaymentModal() {
+            if (cart.length === 0) return alert("Cart is empty!");
+            let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
+            let discountAmount = parseFloat(document.getElementById('discount-input').value) || 0;
+            currentGrandTotalForPay = subtotal - discountAmount;
+            if (currentGrandTotalForPay < 0) currentGrandTotalForPay = 0;
+
+            document.getElementById('modal-grand-total').innerText = currentGrandTotalForPay.toFixed(2);
+            document.getElementById('modal-paid-input').value = currentGrandTotalForPay.toFixed(2);
+            document.getElementById('modal-change-amount').innerText = "0.00";
+
+            document.getElementById('payment-modal').style.display = 'flex';
+            setTimeout(() => {
+                const paidInput = document.getElementById('modal-paid-input');
+                paidInput.focus();
+                paidInput.select();
+            }, 100);
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').style.display = 'none';
+        }
+
+        function calculateChangePreview() {
+            let paid = parseFloat(document.getElementById('modal-paid-input').value) || 0;
+            let change = paid - currentGrandTotalForPay;
+            document.getElementById('modal-change-amount').innerText = (change >= 0 ? change : 0).toFixed(2);
+        }
+
+        function confirmPaymentProcess() {
+            let paid = parseFloat(document.getElementById('modal-paid-input').value) || 0;
+            if (isNaN(paid) || paid < currentGrandTotalForPay) {
+                return alert("⚠️ Insufficient paid amount!");
+            }
+
+            let change = paid - currentGrandTotalForPay;
+            closePaymentModal();
+
+            const orderType = document.getElementById('order-type').value;
+            const refName = document.getElementById('table-no').value;
+            const payMethod = document.getElementById('payment-method').value;
+            const timeStr = new Date().toLocaleString();
+
+            let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
+            let discountAmount = parseFloat(document.getElementById('discount-input').value) || 0;
+
+            fillReceiptDetails(orderType, refName, payMethod, timeStr, subtotal, discountAmount, currentGrandTotalForPay, paid, change, cart);
+
+            completedSales.push({ 
+                time: timeStr, 
+                ref: `${orderType} (${refName})`, 
+                method: payMethod, 
+                amount: currentGrandTotalForPay,
+                orderType: orderType,
+                refName: refName,
+                subtotal: subtotal,
+                discount: discountAmount,
+                paid: paid,
+                change: change,
+                items: JSON.parse(JSON.stringify(cart))
+            });
+            
+            db.ref('sales').set(completedSales);
+
+            if (orderType === "Takeaway") {
+                orderRunningNumber++;
+                localStorage.setItem('alhussain_order_num', orderRunningNumber);
+            }
+
+            delete activeOrders[refName];
+            db.ref('activeOrders').set(activeOrders);
+
+            cart = []; 
+            document.getElementById('discount-input').value = "0.00";
+            updateCart(); 
+            renderVisualTables();
+            renderVisualTakeaways();
+            toggleOrderTypeFields();
+            updateStats();
+            renderMenu();
+
+            alert("✅ Payment Successful! Change: $" + change.toFixed(2));
+        }
+
+        function fillReceiptDetails(orderType, ref, method, time, subtotal, discount, total, paid, change, items) {
+            document.getElementById('p-order-type').innerText = orderType;
+            document.getElementById('p-table').innerText = ref;
+            document.getElementById('p-method').innerText = method;
+            document.getElementById('p-time').innerText = time;
+            document.getElementById('p-subtotal').innerText = Number(subtotal).toFixed(2);
+            document.getElementById('p-total').innerText = Number(total).toFixed(2);
+            document.getElementById('p-paid').innerText = Number(paid).toFixed(2);
+            document.getElementById('p-change').innerText = Number(change).toFixed(2);
+
+            const pItems = document.getElementById('p-items');
+            pItems.innerHTML = '';
+            items.forEach(item => {
+                let noteStr = getFormattedItemNotes(item);
+                let noteHtml = noteStr ? `<br><span style="font-size:13px; font-weight:900;">Note: ${noteStr}</span>` : '';
+                pItems.innerHTML += `<tr><td style="padding: 6px 0;"><b>${item.name}</b>${noteHtml}</td><td style="text-align:center; vertical-align:top;"><b>${item.qty}</b></td><td style="text-align:right; vertical-align:top;"><b>$${(item.customPrice * item.qty).toFixed(2)}</b></td></tr>`;
+            });
+        }
+
+        function reprintBill(index) {
+            const sale = completedSales[index];
+            if (!sale) return alert("Bill data not found!");
+            fillReceiptDetails(sale.orderType, sale.refName, sale.method, sale.time, sale.subtotal, sale.discount, sale.amount, sale.paid, sale.change, sale.items);
+            safePrint("print-customer");
+        }
+
+        function openMenuManagerModal() {
+            const searchInput = document.getElementById('menu-manager-search');
+            if(searchInput) searchInput.value = '';
+            populateMenuManagerTable(menuData);
+            document.getElementById('menu-manager-modal').style.display = 'flex';
+        }
+
+        function filterMenuManagerList() {
+            const query = document.getElementById('menu-manager-search').value.toLowerCase();
+            const filtered = menuData.filter(item => item.name.toLowerCase().includes(query) || item.category.toLowerCase().includes(query));
+            populateMenuManagerTable(filtered);
+        }
+
+        function populateMenuManagerTable(itemsToDisplay) {
+            const tbody = document.getElementById('menu-manager-tbody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            const allCategories = getAllCategories();
+
+            let rowsHtml = '';
+            itemsToDisplay.forEach((item) => {
+                let optionsHtml = '';
+                allCategories.forEach(cat => {
+                    let selected = (cat === item.category) ? 'selected' : '';
+                    optionsHtml += `<option value="${cat}" ${selected}>${cat}</option>`;
+                });
+
+                rowsHtml += `
+                    <tr>
+                        <td><input type="text" value="${item.name}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:95%; padding:4px; border:1px solid #cbd5e1; border-radius:4px;"></td>
+                        <td><select onchange="updateMenuField(${item.id}, 'category', this.value)" style="width:98%; padding:4px; border:1px solid #cbd5e1; border-radius:4px; font-weight:bold; color:#4f46e5; background:white;">${optionsHtml}</select></td>
+                        <td style="text-align:right;"><input type="number" value="${item.price.toFixed(2)}" step="0.50" min="0" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:70px; padding:4px; text-align:right; border:1px solid #cbd5e1; border-radius:4px;"></td>
+                        <td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">Del</button></td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = rowsHtml;
+        }
+        
+        function closeMenuManagerModal() { 
+            document.getElementById('menu-manager-modal').style.display = 'none'; 
+            renderCategories();
+            populateCategoryDropdown();
+            renderMenu();
+        }
+
+        function updateMenuField(id, field, value) {
+            let item = menuData.find(m => m.id === id);
+            if (item) {
+                if (field === 'price') item.price = parseFloat(value) || 0;
+                else if (field === 'category') item.category = value;
+                else if (field === 'name') item.name = value.trim();
+                localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+            }
+        }
+
+        function deleteMenuItem(id) {
+            menuData = menuData.filter(m => m.id !== id);
+            localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+            renderMenu();
+            renderCategories();
+            populateCategoryDropdown();
+            filterMenuManagerList();
+        }
+
+        function openStockModal() {
+            const tbody = document.getElementById('stock-tbody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            rawMaterials.forEach(mat => {
+                tbody.innerHTML += `<tr><td><b>${mat.name}</b></td><td><span id="mat-qty-${mat.id}">${mat.qty}</span></td><td><button class="btn-small" onclick="updateRawMaterial(${mat.id})">Update Qty</button></td></tr>`;
+            });
+            document.getElementById('stock-modal').style.display = 'flex';
+        }
+        function closeStockModal() { document.getElementById('stock-modal').style.display = 'none'; }
+
+        function addNewRawMaterial() {
+            let name = prompt("Enter Raw Material / Grocery Name (e.g. Sugar, Onion):");
+            if (!name) return;
+            let qty = prompt(`Enter quantity for ${name}:`, "10");
+            if (qty === null || isNaN(qty)) return;
+
+            const newId = rawMaterials.length > 0 ? Math.max(...rawMaterials.map(m => m.id)) + 1 : 1;
+            rawMaterials.push({ id: newId, name: name.trim(), qty: parseFloat(qty) });
+            localStorage.setItem('alhussain_materials', JSON.stringify(rawMaterials));
+            openStockModal();
+        }
+
+        function updateRawMaterial(id) {
+            let mat = rawMaterials.find(m => m.id === id);
+            let newQty = prompt(`Update quantity for ${mat.name}:`, mat.qty);
+            if (newQty !== null && !isNaN(newQty)) {
+                mat.qty = parseFloat(newQty);
+                localStorage.setItem('alhussain_materials', JSON.stringify(rawMaterials));
+                openStockModal();
+            }
+        }
+
+        function openItemReportModal() {
+            try {
+                const tbody = document.getElementById('item-report-tbody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                
+                let itemCounts = {};
+                if (completedSales && completedSales.length > 0) {
+                    completedSales.forEach(sale => {
+                        if (sale.items && Array.isArray(sale.items)) {
+                            sale.items.forEach(item => {
+                                if (item && item.name) {
+                                    if (!itemCounts[item.name]) itemCounts[item.name] = 0;
+                                    itemCounts[item.name] += (item.qty || 1);
+                                }
+                            });
+                        }
+                    });
+                }
+
+                if (Object.keys(itemCounts).length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:#94a3b8;">No sales recorded today yet.</td></tr>`;
+                } else {
+                    for (let [name, qty] of Object.entries(itemCounts)) {
+                        tbody.innerHTML += `<tr><td><b>${name}</b></td><td style="text-align:right; font-weight:bold; color:#4f46e5;">${qty}</td></tr>`;
+                    }
+                }
+                document.getElementById('item-report-modal').style.display = 'flex';
+            } catch (error) {
+                console.error("Report Error: ", error);
+            }
+        }
+
+        function closeItemReportModal() { document.getElementById('item-report-modal').style.display = 'none'; }
+
+        function printItemReport() {
+            let itemCounts = {};
+            if (completedSales && completedSales.length > 0) {
+                completedSales.forEach(sale => {
+                    if (sale.items && Array.isArray(sale.items)) {
+                        sale.items.forEach(item => {
+                            if (item && item.name) {
+                                if (!itemCounts[item.name]) itemCounts[item.name] = 0;
+                                itemCounts[item.name] += (item.qty || 1);
+                            }
+                        });
+                    }
+                });
+            }
+
+            const pItems = document.getElementById('print-item-report-items');
+            if (pItems) {
+                pItems.innerHTML = '';
+                for (let [name, qty] of Object.entries(itemCounts)) {
+                    pItems.innerHTML += `<tr><td><b>${name}</b></td><td style="text-align:right;"><b>${qty}</b></td></tr>`;
+                }
+            }
+
+            safePrint("print-item-report-mode");
+        }
+
+        // --- CUSTOMER QR GENERATOR FUNCTIONS ---
+        function openCustomerQRModal() {
+            const grid = document.getElementById('qr-cards-grid');
+            grid.innerHTML = '';
+            
+            let baseUrl = window.location.href.split('?')[0];
+
+            for (let i = 1; i <= 13; i++) {
+                let tableName = `Table ${i}`;
+                let targetUrl = `${baseUrl}?table=${encodeURIComponent(tableName)}`;
+                
+                let card = document.createElement('div');
+                card.className = 'qr-card';
+                card.innerHTML = `
+                    <h4>🪑 ${tableName}</h4>
+                    <div id="qrcode-${i}" class="qr-img-box"></div>
+                    <p style="font-size:10px; color:#64748b; margin:5px 0 0 0; word-break:break-all;">${targetUrl}</p>
+                `;
+                grid.appendChild(card);
+
+                new QRCode(document.getElementById(`qrcode-${i}`), {
+                    text: targetUrl,
+                    width: 120,
+                    height: 120,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            }
+
+            document.getElementById('qr-modal').style.display = 'flex';
+        }
+
+        function closeCustomerQRModal() { 
+            document.getElementById('qr-modal').style.display = 'none'; 
+        }
+
+        function printAllTableQRs() {
+            let baseUrl = window.location.href.split('?')[0];
+            const printContainer = document.getElementById('print-qr-container');
+            printContainer.innerHTML = '';
+
+            for (let i = 1; i <= 13; i++) {
+                let tableName = `Table ${i}`;
+                let targetUrl = `${baseUrl}?table=${encodeURIComponent(tableName)}`;
+                
+                let div = document.createElement('div');
+                div.style.cssText = "border: 2px solid #000; padding: 15px; text-align: center; margin-bottom: 15px; page-break-inside: avoid;";
+                div.innerHTML = `
+                    <h3 style="margin:0 0 10px 0; font-size:22px;">AL HUSSAIN RESTAURANT</h3>
+                    <h2 style="margin:0 0 10px 0; font-size:26px; background:#000; color:#fff; padding:4px;">${tableName}</h2>
+                    <div id="print-qrcode-${i}" style="display:inline-block; margin: 5px 0;"></div>
+                    <p style="font-size:12px; margin:5px 0 0 0;">Scan to Order from Table</p>
+                `;
+                printContainer.appendChild(div);
+
+                new QRCode(document.getElementById(`print-qrcode-${i}`), {
+                    text: targetUrl,
+                    width: 150,
+                    height: 150,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            }
+
+            safePrint("print-qr-mode");
+        }
+
+        function openHistoryModal() {
+            const historyBody = document.getElementById('history-table-body');
+            if(!historyBody) return;
+            historyBody.innerHTML = '';
+            completedSales.forEach((s, idx) => {
+                historyBody.innerHTML += `<tr><td>${s.time}</td><td>${s.ref}</td><td>${s.method}</td><td style="text-align:right;">$${(s.amount || 0).toFixed(2)}</td><td style="text-align:center;"><button onclick="reprintBill(${idx})" style="background:#0284c7; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Print</button></td></tr>`;
+            });
+            document.getElementById('history-modal').style.display = 'flex';
+        }
+        function closeHistoryModal() { document.getElementById('history-modal').style.display = 'none'; }
+
+        function printSalesHistory() {
+            let totalSales = completedSales.reduce((sum, s) => sum + (s.amount || 0), 0);
+            const pItems = document.getElementById('print-history-items');
+            if(pItems) {
+                pItems.innerHTML = '';
+                completedSales.forEach(s => {
+                    pItems.innerHTML += `<tr><td><b>${s.time}</b><br>${s.ref}</td><td style="text-align:right;"><b>$${(s.amount || 0).toFixed(2)}</b></td></tr>`;
+                });
+            }
+            if(document.getElementById('print-history-grand-total')) {
+                document.getElementById('print-history-grand-total').innerText = totalSales.toFixed(2);
+            }
+
+            safePrint("print-history-mode");
+        }
+
+        function closeDay() {
+            if(confirm("Close day and reset all sales and order numbers?")) {
+                completedSales = [];
+                db.ref('sales').set(completedSales);
+                orderRunningNumber = 1;
+                localStorage.setItem('alhussain_order_num', orderRunningNumber);
+                updateStats();
+                toggleOrderTypeFields();
+                alert("🔒 Day closed successfully! Sales cleared and Order Numbers reset to 1.");
+            }
+        }
+
+        function updateStats() {
+            let totalSales = completedSales.reduce((sum, s) => sum + (s.amount || 0), 0);
+            if(document.getElementById('stat-sales')) document.getElementById('stat-sales').innerText = totalSales.toFixed(2);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tableParam = urlParams.get('table');
+            if (tableParam) {
+                const tableSelect = document.getElementById('table-no');
+                if (tableSelect) tableSelect.value = tableParam;
+            }
+        });
+    </script>
+</body>
+</html>
