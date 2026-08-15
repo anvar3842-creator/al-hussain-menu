@@ -212,7 +212,7 @@
                 <div class="controls-bar">
                     <div class="search-container">
                         <input type="text" id="search-input" class="search-box" placeholder="Search menu..." onkeyup="renderMenu()" onclick="this.value=''; renderMenu();">
-                        <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Reset to Default Menu">🔄 Reset Menu</button>
+                        <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">🔄 Refresh</button>
                     </div>
                     <div class="category-filters" id="category-filters"></div>
                 </div>
@@ -1136,13 +1136,17 @@
         function logout() { location.href = liveBaseUrl; }
 
         function refreshMenuData() {
-            if (confirm("Reset menu to default items?")) {
-                menuData = defaultMenuData;
-                categoryOrder = defaultCategoryOrder;
-                db.ref('menuData').set(menuData);
-                db.ref('categoryOrder').set(categoryOrder);
-                alert("🔄 Menu reset to default successfully!");
-            }
+            // Force re-fetch and re-render without logging out
+            db.ref('menuData').once('value').then((snapshot) => {
+                const val = snapshot.val();
+                if (val && Array.isArray(val)) {
+                    menuData = val;
+                }
+                renderCategories();
+                populateCategoryDropdown();
+                renderMenu();
+                alert("🔄 Menu refreshed successfully from Cloud!");
+            });
         }
 
         function toggleOrderTypeFields() {
