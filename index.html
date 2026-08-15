@@ -212,7 +212,7 @@
                 <div class="controls-bar">
                     <div class="search-container">
                         <input type="text" id="search-input" class="search-box" placeholder="Search menu..." onkeyup="renderMenu()" onclick="this.value=''; renderMenu();">
-                        <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">🔄 Refresh</button>
+                        <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Reset to Default Menu">🔄 Reset Menu</button>
                     </div>
                     <div class="category-filters" id="category-filters"></div>
                 </div>
@@ -983,21 +983,17 @@
             { id: 288, name: "Air Botol Besar", price: 1.00, category: "Minimum Tin", icon: "🥤" }
         ];
 
-        let menuData = JSON.parse(localStorage.getItem('alhussain_menu')) || defaultMenuData;
-        if (!Array.isArray(menuData) || menuData.length < defaultMenuData.length) {
-            menuData = defaultMenuData;
-            localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
-        }
-
+        let menuData = [];
         let rawMaterials = JSON.parse(localStorage.getItem('alhussain_materials')) || [];
         let dailyExpenses = JSON.parse(localStorage.getItem('alhussain_expenses')) || [];
         let monthlyRecords = JSON.parse(localStorage.getItem('alhussain_monthly')) || {};
         
-        let categoryOrder = JSON.parse(localStorage.getItem('alhussain_cat_order')) || [
+        let defaultCategoryOrder = [
             "Roti", "Dosai", "Nasi Campur", "Bruger", "Nasi Goreng", "Murtabak", "Mee Goreng", "Mee Basah", 
             "Indomie", "Rojak & Sayur", "Soto", "Special", "Soup", "Tom Yum", "Mee Soup", 
             "Kueh Teow Soup", "Kolo Mee", "Hot Drinks", "Sejuk", "Fresh Juice", "Milk Shake", "Minimum Tin"
         ];
+        let categoryOrder = [];
 
         let cart = [];
         let activeOrders = {}; 
@@ -1006,6 +1002,32 @@
         let isPrinting = false;
         let loggedInRole = "";
         let orderRunningNumber = parseInt(localStorage.getItem('alhussain_order_num')) || 1;
+
+        // --- FIREBASE LISTENERS FOR CLOUD SYNC ---
+        db.ref('menuData').on('value', (snapshot) => {
+            const val = snapshot.val();
+            if (val && Array.isArray(val)) {
+                menuData = val;
+            } else {
+                menuData = defaultMenuData;
+                db.ref('menuData').set(defaultMenuData);
+            }
+            renderCategories();
+            populateCategoryDropdown();
+            renderMenu();
+        });
+
+        db.ref('categoryOrder').on('value', (snapshot) => {
+            const val = snapshot.val();
+            if (val && Array.isArray(val)) {
+                categoryOrder = val;
+            } else {
+                categoryOrder = defaultCategoryOrder;
+                db.ref('categoryOrder').set(defaultCategoryOrder);
+            }
+            renderCategories();
+            populateCategoryDropdown();
+        });
 
         db.ref('activeOrders').on('value', (snapshot) => {
             activeOrders = snapshot.val() || {};
@@ -1040,8 +1062,6 @@
                 document.getElementById('visual-tables-section').style.display = 'none';
                 document.getElementById('visual-takeaway-section').style.display = 'none';
 
-                renderCategories();
-                renderMenu();
                 updateCart();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -1106,9 +1126,6 @@
             document.getElementById('login-screen').style.display = "none";
             document.getElementById('main-app').style.display = "block";
             document.getElementById('display-user').innerText = role;
-            renderCategories();
-            populateCategoryDropdown();
-            renderMenu();
             updateCart();
             renderVisualTables();
             renderVisualTakeaways();
@@ -1119,12 +1136,13 @@
         function logout() { location.href = liveBaseUrl; }
 
         function refreshMenuData() {
-            menuData = defaultMenuData;
-            localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
-            renderCategories();
-            populateCategoryDropdown();
-            renderMenu();
-            alert("🔄 Menu items refreshed successfully!");
+            if (confirm("Reset menu to default items?")) {
+                menuData = defaultMenuData;
+                categoryOrder = defaultCategoryOrder;
+                db.ref('menuData').set(menuData);
+                db.ref('categoryOrder').set(categoryOrder);
+                alert("🔄 Menu reset to default successfully!");
+            }
         }
 
         function toggleOrderTypeFields() {
@@ -1179,7 +1197,7 @@
                 let formattedCat = newCat.trim();
                 if (!categoryOrder.includes(formattedCat)) {
                     categoryOrder.push(formattedCat);
-                    localStorage.setItem('alhussain_cat_order', JSON.stringify(categoryOrder));
+                    db.ref('categoryOrder').set(categoryOrder);
                 }
                 populateCategoryDropdown();
                 renderCategories();
@@ -1213,9 +1231,6 @@
 
         function closeCategoryManagerModal() {
             document.getElementById('category-manager-modal').style.display = 'none';
-            renderCategories();
-            populateCategoryDropdown();
-            renderMenu();
         }
 
         function renameCategory(oldName, index) {
@@ -1228,14 +1243,14 @@
             if (currentCats.includes(newName)) return alert("Category name already exists!");
 
             categoryOrder = currentCats.map(c => c === oldName ? newName : c);
-            localStorage.setItem('alhussain_cat_order', JSON.stringify(categoryOrder));
+            db.ref('categoryOrder').set(categoryOrder);
 
             menuData.forEach(item => {
                 if (item.category === oldName) {
                     item.category = newName;
                 }
             });
-            localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+            db.ref('menuData').set(menuData);
 
             openCategoryManagerModal();
             alert(`✅ Category renamed from "${oldName}" to "${newName}" successfully!`);
@@ -1244,10 +1259,10 @@
         function deleteCategory(catName) {
             if (confirm(`Are you sure you want to delete category "${catName}"? Note: Items in this category will also be removed.`)) {
                 categoryOrder = categoryOrder.filter(c => c !== catName);
-                localStorage.setItem('alhussain_cat_order', JSON.stringify(categoryOrder));
+                db.ref('categoryOrder').set(categoryOrder);
 
                 menuData = menuData.filter(item => item.category !== catName);
-                localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+                db.ref('menuData').set(menuData);
 
                 if (currentCategory === catName) currentCategory = "All";
                 openCategoryManagerModal();
@@ -1263,7 +1278,7 @@
             let temp = categoryOrder[index];
             categoryOrder[index] = categoryOrder[targetIndex];
             categoryOrder[targetIndex] = temp;
-            localStorage.setItem('alhussain_cat_order', JSON.stringify(categoryOrder));
+            db.ref('categoryOrder').set(categoryOrder);
             openCategoryManagerModal();
             renderCategories();
             populateCategoryDropdown();
@@ -1319,13 +1334,10 @@
 
             const newId = menuData.length > 0 ? Math.max(...menuData.map(m => m.id)) + 1 : 1;
             menuData.push({ id: newId, name: name, category: category, price: price, icon: "🍲" });
-            localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+            db.ref('menuData').set(menuData);
 
             document.getElementById('add-m-name').value = '';
             document.getElementById('add-m-price').value = '';
-            renderCategories();
-            populateCategoryDropdown();
-            renderMenu();
             alert("✅ New Menu Item Added Successfully!");
         }
 
@@ -1742,9 +1754,6 @@
         
         function closeMenuManagerModal() { 
             document.getElementById('menu-manager-modal').style.display = 'none'; 
-            renderCategories();
-            populateCategoryDropdown();
-            renderMenu();
         }
 
         function updateMenuField(id, field, value) {
@@ -1753,17 +1762,14 @@
                 if (field === 'price') item.price = parseFloat(value) || 0;
                 else if (field === 'category') item.category = value;
                 else if (field === 'name') item.name = value.trim();
-                localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+                db.ref('menuData').set(menuData);
             }
         }
 
         function deleteMenuItem(id) {
             if (confirm("Are you sure you want to delete this menu item?")) {
                 menuData = menuData.filter(m => m.id !== id);
-                localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
-                renderMenu();
-                renderCategories();
-                populateCategoryDropdown();
+                db.ref('menuData').set(menuData);
                 filterMenuManagerList();
             }
         }
