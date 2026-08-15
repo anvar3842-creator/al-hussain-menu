@@ -96,19 +96,22 @@
         .stat-box { background: white; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #e2e8f0; margin-top: 6px; font-size: 15px; font-weight: bold; color: #4f46e5; }
         
         .visual-tables-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 140px; overflow-y: auto; }
-        .v-table-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; color: white; border: none; }
+        .v-table-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; color: white; border: none; position: relative; }
         .v-table-free { background: #10b981; }
         .v-table-occupied { background: #ef4444; }
+        .v-cancel-btn { position: absolute; top: 2px; right: 2px; background: #000; color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
         .visual-takeaway-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 140px; overflow-y: auto; }
-        .v-takeaway-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; color: white; background: #d97706; border: none; }
+        .v-takeaway-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; color: white; background: #d97706; border: none; position: relative; }
 
-        .history-btn, .manage-menu-btn, .close-day-btn, .stock-btn, .qr-btn, .report-btn, .manage-cat-btn { background: #475569; color: white; border: none; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; width: 100%; margin-top: 6px; }
+        .history-btn, .manage-menu-btn, .close-day-btn, .stock-btn, .qr-btn, .report-btn, .manage-cat-btn, .expense-btn, .monthly-btn { background: #475569; color: white; border: none; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; width: 100%; margin-top: 6px; }
         .manage-menu-btn { background: #0284c7; }
         .manage-cat-btn { background: #7c3aed; }
         .stock-btn { background: #8b5cf6; }
         .qr-btn { background: #059669; }
         .report-btn { background: #0d9488; }
+        .expense-btn { background: #ea580c; }
+        .monthly-btn { background: #2563eb; }
         .close-day-btn { background: #dc2626; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 15px; box-sizing: border-box; }
@@ -131,7 +134,7 @@
         .qr-card h4 { margin: 5px 0 10px 0; color: #4f46e5; font-size: 16px; }
         .qr-img-box { display: inline-block; background: white; padding: 5px; border-radius: 6px; }
 
-        #print-receipt, #print-kitchen, #print-drawer, #print-sales-history, #print-item-report, #print-qr-batch { display: none; }
+        #print-receipt, #print-kitchen, #print-drawer, #print-sales-history, #print-item-report, #print-qr-batch, #print-day-close { display: none; }
 
         @media print {
             @page { size: auto; margin: 10mm; }
@@ -161,6 +164,12 @@
 
             body.print-item-report-mode #print-item-report, body.print-item-report-mode #print-item-report * { visibility: visible !important; }
             body.print-item-report-mode #print-item-report { 
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
+                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
+            }
+
+            body.print-day-close-mode #print-day-close, body.print-day-close-mode #print-day-close * { visibility: visible !important; }
+            body.print-day-close-mode #print-day-close { 
                 display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
                 font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
             }
@@ -308,9 +317,11 @@
                         </div>
                     </div>
                     <button class="manage-menu-btn" onclick="openMenuManagerModal()">⚙️ Manage Menu Items & Prices</button>
-                    <button class="manage-cat-btn" onclick="openCategoryManagerModal()">📁 Reorder Categories (Priority)</button>
+                    <button class="manage-cat-btn" onclick="openCategoryManagerModal()">📁 Manage Categories (Rename/Delete/Priority)</button>
                     <button class="stock-btn" onclick="openStockModal()">📦 Manual Stock (Raw Materials)</button>
+                    <button class="expense-btn" onclick="openExpenseModal()">💸 Add Daily Expense (Jamans)</button>
                     <button class="report-btn" onclick="openItemReportModal()">📊 Daily Item Sold Report</button>
+                    <button class="monthly-btn" onclick="openMonthlyReportModal()">📅 View Monthly Sales & Expenses</button>
                     <button class="qr-btn" onclick="openCustomerQRModal()">📱 Customer QR Ordering Link</button>
                     <button class="history-btn" onclick="openHistoryModal()">📋 View Sales History</button>
                     <button class="close-day-btn" onclick="closeDay()">🔒 Day Close (End of Day)</button>
@@ -370,7 +381,7 @@
             </div>
             <div class="modal-body">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; flex-wrap: wrap;">
-                    <p style="font-size: 12px; color: #64748b; margin: 0;">You can search, edit item names, categories, or prices directly.</p>
+                    <p style="font-size: 12px; color: #64748b; margin: 0;">You can search, edit item names, categories, prices, or delete items directly.</p>
                     <input type="text" id="menu-manager-search" placeholder="🔍 Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; width: 220px; outline: none;">
                 </div>
                 <table style="width:100%; font-size:12px;">
@@ -388,17 +399,17 @@
         </div>
     </div>
 
-    <!-- CATEGORY REORDER MODAL -->
+    <!-- CATEGORY REORDER, RENAME & DELETE MODAL -->
     <div id="category-manager-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header">
-                <h3>📁 Reorder Categories (Top Priority)</h3>
+                <h3>📁 Manage Categories (Rename, Delete, Priority)</h3>
                 <button class="close-modal" onclick="closeCategoryManagerModal()">X</button>
             </div>
             <div class="modal-body">
-                <p style="font-size: 12px; color: #64748b; margin-top: 0;">Use Up / Down buttons to set which category appears first on screen.</p>
+                <p style="font-size: 12px; color: #64748b; margin-top: 0;">You can rename categories, reorder their display priority, or delete them.</p>
                 <table style="width:100%; font-size:13px;">
-                    <thead><tr><th>Category Name</th><th style="text-align:right;">Priority Action</th></tr></thead>
+                    <thead><tr><th>Category Name</th><th style="text-align:right;">Actions</th></tr></thead>
                     <tbody id="category-manager-tbody"></tbody>
                 </table>
             </div>
@@ -416,6 +427,50 @@
                 <table style="width:100%; font-size:12px;">
                     <thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead>
                     <tbody id="stock-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXPENSE MODAL -->
+    <div id="expense-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>💸 Add Daily Expense / Jamans</h3>
+                <button class="close-modal" onclick="closeExpenseModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 13px; font-weight: bold; color: #475569;">Description (Item / Purpose):</label>
+                    <input type="text" id="expense-desc" placeholder="e.g. Vegetables, Chicken, Gas" style="width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; outline: none;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 13px; font-weight: bold; color: #475569;">Amount ($):</label>
+                    <input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; outline: none;">
+                </div>
+                <button class="btn-small" style="width: 100%; padding: 10px; font-size: 14px;" onclick="saveExpenseItem()">Save Expense</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MONTHLY REPORT MODAL -->
+    <div id="monthly-report-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📅 Monthly Sales & Expenses Summary</h3>
+                <button class="close-modal" onclick="closeMonthlyReportModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <table style="width:100%; font-size:13px;">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th style="text-align:right;">Total Sales ($)</th>
+                            <th style="text-align:right;">Total Expenses ($)</th>
+                            <th style="text-align:right;">Net Profit ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthly-report-tbody"></tbody>
                 </table>
             </div>
         </div>
@@ -460,30 +515,30 @@
             <p style="margin: 2px 0; font-size: 15px; font-weight: 900;">Nagara Brunei Darussalam.</p>
             <hr style="border-top: 3px solid black; margin: 4px 0;">
         </div>
-        <div style="font-size: 15px; font-weight: 900; margin-bottom: 6px;">
-            <div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" style="font-size: 17px; background: #000; color: #fff; padding: 0 4px;"></span></div>
+        <div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;">
+            <div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" style="font-size: 18px; background: #000; color: #fff; padding: 0 4px;"></span></div>
             <div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div>
         </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 15px; font-weight: 900; margin-bottom: 6px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 16px; font-weight: 900; margin-bottom: 6px;">
             <thead>
                 <tr style="border-bottom: 3px solid black;">
-                    <th style="text-align: left; padding: 2px 0; font-size: 15px;">Item</th>
-                    <th style="text-align: center; padding: 2px 0; font-size: 15px;">Qty</th>
-                    <th style="text-align: right; padding: 2px 0; font-size: 15px;">Price</th>
+                    <th style="text-align: left; padding: 3px 0; font-size: 16px; font-weight: 900;">Item & Notes</th>
+                    <th style="text-align: center; padding: 3px 0; font-size: 16px; font-weight: 900;">Qty</th>
+                    <th style="text-align: right; padding: 3px 0; font-size: 16px; font-weight: 900;">Price</th>
                 </tr>
             </thead>
             <tbody id="p-items"></tbody>
         </table>
         <hr style="border-top: 3px solid black; margin: 4px 0;">
-        <div style="font-size: 15px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div>
-        <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 900; margin-top: 4px;">
+        <div style="font-size: 16px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;">
             <span>TOTAL:</span><span>$<span id="p-total">0.00</span></span>
         </div>
-        <div style="font-size: 15px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;">
+        <div style="font-size: 16px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;">
             <div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div>
-            <div style="display: flex; justify-content: space-between; font-size: 16px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div>
         </div>
-        <div style="text-align: center; margin-top: 8px; font-size: 15px; font-weight: 900;"><p>Thank you! Please come again.</p></div>
+        <div style="text-align: center; margin-top: 8px; font-size: 16px; font-weight: 900;"><p>Thank you! Please come again.</p></div>
         <div style="display:none;">\x1B\x70\x00\x19\xFA</div>
     </div>
 
@@ -496,7 +551,7 @@
             <div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" style="font-size: 22px; background: #000; color: #fff; padding: 0 4px;"></span></div>
         </div>
         <table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;">
-            <thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px;">Item & Notes</th><th style="text-align: center; font-size: 20px;">Qty</th></tr></thead>
+            <thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900;">Qty</th></tr></thead>
             <tbody id="k-items"></tbody>
         </table>
     </div>
@@ -512,8 +567,8 @@
             <p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>SALES HISTORY REPORT</b></p>
             <hr style="border-top: 3px solid black; margin: 4px 0;">
         </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900;">
-            <thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 13px;">Time / Ref</th><th style="text-align: right; font-size: 13px;">Amount</th></tr></thead>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;">
+            <thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 14px; font-weight: 900;">Time / Ref</th><th style="text-align: right; font-size: 14px; font-weight: 900;">Amount</th></tr></thead>
             <tbody id="print-history-items"></tbody>
         </table>
         <hr style="border-top: 3px solid black; margin: 4px 0;">
@@ -522,14 +577,30 @@
         </div>
     </div>
 
+    <div id="print-day-close">
+        <div style="text-align: center; margin-bottom: 6px;">
+            <h2 style="margin: 0; font-size: 20px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
+            <p style="margin: 2px 0; font-size: 15px; font-weight: 900;"><b>DAY CLOSE REPORT</b></p>
+            <p style="margin: 2px 0; font-size: 13px;" id="dc-date"></p>
+            <hr style="border-top: 3px solid black; margin: 4px 0;">
+        </div>
+        <div style="font-size: 15px; font-weight: 900; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Sales:</span><span>$<span id="dc-sales">0.00</span></span></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Expenses:</span><span>$<span id="dc-expenses">0.00</span></span></div>
+            <hr style="border-top: 2px dashed black; margin: 4px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Net Balance:</span><span>$<span id="dc-net">0.00</span></span></div>
+        </div>
+        <div style="text-align: center; margin-top: 15px; font-size: 14px;"><p>*** END OF DAY CLOSED ***</p></div>
+    </div>
+
     <div id="print-item-report">
         <div style="text-align: center; margin-bottom: 6px;">
             <h2 style="margin: 0; font-size: 18px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
             <p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>DAILY ITEM SOLD REPORT</b></p>
             <hr style="border-top: 3px solid black; margin: 4px 0;">
         </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900;">
-            <thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 13px;">Item Name</th><th style="text-align: right; font-size: 13px;">Qty Sold</th></tr></thead>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;">
+            <thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 14px; font-weight: 900;">Item Name</th><th style="text-align: right; font-size: 14px; font-weight: 900;">Qty Sold</th></tr></thead>
             <tbody id="print-item-report-items"></tbody>
         </table>
     </div>
@@ -900,11 +971,15 @@
             { id: 288, name: "Air Botol Besar", price: 1.00, category: "Minimum Tin", icon: "🥤" }
         ];
 
-        // Ensure customer phones always load the latest complete menu without getting stuck on old local storage
-        let menuData = defaultMenuData;
-        localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+        let menuData = JSON.parse(localStorage.getItem('alhussain_menu')) || defaultMenuData;
+        if (!Array.isArray(menuData) || menuData.length < defaultMenuData.length) {
+            menuData = defaultMenuData;
+            localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+        }
 
         let rawMaterials = JSON.parse(localStorage.getItem('alhussain_materials')) || [];
+        let dailyExpenses = JSON.parse(localStorage.getItem('alhussain_expenses')) || [];
+        let monthlyRecords = JSON.parse(localStorage.getItem('alhussain_monthly')) || {};
         
         let categoryOrder = JSON.parse(localStorage.getItem('alhussain_cat_order')) || [
             "Roti", "Dosai", "Nasi Campur", "Bruger", "Nasi Goreng", "Murtabak", "Mee Goreng", "Mee Basah", 
@@ -917,6 +992,7 @@
         let completedSales = []; 
         let currentCategory = "All";
         let isPrinting = false;
+        let loggedInRole = "";
         let orderRunningNumber = parseInt(localStorage.getItem('alhussain_order_num')) || 1;
 
         db.ref('activeOrders').on('value', (snapshot) => {
@@ -975,6 +1051,7 @@
             const btnKitchen = document.getElementById('btn-kitchen-elem');
 
             if (user === "admin" && pass === "admin123") {
+                loggedInRole = "admin";
                 adminPanel.style.display = "block";
                 billSummaryContainer.style.display = "block";
                 btnPrintBill.style.display = "block";
@@ -985,6 +1062,7 @@
                 grantAccess("Admin Dashboard");
             } 
             else if (user === "user1" && pass === "1234") {
+                loggedInRole = "user1";
                 adminPanel.style.display = "none";
                 billSummaryContainer.style.display = "block";
                 btnPrintBill.style.display = "block";
@@ -995,6 +1073,7 @@
                 grantAccess("Staff (User 1)");
             }
             else if (user === "user2" && pass === "1234") {
+                loggedInRole = "user2";
                 adminPanel.style.display = "none";
                 billSummaryContainer.style.display = "none";
                 btnPrintBill.style.display = "none";
@@ -1105,10 +1184,14 @@
             cats.forEach((cat, index) => {
                 tbody.innerHTML += `
                     <tr>
-                        <td><b>${cat}</b></td>
+                        <td>
+                            <input type="text" id="cat-rename-${index}" value="${cat}" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: bold; width: 150px;">
+                            <button class="btn-small" style="padding: 5px 8px; font-size: 11px;" onclick="renameCategory('${cat}', ${index})">Rename</button>
+                        </td>
                         <td style="text-align:right;">
                             <button class="btn-small" onclick="moveCategory(${index}, -1)" ${index === 0 ? 'disabled style="opacity:0.5"' : ''}>⬆️ Up</button>
                             <button class="btn-small" onclick="moveCategory(${index}, 1)" ${index === cats.length - 1 ? 'disabled style="opacity:0.5"' : ''}>⬇️ Down</button>
+                            <button onclick="deleteCategory('${cat}')" style="background:#ef4444; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer; font-size:11px; margin-left:4px;">Del</button>
                         </td>
                     </tr>
                 `;
@@ -1120,6 +1203,44 @@
             document.getElementById('category-manager-modal').style.display = 'none';
             renderCategories();
             populateCategoryDropdown();
+            renderMenu();
+        }
+
+        function renameCategory(oldName, index) {
+            let newNameInput = document.getElementById(`cat-rename-${index}`);
+            let newName = newNameInput ? newNameInput.value.trim() : "";
+            if (!newName) return alert("Category name cannot be empty!");
+            if (newName === oldName) return;
+
+            let currentCats = getAllCategories();
+            if (currentCats.includes(newName)) return alert("Category name already exists!");
+
+            categoryOrder = currentCats.map(c => c === oldName ? newName : c);
+            localStorage.setItem('alhussain_cat_order', JSON.stringify(categoryOrder));
+
+            menuData.forEach(item => {
+                if (item.category === oldName) {
+                    item.category = newName;
+                }
+            });
+            localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+
+            openCategoryManagerModal();
+            alert(`✅ Category renamed from "${oldName}" to "${newName}" successfully!`);
+        }
+
+        function deleteCategory(catName) {
+            if (confirm(`Are you sure you want to delete category "${catName}"? Note: Items in this category will also be removed.`)) {
+                categoryOrder = categoryOrder.filter(c => c !== catName);
+                localStorage.setItem('alhussain_cat_order', JSON.stringify(categoryOrder));
+
+                menuData = menuData.filter(item => item.category !== catName);
+                localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+
+                if (currentCategory === catName) currentCategory = "All";
+                openCategoryManagerModal();
+                alert(`✅ Category "${catName}" deleted successfully.`);
+            }
         }
 
         function moveCategory(index, direction) {
@@ -1328,6 +1449,20 @@
             toggleOrderTypeFields();
         }
 
+        function cancelActiveOrder(key, event) {
+            event.stopPropagation();
+            if (loggedInRole !== "admin") {
+                return alert("⚠️ Access Denied! Only Admin can cancel active orders.");
+            }
+            if (confirm(`Are you sure you want to cancel and delete active order for ${key}?`)) {
+                delete activeOrders[key];
+                db.ref('activeOrders').set(activeOrders);
+                renderVisualTables();
+                renderVisualTakeaways();
+                alert(`✅ Order ${key} cancelled successfully.`);
+            }
+        }
+
         function renderVisualTables() {
             const container = document.getElementById('visual-tables-grid');
             if(!container) return;
@@ -1338,9 +1473,12 @@
                 let btnClass = isOccupied ? "v-table-card v-table-occupied" : "v-table-card v-table-free";
                 let statusText = isOccupied ? "Occupied 🔴" : "Free 🟢";
 
+                let cancelBtnHtml = (isOccupied && loggedInRole === "admin") ? `<button class="v-cancel-btn" title="Cancel Order" onclick="cancelActiveOrder('${tableName}', event)">X</button>` : '';
+
                 container.innerHTML += `
                     <button class="${btnClass}" onclick="loadTable('${tableName}')">
                         ${tableName}<br><small style="font-size:10px;">${statusText}</small>
+                        ${cancelBtnHtml}
                     </button>
                 `;
             }
@@ -1363,9 +1501,12 @@
             takeawayKeys.forEach((key) => {
                 let order = activeOrders[key];
                 let itemCount = order.items ? order.items.reduce((sum, i) => sum + i.qty, 0) : 0;
+                let cancelBtnHtml = (loggedInRole === "admin") ? `<button class="v-cancel-btn" title="Cancel Order" onclick="cancelActiveOrder('${key}', event)">X</button>` : '';
+
                 container.innerHTML += `
                     <button class="v-takeaway-card" onclick="loadTakeawayOrder('${key}')">
                         <b>${key}</b><br><small style="font-size:10px;">Items: ${itemCount} 📦</small>
+                        ${cancelBtnHtml}
                     </button>
                 `;
             });
@@ -1421,8 +1562,8 @@
             kItems.innerHTML = '';
             cart.forEach(i => {
                 let noteStr = getFormattedItemNotes(i);
-                let noteHtml = noteStr ? `<br><span style="font-size:16px; font-weight:900; color:#000;">Note: ${noteStr}</span>` : '';
-                kItems.innerHTML += `<tr><td style="padding: 8px 0; border-bottom: 1px dashed #000;"><b>${i.name}</b>${noteHtml}</td><td style="text-align:center; vertical-align:top; font-size:22px; border-bottom: 1px dashed #000;"><b>${i.qty}</b></td></tr>`;
+                let noteHtml = noteStr ? `<br><span style="font-size:18px; font-weight:900; color:#000;">Note: ${noteStr}</span>` : '';
+                kItems.innerHTML += `<tr><td style="padding: 8px 0; border-bottom: 1px dashed #000; font-size: 20px; font-weight: 900;"><b>${i.name}</b>${noteHtml}</td><td style="text-align:center; vertical-align:top; font-size:24px; font-weight:900; border-bottom: 1px dashed #000;"><b>${i.qty}</b></td></tr>`;
             });
 
             activeOrders[refName] = { time: Date.now(), type: orderType, items: JSON.parse(JSON.stringify(cart)) };
@@ -1537,8 +1678,8 @@
             pItems.innerHTML = '';
             items.forEach(item => {
                 let noteStr = getFormattedItemNotes(item);
-                let noteHtml = noteStr ? `<br><span style="font-size:13px; font-weight:900;">Note: ${noteStr}</span>` : '';
-                pItems.innerHTML += `<tr><td style="padding: 6px 0;"><b>${item.name}</b>${noteHtml}</td><td style="text-align:center; vertical-align:top;"><b>${item.qty}</b></td><td style="text-align:right; vertical-align:top;"><b>$${(item.customPrice * item.qty).toFixed(2)}</b></td></tr>`;
+                let noteHtml = noteStr ? `<br><span style="font-size:15px; font-weight:900;">Note: ${noteStr}</span>` : '';
+                pItems.innerHTML += `<tr><td style="padding: 6px 0; font-size: 16px; font-weight: 900;"><b>${item.name}</b>${noteHtml}</td><td style="text-align:center; vertical-align:top; font-size: 18px; font-weight: 900;"><b>${item.qty}</b></td><td style="text-align:right; vertical-align:top; font-size: 16px; font-weight: 900;"><b>$${(item.customPrice * item.qty).toFixed(2)}</b></td></tr>`;
             });
         }
 
@@ -1605,12 +1746,14 @@
         }
 
         function deleteMenuItem(id) {
-            menuData = menuData.filter(m => m.id !== id);
-            localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
-            renderMenu();
-            renderCategories();
-            populateCategoryDropdown();
-            filterMenuManagerList();
+            if (confirm("Are you sure you want to delete this menu item?")) {
+                menuData = menuData.filter(m => m.id !== id);
+                localStorage.setItem('alhussain_menu', JSON.stringify(menuData));
+                renderMenu();
+                renderCategories();
+                populateCategoryDropdown();
+                filterMenuManagerList();
+            }
         }
 
         function openStockModal() {
@@ -1645,6 +1788,52 @@
                 openStockModal();
             }
         }
+
+        function openExpenseModal() {
+            document.getElementById('expense-desc').value = '';
+            document.getElementById('expense-amount').value = '';
+            document.getElementById('expense-modal').style.display = 'flex';
+        }
+        function closeExpenseModal() { document.getElementById('expense-modal').style.display = 'none'; }
+
+        function saveExpenseItem() {
+            let desc = document.getElementById('expense-desc').value.trim();
+            let amt = parseFloat(document.getElementById('expense-amount').value);
+            if (!desc || isNaN(amt) || amt <= 0) return alert("Please enter valid expense description and amount!");
+
+            dailyExpenses.push({ time: new Date().toLocaleString(), desc: desc, amount: amt });
+            localStorage.setItem('alhussain_expenses', JSON.stringify(dailyExpenses));
+            closeExpenseModal();
+            updateStats();
+            alert("✅ Expense added successfully!");
+        }
+
+        function openMonthlyReportModal() {
+            const tbody = document.getElementById('monthly-report-tbody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            let months = Object.keys(monthlyRecords);
+            if(months.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No monthly records found yet.</td></tr>`;
+            } else {
+                months.forEach(m => {
+                    let rec = monthlyRecords[m];
+                    let net = rec.sales - rec.expenses;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b>${m}</b></td>
+                            <td style="text-align:right; color:#10b981; font-weight:bold;">$${rec.sales.toFixed(2)}</td>
+                            <td style="text-align:right; color:#ea580c; font-weight:bold;">$${rec.expenses.toFixed(2)}</td>
+                            <td style="text-align:right; color:#4f46e5; font-weight:bold;">$${net.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('monthly-report-modal').style.display = 'flex';
+        }
+
+        function closeMonthlyReportModal() { document.getElementById('monthly-report-modal').style.display = 'none'; }
 
         function openItemReportModal() {
             const tbody = document.getElementById('item-report-tbody');
@@ -1790,20 +1979,45 @@
         }
 
         function closeDay() {
-            if(confirm("Close day and reset all sales and order numbers?")) {
+            if(confirm("Close day and print Day Close report? This will save records to Monthly Report and reset today's sales.")) {
+                let totalSales = completedSales.reduce((sum, s) => sum + (s.amount || 0), 0);
+                let totalExpenses = dailyExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+                let netBalance = totalSales - totalExpenses;
+
+                let now = new Date();
+                let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                let currentMonthKey = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+
+                if (!monthlyRecords[currentMonthKey]) {
+                    monthlyRecords[currentMonthKey] = { sales: 0, expenses: 0 };
+                }
+                monthlyRecords[currentMonthKey].sales += totalSales;
+                monthlyRecords[currentMonthKey].expenses += totalExpenses;
+                localStorage.setItem('alhussain_monthly', JSON.stringify(monthlyRecords));
+
+                document.getElementById('dc-date').innerText = new Date().toLocaleString();
+                document.getElementById('dc-sales').innerText = totalSales.toFixed(2);
+                document.getElementById('dc-expenses').innerText = totalExpenses.toFixed(2);
+                document.getElementById('dc-net').innerText = netBalance.toFixed(2);
+
+                safePrint("print-day-close-mode");
+
                 completedSales = [];
                 db.ref('sales').set(completedSales);
+                dailyExpenses = [];
+                localStorage.setItem('alhussain_expenses', JSON.stringify(dailyExpenses));
                 orderRunningNumber = 1;
                 localStorage.setItem('alhussain_order_num', orderRunningNumber);
                 updateStats();
                 toggleOrderTypeFields();
-                alert("🔒 Day closed successfully! Sales cleared and Order Numbers reset to 1.");
             }
         }
 
         function updateStats() {
             let totalSales = completedSales.reduce((sum, s) => sum + (s.amount || 0), 0);
+            let totalExpenses = dailyExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
             if(document.getElementById('stat-sales')) document.getElementById('stat-sales').innerText = totalSales.toFixed(2);
+            if(document.getElementById('stat-expenses')) document.getElementById('stat-expenses').innerText = totalExpenses.toFixed(2);
         }
 
         function submitCustomerOrder() {
