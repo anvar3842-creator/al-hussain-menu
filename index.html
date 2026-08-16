@@ -1512,7 +1512,7 @@
                     noteHtml = `<input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value">`;
                 }
 
-                // 🛠️ Restored: Admins and Staff see the full interactive quantity/price editor controls. Only customers see the locked static view.
+                // 🛠️ Fixed: Only Customers see static view after order placement. Admin and Staff (user1, user2) ALWAYS see full editable/interactive item lists.
                 if (isCustomerMode && document.getElementById('customer-left-menu-panel').style.display === 'none') {
                     tbody.innerHTML += `
                         <tr>
@@ -2331,7 +2331,6 @@
             }, 25 * 60 * 1000);
         }
 
-        // 🛠️ Restricted to customers only when table URL param is present
         function showThankYouScreen() {
             const urlParams = new URLSearchParams(window.location.search);
             const tableName = urlParams.get('table') || "Customer";
