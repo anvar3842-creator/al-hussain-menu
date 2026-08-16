@@ -30,12 +30,14 @@
         
         .main-layout { display: flex; height: calc(100vh - 50px); padding: 10px; box-sizing: border-box; gap: 12px; }
         .left-panel { flex: 6.5; display: flex; flex-direction: column; overflow: hidden; }
-        .right-panel { flex: 3.5; background: white; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; overflow-y: auto; padding: 12px; box-sizing: border-box; }
+        
+        /* 🛠️ Fix: Ensure right panel allows proper scrolling so bottom buttons are never cut off */
+        .right-panel { flex: 3.5; background: white; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; overflow-y: auto; padding: 12px; box-sizing: border-box; max-height: calc(100vh - 70px); }
         
         @media (max-width: 900px) {
             .main-layout { flex-direction: column; height: auto; overflow-y: auto; }
-            .left-panel { height: 500px; flex: none; }
-            .right-panel { height: auto; flex: none; margin-bottom: 20px; }
+            .left-panel { height: 450px; flex: none; }
+            .right-panel { height: auto; flex: none; margin-bottom: 20px; max-height: none; }
         }
 
         .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
@@ -66,9 +68,9 @@
         .order-controls { display: flex; gap: 8px; margin-bottom: 8px; }
         .order-controls select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 13px; font-weight: bold; background: white; }
         
-        .cart-table-wrapper { flex-grow: 1; overflow-y: visible; margin-bottom: 10px; }
+        .cart-table-wrapper { margin-bottom: 10px; max-height: 220px; overflow-y: auto; border: 1px solid #f1f5f9; border-radius: 6px; }
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; color: #64748b; padding: 8px 6px; text-align: left; font-size: 13px; }
+        th { background: #f8fafc; color: #64748b; padding: 8px 6px; text-align: left; font-size: 13px; position: sticky; top: 0; z-index: 2; }
         td { padding: 10px 6px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
         
         .cart-item-name { font-weight: 700; font-size: 14px; color: #0f172a; margin-bottom: 3px; }
@@ -88,14 +90,14 @@
         .summary-row input { width: 75px; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: right; outline: none; }
         .total-row { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: #0f172a; margin-top: 6px; border-top: 1px dashed #cbd5e1; padding-top: 6px; }
         
-        .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; }
+        .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
         .btn-hold { flex: 1; background: #f59e0b; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-kitchen { flex: 1; background: #0284c7; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-print-bill { flex: 1; background: #3b82f6; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-pay { flex: 1; background: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-drawer { flex: 100%; background: #6366f1; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-top: 2px; }
-        .btn-customer-order { flex: 100%; background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; text-align: center; display: none; }
-        .btn-customer-addmore { flex: 100%; background: #0284c7; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center; display: none; margin-top: 5px; }
+        .btn-customer-order { flex: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; text-align: center; display: block; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+        .btn-customer-addmore { flex: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; text-align: center; display: none; margin-top: 5px; }
 
         .admin-section { margin-top: 15px; display: none; background: #f8fafc; padding: 10px; border-radius: 8px; }
         .btn-small { background: #4f46e5; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
@@ -555,7 +557,7 @@
         </div>
     </div>
 
-    <!-- Print Templates (Enhanced Bold & Clear Styling for Receipt and Kitchen) -->
+    <!-- Print Templates -->
     <div id="print-receipt">
         <div style="text-align: center; margin-bottom: 6px;">
             <h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
@@ -1107,7 +1109,6 @@
             renderVisualTakeaways();
         });
 
-        // Run timer update every 1 second
         setInterval(() => {
             renderVisualTables();
             renderVisualTakeaways();
@@ -1513,7 +1514,6 @@
                     noteHtml = `<input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value">`;
                 }
 
-                // If in customer mode and order is confirmed, render static view
                 if (isCustomerMode && document.getElementById('customer-left-menu-panel').style.display === 'none') {
                     tbody.innerHTML += `
                         <tr>
@@ -2290,22 +2290,18 @@
             db.ref('activeOrders').set(activeOrders);
 
             cart = JSON.parse(JSON.stringify(mergedItems));
-            showCustomerConfirmedView();
+            showCustomerSuccessView();
         }
 
-        function showCustomerConfirmedView() {
-            // Hide left menu panel
+        function showCustomerSuccessView() {
             document.getElementById('customer-left-menu-panel').style.display = 'none';
-            // Show success banner
             document.getElementById('customer-success-banner').style.display = 'block';
-            // Switch buttons
+            
             document.getElementById('btn-customer-order-elem').style.display = 'none';
             document.getElementById('btn-customer-addmore-elem').style.display = 'block';
             
-            // Render confirmed read-only list
             updateCart();
 
-            // --- 25 நிமிட டைமர் (25 Minutes Auto Reset / Logout) ---
             if (customerResetTimer) clearTimeout(customerResetTimer);
             customerResetTimer = setTimeout(() => {
                 logout();
@@ -2317,9 +2313,23 @@
 
             document.getElementById('customer-left-menu-panel').style.display = 'flex';
             document.getElementById('customer-success-banner').style.display = 'none';
+            
             document.getElementById('btn-customer-order-elem').style.display = 'block';
             document.getElementById('btn-customer-addmore-elem').style.display = 'none';
             updateCart();
+        }
+
+        function showCustomerConfirmedView() {
+            document.getElementById('customer-left-menu-panel').style.display = 'none';
+            document.getElementById('customer-success-banner').style.display = 'block';
+            document.getElementById('btn-customer-order-elem').style.display = 'none';
+            document.getElementById('btn-customer-addmore-elem').style.display = 'block';
+            updateCart();
+            
+            if (customerResetTimer) clearTimeout(customerResetTimer);
+            customerResetTimer = setTimeout(() => {
+                logout();
+            }, 25 * 60 * 1000);
         }
     </script>
 </body>
