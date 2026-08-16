@@ -1512,7 +1512,7 @@
                     noteHtml = `<input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value">`;
                 }
 
-                // 🛠️ Fixed: Only Customers see static view after order placement. Admin and Staff (user1, user2) ALWAYS see full editable/interactive item lists.
+                // 🛠️ Fixed: Admin, Staff (user1, user2) ALWAYS see full editable/interactive item lists. Only external QR customer view shows static view.
                 if (isCustomerMode && document.getElementById('customer-left-menu-panel').style.display === 'none') {
                     tbody.innerHTML += `
                         <tr>
