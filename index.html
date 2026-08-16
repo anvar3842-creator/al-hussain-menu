@@ -30,12 +30,12 @@
         
         .main-layout { display: flex; height: calc(100vh - 50px); padding: 10px; box-sizing: border-box; gap: 12px; }
         .left-panel { flex: 6.5; display: flex; flex-direction: column; overflow: hidden; }
-        .right-panel { flex: 3.5; background: white; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; overflow-y: auto; padding: 12px; box-sizing: border-box; max-height: calc(100vh - 70px); }
+        .right-panel { flex: 3.5; background: white; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; overflow-y: auto; padding: 12px; box-sizing: border-box; }
         
         @media (max-width: 900px) {
             .main-layout { flex-direction: column; height: auto; overflow-y: auto; }
-            .left-panel { height: 450px; flex: none; }
-            .right-panel { height: auto; flex: none; margin-bottom: 20px; max-height: none; }
+            .left-panel { height: 500px; flex: none; }
+            .right-panel { height: auto; flex: none; margin-bottom: 20px; }
         }
 
         .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
@@ -63,24 +63,13 @@
         .mode-tab { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; background: #e2e8f0; color: #475569; text-align: center; }
         .mode-tab.active { background: #4f46e5; color: white; }
 
-        .order-controls { display: flex; gap: 8px; margin-bottom: 8px; flex-shrink: 0; }
-        .order-controls select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 14px; font-weight: bold; background: white; }
+        .order-controls { display: flex; gap: 8px; margin-bottom: 8px; }
+        .order-controls select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 13px; font-weight: bold; background: white; }
         
-        /* 🔥 THE BULLETPROOF FIX: பாக்ஸ் எந்த காரணம் கொண்டும் சுருங்காது 🔥 */
-        .cart-table-wrapper { 
-            height: 350px; 
-            min-height: 300px;
-            flex-shrink: 0; /* இதுதான் மிக முக்கியமான கோடு - பாக்ஸ் சுருங்குவதை தடுக்கும் */
-            display: block;
-            overflow-y: auto; 
-            border: 2px solid #94a3b8; /* பார்டர் இன்னும் தடிமனாக்கப்பட்டுள்ளது */
-            border-radius: 8px; 
-            margin-bottom: 12px; 
-            background: #fff; 
-        }
+        .cart-table-wrapper { flex-grow: 1; overflow-y: visible; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; }
-        th { background: #e2e8f0; color: #1e293b; padding: 10px 8px; text-align: left; font-size: 14px; position: sticky; top: 0; z-index: 2; border-bottom: 2px solid #cbd5e1; }
-        td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        th { background: #f8fafc; color: #64748b; padding: 8px 6px; text-align: left; font-size: 13px; }
+        td { padding: 10px 6px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
         
         .cart-item-name { font-weight: 700; font-size: 14px; color: #0f172a; margin-bottom: 3px; }
         
@@ -94,33 +83,30 @@
         .qty-controls { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
         .qty-btn { background: #e2e8f0; border: none; width: 26px; height: 26px; border-radius: 4px; cursor: pointer; font-weight: bold; color: #475569; font-size: 15px; }
 
-        .bill-summary { background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 8px; flex-shrink: 0; border: 1px solid #e2e8f0; }
+        .bill-summary { background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
         .summary-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 4px; align-items: center; }
-        .summary-row input { width: 75px; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: right; outline: none; font-weight: bold; }
+        .summary-row input { width: 75px; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: right; outline: none; }
         .total-row { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: #0f172a; margin-top: 6px; border-top: 1px dashed #cbd5e1; padding-top: 6px; }
         
-        .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; flex-shrink: 0; }
+        .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; }
         .btn-hold { flex: 1; background: #f59e0b; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-kitchen { flex: 1; background: #0284c7; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-print-bill { flex: 1; background: #3b82f6; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-pay { flex: 1; background: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-drawer { flex: 100%; background: #6366f1; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-top: 2px; }
-        .btn-customer-order { flex: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; text-align: center; display: block; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
-        .btn-customer-addmore { flex: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; text-align: center; display: none; margin-top: 5px; }
+        .btn-customer-order { flex: 100%; background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; text-align: center; display: none; }
 
-        .admin-section { margin-top: 15px; display: none; background: #f8fafc; padding: 10px; border-radius: 8px; flex-shrink: 0; }
+        .admin-section { margin-top: 15px; display: none; background: #f8fafc; padding: 10px; border-radius: 8px; }
         .btn-small { background: #4f46e5; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         .btn-cat-add { background: #059669; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; white-space: nowrap; }
         .stat-box { background: white; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #e2e8f0; margin-top: 6px; font-size: 15px; font-weight: bold; color: #4f46e5; }
         
-        #visual-tables-section { flex-shrink: 0; }
         .visual-tables-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 150px; overflow-y: auto; }
         .v-table-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: white; border: none; position: relative; }
         .v-table-free { background: #10b981; }
         .v-table-occupied { background: #ef4444; }
         .v-cancel-btn { position: absolute; top: 2px; right: 2px; background: #000; color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; }
 
-        #visual-takeaway-section { flex-shrink: 0; }
         .visual-takeaway-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 150px; overflow-y: auto; }
         .v-takeaway-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: white; background: #d97706; border: none; position: relative; }
 
@@ -168,25 +154,42 @@
             body * { visibility: hidden !important; }
             
             body.print-customer #print-receipt, body.print-customer #print-receipt * { visibility: visible !important; }
-            body.print-customer #print-receipt { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 16px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
+            body.print-customer #print-receipt { 
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
+                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 16px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
+            }
 
             body.print-kitchen-mode #print-kitchen, body.print-kitchen-mode #print-kitchen * { visibility: visible !important; }
-            body.print-kitchen-mode #print-kitchen { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
+            body.print-kitchen-mode #print-kitchen { 
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
+                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
+            }
 
             body.print-drawer-mode #print-drawer, body.print-drawer-mode #print-drawer * { visibility: visible !important; }
             body.print-drawer-mode #print-drawer { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 16px !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
 
             body.print-history-mode #print-sales-history, body.print-sales-history #print-sales-history * { visibility: visible !important; }
-            body.print-sales-history { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
+            body.print-sales-history { 
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
+                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
+            }
 
             body.print-item-report-mode #print-item-report, body.print-item-report-mode #print-item-report * { visibility: visible !important; }
-            body.print-item-report-mode #print-item-report { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
+            body.print-item-report-mode #print-item-report { 
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
+                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
+            }
 
             body.print-day-close-mode #print-day-close, body.print-day-close-mode #print-day-close * { visibility: visible !important; }
-            body.print-day-close-mode #print-day-close { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
+            body.print-day-close-mode #print-day-close { 
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
+                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
+            }
 
             body.print-qr-mode #print-qr-batch, body.print-qr-mode #print-qr-batch * { visibility: visible !important; }
-            body.print-qr-mode #print-qr-batch { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: white !important; }
+            body.print-qr-mode #print-qr-batch {
+                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: white !important;
+            }
         }
     </style>
 </head>
@@ -215,9 +218,9 @@
             <button class="btn-logout" id="logout-btn-elem" onclick="logout()">Logout</button>
         </div>
 
-        <div class="main-layout" id="main-layout-container">
+        <div class="main-layout">
             <!-- LEFT PANEL: MENU -->
-            <div class="left-panel" id="customer-left-menu-panel">
+            <div class="left-panel">
                 <div class="controls-bar">
                     <div class="search-container">
                         <input type="text" id="search-input" class="search-box" placeholder="Search or Type Code (e.g. R1, T1)..." onkeyup="handleSearchInput(event)" onclick="this.value=''; renderMenu();">
@@ -247,22 +250,9 @@
                     </select>
                 </div>
 
-                <!-- Customer Success Status Banner -->
-                <div id="customer-success-banner" style="display: none; background: #e0e7ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 10px; margin-bottom: 10px; text-align: center;">
-                    <div style="font-size: 14px; font-weight: bold; color: #3730a3; margin-bottom: 4px;">🎉 Order Placed Successfully!</div>
-                    <div style="font-size: 12px; color: #4338ca;">Your ordered items have been sent to the kitchen. You can check your confirmed items below or click '+ Add More Items' to order extra.</div>
-                </div>
-
-                <!-- CARTS TABLE (சுருங்காமல் இருக்க flex-shrink: 0 சேர்க்கப்பட்டுள்ளது) -->
                 <div class="cart-table-wrapper">
                     <table>
-                        <thead id="cart-table-head">
-                            <tr>
-                                <th>Item & Notes</th>
-                                <th>Qty</th>
-                                <th style="text-align:right;">Price ($)</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Item & Notes</th><th>Qty</th><th style="text-align:right;">Price ($)</th></tr></thead>
                         <tbody id="cart-items"></tbody>
                     </table>
                 </div>
@@ -274,7 +264,7 @@
                     </div>
                     <div class="summary-row" id="discount-row-elem">
                         <span>Discount ($):</span>
-                        <input type="number" id="discount-input" value="0.00" min="0" step="0.50" oninput="updateCartUI()">
+                        <input type="number" id="discount-input" value="0.00" min="0" step="0.50" oninput="updateCart()">
                     </div>
                     <div class="total-row">
                         <span>Grand Total:</span>
@@ -299,7 +289,6 @@
                     <button id="btn-pay-elem" class="btn-pay" onclick="openPaymentModal()">💵 Pay</button>
                     <button id="btn-drawer-elem" class="btn-drawer" onclick="openCashDrawerOnly()">🔓 Open Cash Drawer</button>
                     <button id="btn-customer-order-elem" class="btn-customer-order" onclick="submitCustomerOrder()">🚀 Send Order to Kitchen</button>
-                    <button id="btn-customer-addmore-elem" class="btn-customer-addmore" onclick="customerAddMoreItems()">➕ Add More Items</button>
                 </div>
 
                 <div style="margin-top: 10px;" id="visual-tables-section">
@@ -558,7 +547,7 @@
         </div>
     </div>
 
-    <!-- Print Templates -->
+    <!-- Print Templates (Enhanced Bold & Clear Styling for Receipt and Kitchen) -->
     <div id="print-receipt">
         <div style="text-align: center; margin-bottom: 6px;">
             <h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
@@ -1075,8 +1064,6 @@
         let loggedInRole = "";
         let currentOrderType = "Dine-In";
         let orderRunningNumber = parseInt(localStorage.getItem('alhussain_order_num')) || 1;
-        let isCustomerMode = false;
-        let customerResetTimer = null; 
 
         // --- FIREBASE LISTENERS FOR CLOUD SYNC ---
         db.ref('menuData').on('value', (snapshot) => {
@@ -1110,6 +1097,12 @@
             renderVisualTakeaways();
         });
 
+        db.ref('sales').on('value', (snapshot) => {
+            completedSales = snapshot.val() || [];
+            updateStats();
+        });
+
+        // Run timer update every 1 second
         setInterval(() => {
             renderVisualTables();
             renderVisualTakeaways();
@@ -1120,7 +1113,6 @@
             const tableParam = urlParams.get('table');
 
             if (tableParam && tableParam.trim() !== "") {
-                isCustomerMode = true;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-app').style.display = 'block';
                 document.getElementById('app-header-title').innerText = `Al Hussain Restaurant - ${tableParam} (Company Acc)`;
@@ -1135,16 +1127,16 @@
                 document.getElementById('btn-print-bill-elem').style.display = 'none';
                 document.getElementById('btn-pay-elem').style.display = 'none';
                 document.getElementById('btn-drawer-elem').style.display = 'none';
+                document.getElementById('btn-customer-order-elem').style.display = 'block';
                 document.getElementById('visual-tables-section').style.display = 'none';
                 document.getElementById('visual-takeaway-section').style.display = 'none';
 
+                // Load existing ordered items for this table if any so customer can add more
                 if (activeOrders[tableParam] && activeOrders[tableParam].items) {
                     cart = JSON.parse(JSON.stringify(activeOrders[tableParam].items));
-                    showCustomerConfirmedView();
-                } else {
-                    cart = [];
-                    updateCartUI();
                 }
+
+                updateCart();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-app').style.display = 'none';
@@ -1192,7 +1184,7 @@
             else if (user === "user2" && pass === "1234") {
                 loggedInRole = "user2";
                 adminPanel.style.display = "none";
-                billSummaryContainer.style.display = "block";
+                billSummaryContainer.style.display = "none";
                 btnPrintBill.style.display = "none";
                 btnPay.style.display = "none";
                 btnDrawer.style.display = "none";
@@ -1267,7 +1259,7 @@
             }
             cart = [];
             document.getElementById('discount-input').value = "0.00";
-            updateCartUI();
+            updateCart();
         }
 
         function onTableChange() {
@@ -1278,7 +1270,7 @@
                 cart = [];
             }
             document.getElementById('discount-input').value = "0.00";
-            updateCartUI();
+            updateCart();
         }
 
         function getAllCategories() {
@@ -1468,7 +1460,7 @@
             } else {
                 cart.push({ ...item, qty: 1, customPrice: item.price, selectedNotes: [], customComment: "" });
             }
-            updateCartUI();
+            updateCart();
         }
 
         function toggleItemNoteCheckbox(id, noteName, checkboxElem) {
@@ -1480,50 +1472,15 @@
                 } else {
                     cartItem.selectedNotes = cartItem.selectedNotes.filter(n => n !== noteName);
                 }
-                updateCartUI();
+                updateCart();
             }
         }
 
-        function updateCustomComment(id, val) {
-            const cartItem = cart.find(c => c.id === id);
-            if (cartItem) {
-                cartItem.customComment = val;
-            }
-        }
-
-        function updateItemPrice(id, val) {
-            let p = parseFloat(val);
-            if (!isNaN(p) && p >= 0) {
-                const cartItem = cart.find(c => c.id === id);
-                if (cartItem) {
-                    cartItem.customPrice = p;
-                    updateCartUI();
-                }
-            }
-        }
-
-        function decreaseQty(id) {
-            const cartItem = cart.find(c => c.id === id);
-            if (cartItem) {
-                cartItem.qty -= 1;
-                if (cartItem.qty <= 0) cart = cart.filter(c => c.id !== id);
-                updateCartUI();
-            }
-        }
-
-        function increaseQty(id) {
-            const cartItem = cart.find(c => c.id === id);
-            if (cartItem) { cartItem.qty += 1; updateCartUI(); }
-        }
-
-        // 🔥 THE JAVASCRIPT BUG FIX: Completely rewritten to assign UI safely 🔥
-        function updateCartUI() {
+        function updateCart() {
             const tbody = document.getElementById('cart-items');
             if(!tbody) return;
-            
+            tbody.innerHTML = ''; 
             let subtotal = 0;
-            let rowsHtml = '';
-            
             cart.forEach(item => {
                 subtotal += item.customPrice * item.qty;
                 
@@ -1544,52 +1501,64 @@
                             <label class="note-label"><input type="checkbox" ${isDhalChecked} onchange="toggleItemNoteCheckbox(${item.id}, 'Dhal', this)"> Dhal</label>
                             <label class="note-label"><input type="checkbox" ${isIkanChecked} onchange="toggleItemNoteCheckbox(${item.id}, 'Curry Ikan', this)"> Curry Ikan</label>
                         </div>
-                        <input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="updateCustomComment(${item.id}, this.value)">
+                        <input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value">
                     `;
                 } else {
-                    noteHtml = `<input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="updateCustomComment(${item.id}, this.value)">`;
+                    noteHtml = `<input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value">`;
                 }
 
-                if (isCustomerMode && document.getElementById('customer-left-menu-panel').style.display === 'none') {
-                    rowsHtml += `
-                        <tr>
-                            <td>
-                                <div class="cart-item-name">${item.name}</div>
-                                ${noteHtml}
-                            </td>
-                            <td style="text-align:center; font-weight:bold;">${item.qty}</td>
-                            <td style="text-align:right; font-weight:bold;">$${(item.customPrice * item.qty).toFixed(2)}</td>
-                        </tr>
-                    `;
-                } else {
-                    rowsHtml += `
-                        <tr>
-                            <td>
-                                <div class="cart-item-name">${item.name}</div>
-                                ${noteHtml}
-                            </td>
-                            <td>
-                                <div class="qty-controls">
-                                    <button class="qty-btn" onclick="decreaseQty(${item.id})">-</button>
-                                    <span style="font-weight:bold; font-size:16px;">${item.qty}</span>
-                                    <button class="qty-btn" onclick="increaseQty(${item.id})">+</button>
-                                </div>
-                            </td>
-                            <td style="text-align:right;">
-                                <input type="number" class="price-input" value="${item.customPrice.toFixed(2)}" step="0.50" min="0" oninput="updateItemPrice(${item.id}, this.value)">
-                            </td>
-                        </tr>
-                    `;
-                }
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="cart-item-name">${item.name}</div>
+                            ${noteHtml}
+                        </td>
+                        <td>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="decreaseQty(${item.id})">-</button>
+                                <span>${item.qty}</span>
+                                <button class="qty-btn" onclick="increaseQty(${item.id})">+</button>
+                            </div>
+                        </td>
+                        <td style="text-align:right;">
+                            <input type="number" class="price-input" value="${item.customPrice.toFixed(2)}" step="0.50" min="0" oninput="updateItemPrice(${item.id}, this.value)">
+                        </td>
+                    </tr>
+                `;
             });
-            
-            // Assign everything at once to prevent browser rendering bugs
-            tbody.innerHTML = rowsHtml;
-            
             let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
             let total = subtotal - discount;
             if(document.getElementById('sub-total')) document.getElementById('sub-total').innerText = subtotal.toFixed(2);
             if(document.getElementById('total-amount')) document.getElementById('total-amount').innerText = (total < 0 ? 0 : total).toFixed(2);
+        }
+
+        function decreaseQty(id) {
+            const cartItem = cart.find(c => c.id === id);
+            if (cartItem) {
+                cartItem.qty -= 1;
+                if (cartItem.qty <= 0) cart = cart.filter(c => c.id !== id);
+                updateCart();
+            }
+        }
+
+        function increaseQty(id) {
+            const cartItem = cart.find(c => c.id === id);
+            if (cartItem) { cartItem.qty += 1; updateCart(); }
+        }
+
+        function updateItemPrice(id, val) {
+            let p = parseFloat(val);
+            if (!isNaN(p) && p >= 0) {
+                const cartItem = cart.find(c => c.id === id);
+                if (cartItem) {
+                    cartItem.customPrice = p;
+                    let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
+                    let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
+                    let total = subtotal - discount;
+                    document.getElementById('sub-total').innerText = subtotal.toFixed(2);
+                    document.getElementById('total-amount').innerText = (total < 0 ? 0 : total).toFixed(2);
+                }
+            }
         }
 
         function getFormattedItemNotes(item) {
@@ -1610,7 +1579,7 @@
 
             cart = [];
             document.getElementById('discount-input').value = "0.00";
-            updateCartUI();
+            updateCart();
             renderVisualTables();
             renderVisualTakeaways();
             switchOrderMode(currentOrderType);
@@ -1715,7 +1684,7 @@
                 cart = [];
             }
             document.getElementById('discount-input').value = "0.00";
-            updateCartUI();
+            updateCart();
         }
 
         function loadTakeawayOrder(key) {
@@ -1730,7 +1699,7 @@
                 cart = [];
             }
             document.getElementById('discount-input').value = "0.00";
-            updateCartUI();
+            updateCart();
         }
 
         function safePrint(modeClass) {
@@ -1863,7 +1832,7 @@
 
             cart = []; 
             document.getElementById('discount-input').value = "0.00";
-            updateCartUI(); 
+            updateCart(); 
             renderVisualTables();
             renderVisualTakeaways();
             switchOrderMode(currentOrderType);
@@ -2300,64 +2269,12 @@
             activeOrders[tableName] = { time: existingTime, type: "Dine-In", items: mergedItems };
             db.ref('activeOrders').set(activeOrders);
 
+            // Customer feedback message with clear confirmation and instruction that they can add more items if needed
+            alert(`🎉 Success! Your order has been successfully sent to the kitchen for ${tableName}.\n\n✨ You can continue to browse the menu and add more items anytime if you wish! (Direct payment to Company Account)`);
+            
+            // Reload updated items back into cart for further additions
             cart = JSON.parse(JSON.stringify(mergedItems));
-            showCustomerSuccessView();
-        }
-
-        function showCustomerSuccessView() {
-            document.getElementById('customer-left-menu-panel').style.display = 'none';
-            document.getElementById('customer-success-banner').style.display = 'block';
-            
-            document.getElementById('btn-customer-order-elem').style.display = 'none';
-            document.getElementById('btn-customer-addmore-elem').style.display = 'block';
-            
-            updateCartUI();
-
-            if (customerResetTimer) clearTimeout(customerResetTimer);
-            customerResetTimer = setTimeout(() => {
-                showThankYouScreen();
-            }, 25 * 60 * 1000); 
-        }
-
-        function customerAddMoreItems() {
-            if (customerResetTimer) clearTimeout(customerResetTimer);
-
-            document.getElementById('customer-left-menu-panel').style.display = 'flex';
-            document.getElementById('customer-success-banner').style.display = 'none';
-            
-            document.getElementById('btn-customer-order-elem').style.display = 'block';
-            document.getElementById('btn-customer-addmore-elem').style.display = 'none';
-            updateCartUI();
-        }
-
-        function showCustomerConfirmedView() {
-            document.getElementById('customer-left-menu-panel').style.display = 'none';
-            document.getElementById('customer-success-banner').style.display = 'block';
-            document.getElementById('btn-customer-order-elem').style.display = 'none';
-            document.getElementById('btn-customer-addmore-elem').style.display = 'block';
-            updateCartUI();
-            
-            if (customerResetTimer) clearTimeout(customerResetTimer);
-            customerResetTimer = setTimeout(() => {
-                showThankYouScreen();
-            }, 25 * 60 * 1000);
-        }
-
-        function showThankYouScreen() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const tableName = urlParams.get('table') || "Customer";
-            
-            document.body.innerHTML = `
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: #4f46e5; color: white; text-align: center; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-                    <div style="background: white; color: #1e293b; padding: 40px 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); max-width: 400px; width: 100%;">
-                        <div style="font-size: 50px; margin-bottom: 15px;">🎉</div>
-                        <h1 style="color: #4f46e5; margin-top: 0; margin-bottom: 10px; font-size: 24px;">Thank You!</h1>
-                        <h3 style="color: #64748b; margin-top: 0; margin-bottom: 20px; font-size: 16px;">${tableName}</h3>
-                        <p style="color: #475569; font-size: 14px; line-height: 1.5; margin-bottom: 25px;">Your ordering session has expired after 25 minutes. Your food is being prepared. Please come again!</p>
-                        <button onclick="location.reload()" style="background: #4f46e5; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; width: 100%;">Order Again / New Session</button>
-                    </div>
-                </div>
-            `;
+            updateCart();
         }
     </script>
 </body>
