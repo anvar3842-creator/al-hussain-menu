@@ -646,7 +646,6 @@
             { id: 20, name: "Roti John daging cheese", price: 4.00, category: "Roti", icon: "🫓" },
             { id: 21, name: "Capati", price: 1.00, category: "Roti", icon: "🫓" },
             { id: 22, name: "Roti Sarang Burung", price: 2.00, category: "Roti", icon: "🫓" },
-            { id: 330, name: "Roti Telur mata Lembu", price: 2.00, category: "Roti", icon: "🫓" },
 
             // --- 2. DOSAI ---
             { id: 263, name: "Plain Dosai", price: 1.20, category: "Dosai", icon: "🥞" },
@@ -1137,7 +1136,6 @@
         function logout() { location.href = liveBaseUrl; }
 
         function refreshMenuData() {
-            // Force re-fetch and re-render without logging out
             db.ref('menuData').once('value').then((snapshot) => {
                 const val = snapshot.val();
                 if (val && Array.isArray(val)) {
@@ -1157,7 +1155,12 @@
             
             tableSelect.innerHTML = '';
             if (orderType === "Takeaway") {
-                tableSelect.innerHTML = `<option value="Order ${orderRunningNumber}">Order ${orderRunningNumber}</option>`;
+                // Find next available Takeaway order number avoiding conflict with existing active takeaways
+                let nextNum = orderRunningNumber;
+                while (activeOrders[`Order ${nextNum}`]) {
+                    nextNum++;
+                }
+                tableSelect.innerHTML = `<option value="Order ${nextNum}">Order ${nextNum}</option>`;
             } else {
                 for (let i = 1; i <= 13; i++) {
                     tableSelect.innerHTML += `<option value="Table ${i}">Table ${i}</option>`;
