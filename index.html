@@ -462,23 +462,13 @@
 
     <!-- MONTHLY REPORT MODAL -->
     <div id="monthly-report-modal" class="modal-overlay">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 650px;">
             <div class="modal-header">
-                <h3>📅 Monthly Sales & Expenses Summary</h3>
+                <h3>📅 Daily & Monthly Sales & Expenses History</h3>
                 <button class="close-modal" onclick="closeMonthlyReportModal()">X</button>
             </div>
             <div class="modal-body">
-                <table style="width:100%; font-size:13px;">
-                    <thead>
-                        <tr>
-                            <th>Month</th>
-                            <th style="text-align:right;">Total Sales ($)</th>
-                            <th style="text-align:right;">Total Expenses ($)</th>
-                            <th style="text-align:right;">Net Profit ($)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="monthly-report-tbody"></tbody>
-                </table>
+                <div id="monthly-report-container"></div>
             </div>
         </div>
     </div>
@@ -602,6 +592,20 @@
             <hr style="border-top: 2px dashed black; margin: 4px 0;">
             <div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Net Balance:</span><span>$<span id="dc-net">0.00</span></span></div>
         </div>
+        
+        <div style="margin-top: 10px;">
+            <p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>TODAY'S EXPENSES & ITEMS:</b></p>
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900; margin-top: 4px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid black;">
+                        <th style="text-align: left; font-size: 13px; font-weight: 900; color: #000;">Purpose / Item</th>
+                        <th style="text-align: right; font-size: 13px; font-weight: 900; color: #000;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="dc-expenses-list"></tbody>
+            </table>
+        </div>
+
         <div style="text-align: center; margin-top: 15px; font-size: 14px;"><p>*** END OF DAY CLOSED ***</p></div>
     </div>
 
@@ -998,7 +1002,7 @@
         let menuData = [];
         let rawMaterials = JSON.parse(localStorage.getItem('alhussain_materials')) || [];
         let dailyExpenses = JSON.parse(localStorage.getItem('alhussain_expenses')) || [];
-        let monthlyRecords = JSON.parse(localStorage.getItem('alhussain_monthly')) || {};
+        let dailyHistoryRecords = JSON.parse(localStorage.getItem('alhussain_daily_history')) || {};
         
         let defaultCategoryOrder = [
             "Roti", "Dosai", "Nasi Campur", "Bruger", "Nasi Goreng", "Murtabak", "Mee Goreng", "Mee Basah", 
@@ -1484,7 +1488,6 @@
             if (cart.length === 0) return alert("Cart is empty!");
             let targetKey = document.getElementById('table-no').value;
 
-            // Preserve existing start time if already occupied, else set current time
             let existingTime = (activeOrders[targetKey] && activeOrders[targetKey].time) ? activeOrders[targetKey].time : Date.now();
 
             activeOrders[targetKey] = { time: existingTime, type: currentOrderType, items: JSON.parse(JSON.stringify(cart)) };
@@ -1870,24 +1873,40 @@
         }
 
         function openMonthlyReportModal() {
-            const tbody = document.getElementById('monthly-report-tbody');
-            if(!tbody) return;
-            tbody.innerHTML = '';
+            const container = document.getElementById('monthly-report-container');
+            if(!container) return;
+            container.innerHTML = '';
             
-            let months = Object.keys(monthlyRecords);
-            if(months.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No monthly records found yet.</td></tr>`;
+            let dates = Object.keys(dailyHistoryRecords).sort().reverse();
+            if(dates.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:#94a3b8;">No closed day records found yet. Complete a Day Close to view daily sales history.</p>`;
             } else {
-                months.forEach(m => {
-                    let rec = monthlyRecords[m];
-                    let net = rec.sales - rec.expenses;
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><b>${m}</b></td>
-                            <td style="text-align:right; color:#10b981; font-weight:bold;">$${rec.sales.toFixed(2)}</td>
-                            <td style="text-align:right; color:#ea580c; font-weight:bold;">$${rec.expenses.toFixed(2)}</td>
-                            <td style="text-align:right; color:#4f46e5; font-weight:bold;">$${net.toFixed(2)}</td>
-                        </tr>
+                dates.forEach(dateStr => {
+                    let dayRec = dailyHistoryRecords[dateStr];
+                    let netProfit = dayRec.sales - dayRec.expenses;
+                    
+                    let expensesListHtml = '';
+                    if (dayRec.expenseItems && dayRec.expenseItems.length > 0) {
+                        dayRec.expenseItems.forEach(exp => {
+                            expensesListHtml += `<div style="display:flex; justify-content:space-between; font-size:12px; color:#475569; padding-left:10px;"><span>• ${exp.desc}</span><span>$${exp.amount.toFixed(2)}</span></div>`;
+                        });
+                    } else {
+                        expensesListHtml = `<div style="font-size:12px; color:#94a3b8; padding-left:10px;">No expenses recorded.</div>`;
+                    }
+
+                    container.innerHTML += `
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:15px; color:#1e293b; border-bottom:1px dashed #cbd5e1; padding-bottom:6px; margin-bottom:6px;">
+                                <span>📅 ${dateStr}</span>
+                                <span>Net Profit: <span style="color:#4f46e5;">$${netProfit.toFixed(2)}</span></span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:600; margin-bottom:6px;">
+                                <span style="color:#10b981;">Total Sales: $${dayRec.sales.toFixed(2)}</span>
+                                <span style="color:#ea580c;">Total Expenses: $${dayRec.expenses.toFixed(2)}</span>
+                            </div>
+                            <div style="font-size:12px; font-weight:bold; color:#334155; margin-top:4px;">Jamans / Expenses List:</div>
+                            ${expensesListHtml}
+                        </div>
                     `;
                 });
             }
@@ -2040,29 +2059,41 @@
         }
 
         function closeDay() {
-            if(confirm("Close day and print Day Close report? This will save records to Monthly Report and reset today's sales.")) {
+            if(confirm("Close day and print Day Close report? This will save records to Monthly/Daily History and reset today's sales.")) {
                 let totalSales = completedSales.reduce((sum, s) => sum + (s.amount || 0), 0);
                 let totalExpenses = dailyExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
                 let netBalance = totalSales - totalExpenses;
 
                 let now = new Date();
-                let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-                let currentMonthKey = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+                let dateKey = now.toISOString().split('T')[0]; // YYYY-MM-DD format for unique sorting
 
-                if (!monthlyRecords[currentMonthKey]) {
-                    monthlyRecords[currentMonthKey] = { sales: 0, expenses: 0 };
-                }
-                monthlyRecords[currentMonthKey].sales += totalSales;
-                monthlyRecords[currentMonthKey].expenses += totalExpenses;
-                localStorage.setItem('alhussain_monthly', JSON.stringify(monthlyRecords));
+                // Save to daily history records
+                dailyHistoryRecords[dateKey] = {
+                    sales: totalSales,
+                    expenses: totalExpenses,
+                    expenseItems: JSON.parse(JSON.stringify(dailyExpenses))
+                };
+                localStorage.setItem('alhussain_daily_history', JSON.stringify(dailyHistoryRecords));
 
+                // Populate print template
                 document.getElementById('dc-date').innerText = new Date().toLocaleString();
                 document.getElementById('dc-sales').innerText = totalSales.toFixed(2);
                 document.getElementById('dc-expenses').innerText = totalExpenses.toFixed(2);
                 document.getElementById('dc-net').innerText = netBalance.toFixed(2);
 
+                const dcExpensesList = document.getElementById('dc-expenses-list');
+                dcExpensesList.innerHTML = '';
+                if (dailyExpenses.length === 0) {
+                    dcExpensesList.innerHTML = `<tr><td colspan="2" style="text-align:center;">No expenses recorded today.</td></tr>`;
+                } else {
+                    dailyExpenses.forEach(exp => {
+                        dcExpensesList.innerHTML += `<tr><td>${exp.desc}</td><td style="text-align:right;">$${exp.amount.toFixed(2)}</td></tr>`;
+                    });
+                }
+
                 safePrint("print-day-close-mode");
 
+                // Reset today's data
                 completedSales = [];
                 db.ref('sales').set(completedSales);
                 dailyExpenses = [];
