@@ -57,8 +57,14 @@
         .btn-add { background: #f8fafc; color: #4f46e5; border: 1px solid #e2e8f0; width: 26px; height: 26px; border-radius: 6px; font-size: 15px; display: flex; justify-content: center; align-items: center; font-weight: bold; }
 
         h3 { margin-top: 0; color: #1e293b; font-size: 15px; margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; }
+        
+        /* Mode Switcher Tabs */
+        .mode-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+        .mode-tab { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; background: #e2e8f0; color: #475569; text-align: center; }
+        .mode-tab.active { background: #4f46e5; color: white; }
+
         .order-controls { display: flex; gap: 8px; margin-bottom: 8px; }
-        .order-controls select { width: 50%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 13px; }
+        .order-controls select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 13px; font-weight: bold; background: white; }
         
         .cart-table-wrapper { flex-grow: 1; overflow-y: visible; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; }
@@ -223,11 +229,13 @@
             <div class="right-panel">
                 <h3 id="cart-panel-title">Current Order</h3>
                 
+                <!-- Order Mode Tabs -->
+                <div class="mode-tabs">
+                    <button class="mode-tab active" id="tab-dinein" onclick="switchOrderMode('Dine-In')">🪑 Dine-In</button>
+                    <button class="mode-tab" id="tab-takeaway" onclick="switchOrderMode('Takeaway')">📦 Takeaway</button>
+                </div>
+
                 <div class="order-controls" id="order-controls-container">
-                    <select id="order-type" onchange="onOrderTypeChange()">
-                        <option value="Dine-In">Dine-In</option>
-                        <option value="Takeaway">Takeaway</option>
-                    </select>
                     <select id="table-no" onchange="onTableChange()">
                         <option value="Table 1">Table 1</option><option value="Table 2">Table 2</option><option value="Table 3">Table 3</option>
                         <option value="Table 4">Table 4</option><option value="Table 5">Table 5</option><option value="Table 6">Table 6</option>
@@ -508,37 +516,37 @@
         </div>
     </div>
 
-    <!-- Print Templates -->
+    <!-- Print Templates (Enhanced Bold & Clear Styling for Receipt and Kitchen) -->
     <div id="print-receipt">
         <div style="text-align: center; margin-bottom: 6px;">
-            <h2 style="margin: 0; font-size: 20px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
-            <p style="margin: 2px 0; font-size: 15px; font-weight: 900;">Nagara Brunei Darussalam.</p>
+            <h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
+            <p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p>
             <hr style="border-top: 3px solid black; margin: 4px 0;">
         </div>
         <div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;">
             <div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" style="font-size: 18px; background: #000; color: #fff; padding: 0 4px;"></span></div>
             <div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div>
         </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 16px; font-weight: 900; margin-bottom: 6px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;">
             <thead>
                 <tr style="border-bottom: 3px solid black;">
-                    <th style="text-align: left; padding: 3px 0; font-size: 16px; font-weight: 900;">Item & Notes</th>
-                    <th style="text-align: center; padding: 3px 0; font-size: 16px; font-weight: 900;">Qty</th>
-                    <th style="text-align: right; padding: 3px 0; font-size: 16px; font-weight: 900;">Price</th>
+                    <th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th>
+                    <th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th>
+                    <th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th>
                 </tr>
             </thead>
             <tbody id="p-items"></tbody>
         </table>
         <hr style="border-top: 3px solid black; margin: 4px 0;">
-        <div style="font-size: 16px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div>
+        <div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div>
         <div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;">
             <span>TOTAL:</span><span>$<span id="p-total">0.00</span></span>
         </div>
-        <div style="font-size: 16px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;">
+        <div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;">
             <div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div>
-            <div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div>
         </div>
-        <div style="text-align: center; margin-top: 8px; font-size: 16px; font-weight: 900;"><p>Thank you! Please come again.</p></div>
+        <div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div>
         <div style="display:none;">\x1B\x70\x00\x19\xFA</div>
     </div>
 
@@ -551,7 +559,12 @@
             <div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" style="font-size: 22px; background: #000; color: #fff; padding: 0 4px;"></span></div>
         </div>
         <table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;">
-            <thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900;">Qty</th></tr></thead>
+            <thead>
+                <tr style="border-bottom: 3px solid black;">
+                    <th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th>
+                    <th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th>
+                </tr>
+            </thead>
             <tbody id="k-items"></tbody>
         </table>
     </div>
@@ -1001,6 +1014,7 @@
         let currentCategory = "All";
         let isPrinting = false;
         let loggedInRole = "";
+        let currentOrderType = "Dine-In";
         let orderRunningNumber = parseInt(localStorage.getItem('alhussain_order_num')) || 1;
 
         // --- FIREBASE LISTENERS FOR CLOUD SYNC ---
@@ -1050,6 +1064,7 @@
                 document.getElementById('app-header-title').innerText = `Al Hussain Restaurant - ${tableParam}`;
                 document.getElementById('display-user').innerText = tableParam;
                 
+                document.querySelector('.mode-tabs').style.display = 'none';
                 document.getElementById('order-controls-container').style.display = 'none';
                 document.getElementById('discount-row-elem').style.display = 'none';
                 document.getElementById('payment-method-row').style.display = 'none';
@@ -1126,11 +1141,8 @@
             document.getElementById('login-screen').style.display = "none";
             document.getElementById('main-app').style.display = "block";
             document.getElementById('display-user').innerText = role;
-            updateCart();
-            renderVisualTables();
-            renderVisualTakeaways();
+            switchOrderMode("Dine-In");
             updateStats();
-            toggleOrderTypeFields();
         }
 
         function logout() { location.href = liveBaseUrl; }
@@ -1148,14 +1160,16 @@
             });
         }
 
-        function toggleOrderTypeFields() {
-            const orderType = document.getElementById('order-type').value;
+        function switchOrderMode(mode) {
+            currentOrderType = mode;
+            document.getElementById('tab-dinein').className = `mode-tab ${mode === 'Dine-In' ? 'active' : ''}`;
+            document.getElementById('tab-takeaway').className = `mode-tab ${mode === 'Takeaway' ? 'active' : ''}`;
+
             const tableSelect = document.getElementById('table-no');
             if(!tableSelect) return;
-            
             tableSelect.innerHTML = '';
-            if (orderType === "Takeaway") {
-                // Find next available Takeaway order number avoiding conflict with existing active takeaways
+
+            if (mode === "Takeaway") {
                 let nextNum = orderRunningNumber;
                 while (activeOrders[`Order ${nextNum}`]) {
                     nextNum++;
@@ -1166,10 +1180,6 @@
                     tableSelect.innerHTML += `<option value="Table ${i}">Table ${i}</option>`;
                 }
             }
-        }
-
-        function onOrderTypeChange() {
-            toggleOrderTypeFields();
             cart = [];
             document.getElementById('discount-input').value = "0.00";
             updateCart();
@@ -1467,10 +1477,9 @@
 
         function saveOrderToTable() {
             if (cart.length === 0) return alert("Cart is empty!");
-            const orderType = document.getElementById('order-type').value;
             let targetKey = document.getElementById('table-no').value;
 
-            activeOrders[targetKey] = { time: Date.now(), type: orderType, items: JSON.parse(JSON.stringify(cart)) };
+            activeOrders[targetKey] = { time: Date.now(), type: currentOrderType, items: JSON.parse(JSON.stringify(cart)) };
             db.ref('activeOrders').set(activeOrders);
 
             cart = [];
@@ -1478,7 +1487,7 @@
             updateCart();
             renderVisualTables();
             renderVisualTakeaways();
-            toggleOrderTypeFields();
+            switchOrderMode(currentOrderType);
         }
 
         function cancelActiveOrder(key, event) {
@@ -1545,8 +1554,7 @@
         }
 
         function loadTable(key) {
-            document.getElementById('order-type').value = "Dine-In";
-            toggleOrderTypeFields();
+            switchOrderMode("Dine-In");
             document.getElementById('table-no').value = key;
             if (activeOrders[key]) {
                 cart = JSON.parse(JSON.stringify(activeOrders[key].items));
@@ -1558,7 +1566,7 @@
         }
 
         function loadTakeawayOrder(key) {
-            document.getElementById('order-type').value = "Takeaway";
+            switchOrderMode("Takeaway");
             const tableSelect = document.getElementById('table-no');
             tableSelect.innerHTML = `<option value="${key}">${key}</option>`;
             tableSelect.value = key;
@@ -1584,10 +1592,9 @@
 
         function printKitchenKOT() {
             if (cart.length === 0) return alert("Cart is empty!");
-            const orderType = document.getElementById('order-type').value;
             const refName = document.getElementById('table-no').value;
 
-            document.getElementById('k-order-type').innerText = orderType;
+            document.getElementById('k-order-type').innerText = currentOrderType;
             document.getElementById('k-table').innerText = refName;
             
             const kItems = document.getElementById('k-items');
@@ -1598,7 +1605,7 @@
                 kItems.innerHTML += `<tr><td style="padding: 8px 0; border-bottom: 1px dashed #000; font-size: 20px; font-weight: 900;"><b>${i.name}</b>${noteHtml}</td><td style="text-align:center; vertical-align:top; font-size:24px; font-weight:900; border-bottom: 1px dashed #000;"><b>${i.qty}</b></td></tr>`;
             });
 
-            activeOrders[refName] = { time: Date.now(), type: orderType, items: JSON.parse(JSON.stringify(cart)) };
+            activeOrders[refName] = { time: Date.now(), type: currentOrderType, items: JSON.parse(JSON.stringify(cart)) };
             db.ref('activeOrders').set(activeOrders);
             renderVisualTables();
             renderVisualTakeaways();
@@ -1615,12 +1622,11 @@
             let grandTotal = subtotal - discountAmount;
             if (grandTotal < 0) grandTotal = 0;
 
-            const orderType = document.getElementById('order-type').value;
             const refName = document.getElementById('table-no').value;
             const payMethod = document.getElementById('payment-method').value;
             const timeStr = new Date().toLocaleString();
 
-            fillReceiptDetails(orderType, refName, payMethod, timeStr, subtotal, discountAmount, grandTotal, 0, 0, cart);
+            fillReceiptDetails(currentOrderType, refName, payMethod, timeStr, subtotal, discountAmount, grandTotal, 0, 0, cart);
             safePrint("print-customer");
         }
 
@@ -1659,7 +1665,6 @@
             let change = paid - currentGrandTotalForPay;
             closePaymentModal();
 
-            const orderType = document.getElementById('order-type').value;
             const refName = document.getElementById('table-no').value;
             const payMethod = document.getElementById('payment-method').value;
             const timeStr = new Date().toLocaleString();
@@ -1667,17 +1672,17 @@
             let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
             let discountAmount = parseFloat(document.getElementById('discount-input').value) || 0;
 
-            fillReceiptDetails(orderType, refName, payMethod, timeStr, subtotal, discountAmount, currentGrandTotalForPay, paid, change, cart);
+            fillReceiptDetails(currentOrderType, refName, payMethod, timeStr, subtotal, discountAmount, currentGrandTotalForPay, paid, change, cart);
 
             completedSales.push({ 
-                time: timeStr, ref: `${orderType} (${refName})`, method: payMethod, amount: currentGrandTotalForPay,
-                orderType: orderType, refName: refName, subtotal: subtotal, discount: discountAmount, paid: paid, change: change,
+                time: timeStr, ref: `${currentOrderType} (${refName})`, method: payMethod, amount: currentGrandTotalForPay,
+                orderType: currentOrderType, refName: refName, subtotal: subtotal, discount: discountAmount, paid: paid, change: change,
                 items: JSON.parse(JSON.stringify(cart))
             });
             
             db.ref('sales').set(completedSales);
 
-            if (orderType === "Takeaway") {
+            if (currentOrderType === "Takeaway") {
                 orderRunningNumber++;
                 localStorage.setItem('alhussain_order_num', orderRunningNumber);
             }
@@ -1690,7 +1695,7 @@
             updateCart(); 
             renderVisualTables();
             renderVisualTakeaways();
-            toggleOrderTypeFields();
+            switchOrderMode(currentOrderType);
             updateStats();
 
             alert("✅ Payment Successful! Change: $" + change.toFixed(2));
@@ -1711,7 +1716,7 @@
             items.forEach(item => {
                 let noteStr = getFormattedItemNotes(item);
                 let noteHtml = noteStr ? `<br><span style="font-size:15px; font-weight:900;">Note: ${noteStr}</span>` : '';
-                pItems.innerHTML += `<tr><td style="padding: 6px 0; font-size: 16px; font-weight: 900;"><b>${item.name}</b>${noteHtml}</td><td style="text-align:center; vertical-align:top; font-size: 18px; font-weight: 900;"><b>${item.qty}</b></td><td style="text-align:right; vertical-align:top; font-size: 16px; font-weight: 900;"><b>$${(item.customPrice * item.qty).toFixed(2)}</b></td></tr>`;
+                pItems.innerHTML += `<tr><td style="padding: 6px 0; font-size: 17px; font-weight: 900;"><b>${item.name}</b>${noteHtml}</td><td style="text-align:center; vertical-align:top; font-size: 18px; font-weight: 900;"><b>${item.qty}</b></td><td style="text-align:right; vertical-align:top; font-size: 17px; font-weight: 900;"><b>$${(item.customPrice * item.qty).toFixed(2)}</b></td></tr>`;
             });
         }
 
@@ -2035,7 +2040,7 @@
                 orderRunningNumber = 1;
                 localStorage.setItem('alhussain_order_num', orderRunningNumber);
                 updateStats();
-                toggleOrderTypeFields();
+                switchOrderMode("Dine-In");
             }
         }
 
