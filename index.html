@@ -95,6 +95,7 @@
         .btn-pay { flex: 1; background: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-drawer { flex: 100%; background: #6366f1; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-top: 2px; }
         .btn-customer-order { flex: 100%; background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; text-align: center; display: none; }
+        .btn-customer-addmore { flex: 100%; background: #0284c7; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center; display: none; margin-top: 5px; }
 
         .admin-section { margin-top: 15px; display: none; background: #f8fafc; padding: 10px; border-radius: 8px; }
         .btn-small { background: #4f46e5; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
@@ -218,9 +219,9 @@
             <button class="btn-logout" id="logout-btn-elem" onclick="logout()">Logout</button>
         </div>
 
-        <div class="main-layout">
+        <div class="main-layout" id="main-layout-container">
             <!-- LEFT PANEL: MENU -->
-            <div class="left-panel">
+            <div class="left-panel" id="customer-left-menu-panel">
                 <div class="controls-bar">
                     <div class="search-container">
                         <input type="text" id="search-input" class="search-box" placeholder="Search or Type Code (e.g. R1, T1)..." onkeyup="handleSearchInput(event)" onclick="this.value=''; renderMenu();">
@@ -250,9 +251,15 @@
                     </select>
                 </div>
 
+                <!-- Customer Success Status Banner (Hidden by default) -->
+                <div id="customer-success-banner" style="display: none; background: #e0e7ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 10px; margin-bottom: 10px; text-align: center;">
+                    <div style="font-size: 14px; font-weight: bold; color: #3730a3; margin-bottom: 4px;">🎉 Order Placed Successfully!</div>
+                    <div style="font-size: 12px; color: #4338ca;">Your ordered items have been sent to the kitchen. You can check your confirmed items below or click '+ Add More Items' to order extra.</div>
+                </div>
+
                 <div class="cart-table-wrapper">
                     <table>
-                        <thead><tr><th>Item & Notes</th><th>Qty</th><th style="text-align:right;">Price ($)</th></tr></thead>
+                        <thead id="cart-table-head"><tr><th>Item & Notes</th><th>Qty</th><th style="text-align:right;">Price ($)</th></tr></thead>
                         <tbody id="cart-items"></tbody>
                     </table>
                 </div>
@@ -289,6 +296,7 @@
                     <button id="btn-pay-elem" class="btn-pay" onclick="openPaymentModal()">💵 Pay</button>
                     <button id="btn-drawer-elem" class="btn-drawer" onclick="openCashDrawerOnly()">🔓 Open Cash Drawer</button>
                     <button id="btn-customer-order-elem" class="btn-customer-order" onclick="submitCustomerOrder()">🚀 Send Order to Kitchen</button>
+                    <button id="btn-customer-addmore-elem" class="btn-customer-addmore" onclick="customerAddMoreItems()">➕ Add More Items</button>
                 </div>
 
                 <div style="margin-top: 10px;" id="visual-tables-section">
@@ -1064,6 +1072,8 @@
         let loggedInRole = "";
         let currentOrderType = "Dine-In";
         let orderRunningNumber = parseInt(localStorage.getItem('alhussain_order_num')) || 1;
+        let isCustomerMode = false;
+        let customerResetTimer = null; // 25 நிமிட டைமரை கட்டுப்படுத்த
 
         // --- FIREBASE LISTENERS FOR CLOUD SYNC ---
         db.ref('menuData').on('value', (snapshot) => {
@@ -1097,11 +1107,6 @@
             renderVisualTakeaways();
         });
 
-        db.ref('sales').on('value', (snapshot) => {
-            completedSales = snapshot.val() || [];
-            updateStats();
-        });
-
         // Run timer update every 1 second
         setInterval(() => {
             renderVisualTables();
@@ -1113,6 +1118,7 @@
             const tableParam = urlParams.get('table');
 
             if (tableParam && tableParam.trim() !== "") {
+                isCustomerMode = true;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-app').style.display = 'block';
                 document.getElementById('app-header-title').innerText = `Al Hussain Restaurant - ${tableParam} (Company Acc)`;
@@ -1127,16 +1133,16 @@
                 document.getElementById('btn-print-bill-elem').style.display = 'none';
                 document.getElementById('btn-pay-elem').style.display = 'none';
                 document.getElementById('btn-drawer-elem').style.display = 'none';
-                document.getElementById('btn-customer-order-elem').style.display = 'block';
                 document.getElementById('visual-tables-section').style.display = 'none';
                 document.getElementById('visual-takeaway-section').style.display = 'none';
 
-                // Load existing ordered items for this table if any so customer can add more
                 if (activeOrders[tableParam] && activeOrders[tableParam].items) {
                     cart = JSON.parse(JSON.stringify(activeOrders[tableParam].items));
+                    showCustomerConfirmedView();
+                } else {
+                    cart = [];
+                    updateCart();
                 }
-
-                updateCart();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-app').style.display = 'none';
@@ -2269,11 +2275,61 @@
             activeOrders[tableName] = { time: existingTime, type: "Dine-In", items: mergedItems };
             db.ref('activeOrders').set(activeOrders);
 
-            // Customer feedback message with clear confirmation and instruction that they can add more items if needed
-            alert(`🎉 Success! Your order has been successfully sent to the kitchen for ${tableName}.\n\n✨ You can continue to browse the menu and add more items anytime if you wish! (Direct payment to Company Account)`);
-            
-            // Reload updated items back into cart for further additions
             cart = JSON.parse(JSON.stringify(mergedItems));
+            showCustomerConfirmedView();
+        }
+
+        function showCustomerConfirmedView() {
+            // Hide left menu panel
+            document.getElementById('customer-left-menu-panel').style.display = 'none';
+            // Show success banner
+            document.getElementById('customer-success-banner').style.display = 'block';
+            // Switch buttons
+            document.getElementById('btn-customer-order-elem').style.display = 'none';
+            document.getElementById('btn-customer-addmore-elem').style.display = 'block';
+            
+            // Render confirmed read-only list
+            const tbody = document.getElementById('cart-items');
+            tbody.innerHTML = '';
+            let subtotal = 0;
+
+            cart.forEach(item => {
+                let itemTotal = item.customPrice * item.qty;
+                subtotal += itemTotal;
+                let noteStr = getFormattedItemNotes(item);
+                let noteHtml = noteStr ? `<div style="font-size:12px; color:#64748b; margin-top:2px;">Note: ${noteStr}</div>` : '';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="cart-item-name">${item.name}</div>
+                            ${noteHtml}
+                        </td>
+                        <td style="text-align:center; font-weight:bold;">${item.qty}</td>
+                        <td style="text-align:right; font-weight:bold;">$${itemTotal.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('sub-total').innerText = subtotal.toFixed(2);
+            document.getElementById('total-amount').innerText = subtotal.toFixed(2);
+
+            // --- 25 நிமிட டைமர் (25 Minutes Auto Reset / Logout) ---
+            if (customerResetTimer) clearTimeout(customerResetTimer);
+            customerResetTimer = setTimeout(() => {
+                // 25 நிமிடங்கள் (1500000 மி.வி) கடந்த பிறகு பேஜ் ரீசெட் ஆகி லாக் அவுட் போல வெளியேறிவிடும்
+                logout();
+            }, 25 * 60 * 1000); 
+        }
+
+        function customerAddMoreItems() {
+            // எக்ஸ்ட்ரா ஐட்டம் சேர்க்கும் போது டைமரை கேன்சல் செய்துவிடலாம்
+            if (customerResetTimer) clearTimeout(customerResetTimer);
+
+            document.getElementById('customer-left-menu-panel').style.display = 'flex';
+            document.getElementById('customer-success-banner').style.display = 'none';
+            document.getElementById('btn-customer-order-elem').style.display = 'block';
+            document.getElementById('btn-customer-addmore-elem').style.display = 'none';
             updateCart();
         }
     </script>
