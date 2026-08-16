@@ -58,7 +58,6 @@
 
         h3 { margin-top: 0; color: #1e293b; font-size: 15px; margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; }
         
-        /* Mode Switcher Tabs */
         .mode-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
         .mode-tab { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; background: #e2e8f0; color: #475569; text-align: center; }
         .mode-tab.active { background: #4f46e5; color: white; }
@@ -101,14 +100,14 @@
         .btn-cat-add { background: #059669; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; white-space: nowrap; }
         .stat-box { background: white; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #e2e8f0; margin-top: 6px; font-size: 15px; font-weight: bold; color: #4f46e5; }
         
-        .visual-tables-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 140px; overflow-y: auto; }
-        .v-table-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; color: white; border: none; position: relative; }
+        .visual-tables-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 150px; overflow-y: auto; }
+        .v-table-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: white; border: none; position: relative; }
         .v-table-free { background: #10b981; }
         .v-table-occupied { background: #ef4444; }
-        .v-cancel-btn { position: absolute; top: 2px; right: 2px; background: #000; color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .v-cancel-btn { position: absolute; top: 2px; right: 2px; background: #000; color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; }
 
-        .visual-takeaway-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 140px; overflow-y: auto; }
-        .v-takeaway-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; color: white; background: #d97706; border: none; position: relative; }
+        .visual-takeaway-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 150px; overflow-y: auto; }
+        .v-takeaway-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: white; background: #d97706; border: none; position: relative; }
 
         .history-btn, .manage-menu-btn, .close-day-btn, .stock-btn, .qr-btn, .report-btn, .manage-cat-btn, .expense-btn, .monthly-btn { background: #475569; color: white; border: none; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; width: 100%; margin-top: 6px; }
         .manage-menu-btn { background: #0284c7; }
@@ -1054,6 +1053,12 @@
             updateStats();
         });
 
+        // Run timer update every 1 second
+        setInterval(() => {
+            renderVisualTables();
+            renderVisualTakeaways();
+        }, 1000);
+
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const tableParam = urlParams.get('table');
@@ -1479,7 +1484,10 @@
             if (cart.length === 0) return alert("Cart is empty!");
             let targetKey = document.getElementById('table-no').value;
 
-            activeOrders[targetKey] = { time: Date.now(), type: currentOrderType, items: JSON.parse(JSON.stringify(cart)) };
+            // Preserve existing start time if already occupied, else set current time
+            let existingTime = (activeOrders[targetKey] && activeOrders[targetKey].time) ? activeOrders[targetKey].time : Date.now();
+
+            activeOrders[targetKey] = { time: existingTime, type: currentOrderType, items: JSON.parse(JSON.stringify(cart)) };
             db.ref('activeOrders').set(activeOrders);
 
             cart = [];
@@ -1504,21 +1512,41 @@
             }
         }
 
+        function formatElapsedTime(startTime) {
+            let diffMs = Date.now() - startTime;
+            let diffSec = Math.floor(diffMs / 1000);
+            let mins = Math.floor(diffSec / 60);
+            let secs = diffSec % 60;
+            if (mins < 60) {
+                return `${mins}m ${secs}s`;
+            } else {
+                let hrs = Math.floor(mins / 60);
+                let remMins = mins % 60;
+                return `${hrs}h ${remMins}m`;
+            }
+        }
+
         function renderVisualTables() {
             const container = document.getElementById('visual-tables-grid');
             if(!container) return;
             container.innerHTML = '';
             for (let i = 1; i <= 13; i++) {
                 let tableName = `Table ${i}`;
-                let isOccupied = activeOrders[tableName] !== undefined;
+                let orderData = activeOrders[tableName];
+                let isOccupied = orderData !== undefined;
                 let btnClass = isOccupied ? "v-table-card v-table-occupied" : "v-table-card v-table-free";
-                let statusText = isOccupied ? "Occupied 🔴" : "Free 🟢";
+                
+                let statusText = "Free 🟢";
+                if (isOccupied) {
+                    let elapsedStr = formatElapsedTime(orderData.time);
+                    statusText = `Occupied 🔴<br><b style="font-size:11px; color:#ffeb3b;">⏱️ ${elapsedStr}</b>`;
+                }
 
                 let cancelBtnHtml = (isOccupied && loggedInRole === "admin") ? `<button class="v-cancel-btn" title="Cancel Order" onclick="cancelActiveOrder('${tableName}', event)">X</button>` : '';
 
                 container.innerHTML += `
                     <button class="${btnClass}" onclick="loadTable('${tableName}')">
-                        ${tableName}<br><small style="font-size:10px;">${statusText}</small>
+                        ${tableName}<br>${statusText}
                         ${cancelBtnHtml}
                     </button>
                 `;
@@ -1542,11 +1570,12 @@
             takeawayKeys.forEach((key) => {
                 let order = activeOrders[key];
                 let itemCount = order.items ? order.items.reduce((sum, i) => sum + i.qty, 0) : 0;
+                let elapsedStr = formatElapsedTime(order.time);
                 let cancelBtnHtml = (loggedInRole === "admin") ? `<button class="v-cancel-btn" title="Cancel Order" onclick="cancelActiveOrder('${key}', event)">X</button>` : '';
 
                 container.innerHTML += `
                     <button class="v-takeaway-card" onclick="loadTakeawayOrder('${key}')">
-                        <b>${key}</b><br><small style="font-size:10px;">Items: ${itemCount} 📦</small>
+                        <b>${key}</b><br><small style="font-size:10px;">Items: ${itemCount} 📦</small><br><b style="font-size:11px; color:#ffeb3b;">⏱️ ${elapsedStr}</b>
                         ${cancelBtnHtml}
                     </button>
                 `;
@@ -1605,7 +1634,8 @@
                 kItems.innerHTML += `<tr><td style="padding: 8px 0; border-bottom: 1px dashed #000; font-size: 20px; font-weight: 900;"><b>${i.name}</b>${noteHtml}</td><td style="text-align:center; vertical-align:top; font-size:24px; font-weight:900; border-bottom: 1px dashed #000;"><b>${i.qty}</b></td></tr>`;
             });
 
-            activeOrders[refName] = { time: Date.now(), type: currentOrderType, items: JSON.parse(JSON.stringify(cart)) };
+            let existingTime = (activeOrders[refName] && activeOrders[refName].time) ? activeOrders[refName].time : Date.now();
+            activeOrders[refName] = { time: existingTime, type: currentOrderType, items: JSON.parse(JSON.stringify(cart)) };
             db.ref('activeOrders').set(activeOrders);
             renderVisualTables();
             renderVisualTakeaways();
@@ -2068,7 +2098,8 @@
                 }
             });
 
-            activeOrders[tableName] = { time: Date.now(), type: "Dine-In", items: mergedItems };
+            let existingTime = (activeOrders[tableName] && activeOrders[tableName].time) ? activeOrders[tableName].time : Date.now();
+            activeOrders[tableName] = { time: existingTime, type: "Dine-In", items: mergedItems };
             db.ref('activeOrders').set(activeOrders);
 
             cart = [];
