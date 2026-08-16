@@ -1131,6 +1131,11 @@
                 document.getElementById('visual-tables-section').style.display = 'none';
                 document.getElementById('visual-takeaway-section').style.display = 'none';
 
+                // Load existing ordered items for this table if any so customer can add more
+                if (activeOrders[tableParam] && activeOrders[tableParam].items) {
+                    cart = JSON.parse(JSON.stringify(activeOrders[tableParam].items));
+                }
+
                 updateCart();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -1418,7 +1423,6 @@
 
         function handleSearchInput(event) {
             const searchText = document.getElementById('search-input').value.trim();
-            // If user typed exact shortcut code and pressed Enter
             if (event.key === 'Enter' && searchText !== '') {
                 let foundItem = menuData.find(m => m.code && m.code.toLowerCase() === searchText.toLowerCase());
                 if (foundItem) {
@@ -1584,7 +1588,6 @@
         function saveOrderToTableAndPrintKOT() {
             if (cart.length === 0) return alert("Cart is empty!");
             saveOrderToTable();
-            // Automatically trigger Kitchen KOT print after saving
             printKitchenKOTSilent();
         }
 
@@ -2266,9 +2269,12 @@
             activeOrders[tableName] = { time: existingTime, type: "Dine-In", items: mergedItems };
             db.ref('activeOrders').set(activeOrders);
 
-            cart = [];
+            // Customer feedback message with clear confirmation and instruction that they can add more items if needed
+            alert(`🎉 Success! Your order has been successfully sent to the kitchen for ${tableName}.\n\n✨ You can continue to browse the menu and add more items anytime if you wish! (Direct payment to Company Account)`);
+            
+            // Reload updated items back into cart for further additions
+            cart = JSON.parse(JSON.stringify(mergedItems));
             updateCart();
-            alert(`🎉 Success! Your order has been sent to ${tableName} (Routed to Company Account). Our staff will serve you shortly.`);
         }
     </script>
 </body>
