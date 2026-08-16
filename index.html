@@ -66,12 +66,14 @@
         .order-controls { display: flex; gap: 8px; margin-bottom: 8px; flex-shrink: 0; }
         .order-controls select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 14px; font-weight: bold; background: white; }
         
-        /* 🔥 இதுதான் முக்கிய திருத்தம்: கார்ட் பாக்ஸ் சுருங்காமல் இருக்க min-height கொடுக்கப்பட்டுள்ளது 🔥 */
+        /* 🔥 THE BULLETPROOF FIX: பாக்ஸ் எந்த காரணம் கொண்டும் சுருங்காது 🔥 */
         .cart-table-wrapper { 
-            flex: 1 1 auto; 
-            min-height: 250px; 
+            height: 350px; 
+            min-height: 300px;
+            flex-shrink: 0; /* இதுதான் மிக முக்கியமான கோடு - பாக்ஸ் சுருங்குவதை தடுக்கும் */
+            display: block;
             overflow-y: auto; 
-            border: 2px solid #cbd5e1; 
+            border: 2px solid #94a3b8; /* பார்டர் இன்னும் தடிமனாக்கப்பட்டுள்ளது */
             border-radius: 8px; 
             margin-bottom: 12px; 
             background: #fff; 
@@ -166,42 +168,25 @@
             body * { visibility: hidden !important; }
             
             body.print-customer #print-receipt, body.print-customer #print-receipt * { visibility: visible !important; }
-            body.print-customer #print-receipt { 
-                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
-                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 16px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
-            }
+            body.print-customer #print-receipt { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 16px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
 
             body.print-kitchen-mode #print-kitchen, body.print-kitchen-mode #print-kitchen * { visibility: visible !important; }
-            body.print-kitchen-mode #print-kitchen { 
-                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
-                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
-            }
+            body.print-kitchen-mode #print-kitchen { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
 
             body.print-drawer-mode #print-drawer, body.print-drawer-mode #print-drawer * { visibility: visible !important; }
             body.print-drawer-mode #print-drawer { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 16px !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
 
             body.print-history-mode #print-sales-history, body.print-sales-history #print-sales-history * { visibility: visible !important; }
-            body.print-sales-history { 
-                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
-                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
-            }
+            body.print-sales-history { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
 
             body.print-item-report-mode #print-item-report, body.print-item-report-mode #print-item-report * { visibility: visible !important; }
-            body.print-item-report-mode #print-item-report { 
-                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
-                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
-            }
+            body.print-item-report-mode #print-item-report { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
 
             body.print-day-close-mode #print-day-close, body.print-day-close-mode #print-day-close * { visibility: visible !important; }
-            body.print-day-close-mode #print-day-close { 
-                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; 
-                font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important;
-            }
+            body.print-day-close-mode #print-day-close { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-family: 'Courier New', Courier, monospace !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
 
             body.print-qr-mode #print-qr-batch, body.print-qr-mode #print-qr-batch * { visibility: visible !important; }
-            body.print-qr-mode #print-qr-batch {
-                display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: white !important;
-            }
+            body.print-qr-mode #print-qr-batch { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: white !important; }
         }
     </style>
 </head>
@@ -268,7 +253,7 @@
                     <div style="font-size: 12px; color: #4338ca;">Your ordered items have been sent to the kitchen. You can check your confirmed items below or click '+ Add More Items' to order extra.</div>
                 </div>
 
-                <!-- CARTS TABLE (பாக்ஸ் சுருங்காமல் இருக்க min-height சேர்க்கப்பட்டுள்ளது) -->
+                <!-- CARTS TABLE (சுருங்காமல் இருக்க flex-shrink: 0 சேர்க்கப்பட்டுள்ளது) -->
                 <div class="cart-table-wrapper">
                     <table>
                         <thead id="cart-table-head">
@@ -289,7 +274,7 @@
                     </div>
                     <div class="summary-row" id="discount-row-elem">
                         <span>Discount ($):</span>
-                        <input type="number" id="discount-input" value="0.00" min="0" step="0.50" oninput="updateCart()">
+                        <input type="number" id="discount-input" value="0.00" min="0" step="0.50" oninput="updateCartUI()">
                     </div>
                     <div class="total-row">
                         <span>Grand Total:</span>
@@ -1158,7 +1143,7 @@
                     showCustomerConfirmedView();
                 } else {
                     cart = [];
-                    updateCart();
+                    updateCartUI();
                 }
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -1282,7 +1267,7 @@
             }
             cart = [];
             document.getElementById('discount-input').value = "0.00";
-            updateCart();
+            updateCartUI();
         }
 
         function onTableChange() {
@@ -1293,7 +1278,7 @@
                 cart = [];
             }
             document.getElementById('discount-input').value = "0.00";
-            updateCart();
+            updateCartUI();
         }
 
         function getAllCategories() {
@@ -1483,7 +1468,7 @@
             } else {
                 cart.push({ ...item, qty: 1, customPrice: item.price, selectedNotes: [], customComment: "" });
             }
-            updateCart();
+            updateCartUI();
         }
 
         function toggleItemNoteCheckbox(id, noteName, checkboxElem) {
@@ -1495,15 +1480,49 @@
                 } else {
                     cartItem.selectedNotes = cartItem.selectedNotes.filter(n => n !== noteName);
                 }
-                updateCart();
+                updateCartUI();
             }
         }
 
-        function updateCart() {
+        function updateCustomComment(id, val) {
+            const cartItem = cart.find(c => c.id === id);
+            if (cartItem) {
+                cartItem.customComment = val;
+            }
+        }
+
+        function updateItemPrice(id, val) {
+            let p = parseFloat(val);
+            if (!isNaN(p) && p >= 0) {
+                const cartItem = cart.find(c => c.id === id);
+                if (cartItem) {
+                    cartItem.customPrice = p;
+                    updateCartUI();
+                }
+            }
+        }
+
+        function decreaseQty(id) {
+            const cartItem = cart.find(c => c.id === id);
+            if (cartItem) {
+                cartItem.qty -= 1;
+                if (cartItem.qty <= 0) cart = cart.filter(c => c.id !== id);
+                updateCartUI();
+            }
+        }
+
+        function increaseQty(id) {
+            const cartItem = cart.find(c => c.id === id);
+            if (cartItem) { cartItem.qty += 1; updateCartUI(); }
+        }
+
+        // 🔥 THE JAVASCRIPT BUG FIX: Completely rewritten to assign UI safely 🔥
+        function updateCartUI() {
             const tbody = document.getElementById('cart-items');
             if(!tbody) return;
-            tbody.innerHTML = ''; 
+            
             let subtotal = 0;
+            let rowsHtml = '';
             
             cart.forEach(item => {
                 subtotal += item.customPrice * item.qty;
@@ -1525,14 +1544,14 @@
                             <label class="note-label"><input type="checkbox" ${isDhalChecked} onchange="toggleItemNoteCheckbox(${item.id}, 'Dhal', this)"> Dhal</label>
                             <label class="note-label"><input type="checkbox" ${isIkanChecked} onchange="toggleItemNoteCheckbox(${item.id}, 'Curry Ikan', this)"> Curry Ikan</label>
                         </div>
-                        <input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value">
+                        <input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="updateCustomComment(${item.id}, this.value)">
                     `;
                 } else {
-                    noteHtml = `<input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value">`;
+                    noteHtml = `<input type="text" class="comment-input" placeholder="Type custom note..." value="${item.customComment || ''}" oninput="updateCustomComment(${item.id}, this.value)">`;
                 }
 
                 if (isCustomerMode && document.getElementById('customer-left-menu-panel').style.display === 'none') {
-                    tbody.innerHTML += `
+                    rowsHtml += `
                         <tr>
                             <td>
                                 <div class="cart-item-name">${item.name}</div>
@@ -1543,7 +1562,7 @@
                         </tr>
                     `;
                 } else {
-                    tbody.innerHTML += `
+                    rowsHtml += `
                         <tr>
                             <td>
                                 <div class="cart-item-name">${item.name}</div>
@@ -1564,39 +1583,13 @@
                 }
             });
             
+            // Assign everything at once to prevent browser rendering bugs
+            tbody.innerHTML = rowsHtml;
+            
             let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
             let total = subtotal - discount;
             if(document.getElementById('sub-total')) document.getElementById('sub-total').innerText = subtotal.toFixed(2);
             if(document.getElementById('total-amount')) document.getElementById('total-amount').innerText = (total < 0 ? 0 : total).toFixed(2);
-        }
-
-        function decreaseQty(id) {
-            const cartItem = cart.find(c => c.id === id);
-            if (cartItem) {
-                cartItem.qty -= 1;
-                if (cartItem.qty <= 0) cart = cart.filter(c => c.id !== id);
-                updateCart();
-            }
-        }
-
-        function increaseQty(id) {
-            const cartItem = cart.find(c => c.id === id);
-            if (cartItem) { cartItem.qty += 1; updateCart(); }
-        }
-
-        function updateItemPrice(id, val) {
-            let p = parseFloat(val);
-            if (!isNaN(p) && p >= 0) {
-                const cartItem = cart.find(c => c.id === id);
-                if (cartItem) {
-                    cartItem.customPrice = p;
-                    let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
-                    let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
-                    let total = subtotal - discount;
-                    document.getElementById('sub-total').innerText = subtotal.toFixed(2);
-                    document.getElementById('total-amount').innerText = (total < 0 ? 0 : total).toFixed(2);
-                }
-            }
         }
 
         function getFormattedItemNotes(item) {
@@ -1617,7 +1610,7 @@
 
             cart = [];
             document.getElementById('discount-input').value = "0.00";
-            updateCart();
+            updateCartUI();
             renderVisualTables();
             renderVisualTakeaways();
             switchOrderMode(currentOrderType);
@@ -1722,7 +1715,7 @@
                 cart = [];
             }
             document.getElementById('discount-input').value = "0.00";
-            updateCart();
+            updateCartUI();
         }
 
         function loadTakeawayOrder(key) {
@@ -1737,7 +1730,7 @@
                 cart = [];
             }
             document.getElementById('discount-input').value = "0.00";
-            updateCart();
+            updateCartUI();
         }
 
         function safePrint(modeClass) {
@@ -1870,7 +1863,7 @@
 
             cart = []; 
             document.getElementById('discount-input').value = "0.00";
-            updateCart(); 
+            updateCartUI(); 
             renderVisualTables();
             renderVisualTakeaways();
             switchOrderMode(currentOrderType);
@@ -2318,7 +2311,7 @@
             document.getElementById('btn-customer-order-elem').style.display = 'none';
             document.getElementById('btn-customer-addmore-elem').style.display = 'block';
             
-            updateCart();
+            updateCartUI();
 
             if (customerResetTimer) clearTimeout(customerResetTimer);
             customerResetTimer = setTimeout(() => {
@@ -2334,7 +2327,7 @@
             
             document.getElementById('btn-customer-order-elem').style.display = 'block';
             document.getElementById('btn-customer-addmore-elem').style.display = 'none';
-            updateCart();
+            updateCartUI();
         }
 
         function showCustomerConfirmedView() {
@@ -2342,7 +2335,7 @@
             document.getElementById('customer-success-banner').style.display = 'block';
             document.getElementById('btn-customer-order-elem').style.display = 'none';
             document.getElementById('btn-customer-addmore-elem').style.display = 'block';
-            updateCart();
+            updateCartUI();
             
             if (customerResetTimer) clearTimeout(customerResetTimer);
             customerResetTimer = setTimeout(() => {
