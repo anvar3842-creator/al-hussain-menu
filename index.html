@@ -63,13 +63,22 @@
         .mode-tab { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; background: #e2e8f0; color: #475569; text-align: center; }
         .mode-tab.active { background: #4f46e5; color: white; }
 
-        .order-controls { display: flex; gap: 8px; margin-bottom: 8px; }
-        .order-controls select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 13px; font-weight: bold; background: white; }
+        .order-controls { display: flex; gap: 8px; margin-bottom: 8px; flex-shrink: 0; }
+        .order-controls select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 14px; font-weight: bold; background: white; }
         
-        .cart-table-wrapper { margin-bottom: 10px; max-height: 220px; overflow-y: auto; border: 1px solid #f1f5f9; border-radius: 6px; }
+        /* 🔥 இதுதான் முக்கிய திருத்தம்: கார்ட் பாக்ஸ் சுருங்காமல் இருக்க min-height கொடுக்கப்பட்டுள்ளது 🔥 */
+        .cart-table-wrapper { 
+            flex: 1 1 auto; 
+            min-height: 250px; 
+            overflow-y: auto; 
+            border: 2px solid #cbd5e1; 
+            border-radius: 8px; 
+            margin-bottom: 12px; 
+            background: #fff; 
+        }
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; color: #64748b; padding: 8px 6px; text-align: left; font-size: 13px; position: sticky; top: 0; z-index: 2; }
-        td { padding: 10px 6px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        th { background: #e2e8f0; color: #1e293b; padding: 10px 8px; text-align: left; font-size: 14px; position: sticky; top: 0; z-index: 2; border-bottom: 2px solid #cbd5e1; }
+        td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         
         .cart-item-name { font-weight: 700; font-size: 14px; color: #0f172a; margin-bottom: 3px; }
         
@@ -83,12 +92,12 @@
         .qty-controls { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
         .qty-btn { background: #e2e8f0; border: none; width: 26px; height: 26px; border-radius: 4px; cursor: pointer; font-weight: bold; color: #475569; font-size: 15px; }
 
-        .bill-summary { background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+        .bill-summary { background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 8px; flex-shrink: 0; border: 1px solid #e2e8f0; }
         .summary-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 4px; align-items: center; }
-        .summary-row input { width: 75px; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: right; outline: none; }
+        .summary-row input { width: 75px; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: right; outline: none; font-weight: bold; }
         .total-row { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: #0f172a; margin-top: 6px; border-top: 1px dashed #cbd5e1; padding-top: 6px; }
         
-        .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+        .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; flex-shrink: 0; }
         .btn-hold { flex: 1; background: #f59e0b; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-kitchen { flex: 1; background: #0284c7; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-print-bill { flex: 1; background: #3b82f6; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
@@ -97,17 +106,19 @@
         .btn-customer-order { flex: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; text-align: center; display: block; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
         .btn-customer-addmore { flex: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; text-align: center; display: none; margin-top: 5px; }
 
-        .admin-section { margin-top: 15px; display: none; background: #f8fafc; padding: 10px; border-radius: 8px; }
+        .admin-section { margin-top: 15px; display: none; background: #f8fafc; padding: 10px; border-radius: 8px; flex-shrink: 0; }
         .btn-small { background: #4f46e5; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         .btn-cat-add { background: #059669; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; white-space: nowrap; }
         .stat-box { background: white; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #e2e8f0; margin-top: 6px; font-size: 15px; font-weight: bold; color: #4f46e5; }
         
+        #visual-tables-section { flex-shrink: 0; }
         .visual-tables-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 150px; overflow-y: auto; }
         .v-table-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: white; border: none; position: relative; }
         .v-table-free { background: #10b981; }
         .v-table-occupied { background: #ef4444; }
         .v-cancel-btn { position: absolute; top: 2px; right: 2px; background: #000; color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; }
 
+        #visual-takeaway-section { flex-shrink: 0; }
         .visual-takeaway-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; max-height: 150px; overflow-y: auto; }
         .v-takeaway-card { padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: white; background: #d97706; border: none; position: relative; }
 
@@ -257,10 +268,16 @@
                     <div style="font-size: 12px; color: #4338ca;">Your ordered items have been sent to the kitchen. You can check your confirmed items below or click '+ Add More Items' to order extra.</div>
                 </div>
 
-                <!-- CARTS TABLE -->
+                <!-- CARTS TABLE (பாக்ஸ் சுருங்காமல் இருக்க min-height சேர்க்கப்பட்டுள்ளது) -->
                 <div class="cart-table-wrapper">
                     <table>
-                        <thead id="cart-table-head"><tr><th>Item & Notes</th><th>Qty</th><th style="text-align:right;">Price ($)</th></tr></thead>
+                        <thead id="cart-table-head">
+                            <tr>
+                                <th>Item & Notes</th>
+                                <th>Qty</th>
+                                <th style="text-align:right;">Price ($)</th>
+                            </tr>
+                        </thead>
                         <tbody id="cart-items"></tbody>
                     </table>
                 </div>
@@ -1482,7 +1499,6 @@
             }
         }
 
-        // 🌟 ITHU THAN CART FIX SECTION 🌟
         function updateCart() {
             const tbody = document.getElementById('cart-items');
             if(!tbody) return;
