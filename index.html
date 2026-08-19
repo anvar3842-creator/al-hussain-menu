@@ -27,11 +27,23 @@
         .btn-login:hover { opacity: 0.9; transform: translateY(-2px); }
         .error-msg { color: #ef4444; font-size: 14px; margin-top: 10px; display: none; font-weight: bold; }
         
+        /* Overlays for Customers */
         .timeout-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; display: none; justify-content: center; align-items: center; z-index: 3000; padding: 20px; box-sizing: border-box; text-align: center; }
         .timeout-box { background: white; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         .timeout-box h1 { color: #ef4444; font-size: 48px; margin: 0 0 15px 0; }
         .timeout-box h2 { color: #1e293b; margin-top: 0; margin-bottom: 10px; font-size: 22px; font-weight: 800; }
         .timeout-box p { color: #64748b; font-size: 15px; line-height: 1.5; margin: 0; font-weight: 600; }
+
+        /* Order Success Screen */
+        #customer-success-screen { z-index: 4000; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); }
+        .success-box { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); width: 100%; max-width: 450px; text-align: center; }
+        .success-box h1 { font-size: 50px; margin: 0 0 10px 0; }
+        .success-box h2 { color: #10b981; margin: 0 0 5px 0; font-weight: 900; font-size: 24px; }
+        .success-box p { color: #64748b; font-size: 14px; font-weight: 700; margin-bottom: 20px; }
+        .order-summary-list { text-align: left; background: #f1f5f9; padding: 15px; border-radius: 12px; max-height: 250px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .order-summary-list ul { padding-left: 20px; margin: 0; color: #334155; font-size: 14px; font-weight: 800; line-height: 1.6; }
+        .btn-add-more { background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-add-more:hover { transform: translateY(-2px); opacity: 0.9; }
 
         .header { background: white; padding: 10px 20px; margin: 10px 15px 0 15px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); flex-shrink: 0; }
         .header h2 { margin: 0; font-size: 17px; font-weight: 800; color: #4f46e5; display: flex; align-items: center; gap: 8px; }
@@ -121,10 +133,7 @@
         .btn-print-bill { background: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe !important; }
         .btn-pay { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0 !important; font-size: 13px; }
         .btn-drawer { grid-column: span 2; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0 !important; padding: 8px !important; }
-        
-        .customer-btn-group { grid-column: span 2; display: none; gap: 8px; }
-        .btn-customer-order { flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 12px; font-size: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-customer-addmore { flex: 1; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 12px; font-size: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-customer-order { grid-column: span 2; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 12px; font-size: 15px; border-radius: 10px; display: none; }
 
         .visual-tables-section-box, .visual-takeaway-section-box { margin-bottom: 12px; flex-shrink: 0; }
         .visual-tables-grid, .visual-takeaway-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; max-height: 140px; overflow-y: auto; padding-right: 4px; }
@@ -204,11 +213,24 @@
 </head>
 <body>
 
-    <div id="timeout-screen" class="timeout-overlay">
+    <div id="customer-success-screen" class="timeout-overlay">
+        <div class="success-box">
+            <h1>🎉</h1>
+            <h2>Thank You for Ordering!</h2>
+            <p>Your order has been successfully sent to the kitchen.</p>
+            
+            <div class="order-summary-list" id="customer-ordered-items">
+                </div>
+            
+            <button class="btn-add-more" onclick="continueOrdering()">➕ Add More Items</button>
+        </div>
+    </div>
+
+    <div id="timeout-screen" class="timeout-overlay" style="z-index: 5000;">
         <div class="timeout-box">
             <h1>⏳</h1>
             <h2>Session Expired</h2>
-            <p>உங்கள் ஆர்டர் வெற்றிகரமாக முடிக்கப்பட்டது / அல்லது 15 நிமிடங்கள் செயலற்ற நிலை காரணமாக லாக் அவுட் செய்யப்பட்டுள்ளது.<br><br>மீண்டும் ஆர்டர் செய்ய உங்கள் டேபிளில் உள்ள QR கோடை ஸ்கேன் செய்யவும்.</p>
+            <p>For your security, this page has been closed due to 15 minutes of inactivity.<br><br>Please scan the QR code on your table to order again.</p>
         </div>
     </div>
 
@@ -300,11 +322,7 @@
                     <button id="btn-print-bill-elem" class="btn-print-bill" onclick="printCustomerBillOnly()">🖨️ Print Bill</button>
                     <button id="btn-pay-elem" class="btn-pay" onclick="openPaymentModal()">💳 Pay Now</button>
                     <button id="btn-drawer-elem" class="btn-drawer" onclick="openCashDrawerOnly()">🔓 Open Drawer</button>
-                    
-                    <div id="customer-btn-group" class="customer-btn-group">
-                        <button class="btn-customer-order" onclick="submitCustomerOrder()">🚀 Send to Kitchen</button>
-                        <button class="btn-customer-addmore" onclick="addMoreItemsMode()">➕ Add More</button>
-                    </div>
+                    <button id="btn-customer-order-elem" class="btn-customer-order" onclick="submitCustomerOrder()">🚀 Send to Kitchen</button>
                 </div>
 
                 <div class="visual-tables-section-box" id="visual-tables-section">
@@ -657,8 +675,16 @@
             { id: 27, code: "N2", name: "Nasi Goreng Daging", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
             { id: 28, code: "N3", name: "Nasi Goreng Kampung", price: 4.00, category: "Nasi Goreng", icon: "🍛" },
             { id: 29, code: "N4", name: "Nasi Goreng Pattaya", price: 4.80, category: "Nasi Goreng", icon: "🍛" },
-            { id: 30, code: "M1", name: "Mee Goreng Ayam", price: 4.50, category: "Mee Goreng", icon: "🍜" },
-            { id: 31, code: "M2", name: "Mee Goreng Daging", price: 4.50, category: "Mee Goreng", icon: "🍜" },
+            { id: 30, code: "MG1", name: "Mee Goreng Ayam", price: 4.50, category: "Mee Goreng", icon: "🍜" },
+            { id: 31, code: "MG2", name: "Mee Goreng Daging", price: 4.50, category: "Mee Goreng", icon: "🍜" },
+            { id: 32, code: "KG1", name: "Kueh Teow Goreng Ayam", price: 4.50, category: "Kueh Teow Goreng", icon: "🍜" },
+            { id: 33, code: "KG2", name: "Kueh Teow Goreng Daging", price: 4.50, category: "Kueh Teow Goreng", icon: "🍜" },
+            { id: 34, code: "BG1", name: "Bihun Goreng Ayam", price: 4.50, category: "Bihun Goreng", icon: "🍜" },
+            { id: 35, code: "BG2", name: "Bihun Goreng Daging", price: 4.50, category: "Bihun Goreng", icon: "🍜" },
+            { id: 36, code: "MB1", name: "Mee Basah Ayam", price: 4.50, category: "Mee Basah", icon: "🍜" },
+            { id: 37, code: "KB1", name: "Kueh Teow Basah Ayam", price: 4.50, category: "Kueh Teow Basah", icon: "🍜" },
+            { id: 38, code: "BB1", name: "Bihun Basah Ayam", price: 4.50, category: "Bihun Basah", icon: "🍜" },
+            { id: 39, code: "I1", name: "Indomie Goreng Special", price: 4.00, category: "Indomie", icon: "🍜" },
             { id: 163, code: "T1", name: "Tea", price: 1.00, category: "Hot Drinks", icon: "☕" },
             { id: 164, code: "T2", name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "☕" },
             { id: 165, code: "T3", name: "Coffee", price: 1.20, category: "Hot Drinks", icon: "☕" },
@@ -672,7 +698,7 @@
         let dailyHistoryRecords = {};
         let staffShifts = {};
         let takeawaySequenceCounter = 100;
-        let defaultCategoryOrder = ["Roti", "Dosai", "Nasi Campur", "Burger", "Nasi Goreng", "Murtabak", "Mee Goreng", "Mee Basah", "Indomie", "Rojak & Sayur", "Soto", "Special", "Soup", "Tom Yum", "Mee Soup", "Kueh Teow Soup", "Kolo Mee", "Hot Drinks", "Sejuk", "Fresh Juice", "Milk Shake", "Minimum Tin"];
+        let defaultCategoryOrder = ["Roti", "Dosai", "Nasi Goreng", "Mee Goreng", "Kueh Teow Goreng", "Bihun Goreng", "Mee Basah", "Kueh Teow Basah", "Bihun Basah", "Indomie", "Murtabak", "Burger", "Nasi Campur", "Hot Drinks", "Sejuk", "Fresh Juice", "Milk Shake"];
         let categoryOrder = [];
 
         let cart = [];
@@ -682,12 +708,14 @@
         let isPrinting = false;
         let loggedInRole = "";
         let currentOrderType = "Dine-In";
-        let isCustomerSubmitted = false; // Tracks if customer already submitted order
+        
+        let customerHadActiveOrder = false;
 
         db.ref('menuData').on('value', (snapshot) => {
             const val = snapshot.val();
             if (val && Array.isArray(val)) { menuData = val; }
             else { menuData = defaultMenuData; db.ref('menuData').set(defaultMenuData); }
+            sortCategoriesByOrderFrequency();
             renderCategories(); populateCategoryDropdown(); renderMenu();
         });
 
@@ -695,6 +723,7 @@
             const val = snapshot.val();
             if (val && Array.isArray(val)) { categoryOrder = val; }
             else { categoryOrder = defaultCategoryOrder; db.ref('categoryOrder').set(defaultCategoryOrder); }
+            sortCategoriesByOrderFrequency();
             renderCategories(); populateCategoryDropdown();
         });
 
@@ -708,19 +737,10 @@
             activeOrders = snapshot.val() || {}; 
             renderVisualTables(); 
             renderVisualTakeaways(); 
-
-            // Check if current customer order got cleared (paid/closed by admin)
-            const urlParams = new URLSearchParams(window.location.search);
-            const tableParam = urlParams.get('table');
-            if (tableParam && isCustomerSubmitted) {
-                if (!activeOrders[tableParam]) {
-                    // Order was cleared / paid by cashier -> Trigger immediate logout/timeout screen
-                    showTimeoutScreen();
-                }
-            }
+            checkCustomerPaymentStatus(); 
         });
-
-        db.ref('sales').on('value', (snapshot) => { completedSales = snapshot.val() || []; updateStats(); });
+        
+        db.ref('sales').on('value', (snapshot) => { completedSales = snapshot.val() || []; sortCategoriesByOrderFrequency(); updateStats(); });
         db.ref('rawMaterials').on('value', (snapshot) => { rawMaterials = snapshot.val() || []; });
         db.ref('dailyExpenses').on('value', (snapshot) => { dailyExpenses = snapshot.val() || []; updateStats(); });
         db.ref('dailyHistoryRecords').on('value', (snapshot) => { dailyHistoryRecords = snapshot.val() || {}; });
@@ -728,10 +748,39 @@
 
         setInterval(() => { renderVisualTables(); renderVisualTakeaways(); }, 1000);
 
-        function showTimeoutScreen() {
-            document.getElementById('main-app').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('timeout-screen').style.display = 'flex';
+        // --- AUTOMATIC CATEGORY SORTING BASED ON ORDER FREQUENCY ---
+        function sortCategoriesByOrderFrequency() {
+            let catCounts = {};
+            completedSales.forEach(sale => {
+                if(sale.items) {
+                    sale.items.forEach(i => {
+                        let cat = i.category;
+                        if(cat) { catCounts[cat] = (catCounts[cat] || 0) + i.qty; }
+                    });
+                }
+            });
+
+            let currentCats = getAllCategories();
+            currentCats.sort((a, b) => {
+                let countA = catCounts[a] || 0;
+                let countB = catCounts[b] || 0;
+                if(countB !== countA) return countB - countA; // Most ordered first
+                return defaultCategoryOrder.indexOf(a) - defaultCategoryOrder.indexOf(b);
+            });
+            categoryOrder = currentCats;
+        }
+
+        function checkCustomerPaymentStatus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tableParam = urlParams.get('table');
+            
+            if (tableParam) {
+                if (activeOrders[tableParam]) {
+                    customerHadActiveOrder = true;
+                } else if (customerHadActiveOrder && !activeOrders[tableParam]) {
+                    window.location.href = "https://www.google.com";
+                }
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -753,26 +802,27 @@
                 document.getElementById('btn-print-bill-elem').style.display = 'none';
                 document.getElementById('btn-pay-elem').style.display = 'none';
                 document.getElementById('btn-drawer-elem').style.display = 'none';
-                document.getElementById('customer-btn-group').style.display = 'flex';
+                document.getElementById('btn-customer-order-elem').style.display = 'block';
                 document.getElementById('visual-tables-section').style.display = 'none';
                 document.getElementById('visual-takeaway-section').style.display = 'none';
 
-                if (activeOrders[tableParam] && activeOrders[tableParam].items) { 
-                    cart = JSON.parse(JSON.stringify(activeOrders[tableParam].items)); 
-                    isCustomerSubmitted = true;
-                } else {
-                    cart = [];
-                    isCustomerSubmitted = false;
-                }
+                if (activeOrders[tableParam] && activeOrders[tableParam].items) { cart = JSON.parse(JSON.stringify(activeOrders[tableParam].items)); }
                 updateCart();
 
-                // 15-minute inactivity timeout backup
                 let customerTimeout;
-                const timeoutDuration = 15 * 60 * 1000;
+                const timeoutDuration = 15 * 60 * 1000; 
+
+                function showTimeoutScreen() {
+                    document.getElementById('main-app').style.display = 'none';
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('timeout-screen').style.display = 'flex';
+                }
+
                 function resetCustomerTimeout() {
                     clearTimeout(customerTimeout);
                     customerTimeout = setTimeout(showTimeoutScreen, timeoutDuration);
                 }
+
                 window.addEventListener('load', resetCustomerTimeout);
                 window.addEventListener('mousemove', resetCustomerTimeout);
                 window.addEventListener('mousedown', resetCustomerTimeout);
@@ -947,6 +997,7 @@
         }
 
         function renderCategories() {
+            sortCategoriesByOrderFrequency();
             let categories = ["All", ...getAllCategories()];
             const filterContainer = document.getElementById('category-filters'); if(!filterContainer) return;
             filterContainer.innerHTML = '';
@@ -994,7 +1045,6 @@
         }
 
         function addToCart(id) {
-            // If customer already submitted, adding items goes to cart for 'Add More'
             const item = menuData.find(m => m.id === id);
             const cartItem = cart.find(c => c.id === id);
             if (cartItem) cartItem.qty += 1;
@@ -1019,12 +1069,27 @@
                 subtotal += item.customPrice * item.qty;
                 let catLower = (item.category || "").toLowerCase();
                 let nameLower = (item.name || "").toLowerCase();
+                
                 let isRoti = catLower.includes('roti') || catLower.includes('dosai') || nameLower.includes('roti') || nameLower.includes('dosai');
+                let isGorengOrBasah = !isRoti && !catLower.includes('drink') && !catLower.includes('juice') && !catLower.includes('milk') && !catLower.includes('tin');
+
                 let noteHtml = '';
                 if (isRoti) {
                     if (!item.selectedNotes) item.selectedNotes = [];
-                    noteHtml = `<div class="note-checkboxes"><label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Curry Ayam') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Curry Ayam', this)"> Ayam</label><label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Dhal') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Dhal', this)"> Dhal</label></div>`;
+                    noteHtml = `<div class="note-checkboxes">
+                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Curry Ayam') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Curry Ayam', this)"> Ayam</label>
+                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Dhal') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Dhal', this)"> Dhal</label>
+                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Ikan') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Ikan', this)"> Ikan</label>
+                    </div>`;
+                } else if (isGorengOrBasah) {
+                    if (!item.selectedNotes) item.selectedNotes = [];
+                    noteHtml = `<div class="note-checkboxes">
+                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('No Sayur') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'No Sayur', this)"> No Sayur</label>
+                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('No Pedas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'No Pedas', this)"> No Pedas</label>
+                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Extra Pedas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Extra Pedas', this)"> Extra Pedas</label>
+                    </div>`;
                 }
+
                 noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value">`;
                 tbody.innerHTML += `<tr><td><div class="cart-item-name">${item.name}</div>${noteHtml}</td><td><div class="qty-controls"><button class="qty-btn" onclick="decreaseQty(${item.id})">-</button><span>${item.qty}</span><button class="qty-btn" onclick="increaseQty(${item.id})">+</button></div></td><td style="text-align:right;"><input type="number" class="price-input" value="${item.customPrice.toFixed(2)}" step="0.50" oninput="updateItemPrice(${item.id}, this.value)"></td></tr>`;
             });
@@ -1166,7 +1231,7 @@
             }
 
             delete activeOrders[refName]; db.ref('activeOrders').set(activeOrders);
-            cart = []; document.getElementById('discount-input').value = "0.00"; updateCart(); renderVisualTables(); renderVisualTakeaways(); switchOrderMode(currentOrderType); updateStats();
+            cart = []; document.getElementById('discount-input').value = "0.00"; updateCart(); renderVisualTables(); renderVisualTakeaways(); switchOrderMode(currentOrderType); sortCategoriesByOrderFrequency(); updateStats();
             alert("✅ Payment Successful! Change: $" + change.toFixed(2));
         }
 
@@ -1314,21 +1379,31 @@
             let table = new URLSearchParams(window.location.search).get('table') || "Table 1";
             let existing = activeOrders[table] ? activeOrders[table].items : [];
             let merged = [...existing];
+            
             cart.forEach(item => {
                 let found = merged.find(i => i.id === item.id && getFormattedItemNotes(i) === getFormattedItemNotes(item));
                 if(found) found.qty += item.qty; else merged.push(item);
             });
+            
             activeOrders[table] = { time: activeOrders[table]?.time || Date.now(), type: "Dine-In", items: merged };
             db.ref('activeOrders').set(activeOrders);
-            isCustomerSubmitted = true;
-            alert("Al Hussain Restaurant - Thank you for ordering! Your order has been sent to the kitchen.");
-            cart = JSON.parse(JSON.stringify(merged));
+            
+            let listHtml = '<ul>';
+            merged.forEach(i => {
+                let notes = getFormattedItemNotes(i);
+                listHtml += `<li style="margin-bottom: 5px;"><b>${i.qty} x</b> ${i.name} ${notes ? `<span style="font-size:12px; color:#64748b;">(${notes})</span>` : ''}</li>`;
+            });
+            listHtml += '</ul>';
+            document.getElementById('customer-ordered-items').innerHTML = listHtml;
+            
+            document.getElementById('customer-success-screen').style.display = 'flex';
+            
+            cart = [];
             updateCart();
         }
 
-        function addMoreItemsMode() {
-            // Allows customer to clear view or add more items to existing order
-            alert("நீங்கள் கூடுதலாக விரும்பும் ஐட்டங்களைச் சேர்த்து 'Send to Kitchen' கொடுக்கலாம்.");
+        function continueOrdering() {
+            document.getElementById('customer-success-screen').style.display = 'none';
         }
     </script>
 </body>
