@@ -40,16 +40,16 @@
         .btn-logout:hover { background: #ef4444; color: white; }
         
         /* Table Selection & Admin Grid View */
-        #table-selection-view { display: flex; flex-direction: column; flex: 1; padding: 15px; box-sizing: border-box; overflow-y: auto; background: #f8fafc; gap: 15px; }
-        .table-selection-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); flex-shrink: 0; }
-        .table-selection-header h2 { margin: 0; color: #0f172a; font-size: 18px; font-weight: 900; }
+        #table-selection-view { display: flex; flex-direction: column; flex: 1; padding: 15px; box-sizing: border-box; overflow-y: auto; background: #f8fafc; gap: 12px; }
+        .table-selection-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); flex-shrink: 0; }
+        .table-selection-header h2 { margin: 0; color: #0f172a; font-size: 17px; font-weight: 900; }
         
         .big-tables-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
         @media (max-width: 1100px) { .big-tables-grid { grid-template-columns: repeat(4, 1fr); } }
         @media (max-width: 800px) { .big-tables-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 550px) { .big-tables-grid { grid-template-columns: repeat(2, 1fr); } }
 
-        .big-table-card { background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 14px 8px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 3px 8px rgba(0,0,0,0.02); position: relative; }
+        .big-table-card { background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 3px 8px rgba(0,0,0,0.02); position: relative; }
         .big-table-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(79, 70, 229, 0.08); border-color: #4f46e5; }
         .big-table-card.occupied { background: linear-gradient(135deg, #fee2e2, #fecaca); border-color: #f87171; }
         .big-table-card.free { background: linear-gradient(135deg, #dcfce7, #bbf7d0); border-color: #4ade80; }
@@ -145,15 +145,17 @@
         #customer-action-div button { width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); transition: 0.3s; }
         #customer-action-div button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3); }
 
-        /* Admin Dashboard Section on Table View */
-        .admin-dashboard-container { background: white; padding: 16px; border-radius: 14px; border: 2px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: none; margin-top: 10px; }
-        .admin-dashboard-container h3 { margin-top: 0; color: #0f172a; font-size: 16px; font-weight: 900; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; }
-        .btn-small { background: #4f46e5; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; font-family: inherit; }
-        .btn-cat-add { background: #059669; color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; font-family: inherit; }
-        .stat-box { background: #f8fafc; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #e2e8f0; font-size: 15px; font-weight: 900; color: #4f46e5; }
+        /* Super Clean & Compact Admin Dashboard Card Layout */
+        .admin-dashboard-container { background: white; padding: 10px 14px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: none; margin-top: 4px; }
+        .admin-dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; margin-bottom: 8px; }
+        .admin-dashboard-header h3 { margin: 0; color: #0f172a; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
         
-        .admin-buttons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin-top: 12px; }
-        .admin-btn { color: white; border: none; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; font-family: inherit; text-align: left; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-small { background: #4f46e5; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; font-family: inherit; }
+        .btn-cat-add { background: #059669; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; font-family: inherit; }
+        .stat-box { background: #f8fafc; padding: 4px 8px; border-radius: 6px; text-align: center; border: 1px solid #e2e8f0; font-size: 12px; font-weight: 900; color: #4f46e5; }
+        
+        .admin-buttons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 5px; margin-top: 6px; }
+        .admin-btn { color: white; border: none; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; font-family: inherit; text-align: left; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
         .admin-btn:hover { opacity: 0.9; }
         .manage-menu-btn { background: #0284c7; }
         .manage-cat-btn { background: #7c3aed; }
@@ -164,7 +166,7 @@
         .monthly-btn { background: #2563eb; }
         .staff-btn { background: #d97706; }
         .history-btn { background: #475569; }
-        .close-day-btn { background: #dc2626; text-align: center; justify-content: center; font-size: 14px; padding: 12px; grid-column: 1 / -1; }
+        .close-day-btn { background: #dc2626; text-align: center; justify-content: center; font-size: 11px; padding: 7px; grid-column: 1 / -1; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 15px; box-sizing: border-box; }
         .modal-content { background: white; width: 100%; max-width: 750px; max-height: 85vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
@@ -239,47 +241,37 @@
         <div id="table-selection-view">
             <div class="table-selection-header">
                 <h2>🪑 Select Table / Order</h2>
-                <button class="btn-small" style="background:#059669; padding: 8px 14px; font-size: 13px;" onclick="startTakeawayOrder()">📦 + New Takeaway</button>
+                <button class="btn-small" style="background:#059669; padding: 7px 12px; font-size: 12px;" onclick="startTakeawayOrder()">📦 + New Takeaway</button>
             </div>
             <div id="big-tables-grid" class="big-tables-grid"></div>
 
             <div id="admin-dashboard-section" class="admin-dashboard-container">
-                <h3>⚙️ Admin Dashboard & Management</h3>
-                
-                <div style="margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
-                    <b style="font-size:12px; color:#475569;">➕ Add New Menu Item:</b>
-                    <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; align-items: center;">
-                        <input type="text" id="add-m-name" placeholder="Item Name" style="padding: 7px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 2; outline: none; font-size: 12px; font-family: inherit;">
-                        <select id="add-m-cat" style="padding: 7px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 2; outline: none; font-size: 12px; font-weight: bold; color: #4f46e5; background: white; font-family: inherit;"></select>
-                        <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 7px; border: 1px solid #cbd5e1; border-radius: 8px; width: 70px; outline: none; font-size: 12px; font-family: inherit;">
-                        <button class="btn-small" style="padding: 7px 14px; font-size: 12px;" onclick="addNewMenuItem()">Add</button>
-                    </div>
-                    <div style="margin-top: 6px; text-align: right;">
-                        <button class="btn-cat-add" onclick="addNewCategoryPrompt()">+ Add Category</button>
+                <div class="admin-dashboard-header">
+                    <h3>⚙️ Admin Dashboard & Management</h3>
+                    <div style="display:flex; gap:8px;">
+                        <div class="stat-box">Sales: $<span id="stat-sales">0.00</span></div>
+                        <div class="stat-box" style="color:#ea580c;">Exp: $<span id="stat-expenses">0.00</span></div>
                     </div>
                 </div>
-
-                <div style="display:flex; gap:10px; margin-bottom: 12px;">
-                    <div class="stat-box" style="flex:1;">
-                        <div style="font-size:11px; color:#64748b;">Today Sales</div>
-                        $<span id="stat-sales">0.00</span>
-                    </div>
-                    <div class="stat-box" style="flex:1; color:#ea580c;">
-                        <div style="font-size:11px; color:#64748b;">Expenses</div>
-                        $<span id="stat-expenses">0.00</span>
-                    </div>
+                
+                <div style="margin-bottom: 6px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center;">
+                    <input type="text" id="add-m-name" placeholder="New Item Name" style="padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 2; outline: none; font-size: 11px; font-family: inherit;">
+                    <select id="add-m-cat" style="padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 1.5; outline: none; font-size: 11px; font-weight: bold; color: #4f46e5; background: white; font-family: inherit;"></select>
+                    <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; width: 60px; outline: none; font-size: 11px; font-family: inherit;">
+                    <button class="btn-small" style="padding: 5px 10px; font-size: 11px;" onclick="addNewMenuItem()">+ Add</button>
+                    <button class="btn-cat-add" onclick="addNewCategoryPrompt()">+ Category</button>
                 </div>
 
                 <div class="admin-buttons-grid">
-                    <button class="admin-btn manage-menu-btn" onclick="openMenuManagerModal()">⚙️ Manage Menu Items & Prices</button>
-                    <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">📁 Manage Categories</button>
-                    <button class="admin-btn stock-btn" onclick="openStockModal()">📦 Manual Stock (Raw Materials)</button>
-                    <button class="admin-btn expense-btn" onclick="openExpenseModal()">💸 Add Daily Expense (Jamans)</button>
-                    <button class="admin-btn staff-btn" onclick="openStaffPerformanceModal()">👥 Staff Shift & Performance Tracking</button>
-                    <button class="admin-btn report-btn" onclick="openItemReportModal()">📊 Daily Item Sold Report</button>
-                    <button class="admin-btn monthly-btn" onclick="openMonthlyReportModal()">📅 View Monthly Sales & Expenses</button>
-                    <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">📱 Customer QR Ordering Link</button>
-                    <button class="admin-btn history-btn" onclick="openHistoryModal()">📋 View Sales History</button>
+                    <button class="admin-btn manage-menu-btn" onclick="openMenuManagerModal()">⚙️ Manage Menu & Prices</button>
+                    <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">📁 Categories Priority</button>
+                    <button class="admin-btn stock-btn" onclick="openStockModal()">📦 Manual Stock</button>
+                    <button class="admin-btn expense-btn" onclick="openExpenseModal()">💸 Daily Expense (Jamans)</button>
+                    <button class="admin-btn staff-btn" onclick="openStaffPerformanceModal()">👥 Staff Shift Tracking</button>
+                    <button class="admin-btn report-btn" onclick="openItemReportModal()">📊 Daily Items Report</button>
+                    <button class="admin-btn monthly-btn" onclick="openMonthlyReportModal()">📅 Monthly History</button>
+                    <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">📱 Customer QR Code Link</button>
+                    <button class="admin-btn history-btn" onclick="openHistoryModal()">📋 Sales History</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">🔒 Day Close (End of Day)</button>
                 </div>
             </div>
@@ -571,6 +563,8 @@
                 document.getElementById('payment-method-row').style.display = 'none';
                 document.getElementById('staff-action-buttons').style.display = 'none'; 
                 document.getElementById('customer-action-div').style.display = 'block'; 
+                
+                document.getElementById('admin-dashboard-section').style.display = 'none';
 
                 currentSelectedTable = tableParam;
                 currentOrderType = "Dine-In";
@@ -612,7 +606,6 @@
             const user = document.getElementById('login-user').value.trim().toLowerCase();
             const pass = document.getElementById('login-pass').value.trim();
             
-            const adminDashboardSection = document.getElementById('admin-dashboard-section');
             const billSummaryContainer = document.getElementById('bill-summary-container');
             const btnPrintBill = document.getElementById('btn-print-bill-elem');
             const btnPay = document.getElementById('btn-pay-elem');
@@ -623,7 +616,6 @@
             let roleKey = "";
             if (user === "admin" && pass === "admin123") {
                 loggedInRole = "admin";
-                adminDashboardSection.style.display = "block";
                 billSummaryContainer.style.display = "block";
                 btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block";
                 roleKey = "Admin 👑";
@@ -631,7 +623,6 @@
             } 
             else if (user === "user1" && pass === "1234") {
                 loggedInRole = "user1";
-                adminDashboardSection.style.display = "none";
                 billSummaryContainer.style.display = "block";
                 btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block";
                 roleKey = "Staff 👨‍🍳";
@@ -639,7 +630,6 @@
             }
             else if (user === "user2" && pass === "1234") {
                 loggedInRole = "user2";
-                adminDashboardSection.style.display = "none";
                 billSummaryContainer.style.display = "none";
                 btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block";
                 roleKey = "Order Taker 📝";
@@ -664,6 +654,13 @@
 
             document.getElementById('table-selection-view').style.display = 'flex';
             document.getElementById('pos-main-view').style.display = 'none';
+
+            if (loggedInRole === "admin") {
+                document.getElementById('admin-dashboard-section').style.display = 'block';
+            } else {
+                document.getElementById('admin-dashboard-section').style.display = 'none';
+            }
+
             renderBigTableSelectionGrid();
             updateStats();
         }
@@ -754,6 +751,13 @@
             saveOrderToTableSilent();
             document.getElementById('pos-main-view').style.display = 'none';
             document.getElementById('table-selection-view').style.display = 'flex';
+            
+            if (loggedInRole === "admin") {
+                document.getElementById('admin-dashboard-section').style.display = 'block';
+            } else {
+                document.getElementById('admin-dashboard-section').style.display = 'none';
+            }
+
             renderBigTableSelectionGrid();
         }
 
