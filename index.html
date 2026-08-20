@@ -33,126 +33,123 @@
         .timeout-box h2 { color: #1e293b; margin-top: 0; margin-bottom: 10px; font-size: 22px; font-weight: 800; }
         .timeout-box p { color: #64748b; font-size: 15px; line-height: 1.5; margin: 0; font-weight: 600; }
 
-        #customer-success-screen { z-index: 4000; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); }
-        .success-box { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); width: 100%; max-width: 450px; text-align: center; }
-        .success-box h1 { font-size: 50px; margin: 0 0 10px 0; }
-        .success-box h2 { color: #10b981; margin: 0 0 5px 0; font-weight: 900; font-size: 24px; }
-        .success-box p { color: #64748b; font-size: 14px; font-weight: 700; margin-bottom: 20px; }
-        .order-summary-list { text-align: left; background: #f1f5f9; padding: 15px; border-radius: 12px; max-height: 250px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        .order-summary-list ul { padding-left: 20px; margin: 0; color: #334155; font-size: 14px; font-weight: 800; line-height: 1.6; }
-        .btn-add-more { background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-add-more:hover { transform: translateY(-2px); opacity: 0.9; }
-
-        .header { background: white; padding: 10px 20px; margin: 10px 15px 0 15px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); flex-shrink: 0; }
-        .header h2 { margin: 0; font-size: 17px; font-weight: 800; color: #4f46e5; display: flex; align-items: center; gap: 8px; }
-        .badge { background: #e0e7ff; color: #4338ca; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; }
-        .btn-logout { background: #fef2f2; color: #ef4444; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
+        .header { background: white; padding: 8px 15px; margin: 8px 10px 0 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); flex-shrink: 0; }
+        .header h2 { margin: 0; font-size: 15px; font-weight: 800; color: #4f46e5; display: flex; align-items: center; gap: 6px; }
+        .badge { background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; }
+        .btn-logout { background: #fef2f2; color: #ef4444; border: 1px solid #fca5a5; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 11px; transition: 0.2s; }
         .btn-logout:hover { background: #ef4444; color: white; }
         
         /* Table Selection Grid View (Compact 4-5 per row) */
-        #table-selection-view { display: flex; flex-direction: column; flex: 1; padding: 20px; box-sizing: border-box; overflow-y: auto; background: #f8fafc; }
-        .table-selection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 15px 20px; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .table-selection-header h2 { margin: 0; color: #0f172a; font-size: 20px; font-weight: 900; }
+        #table-selection-view { display: flex; flex-direction: column; flex: 1; padding: 15px; box-sizing: border-box; overflow-y: auto; background: #f8fafc; }
+        .table-selection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: white; padding: 12px 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .table-selection-header h2 { margin: 0; color: #0f172a; font-size: 18px; font-weight: 900; }
         
-        .big-tables-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+        .big-tables-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
         @media (max-width: 1100px) { .big-tables-grid { grid-template-columns: repeat(4, 1fr); } }
         @media (max-width: 800px) { .big-tables-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 550px) { .big-tables-grid { grid-template-columns: repeat(2, 1fr); } }
 
-        .big-table-card { background: white; border: 2px solid #e2e8f0; border-radius: 14px; padding: 16px 10px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 3px 8px rgba(0,0,0,0.02); position: relative; }
+        .big-table-card { background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 14px 8px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 3px 8px rgba(0,0,0,0.02); position: relative; }
         .big-table-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(79, 70, 229, 0.08); border-color: #4f46e5; }
         .big-table-card.occupied { background: linear-gradient(135deg, #fee2e2, #fecaca); border-color: #f87171; }
         .big-table-card.free { background: linear-gradient(135deg, #dcfce7, #bbf7d0); border-color: #4ade80; }
-        .big-table-card h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 900; color: #1e293b; }
+        .big-table-card h3 { margin: 0 0 4px 0; font-size: 15px; font-weight: 900; color: #1e293b; }
         .big-table-card p { margin: 0; font-size: 11px; font-weight: 800; color: #64748b; line-height: 1.3; }
 
         /* Main POS View */
         #pos-main-view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
-        .main-layout { display: flex; flex: 1; padding: 10px 15px 15px 15px; box-sizing: border-box; gap: 15px; overflow: hidden; }
+        
+        /* Mobile Tab Switcher (Visible only on smaller screens) */
+        .mobile-tab-bar { display: none; background: white; padding: 8px 15px; gap: 10px; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+        .mob-tab-btn { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; background: #f1f5f9; color: #64748b; font-family: inherit; transition: 0.2s; }
+        .mob-tab-btn.active { background: #4f46e5; color: white; }
+
+        .main-layout { display: flex; flex: 1; padding: 10px; box-sizing: border-box; gap: 12px; overflow: hidden; }
         .left-panel { flex: 6.5; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
-        .right-panel { flex: 3.5; background: white; border-radius: 18px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); display: flex; flex-direction: column; overflow-y: auto; padding: 15px; box-sizing: border-box; height: 100%; }
+        .right-panel { flex: 3.5; background: white; border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); display: flex; flex-direction: column; overflow-y: auto; padding: 12px; box-sizing: border-box; height: 100%; }
         
         @media (max-width: 900px) {
-            body { height: auto; overflow: auto; }
-            .main-layout { flex-direction: column; height: auto; overflow: visible; }
-            .left-panel { height: 600px; flex: none; }
-            .right-panel { height: auto; flex: none; overflow-y: visible; }
+            .mobile-tab-bar { display: flex; }
+            .main-layout { padding: 8px; }
+            /* Mobile tab logic: hide one panel based on active tab */
+            .left-panel.mobile-hidden, .right-panel.mobile-hidden { display: none !important; }
+            .left-panel, .right-panel { flex: 1; height: 100%; }
         }
 
-        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; flex-wrap: wrap; background: white; padding: 10px; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); flex-shrink: 0; }
-        .search-container { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 380px; }
-        .search-box { padding: 8px 14px; border-radius: 10px; border: 1px solid #e2e8f0; width: 100%; outline: none; font-size: 13px; font-family: inherit; background: #f8fafc; transition: 0.3s; }
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; flex-wrap: wrap; background: white; padding: 8px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); flex-shrink: 0; }
+        .search-container { display: flex; align-items: center; gap: 6px; width: 100%; max-width: 380px; }
+        .search-box { padding: 7px 12px; border-radius: 8px; border: 1px solid #e2e8f0; width: 100%; outline: none; font-size: 13px; font-family: inherit; background: #f8fafc; transition: 0.3s; }
         .search-box:focus { border-color: #4f46e5; background: white; }
         
-        .btn-menu-refresh { background: #e0f2fe; color: #0284c7; border: none; padding: 8px 12px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; white-space: nowrap; }
+        .btn-menu-refresh { background: #e0f2fe; color: #0284c7; border: none; padding: 7px 10px; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer; white-space: nowrap; }
         .btn-menu-refresh:hover { background: #0284c7; color: white; }
         .btn-clear { background: #fef2f2; color: #ef4444; }
         .btn-clear:hover { background: #ef4444; color: white; }
 
-        .category-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; width: 100%; scroll-behavior: smooth; }
-        .cat-btn { background: white; border: 1px solid #e2e8f0; padding: 6px 14px; border-radius: 20px; color: #64748b; font-weight: 700; cursor: pointer; white-space: nowrap; font-size: 13px; font-family: inherit; transition: 0.3s; }
+        .category-filters { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; width: 100%; scroll-behavior: smooth; }
+        .cat-btn { background: white; border: 1px solid #e2e8f0; padding: 5px 12px; border-radius: 20px; color: #64748b; font-weight: 700; cursor: pointer; white-space: nowrap; font-size: 12px; font-family: inherit; transition: 0.3s; }
         .cat-btn.active, .cat-btn:hover { background: #4f46e5; color: white; border-color: #4f46e5; transform: translateY(-1px); }
         
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; overflow-y: auto; padding-right: 4px; padding-bottom: 10px; flex: 1; }
-        .menu-card { background: white; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; position: relative; border: 1px solid #f1f5f9; cursor: pointer; transition: all 0.3s; height: 100px; box-sizing: border-box; box-shadow: 0 3px 5px rgba(0,0,0,0.02); }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; overflow-y: auto; padding-right: 4px; padding-bottom: 10px; flex: 1; }
+        .menu-card { background: white; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; position: relative; border: 1px solid #f1f5f9; cursor: pointer; transition: all 0.3s; height: 95px; box-sizing: border-box; box-shadow: 0 3px 5px rgba(0,0,0,0.02); }
         .menu-card:hover { border-color: #c7d2fe; box-shadow: 0 8px 15px rgba(79, 70, 229, 0.08); transform: translateY(-2px); }
         
-        .card-code { position: absolute; top: 10px; left: 10px; background: #f1f5f9; color: #64748b; font-size: 10px; font-weight: 800; padding: 3px 6px; border-radius: 6px; }
-        .card-icon { position: absolute; top: 10px; right: 10px; font-size: 20px; }
-        .card-title { font-weight: 800; font-size: 13px; margin-top: 22px; color: #1e293b; line-height: 1.2; }
+        .card-code { position: absolute; top: 8px; left: 8px; background: #f1f5f9; color: #64748b; font-size: 10px; font-weight: 800; padding: 2px 5px; border-radius: 5px; }
+        .card-icon { position: absolute; top: 8px; right: 8px; font-size: 18px; }
+        .card-title { font-weight: 800; font-size: 12px; margin-top: 20px; color: #1e293b; line-height: 1.2; }
         .card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-        .card-price { font-weight: 800; font-size: 15px; color: #4f46e5; }
-        .btn-add { background: #4f46e5; color: white; width: 24px; height: 24px; border-radius: 6px; font-size: 14px; display: flex; justify-content: center; align-items: center; font-weight: bold; opacity: 0; transition: 0.3s; }
+        .card-price { font-weight: 800; font-size: 14px; color: #4f46e5; }
+        .btn-add { background: #4f46e5; color: white; width: 22px; height: 22px; border-radius: 6px; font-size: 13px; display: flex; justify-content: center; align-items: center; font-weight: bold; opacity: 0; transition: 0.3s; }
         .menu-card:hover .btn-add { opacity: 1; }
 
-        .right-panel h3 { margin-top: 0; color: #0f172a; font-size: 16px; font-weight: 800; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .right-panel h3 { margin-top: 0; color: #0f172a; font-size: 15px; font-weight: 800; margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
         
-        .cart-table-wrapper { height: auto; margin-bottom: 10px; padding-right: 4px; min-height: 100px; overflow-y: visible; flex-shrink: 0; }
+        .cart-table-wrapper { height: auto; margin-bottom: 8px; padding-right: 4px; min-height: 80px; overflow-y: visible; flex-shrink: 0; }
         
-        table { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
-        th { color: #94a3b8; padding: 0 8px; text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; }
-        td { padding: 10px 8px; background: #f8fafc; vertical-align: top; }
-        td:first-child { border-radius: 10px 0 0 10px; }
-        td:last-child { border-radius: 0 10px 10px 0; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 5px; }
+        th { color: #94a3b8; padding: 0 6px; text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+        td { padding: 8px 6px; background: #f8fafc; vertical-align: top; }
+        td:first-child { border-radius: 8px 0 0 8px; }
+        td:last-child { border-radius: 0 8px 8px 0; }
         
-        .cart-item-name { font-weight: 800; font-size: 13px; color: #1e293b; margin-bottom: 4px; }
-        .note-checkboxes { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-        .note-label { background: white; color: #64748b; border: 1px solid #e2e8f0; padding: 3px 6px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+        .cart-item-name { font-weight: 800; font-size: 12px; color: #1e293b; margin-bottom: 3px; }
+        .note-checkboxes { display: flex; gap: 5px; margin-top: 3px; flex-wrap: wrap; }
+        .note-label { background: white; color: #64748b; border: 1px solid #e2e8f0; padding: 2px 5px; border-radius: 5px; font-size: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
         .note-label input { accent-color: #4f46e5; width: 10px; height: 10px; cursor: pointer; }
-        .comment-input { width: 95%; padding: 5px 8px; margin-top: 4px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; font-size: 11px; outline: none; font-family: inherit; }
-        .price-input { width: 55px; padding: 5px; border: 1px solid #e2e8f0; border-radius: 6px; text-align: right; font-weight: 800; font-size: 13px; outline: none; background: white; color: #4f46e5; font-family: inherit; }
+        .comment-input { width: 95%; padding: 4px 6px; margin-top: 3px; border: 1px solid #e2e8f0; background: white; border-radius: 5px; font-size: 11px; outline: none; font-family: inherit; }
+        .price-input { width: 50px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 5px; text-align: right; font-weight: 800; font-size: 12px; outline: none; background: white; color: #4f46e5; font-family: inherit; }
         
-        .qty-controls { display: flex; align-items: center; gap: 8px; background: white; padding: 3px; border-radius: 6px; border: 1px solid #e2e8f0; width: max-content; }
-        .qty-btn { background: transparent; border: none; width: 20px; height: 20px; border-radius: 4px; cursor: pointer; font-weight: bold; color: #4f46e5; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        .qty-controls { display: flex; align-items: center; gap: 6px; background: white; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; width: max-content; }
+        .qty-btn { background: transparent; border: none; width: 18px; height: 18px; border-radius: 3px; cursor: pointer; font-weight: bold; color: #4f46e5; font-size: 13px; display: flex; align-items: center; justify-content: center; }
         .qty-btn:hover { background: #f1f5f9; }
-        .qty-controls span { font-weight: 800; font-size: 13px; width: 12px; text-align: center; }
+        .qty-controls span { font-weight: 800; font-size: 12px; width: 10px; text-align: center; }
         
-        .bill-summary { background: #f8fafc; padding: 12px; border-radius: 14px; margin-bottom: 10px; border: 1px solid #f1f5f9; flex-shrink: 0; }
-        .summary-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 6px; align-items: center; }
-        .summary-row input { width: 75px; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: right; outline: none; font-weight: bold; font-family: inherit; }
-        .total-row { display: flex; justify-content: space-between; font-size: 18px; font-weight: 900; color: #0f172a; margin-top: 8px; border-top: 2px dashed #e2e8f0; padding-top: 10px; }
+        .bill-summary { background: #f8fafc; padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #f1f5f9; flex-shrink: 0; }
+        .summary-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 5px; align-items: center; }
+        .summary-row input { width: 70px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 5px; text-align: right; outline: none; font-weight: bold; font-family: inherit; }
+        .total-row { display: flex; justify-content: space-between; font-size: 16px; font-weight: 900; color: #0f172a; margin-top: 6px; border-top: 2px dashed #e2e8f0; padding-top: 8px; }
         
-        #payment-method { padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 800; background: white; font-size: 12px; font-family: inherit; outline: none; cursor: pointer; color: #334155; }
+        #payment-method { padding: 5px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 800; background: white; font-size: 11px; font-family: inherit; outline: none; cursor: pointer; color: #334155; }
 
-        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0; margin-bottom: 15px; }
-        .action-buttons button { border: none; padding: 10px; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex-shrink: 0; margin-bottom: 12px; }
+        .action-buttons button { border: none; padding: 9px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 11px; font-family: inherit; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .action-buttons button:hover { transform: translateY(-1px); opacity: 0.9; }
         
         .btn-hold { background: #fffbeb; color: #d97706; border: 1px solid #fde68a !important; }
         .btn-kitchen { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd !important; }
         .btn-print-bill { background: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe !important; }
-        .btn-pay { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0 !important; font-size: 13px; }
-        .btn-drawer { grid-column: span 2; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0 !important; padding: 8px !important; }
-        .btn-back-tables { grid-column: span 2; background: #64748b; color: white; padding: 10px; font-size: 13px; border-radius: 10px; }
+        .btn-pay { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0 !important; font-size: 12px; }
+        .btn-drawer { grid-column: span 2; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0 !important; padding: 7px !important; }
+        .btn-back-tables { grid-column: span 2; background: #64748b; color: white; padding: 9px; font-size: 12px; border-radius: 8px; }
 
-        .admin-section { margin-bottom: 10px; display: none; background: #ffffff; padding: 12px; border-radius: 14px; border: 2px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); flex-shrink: 0; }
-        .admin-section h3 { margin-top: 0; color: #0f172a; font-size: 15px; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px; }
-        .btn-small { background: #4f46e5; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; font-family: inherit; }
-        .btn-cat-add { background: #059669; color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; font-family: inherit; }
-        .stat-box { background: #f8fafc; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #e2e8f0; font-size: 14px; font-weight: 900; color: #4f46e5; }
+        .admin-section { margin-bottom: 8px; display: none; background: #ffffff; padding: 10px; border-radius: 12px; border: 2px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); flex-shrink: 0; }
+        .admin-section h3 { margin-top: 0; color: #0f172a; font-size: 14px; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; }
+        .btn-small { background: #4f46e5; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; font-family: inherit; }
+        .btn-cat-add { background: #059669; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; font-family: inherit; }
+        .stat-box { background: #f8fafc; padding: 6px; border-radius: 6px; text-align: center; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 900; color: #4f46e5; }
         
-        .admin-buttons-grid { display: grid; grid-template-columns: 1fr; gap: 5px; margin-top: 10px; }
-        .admin-btn { color: white; border: none; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; font-family: inherit; text-align: left; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .admin-buttons-grid { display: grid; grid-template-columns: 1fr; gap: 4px; margin-top: 8px; }
+        .admin-btn { color: white; border: none; padding: 7px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; font-family: inherit; text-align: left; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         .admin-btn:hover { opacity: 0.9; }
         .manage-menu-btn { background: #0284c7; }
         .manage-cat-btn { background: #7c3aed; }
@@ -163,7 +160,7 @@
         .monthly-btn { background: #2563eb; }
         .staff-btn { background: #d97706; }
         .history-btn { background: #475569; }
-        .close-day-btn { background: #dc2626; text-align: center; justify-content: center; font-size: 13px; padding: 10px; margin-top: 6px; }
+        .close-day-btn { background: #dc2626; text-align: center; justify-content: center; font-size: 12px; padding: 8px; margin-top: 4px; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 15px; box-sizing: border-box; }
         .modal-content { background: white; width: 100%; max-width: 750px; max-height: 85vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
@@ -238,26 +235,31 @@
         <div id="table-selection-view">
             <div class="table-selection-header">
                 <h2>🪑 Select Table / Order</h2>
-                <button class="btn-small" style="background:#059669; padding: 10px 16px; font-size: 14px;" onclick="startTakeawayOrder()">📦 + New Takeaway Order</button>
+                <button class="btn-small" style="background:#059669; padding: 8px 14px; font-size: 13px;" onclick="startTakeawayOrder()">📦 + New Takeaway</button>
             </div>
             <div id="big-tables-grid" class="big-tables-grid"></div>
         </div>
 
         <div id="pos-main-view">
+            <div class="mobile-tab-bar">
+                <button class="mob-tab-btn active" id="tab-menu-btn" onclick="switchMobileTab('menu')">📂 Menu Items</button>
+                <button class="mob-tab-btn" id="tab-cart-btn" onclick="switchMobileTab('cart')">🛒 Cart & Billing</button>
+            </div>
+
             <div class="main-layout">
-                <div class="left-panel">
+                <div class="left-panel" id="panel-menu">
                     <div class="controls-bar">
                         <div class="search-container">
-                            <input type="text" id="search-input" class="search-box" placeholder="🔍 Search item or code (e.g. R1, T1)..." onkeyup="handleSearchInput(event)">
+                            <input type="text" id="search-input" class="search-box" placeholder="🔍 Search item or code (e.g. R1)..." onkeyup="handleSearchInput(event)">
                             <button class="btn-menu-refresh btn-clear" onclick="clearSearch()" title="Clear Search">❌</button>
-                            <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">🔄 Refresh</button>
+                            <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">🔄</button>
                         </div>
                         <div class="category-filters" id="category-filters"></div>
                     </div>
                     <div id="menu-grid" class="menu-grid"></div>
                 </div>
 
-                <div class="right-panel">
+                <div class="right-panel mobile-hidden" id="panel-cart">
                     <h3 id="cart-panel-title">🛒 Order: Table 1</h3>
                     
                     <div class="cart-table-wrapper">
@@ -281,8 +283,8 @@
                             <span style="color: #4f46e5;">$<span id="total-amount">0.00</span></span>
                         </div>
                         
-                        <div id="payment-method-row" style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
-                            <span style="font-size: 13px; font-weight: 800; color: #64748b;">Method:</span>
+                        <div id="payment-method-row" style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+                            <span style="font-size: 12px; font-weight: 800; color: #64748b;">Method:</span>
                             <select id="payment-method">
                                 <option value="Cash">Cash 💵</option>
                                 <option value="Card">Card 💳</option>
@@ -303,33 +305,33 @@
                     <div id="admin-panel" class="admin-section">
                         <h3>⚙️ Admin Dashboard</h3>
                         
-                        <div style="margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
-                            <b style="font-size:12px; color:#475569;">➕ Add New Menu Item:</b>
-                            <div style="display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; align-items: center;">
-                                <input type="text" id="add-m-name" placeholder="Item Name" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 2; outline: none; font-size: 11px; font-family: inherit;">
-                                <select id="add-m-cat" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 2; outline: none; font-size: 11px; font-weight: bold; color: #4f46e5; background: white; font-family: inherit;"></select>
-                                <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; width: 55px; outline: none; font-size: 11px; font-family: inherit;">
-                                <button class="btn-small" style="padding: 6px 10px; font-size: 11px;" onclick="addNewMenuItem()">Add</button>
+                        <div style="margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                            <b style="font-size:11px; color:#475569;">➕ Add Menu Item:</b>
+                            <div style="display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; align-items: center;">
+                                <input type="text" id="add-m-name" placeholder="Item Name" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 5px; flex: 2; outline: none; font-size: 11px; font-family: inherit;">
+                                <select id="add-m-cat" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 5px; flex: 2; outline: none; font-size: 11px; font-weight: bold; color: #4f46e5; background: white; font-family: inherit;"></select>
+                                <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 5px; width: 50px; outline: none; font-size: 11px; font-family: inherit;">
+                                <button class="btn-small" style="padding: 5px 8px; font-size: 10px;" onclick="addNewMenuItem()">Add</button>
                             </div>
-                            <div style="margin-top: 5px; text-align: right;">
-                                <button class="btn-cat-add" onclick="addNewCategoryPrompt()">+ Add Category</button>
+                            <div style="margin-top: 4px; text-align: right;">
+                                <button class="btn-cat-add" onclick="addNewCategoryPrompt()">+ Category</button>
                             </div>
                         </div>
 
-                        <div style="display:flex; gap:8px;">
+                        <div style="display:flex; gap:6px;">
                             <div class="stat-box" style="flex:1;">
-                                <div style="font-size:10px; color:#64748b;">Today Sales</div>
+                                <div style="font-size:9px; color:#64748b;">Today Sales</div>
                                 $<span id="stat-sales">0.00</span>
                             </div>
                             <div class="stat-box" style="flex:1; color:#ea580c;">
-                                <div style="font-size:10px; color:#64748b;">Expenses</div>
+                                <div style="font-size:9px; color:#64748b;">Expenses</div>
                                 $<span id="stat-expenses">0.00</span>
                             </div>
                         </div>
 
                         <div class="admin-buttons-grid">
                             <button class="admin-btn manage-menu-btn" onclick="openMenuManagerModal()">⚙️ Manage Menu Items & Prices</button>
-                            <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">📁 Manage Categories (Rename/Order/Delete)</button>
+                            <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">📁 Manage Categories</button>
                             <button class="admin-btn stock-btn" onclick="openStockModal()">📦 Manual Stock (Raw Materials)</button>
                             <button class="admin-btn expense-btn" onclick="openExpenseModal()">💸 Add Daily Expense (Jamans)</button>
                             <button class="admin-btn staff-btn" onclick="openStaffPerformanceModal()">👥 Staff Shift & Performance Tracking</button>
@@ -551,29 +553,6 @@
 
                 if (activeOrders[tableParam] && activeOrders[tableParam].items) { cart = JSON.parse(JSON.stringify(activeOrders[tableParam].items)); }
                 updateCart();
-
-                let customerTimeout;
-                const timeoutDuration = 15 * 60 * 1000; 
-
-                function showTimeoutScreen() {
-                    document.getElementById('main-app').style.display = 'none';
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('timeout-screen').style.display = 'flex';
-                }
-
-                function resetCustomerTimeout() {
-                    clearTimeout(customerTimeout);
-                    customerTimeout = setTimeout(showTimeoutScreen, timeoutDuration);
-                }
-
-                window.addEventListener('load', resetCustomerTimeout);
-                window.addEventListener('mousemove', resetCustomerTimeout);
-                window.addEventListener('mousedown', resetCustomerTimeout);
-                window.addEventListener('touchstart', resetCustomerTimeout);
-                window.addEventListener('click', resetCustomerTimeout);
-                window.addEventListener('keypress', resetCustomerTimeout);
-                window.addEventListener('scroll', resetCustomerTimeout);
-
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-app').style.display = 'none';
@@ -641,6 +620,25 @@
         function logout() { location.href = liveBaseUrl; }
         function refreshMenuData() { renderMenu(); alert("🔄 Menu Refreshed!"); }
 
+        function switchMobileTab(tabName) {
+            const menuPanel = document.getElementById('panel-menu');
+            const cartPanel = document.getElementById('panel-cart');
+            const menuBtn = document.getElementById('tab-menu-btn');
+            const cartBtn = document.getElementById('tab-cart-btn');
+
+            if (tabName === 'menu') {
+                menuPanel.classList.remove('mobile-hidden');
+                cartPanel.classList.add('mobile-hidden');
+                menuBtn.classList.add('active');
+                cartBtn.classList.remove('active');
+            } else {
+                menuPanel.classList.add('mobile-hidden');
+                cartPanel.classList.remove('mobile-hidden');
+                menuBtn.classList.remove('active');
+                cartBtn.classList.add('active');
+            }
+        }
+
         function formatElapsedTime(startTime) {
             let diffSec = Math.floor((Date.now() - startTime) / 1000);
             let mins = Math.floor(diffSec / 60); let secs = diffSec % 60;
@@ -690,6 +688,7 @@
 
             document.getElementById('table-selection-view').style.display = 'none';
             document.getElementById('pos-main-view').style.display = 'flex';
+            switchMobileTab('menu');
         }
 
         function startTakeawayOrder() {
