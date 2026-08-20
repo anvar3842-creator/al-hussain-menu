@@ -715,7 +715,6 @@
             const val = snapshot.val();
             if (val && Array.isArray(val)) { menuData = val; }
             else { menuData = defaultMenuData; db.ref('menuData').set(defaultMenuData); }
-            sortCategoriesByOrderFrequency();
             renderCategories(); populateCategoryDropdown(); renderMenu();
         });
 
@@ -723,7 +722,6 @@
             const val = snapshot.val();
             if (val && Array.isArray(val)) { categoryOrder = val; }
             else { categoryOrder = defaultCategoryOrder; db.ref('categoryOrder').set(defaultCategoryOrder); }
-            sortCategoriesByOrderFrequency();
             renderCategories(); populateCategoryDropdown();
         });
 
@@ -740,35 +738,13 @@
             checkCustomerPaymentStatus(); 
         });
         
-        db.ref('sales').on('value', (snapshot) => { completedSales = snapshot.val() || []; sortCategoriesByOrderFrequency(); updateStats(); });
+        db.ref('sales').on('value', (snapshot) => { completedSales = snapshot.val() || []; updateStats(); });
         db.ref('rawMaterials').on('value', (snapshot) => { rawMaterials = snapshot.val() || []; });
         db.ref('dailyExpenses').on('value', (snapshot) => { dailyExpenses = snapshot.val() || []; updateStats(); });
         db.ref('dailyHistoryRecords').on('value', (snapshot) => { dailyHistoryRecords = snapshot.val() || {}; });
         db.ref('staffShifts').on('value', (snapshot) => { staffShifts = snapshot.val() || {}; });
 
         setInterval(() => { renderVisualTables(); renderVisualTakeaways(); }, 1000);
-
-        // --- AUTOMATIC CATEGORY SORTING BASED ON ORDER FREQUENCY ---
-        function sortCategoriesByOrderFrequency() {
-            let catCounts = {};
-            completedSales.forEach(sale => {
-                if(sale.items) {
-                    sale.items.forEach(i => {
-                        let cat = i.category;
-                        if(cat) { catCounts[cat] = (catCounts[cat] || 0) + i.qty; }
-                    });
-                }
-            });
-
-            let currentCats = getAllCategories();
-            currentCats.sort((a, b) => {
-                let countA = catCounts[a] || 0;
-                let countB = catCounts[b] || 0;
-                if(countB !== countA) return countB - countA; // Most ordered first
-                return defaultCategoryOrder.indexOf(a) - defaultCategoryOrder.indexOf(b);
-            });
-            categoryOrder = currentCats;
-        }
 
         function checkCustomerPaymentStatus() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -997,7 +973,6 @@
         }
 
         function renderCategories() {
-            sortCategoriesByOrderFrequency();
             let categories = ["All", ...getAllCategories()];
             const filterContainer = document.getElementById('category-filters'); if(!filterContainer) return;
             filterContainer.innerHTML = '';
@@ -1011,10 +986,21 @@
         }
 
         function renderMenu() {
-            const searchText = document.getElementById('search-input').value.toLowerCase();
+            const searchText = document.getElementById('search-input').value.trim().toLowerCase();
             const grid = document.getElementById('menu-grid'); if(!grid) return; grid.innerHTML = '';
-            let filtered = menuData.filter(item => item.name.toLowerCase().includes(searchText) || (item.code && item.code.toLowerCase().includes(searchText)));
-            if (currentCategory !== "All") filtered = filtered.filter(item => item.category === currentCategory);
+            
+            let filtered = menuData;
+            
+            if (searchText !== "") {
+                filtered = menuData.filter(item => {
+                    let nameMatch = item.name && item.name.toLowerCase().includes(searchText);
+                    let codeMatch = item.code && item.code.toString().toLowerCase().includes(searchText);
+                    return nameMatch || codeMatch;
+                });
+            } else if (currentCategory !== "All") {
+                filtered = menuData.filter(item => item.category === currentCategory);
+            }
+
             filtered.forEach(item => {
                 const card = document.createElement('div'); card.className = 'menu-card';
                 card.onclick = () => addToCart(item.id);
@@ -1025,11 +1011,13 @@
 
         function clearSearch() { document.getElementById('search-input').value = ''; renderMenu(); }
         function handleSearchInput(event) {
-            const searchText = document.getElementById('search-input').value.trim();
+            const searchText = document.getElementById('search-input').value.trim().toLowerCase();
             if (event.key === 'Enter' && searchText !== '') {
-                let foundItem = menuData.find(m => m.code && m.code.toLowerCase() === searchText.toLowerCase());
+                let foundItem = menuData.find(m => m.code && m.code.toString().toLowerCase() === searchText);
                 if (foundItem) { addToCart(foundItem.id); document.getElementById('search-input').value = ''; renderMenu(); }
-            } else renderMenu();
+            } else {
+                renderMenu();
+            }
         }
 
         function addNewMenuItem() {
@@ -1231,7 +1219,7 @@
             }
 
             delete activeOrders[refName]; db.ref('activeOrders').set(activeOrders);
-            cart = []; document.getElementById('discount-input').value = "0.00"; updateCart(); renderVisualTables(); renderVisualTakeaways(); switchOrderMode(currentOrderType); sortCategoriesByOrderFrequency(); updateStats();
+            cart = []; document.getElementById('discount-input').value = "0.00"; updateCart(); renderVisualTables(); renderVisualTakeaways(); switchOrderMode(currentOrderType); updateStats();
             alert("✅ Payment Successful! Change: $" + change.toFixed(2));
         }
 
@@ -1391,7 +1379,7 @@
             let listHtml = '<ul>';
             merged.forEach(i => {
                 let notes = getFormattedItemNotes(i);
-                listHtml += `<li style="margin-bottom: 5px;"><b>${i.qty} x</b> ${i.name} ${notes ? `<span style="font-size:12px; color:#64748b;">(${notes})</span>` : ''}</li>`;
+                listHtml += `<li style=\"margin-bottom: 5px;\"><b>${i.qty} x</b> ${i.name} ${notes ? `<span style=\"font-size:12px; color:#64748b;\">(${notes})</span>` : ''}</li>`;
             });
             listHtml += '</ul>';
             document.getElementById('customer-ordered-items').innerHTML = listHtml;
