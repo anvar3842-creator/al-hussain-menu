@@ -49,10 +49,27 @@
         .btn-logout { background: #fef2f2; color: #ef4444; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
         .btn-logout:hover { background: #ef4444; color: white; }
         
+        /* Table Selection Grid View (Compact 4-5 per row) */
+        #table-selection-view { display: flex; flex-direction: column; flex: 1; padding: 20px; box-sizing: border-box; overflow-y: auto; background: #f8fafc; }
+        .table-selection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 15px 20px; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .table-selection-header h2 { margin: 0; color: #0f172a; font-size: 20px; font-weight: 900; }
+        
+        .big-tables-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+        @media (max-width: 1100px) { .big-tables-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 800px) { .big-tables-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 550px) { .big-tables-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .big-table-card { background: white; border: 2px solid #e2e8f0; border-radius: 14px; padding: 16px 10px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 3px 8px rgba(0,0,0,0.02); position: relative; }
+        .big-table-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(79, 70, 229, 0.08); border-color: #4f46e5; }
+        .big-table-card.occupied { background: linear-gradient(135deg, #fee2e2, #fecaca); border-color: #f87171; }
+        .big-table-card.free { background: linear-gradient(135deg, #dcfce7, #bbf7d0); border-color: #4ade80; }
+        .big-table-card h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 900; color: #1e293b; }
+        .big-table-card p { margin: 0; font-size: 11px; font-weight: 800; color: #64748b; line-height: 1.3; }
+
+        /* Main POS View */
+        #pos-main-view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
         .main-layout { display: flex; flex: 1; padding: 10px 15px 15px 15px; box-sizing: border-box; gap: 15px; overflow: hidden; }
-        
         .left-panel { flex: 6.5; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
-        
         .right-panel { flex: 3.5; background: white; border-radius: 18px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); display: flex; flex-direction: column; overflow-y: auto; padding: 15px; box-sizing: border-box; height: 100%; }
         
         @media (max-width: 900px) {
@@ -89,11 +106,6 @@
         .menu-card:hover .btn-add { opacity: 1; }
 
         .right-panel h3 { margin-top: 0; color: #0f172a; font-size: 16px; font-weight: 800; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-        .mode-tabs { display: flex; gap: 6px; margin-bottom: 10px; background: #f8fafc; padding: 4px; border-radius: 10px; flex-shrink: 0; }
-        .mode-tab { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; background: transparent; color: #64748b; transition: 0.3s; font-family: inherit; }
-        .mode-tab.active { background: white; color: #4f46e5; box-shadow: 0 3px 8px rgba(0,0,0,0.05); }
-        
-        .order-controls select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; outline: none; font-size: 13px; font-weight: 800; background: #f8fafc; color: #334155; margin-bottom: 10px; font-family: inherit; cursor: pointer; flex-shrink: 0; }
         
         .cart-table-wrapper { height: auto; margin-bottom: 10px; padding-right: 4px; min-height: 100px; overflow-y: visible; flex-shrink: 0; }
         
@@ -131,15 +143,7 @@
         .btn-print-bill { background: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe !important; }
         .btn-pay { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0 !important; font-size: 13px; }
         .btn-drawer { grid-column: span 2; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0 !important; padding: 8px !important; }
-        .btn-customer-order { grid-column: span 2; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 12px; font-size: 15px; border-radius: 10px; display: none; }
-
-        .visual-tables-section-box, .visual-takeaway-section-box { margin-bottom: 12px; flex-shrink: 0; }
-        .visual-tables-grid, .visual-takeaway-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; max-height: 140px; overflow-y: auto; padding-right: 4px; }
-        .v-table-card { padding: 10px 6px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: 800; font-size: 11px; color: white; border: none; position: relative; font-family: inherit; }
-        .v-table-free { background: linear-gradient(135deg, #10b981, #34d399); }
-        .v-table-occupied { background: linear-gradient(135deg, #ef4444, #f87171); }
-        .v-takeaway-card { padding: 10px 6px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: 800; font-size: 11px; color: white; background: linear-gradient(135deg, #f59e0b, #fbbf24); border: none; position: relative; font-family: inherit; }
-        .v-cancel-btn { position: absolute; top: -5px; right: -5px; background: #0f172a; color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; }
+        .btn-back-tables { grid-column: span 2; background: #64748b; color: white; padding: 10px; font-size: 13px; border-radius: 10px; }
 
         .admin-section { margin-bottom: 10px; display: none; background: #ffffff; padding: 12px; border-radius: 14px; border: 2px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); flex-shrink: 0; }
         .admin-section h3 { margin-top: 0; color: #0f172a; font-size: 15px; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px; }
@@ -181,7 +185,6 @@
         .qr-card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 10px; }
         .qr-card { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 15px; text-align: center; }
         .qr-card h4 { margin: 5px 0 10px 0; color: #4f46e5; font-size: 16px; font-weight: 800; }
-        .qr-img-box { display: inline-block; background: white; padding: 5px; border-radius: 8px; }
 
         table.admin-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
         table.admin-table th { background: #f1f5f9; color: #475569; padding: 8px; text-align: left; font-weight: 800; border-bottom: 2px solid #e2e8f0; }
@@ -211,24 +214,6 @@
 </head>
 <body>
 
-    <div id="customer-success-screen" class="timeout-overlay">
-        <div class="success-box">
-            <h1>🎉</h1>
-            <h2>Thank You for Ordering!</h2>
-            <p>Your order has been successfully sent to the kitchen.</p>
-            <div class="order-summary-list" id="customer-ordered-items"></div>
-            <button class="btn-add-more" onclick="continueOrdering()">➕ Add More Items</button>
-        </div>
-    </div>
-
-    <div id="timeout-screen" class="timeout-overlay" style="z-index: 5000;">
-        <div class="timeout-box">
-            <h1>⏳</h1>
-            <h2>Session Expired</h2>
-            <p>For your security, this page has been closed due to 15 minutes of inactivity.<br><br>Please scan the QR code on your table to order again.</p>
-        </div>
-    </div>
-
     <div id="login-screen" class="login-overlay">
         <div class="login-box">
             <h2>✨ Welcome to POS</h2>
@@ -247,129 +232,113 @@
                 <h2 id="app-header-title">🍽️ Al Hussain Restaurant POS</h2>
                 <span class="badge" id="display-user">Admin</span>
             </div>
-            <button class="btn-logout" id="logout-btn-elem" onclick="logout()">Logout</button>
+            <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
 
-        <div class="main-layout">
-            <div class="left-panel">
-                <div class="controls-bar">
-                    <div class="search-container">
-                        <input type="text" id="search-input" class="search-box" placeholder="🔍 Search item or code (e.g. R1, T1)..." onkeyup="handleSearchInput(event)">
-                        <button class="btn-menu-refresh btn-clear" onclick="clearSearch()" title="Clear Search">❌</button>
-                        <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">🔄 Refresh</button>
-                    </div>
-                    <div class="category-filters" id="category-filters"></div>
-                </div>
-                <div id="menu-grid" class="menu-grid"></div>
+        <div id="table-selection-view">
+            <div class="table-selection-header">
+                <h2>🪑 Select Table / Order</h2>
+                <button class="btn-small" style="background:#059669; padding: 10px 16px; font-size: 14px;" onclick="startTakeawayOrder()">📦 + New Takeaway Order</button>
             </div>
+            <div id="big-tables-grid" class="big-tables-grid"></div>
+        </div>
 
-            <div class="right-panel">
-                <h3 id="cart-panel-title">🛒 Current Order</h3>
-                
-                <div class="mode-tabs">
-                    <button class="mode-tab active" id="tab-dinein" onclick="switchOrderMode('Dine-In')">🪑 Dine-In</button>
-                    <button class="mode-tab" id="tab-takeaway" onclick="switchOrderMode('Takeaway')">📦 Takeaway</button>
+        <div id="pos-main-view">
+            <div class="main-layout">
+                <div class="left-panel">
+                    <div class="controls-bar">
+                        <div class="search-container">
+                            <input type="text" id="search-input" class="search-box" placeholder="🔍 Search item or code (e.g. R1, T1)..." onkeyup="handleSearchInput(event)">
+                            <button class="btn-menu-refresh btn-clear" onclick="clearSearch()" title="Clear Search">❌</button>
+                            <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">🔄 Refresh</button>
+                        </div>
+                        <div class="category-filters" id="category-filters"></div>
+                    </div>
+                    <div id="menu-grid" class="menu-grid"></div>
                 </div>
 
-                <div class="order-controls" id="order-controls-container">
-                    <select id="table-no" onchange="onTableChange()">
-                        <option value="Table 1">Table 1</option><option value="Table 2">Table 2</option><option value="Table 3">Table 3</option>
-                        <option value="Table 4">Table 4</option><option value="Table 5">Table 5</option><option value="Table 6">Table 6</option>
-                        <option value="Table 7">Table 7</option><option value="Table 8">Table 8</option><option value="Table 9">Table 9</option>
-                        <option value="Table 10">Table 10</option><option value="Table 11">Table 11</option><option value="Table 12">Table 12</option><option value="Table 13">Table 13</option>
-                    </select>
-                </div>
-
-                <div class="cart-table-wrapper">
-                    <table>
-                        <thead><tr><th>Item & Notes</th><th>Qty</th><th style="text-align:right;">Price ($)</th></tr></thead>
-                        <tbody id="cart-items"></tbody>
-                    </table>
-                </div>
-
-                <div class="bill-summary" id="bill-summary-container">
-                    <div class="summary-row">
-                        <span>Subtotal</span>
-                        <span>$<span id="sub-total">0.00</span></span>
-                    </div>
-                    <div class="summary-row" id="discount-row-elem">
-                        <span>Discount ($)</span>
-                        <input type="number" id="discount-input" value="0.00" min="0" step="0.50" oninput="updateCart()">
-                    </div>
-                    <div class="total-row">
-                        <span>Grand Total</span>
-                        <span style="color: #4f46e5;">$<span id="total-amount">0.00</span></span>
-                    </div>
+                <div class="right-panel">
+                    <h3 id="cart-panel-title">🛒 Order: Table 1</h3>
                     
-                    <div id="payment-method-row" style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
-                        <span style="font-size: 13px; font-weight: 800; color: #64748b;">Method:</span>
-                        <select id="payment-method">
-                            <option value="Cash">Cash 💵</option>
-                            <option value="Card">Card 💳</option>
-                            <option value="QR Pay">QR Pay 📱</option>
-                        </select>
+                    <div class="cart-table-wrapper">
+                        <table>
+                            <thead><tr><th>Item & Notes</th><th>Qty</th><th style="text-align:right;">Price ($)</th></tr></thead>
+                            <tbody id="cart-items"></tbody>
+                        </table>
                     </div>
-                </div>
 
-                <div class="action-buttons">
-                    <button class="btn-hold" id="btn-hold-elem" onclick="saveOrderToTableAndPrintKOT()">🕒 Hold & KOT</button>
-                    <button class="btn-kitchen" id="btn-kitchen-elem" onclick="printKitchenKOT()">🍳 Kitchen</button>
-                    <button id="btn-print-bill-elem" class="btn-print-bill" onclick="printCustomerBillOnly()">🖨️ Print Bill</button>
-                    <button id="btn-pay-elem" class="btn-pay" onclick="openPaymentModal()">💳 Pay Now</button>
-                    <button id="btn-drawer-elem" class="btn-drawer" onclick="openCashDrawerOnly()">🔓 Open Drawer</button>
-                    <button id="btn-customer-order-elem" class="btn-customer-order" onclick="submitCustomerOrder()">🚀 Send to Kitchen</button>
-                </div>
-
-                <div class="visual-tables-section-box" id="visual-tables-section">
-                    <h3 style="font-size: 13px; margin-bottom:6px; border:none; padding:0;">🪑 Dine-In Visual Tables</h3>
-                    <div id="visual-tables-grid" class="visual-tables-grid"></div>
-                </div>
-
-                <div class="visual-takeaway-section-box" id="visual-takeaway-section">
-                    <h3 style="font-size: 13px; margin-bottom:6px; border:none; padding:0;">📦 Takeaways Orders (<span id="takeaway-count">0</span>)</h3>
-                    <div id="visual-takeaway-grid" class="visual-takeaway-grid">
-                        <div style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 12px; padding: 6px;">No Active Takeaways</div>
-                    </div>
-                </div>
-
-                <div id="admin-panel" class="admin-section">
-                    <h3>⚙️ Admin Dashboard</h3>
-                    
-                    <div style="margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
-                        <b style="font-size:12px; color:#475569;">➕ Add New Menu Item:</b>
-                        <div style="display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; align-items: center;">
-                            <input type="text" id="add-m-name" placeholder="Item Name" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 2; outline: none; font-size: 11px; font-family: inherit;">
-                            <select id="add-m-cat" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 2; outline: none; font-size: 11px; font-weight: bold; color: #4f46e5; background: white; font-family: inherit;"></select>
-                            <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; width: 55px; outline: none; font-size: 11px; font-family: inherit;">
-                            <button class="btn-small" style="padding: 6px 10px; font-size: 11px;" onclick="addNewMenuItem()">Add</button>
+                    <div class="bill-summary" id="bill-summary-container">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span>$<span id="sub-total">0.00</span></span>
                         </div>
-                        <div style="margin-top: 5px; text-align: right;">
-                            <button class="btn-cat-add" onclick="addNewCategoryPrompt()">+ Add Category</button>
+                        <div class="summary-row" id="discount-row-elem">
+                            <span>Discount ($)</span>
+                            <input type="number" id="discount-input" value="0.00" min="0" step="0.50" oninput="updateCart()">
+                        </div>
+                        <div class="total-row">
+                            <span>Grand Total</span>
+                            <span style="color: #4f46e5;">$<span id="total-amount">0.00</span></span>
+                        </div>
+                        
+                        <div id="payment-method-row" style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+                            <span style="font-size: 13px; font-weight: 800; color: #64748b;">Method:</span>
+                            <select id="payment-method">
+                                <option value="Cash">Cash 💵</option>
+                                <option value="Card">Card 💳</option>
+                                <option value="QR Pay">QR Pay 📱</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div style="display:flex; gap:8px;">
-                        <div class="stat-box" style="flex:1;">
-                            <div style="font-size:10px; color:#64748b;">Today Sales</div>
-                            $<span id="stat-sales">0.00</span>
-                        </div>
-                        <div class="stat-box" style="flex:1; color:#ea580c;">
-                            <div style="font-size:10px; color:#64748b;">Expenses</div>
-                            $<span id="stat-expenses">0.00</span>
-                        </div>
+                    <div class="action-buttons">
+                        <button class="btn-hold" id="btn-hold-elem" onclick="saveOrderToTableAndPrintKOT()">🕒 Hold & KOT</button>
+                        <button class="btn-kitchen" id="btn-kitchen-elem" onclick="printKitchenKOT()">🍳 Kitchen</button>
+                        <button id="btn-print-bill-elem" class="btn-print-bill" onclick="printCustomerBillOnly()">🖨️ Print Bill</button>
+                        <button id="btn-pay-elem" class="btn-pay" onclick="openPaymentModal()">💳 Pay Now</button>
+                        <button id="btn-drawer-elem" class="btn-drawer" onclick="openCashDrawerOnly()">🔓 Open Drawer</button>
+                        <button class="btn-back-tables" onclick="backToTableSelection()">⬅️ Back to Tables Grid</button>
                     </div>
 
-                    <div class="admin-buttons-grid">
-                        <button class="admin-btn manage-menu-btn" onclick="openMenuManagerModal()">⚙️ Manage Menu Items & Prices</button>
-                        <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">📁 Manage Categories (Rename/Order/Delete)</button>
-                        <button class="admin-btn stock-btn" onclick="openStockModal()">📦 Manual Stock (Raw Materials)</button>
-                        <button class="admin-btn expense-btn" onclick="openExpenseModal()">💸 Add Daily Expense (Jamans)</button>
-                        <button class="admin-btn staff-btn" onclick="openStaffPerformanceModal()">👥 Staff Shift & Performance Tracking</button>
-                        <button class="admin-btn report-btn" onclick="openItemReportModal()">📊 Daily Item Sold Report</button>
-                        <button class="admin-btn monthly-btn" onclick="openMonthlyReportModal()">📅 View Monthly Sales & Expenses</button>
-                        <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">📱 Customer QR Ordering Link (Company Acc)</button>
-                        <button class="admin-btn history-btn" onclick="openHistoryModal()">📋 View Sales History</button>
-                        <button class="admin-btn close-day-btn" onclick="closeDay()">🔒 Day Close (End of Day)</button>
+                    <div id="admin-panel" class="admin-section">
+                        <h3>⚙️ Admin Dashboard</h3>
+                        
+                        <div style="margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                            <b style="font-size:12px; color:#475569;">➕ Add New Menu Item:</b>
+                            <div style="display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; align-items: center;">
+                                <input type="text" id="add-m-name" placeholder="Item Name" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 2; outline: none; font-size: 11px; font-family: inherit;">
+                                <select id="add-m-cat" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 2; outline: none; font-size: 11px; font-weight: bold; color: #4f46e5; background: white; font-family: inherit;"></select>
+                                <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; width: 55px; outline: none; font-size: 11px; font-family: inherit;">
+                                <button class="btn-small" style="padding: 6px 10px; font-size: 11px;" onclick="addNewMenuItem()">Add</button>
+                            </div>
+                            <div style="margin-top: 5px; text-align: right;">
+                                <button class="btn-cat-add" onclick="addNewCategoryPrompt()">+ Add Category</button>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:8px;">
+                            <div class="stat-box" style="flex:1;">
+                                <div style="font-size:10px; color:#64748b;">Today Sales</div>
+                                $<span id="stat-sales">0.00</span>
+                            </div>
+                            <div class="stat-box" style="flex:1; color:#ea580c;">
+                                <div style="font-size:10px; color:#64748b;">Expenses</div>
+                                $<span id="stat-expenses">0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-buttons-grid">
+                            <button class="admin-btn manage-menu-btn" onclick="openMenuManagerModal()">⚙️ Manage Menu Items & Prices</button>
+                            <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">📁 Manage Categories (Rename/Order/Delete)</button>
+                            <button class="admin-btn stock-btn" onclick="openStockModal()">📦 Manual Stock (Raw Materials)</button>
+                            <button class="admin-btn expense-btn" onclick="openExpenseModal()">💸 Add Daily Expense (Jamans)</button>
+                            <button class="admin-btn staff-btn" onclick="openStaffPerformanceModal()">👥 Staff Shift & Performance Tracking</button>
+                            <button class="admin-btn report-btn" onclick="openItemReportModal()">📊 Daily Item Sold Report</button>
+                            <button class="admin-btn monthly-btn" onclick="openMonthlyReportModal()">📅 View Monthly Sales & Expenses</button>
+                            <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">📱 Customer QR Ordering Link (Company Acc)</button>
+                            <button class="admin-btn history-btn" onclick="openHistoryModal()">📋 View Sales History</button>
+                            <button class="admin-btn close-day-btn" onclick="closeDay()">🔒 Day Close (End of Day)</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -504,6 +473,7 @@
         let currentCategory = "All";
         let isPrinting = false;
         let loggedInRole = "";
+        let currentSelectedTable = "";
         let currentOrderType = "Dine-In";
         
         let customerHadActiveOrder = false;
@@ -530,8 +500,7 @@
 
         db.ref('activeOrders').on('value', (snapshot) => { 
             activeOrders = snapshot.val() || {}; 
-            renderVisualTables(); 
-            renderVisualTakeaways(); 
+            renderBigTableSelectionGrid(); 
             checkCustomerPaymentStatus(); 
         });
         
@@ -541,7 +510,7 @@
         db.ref('dailyHistoryRecords').on('value', (snapshot) => { dailyHistoryRecords = snapshot.val() || {}; });
         db.ref('staffShifts').on('value', (snapshot) => { staffShifts = snapshot.val() || {}; });
 
-        setInterval(() => { renderVisualTables(); renderVisualTakeaways(); }, 1000);
+        setInterval(() => { renderBigTableSelectionGrid(); }, 1000);
 
         function checkCustomerPaymentStatus() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -566,8 +535,8 @@
                 document.getElementById('app-header-title').innerText = `🍽️ Al Hussain Restaurant - ${tableParam}`;
                 document.getElementById('display-user').innerText = tableParam;
                 
-                document.querySelector('.mode-tabs').style.display = 'none';
-                document.getElementById('order-controls-container').style.display = 'none';
+                document.getElementById('table-selection-view').style.display = 'none';
+                document.getElementById('pos-main-view').style.display = 'flex';
                 document.getElementById('discount-row-elem').style.display = 'none';
                 document.getElementById('payment-method-row').style.display = 'none';
                 document.getElementById('btn-hold-elem').style.display = 'none';
@@ -575,9 +544,10 @@
                 document.getElementById('btn-print-bill-elem').style.display = 'none';
                 document.getElementById('btn-pay-elem').style.display = 'none';
                 document.getElementById('btn-drawer-elem').style.display = 'none';
-                document.getElementById('btn-customer-order-elem').style.display = 'block';
-                document.getElementById('visual-tables-section').style.display = 'none';
-                document.getElementById('visual-takeaway-section').style.display = 'none';
+
+                currentSelectedTable = tableParam;
+                currentOrderType = "Dine-In";
+                document.getElementById('cart-panel-title').innerText = `🛒 Order: ${tableParam}`;
 
                 if (activeOrders[tableParam] && activeOrders[tableParam].items) { cart = JSON.parse(JSON.stringify(activeOrders[tableParam].items)); }
                 updateCart();
@@ -661,44 +631,86 @@
             document.getElementById('login-screen').style.display = "none";
             document.getElementById('main-app').style.display = "flex";
             document.getElementById('display-user').innerText = role;
-            switchOrderMode("Dine-In");
+            
+            document.getElementById('table-selection-view').style.display = 'flex';
+            document.getElementById('pos-main-view').style.display = 'none';
+            renderBigTableSelectionGrid();
             updateStats();
         }
 
         function logout() { location.href = liveBaseUrl; }
         function refreshMenuData() { renderMenu(); alert("🔄 Menu Refreshed!"); }
-        function generateNewTakeawayName() {
+
+        function formatElapsedTime(startTime) {
+            let diffSec = Math.floor((Date.now() - startTime) / 1000);
+            let mins = Math.floor(diffSec / 60); let secs = diffSec % 60;
+            return mins < 60 ? `${mins}m ${secs}s` : `${Math.floor(mins / 60)}h ${mins % 60}m`;
+        }
+
+        function renderBigTableSelectionGrid() {
+            const container = document.getElementById('big-tables-grid'); if(!container) return; container.innerHTML = '';
+            
+            for (let i = 1; i <= 13; i++) {
+                let tableName = `Table ${i}`;
+                let orderData = activeOrders[tableName];
+                let isOccupied = orderData !== undefined;
+                let cardClass = isOccupied ? "big-table-card occupied" : "big-table-card free";
+                let statusText = isOccupied ? `Occupied<br>⏱️ ${formatElapsedTime(orderData.time)}` : "Free Table";
+                let cancelBtn = (isOccupied && loggedInRole === "admin") ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tableName}', event)" style="position:absolute; top:6px; right:6px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; font-weight:bold; cursor:pointer;">X</button>` : '';
+
+                container.innerHTML += `<div class="${cardClass}" onclick="selectTableForOrder('${tableName}', 'Dine-In')">
+                    ${cancelBtn}
+                    <h3>${tableName}</h3>
+                    <p>${statusText}</p>
+                </div>`;
+            }
+
+            let takeawayKeys = Object.keys(activeOrders).filter(k => k.startsWith('Order-')).sort((a, b) => parseInt(a.replace('Order-','')) - parseInt(b.replace('Order-','')));
+            takeawayKeys.forEach(tkKey => {
+                let orderData = activeOrders[tkKey];
+                let count = orderData.items ? orderData.items.reduce((sum, i) => sum + i.qty, 0) : 0;
+                let cancelBtn = loggedInRole === "admin" ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tkKey}', event)" style="position:absolute; top:6px; right:6px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; font-weight:bold; cursor:pointer;">X</button>` : '';
+
+                container.innerHTML += `<div class="big-table-card occupied" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;" onclick="selectTableForOrder('${tkKey}', 'Takeaway')">
+                    ${cancelBtn}
+                    <h3 style="color:#b45309;">📦 ${tkKey}</h3>
+                    <p style="color:#92400e;">${count} Items<br>⏱️ ${formatElapsedTime(orderData.time)}</p>
+                </div>`;
+            });
+        }
+
+        function selectTableForOrder(tableName, orderType) {
+            currentSelectedTable = tableName;
+            currentOrderType = orderType;
+            document.getElementById('cart-panel-title').innerText = `🛒 Order: ${tableName}`;
+            
+            cart = activeOrders[tableName] ? JSON.parse(JSON.stringify(activeOrders[tableName].items)) : [];
+            document.getElementById('discount-input').value = "0.00";
+            updateCart();
+
+            document.getElementById('table-selection-view').style.display = 'none';
+            document.getElementById('pos-main-view').style.display = 'flex';
+        }
+
+        function startTakeawayOrder() {
             let nextNum = takeawaySequenceCounter++;
             if (takeawaySequenceCounter > 1000) takeawaySequenceCounter = 100;
             db.ref('takeawaySequenceCounter').set(takeawaySequenceCounter);
-            return `Order-${nextNum}`;
+            let newTkName = `Order-${nextNum}`;
+            selectTableForOrder(newTkName, 'Takeaway');
         }
 
-        function switchOrderMode(mode) {
-            currentOrderType = mode;
-            document.getElementById('tab-dinein').className = `mode-tab ${mode === 'Dine-In' ? 'active' : ''}`;
-            document.getElementById('tab-takeaway').className = `mode-tab ${mode === 'Takeaway' ? 'active' : ''}`;
-            const tableSelect = document.getElementById('table-no');
-            if(!tableSelect) return;
-            tableSelect.innerHTML = '';
-            if (mode === "Takeaway") {
-                let activeTakeaways = Object.keys(activeOrders).filter(k => k.startsWith('Order-'));
-                if (activeTakeaways.length > 0) {
-                    activeTakeaways.sort((a, b) => parseInt(a.replace('Order-', '')) - parseInt(b.replace('Order-', '')));
-                    activeTakeaways.forEach(tk => { tableSelect.innerHTML += `<option value="${tk}">${tk}</option>`; });
-                }
-                let tempNextName = `Order-${takeawaySequenceCounter} (New)`;
-                tableSelect.innerHTML += `<option value="${tempNextName}" selected>${tempNextName}</option>`;
-            } else {
-                for (let i = 1; i <= 13; i++) { tableSelect.innerHTML += `<option value="Table ${i}">Table ${i}</option>`; }
-            }
-            cart = []; document.getElementById('discount-input').value = "0.00"; updateCart();
+        function backToTableSelection() {
+            saveOrderToTableSilent();
+            document.getElementById('pos-main-view').style.display = 'none';
+            document.getElementById('table-selection-view').style.display = 'flex';
+            renderBigTableSelectionGrid();
         }
 
-        function onTableChange() {
-            const selectedKey = document.getElementById('table-no').value;
-            cart = activeOrders[selectedKey] ? JSON.parse(JSON.stringify(activeOrders[selectedKey].items)) : [];
-            document.getElementById('discount-input').value = "0.00"; updateCart();
+        function cancelActiveOrder(key, event) {
+            event.stopPropagation();
+            if (loggedInRole !== "admin") return alert("⚠️ Admin only!");
+            if (confirm(`Cancel active order ${key}?`)) { delete activeOrders[key]; db.ref('activeOrders').set(activeOrders); renderBigTableSelectionGrid(); }
         }
 
         function getAllCategories() {
@@ -867,6 +879,7 @@
             if (cartItem) cartItem.qty += 1;
             else cart.push({ ...item, qty: 1, customPrice: item.price, selectedNotes: [], customComment: "" });
             updateCart();
+            saveOrderToTableSilent();
         }
 
         function toggleItemNoteCheckbox(id, noteName, checkboxElem) {
@@ -876,6 +889,7 @@
                 if (checkboxElem.checked) { if (!cartItem.selectedNotes.includes(noteName)) cartItem.selectedNotes.push(noteName); } 
                 else { cartItem.selectedNotes = cartItem.selectedNotes.filter(n => n !== noteName); }
                 updateCart();
+                saveOrderToTableSilent();
             }
         }
 
@@ -907,7 +921,7 @@
                     </div>`;
                 }
 
-                noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value">`;
+                noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value; saveOrderToTableSilent();">`;
                 tbody.innerHTML += `<tr><td><div class="cart-item-name">${item.name}</div>${noteHtml}</td><td><div class="qty-controls"><button class="qty-btn" onclick="decreaseQty(${item.id})">-</button><span>${item.qty}</span><button class="qty-btn" onclick="increaseQty(${item.id})">+</button></div></td><td style="text-align:right;"><input type="number" class="price-input" value="${item.customPrice.toFixed(2)}" step="0.50" oninput="updateItemPrice(${item.id}, this.value)"></td></tr>`;
             });
             let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
@@ -915,9 +929,9 @@
             if(document.getElementById('total-amount')) document.getElementById('total-amount').innerText = Math.max(0, subtotal - discount).toFixed(2);
         }
 
-        function decreaseQty(id) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.qty -= 1; if (cartItem.qty <= 0) cart = cart.filter(c => c.id !== id); updateCart(); } }
-        function increaseQty(id) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.qty += 1; updateCart(); } }
-        function updateItemPrice(id, val) { let p = parseFloat(val); if (!isNaN(p) && p >= 0) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.customPrice = p; updateCart(); } } }
+        function decreaseQty(id) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.qty -= 1; if (cartItem.qty <= 0) cart = cart.filter(c => c.id !== id); updateCart(); saveOrderToTableSilent(); } }
+        function increaseQty(id) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.qty += 1; updateCart(); saveOrderToTableSilent(); } }
+        function updateItemPrice(id, val) { let p = parseFloat(val); if (!isNaN(p) && p >= 0) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.customPrice = p; updateCart(); saveOrderToTableSilent(); } } }
 
         function getFormattedItemNotes(item) {
             let parts = [];
@@ -926,61 +940,22 @@
             return parts.join(' | ');
         }
 
-        function getResolvedTargetKey() {
-            let currentVal = document.getElementById('table-no').value;
-            if (currentOrderType === "Takeaway" && (currentVal.includes('(New)') || currentVal === "")) return generateNewTakeawayName();
-            return currentVal;
+        function saveOrderToTableSilent() {
+            if (cart.length === 0 || !currentSelectedTable) return;
+            let existingTime = (activeOrders[currentSelectedTable] && activeOrders[currentSelectedTable].time) ? activeOrders[currentSelectedTable].time : Date.now();
+            activeOrders[currentSelectedTable] = { time: existingTime, type: currentOrderType, items: JSON.parse(JSON.stringify(cart)) };
+            db.ref('activeOrders').set(activeOrders);
         }
 
         function saveOrderToTable() {
             if (cart.length === 0) return alert("Cart is empty!");
-            let targetKey = getResolvedTargetKey();
-            let existingTime = (activeOrders[targetKey] && activeOrders[targetKey].time) ? activeOrders[targetKey].time : Date.now();
-            activeOrders[targetKey] = { time: existingTime, type: currentOrderType, items: JSON.parse(JSON.stringify(cart)) };
-            db.ref('activeOrders').set(activeOrders);
-            renderVisualTables(); renderVisualTakeaways(); 
+            saveOrderToTableSilent();
         }
 
-        // --- AUTOMATIC DEFAULT KOT PRINT ON HOLD & KOT ---
         function saveOrderToTableAndPrintKOT() { 
             if (cart.length === 0) return alert("Cart is empty!"); 
             saveOrderToTable(); 
             printKitchenKOTSilent(); 
-        }
-        
-        function cancelActiveOrder(key, event) {
-            event.stopPropagation();
-            if (loggedInRole !== "admin") return alert("⚠️ Admin only!");
-            if (confirm(`Cancel active order ${key}?`)) { delete activeOrders[key]; db.ref('activeOrders').set(activeOrders); renderVisualTables(); renderVisualTakeaways(); }
-        }
-
-        function formatElapsedTime(startTime) {
-            let diffSec = Math.floor((Date.now() - startTime) / 1000);
-            let mins = Math.floor(diffSec / 60); let secs = diffSec % 60;
-            return mins < 60 ? `${mins}m ${secs}s` : `${Math.floor(mins / 60)}h ${mins % 60}m`;
-        }
-
-        function renderVisualTables() {
-            const container = document.getElementById('visual-tables-grid'); if(!container) return; container.innerHTML = '';
-            for (let i = 1; i <= 13; i++) {
-                let tableName = `Table ${i}`; let orderData = activeOrders[tableName]; let isOccupied = orderData !== undefined;
-                let btnClass = isOccupied ? "v-table-card v-table-occupied" : "v-table-card v-table-free";
-                let statusText = isOccupied ? `Occupied<br><span style="font-size:9px;">⏱️ ${formatElapsedTime(orderData.time)}</span>` : "Free";
-                let cancelBtn = (isOccupied && loggedInRole === "admin") ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tableName}', event)">X</button>` : '';
-                container.innerHTML += `<button class="${btnClass}" onclick="switchOrderMode('Dine-In'); document.getElementById('table-no').value='${tableName}'; onTableChange();"><b>${tableName}</b><br>${statusText}${cancelBtn}</button>`;
-            }
-        }
-
-        function renderVisualTakeaways() {
-            const container = document.getElementById('visual-takeaway-grid'); const countBadge = document.getElementById('takeaway-count'); if(!container) return; container.innerHTML = '';
-            let takeawayKeys = Object.keys(activeOrders).filter(k => k.startsWith('Order-')).sort((a, b) => parseInt(a.replace('Order-','')) - parseInt(b.replace('Order-','')));
-            if(countBadge) countBadge.innerText = takeawayKeys.length;
-            if (takeawayKeys.length === 0) { container.innerHTML = `<div style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 11px;">No Active Takeaways</div>`; return; }
-            takeawayKeys.forEach(key => {
-                let order = activeOrders[key]; let count = order.items ? order.items.reduce((sum, i) => sum + i.qty, 0) : 0;
-                let cancelBtn = loggedInRole === "admin" ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${key}', event)">X</button>` : '';
-                container.innerHTML += `<button class="v-takeaway-card" onclick="switchOrderMode('Takeaway'); document.getElementById('table-no').value='${key}'; onTableChange();"><b>${key}</b><br><span style="font-size:9px;">${count} Items</span><br><span style="font-size:9px;">⏱️ ${formatElapsedTime(order.time)}</span>${cancelBtn}</button>`;
-            });
         }
 
         function safePrint(modeClass) { if (isPrinting) return; isPrinting = true; document.body.className = modeClass; setTimeout(() => { window.print(); setTimeout(() => { document.body.className = ""; isPrinting = false; }, 500); }, 100); }
@@ -992,7 +967,7 @@
         }
 
         function printKitchenKOTSilent() {
-            document.getElementById('k-order-type').innerText = currentOrderType; document.getElementById('k-table').innerText = getResolvedTargetKey();
+            document.getElementById('k-order-type').innerText = currentOrderType; document.getElementById('k-table').innerText = currentSelectedTable;
             const kItems = document.getElementById('k-items'); kItems.innerHTML = '';
             cart.forEach(i => {
                 let noteStr = getFormattedItemNotes(i);
@@ -1007,7 +982,7 @@
             if (cart.length === 0) return alert("Cart is empty!");
             let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
             let discount = parseFloat(document.getElementById('discount-input').value) || 0;
-            fillReceiptDetails(currentOrderType, getResolvedTargetKey(), document.getElementById('payment-method').value, new Date().toLocaleString(), subtotal, discount, Math.max(0, subtotal - discount), 0, 0, cart);
+            fillReceiptDetails(currentOrderType, currentSelectedTable, document.getElementById('payment-method').value, new Date().toLocaleString(), subtotal, discount, Math.max(0, subtotal - discount), 0, 0, cart);
             safePrint("print-customer");
         }
 
@@ -1019,7 +994,7 @@
             document.getElementById('modal-grand-total').innerText = currentGrandTotalForPay.toFixed(2);
             document.getElementById('modal-paid-input').value = currentGrandTotalForPay.toFixed(2);
             document.getElementById('modal-change-amount').innerText = "0.00";
-            document.getElementById('modal-print-checkbox').checked = true; // Default checked
+            document.getElementById('modal-print-checkbox').checked = true;
             document.getElementById('payment-modal').style.display = 'flex';
         }
         function closePaymentModal() { document.getElementById('payment-modal').style.display = 'none'; }
@@ -1033,19 +1008,18 @@
             let shouldPrint = document.getElementById('modal-print-checkbox').checked;
             
             closePaymentModal();
-            const refName = getResolvedTargetKey();
             const payMethod = document.getElementById('payment-method').value;
             const timeStr = new Date().toLocaleString();
             let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
             let discount = parseFloat(document.getElementById('discount-input').value) || 0;
 
-            fillReceiptDetails(currentOrderType, refName, payMethod, timeStr, subtotal, discount, currentGrandTotalForPay, paid, change, cart);
+            fillReceiptDetails(currentOrderType, currentSelectedTable, payMethod, timeStr, subtotal, discount, currentGrandTotalForPay, paid, change, cart);
             
             if (shouldPrint) {
                 safePrint("print-customer");
             }
 
-            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${refName})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: refName, subtotal: subtotal, discount: discount, paid: paid, change: change, items: JSON.parse(JSON.stringify(cart)) });
+            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${currentSelectedTable})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: currentSelectedTable, subtotal: subtotal, discount: discount, paid: paid, change: change, items: JSON.parse(JSON.stringify(cart)) });
             db.ref('sales').set(completedSales);
 
             let todayKey = new Date().toISOString().split('T')[0];
@@ -1056,8 +1030,9 @@
                 db.ref('staffShifts').set(staffShifts);
             }
 
-            delete activeOrders[refName]; db.ref('activeOrders').set(activeOrders);
-            cart = []; document.getElementById('discount-input').value = "0.00"; updateCart(); renderVisualTables(); renderVisualTakeaways(); switchOrderMode(currentOrderType); updateStats();
+            delete activeOrders[currentSelectedTable]; db.ref('activeOrders').set(activeOrders);
+            cart = []; updateStats(); 
+            backToTableSelection();
             alert("✅ Payment Successful! Change: $" + change.toFixed(2));
         }
 
@@ -1217,7 +1192,7 @@
                 safePrint("print-day-close-mode");
                 completedSales = []; db.ref('sales').set([]);
                 dailyExpenses = []; db.ref('dailyExpenses').set([]);
-                updateStats(); switchOrderMode("Dine-In");
+                updateStats(); backToTableSelection();
             }
         }
 
@@ -1226,38 +1201,6 @@
             let eTotal = dailyExpenses.reduce((s, x)=>s+x.amount, 0);
             if(document.getElementById('stat-sales')) document.getElementById('stat-sales').innerText = sTotal.toFixed(2);
             if(document.getElementById('stat-expenses')) document.getElementById('stat-expenses').innerText = eTotal.toFixed(2);
-        }
-
-        function submitCustomerOrder() {
-            if(cart.length === 0) return alert("Cart empty!");
-            let table = new URLSearchParams(window.location.search).get('table') || "Table 1";
-            let existing = activeOrders[table] ? activeOrders[table].items : [];
-            let merged = [...existing];
-            
-            cart.forEach(item => {
-                let found = merged.find(i => i.id === item.id && getFormattedItemNotes(i) === getFormattedItemNotes(item));
-                if(found) found.qty += item.qty; else merged.push(item);
-            });
-            
-            activeOrders[table] = { time: activeOrders[table]?.time || Date.now(), type: "Dine-In", items: merged };
-            db.ref('activeOrders').set(activeOrders);
-            
-            let listHtml = '<ul>';
-            merged.forEach(i => {
-                let notes = getFormattedItemNotes(i);
-                listHtml += `<li style=\"margin-bottom: 5px;\"><b>${i.qty} x</b> ${i.name} ${notes ? `<span style=\"font-size:12px; color:#64748b;\">(${notes})</span>` : ''}</li>`;
-            });
-            listHtml += '</ul>';
-            document.getElementById('customer-ordered-items').innerHTML = listHtml;
-            
-            document.getElementById('customer-success-screen').style.display = 'flex';
-            
-            cart = [];
-            updateCart();
-        }
-
-        function continueOrdering() {
-            document.getElementById('customer-success-screen').style.display = 'none';
         }
     </script>
 </body>
