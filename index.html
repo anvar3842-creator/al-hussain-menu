@@ -88,16 +88,20 @@
         .cat-btn { background: white; border: 1px solid #e2e8f0; padding: 5px 12px; border-radius: 20px; color: #64748b; font-weight: 700; cursor: pointer; white-space: nowrap; font-size: 12px; font-family: inherit; transition: 0.3s; }
         .cat-btn.active, .cat-btn:hover { background: #4f46e5; color: white; border-color: #4f46e5; transform: translateY(-1px); }
         
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; overflow-y: auto; padding-right: 4px; padding-bottom: 10px; flex: 1; }
-        .menu-card { background: white; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; position: relative; border: 1px solid #f1f5f9; cursor: pointer; transition: all 0.3s; height: 95px; box-sizing: border-box; box-shadow: 0 3px 5px rgba(0,0,0,0.02); }
+        /* Menu Grid with Group Headers */
+        .category-section-header { grid-column: 1 / -1; font-size: 16px; font-weight: 900; color: #0f172a; padding: 15px 0 5px 0; border-bottom: 2px solid #e2e8f0; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .category-section-header:first-child { padding-top: 0; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; overflow-y: auto; padding-right: 4px; padding-bottom: 15px; flex: 1; align-content: start; }
+        
+        .menu-card { background: white; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; position: relative; border: 1px solid #f1f5f9; cursor: pointer; transition: all 0.3s; height: 105px; box-sizing: border-box; box-shadow: 0 3px 5px rgba(0,0,0,0.02); }
         .menu-card:hover { border-color: #c7d2fe; box-shadow: 0 8px 15px rgba(79, 70, 229, 0.08); transform: translateY(-2px); }
         
         .card-code { position: absolute; top: 8px; left: 8px; background: #f1f5f9; color: #64748b; font-size: 10px; font-weight: 800; padding: 2px 5px; border-radius: 5px; }
         .card-icon { position: absolute; top: 8px; right: 8px; font-size: 18px; }
-        .card-title { font-weight: 800; font-size: 12px; margin-top: 20px; color: #1e293b; line-height: 1.2; }
+        .card-title { font-weight: 800; font-size: 13px; margin-top: 22px; color: #1e293b; line-height: 1.2; }
         .card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-        .card-price { font-weight: 800; font-size: 14px; color: #4f46e5; }
-        .btn-add { background: #4f46e5; color: white; width: 22px; height: 22px; border-radius: 6px; font-size: 13px; display: flex; justify-content: center; align-items: center; font-weight: bold; opacity: 0; transition: 0.3s; }
+        .card-price { font-weight: 900; font-size: 15px; color: #4f46e5; }
+        .btn-add { background: #4f46e5; color: white; width: 24px; height: 24px; border-radius: 6px; font-size: 14px; display: flex; justify-content: center; align-items: center; font-weight: bold; opacity: 0; transition: 0.3s; }
         .menu-card:hover .btn-add { opacity: 1; }
 
         .right-panel h3 { margin-top: 0; color: #0f172a; font-size: 15px; font-weight: 800; margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
@@ -431,45 +435,94 @@
         const liveBaseUrl = "https://anvar3842-creator.github.io/al-hussain-menu/";
 
         const defaultMenuData = [
-            { id: 1, code: "R1", name: "Roti kosong", price: 0.80, category: "Roti", icon: "🫓" },
+            // Roti Category
+            { id: 1, code: "R1", name: "Roti Kosong", price: 0.80, category: "Roti", icon: "🫓" },
             { id: 2, code: "R2", name: "Roti Kosong Cheese", price: 1.50, category: "Roti", icon: "🫓" },
             { id: 3, code: "R3", name: "Roti Kosong Bawang", price: 1.20, category: "Roti", icon: "🫓" },
             { id: 4, code: "R4", name: "Roti Telur", price: 1.40, category: "Roti", icon: "🫓" },
             { id: 5, code: "R5", name: "Roti Telur Bawang", price: 1.70, category: "Roti", icon: "🫓" },
             { id: 6, code: "R6", name: "Roti Telur Cheese", price: 2.00, category: "Roti", icon: "🫓" },
             { id: 7, code: "R7", name: "Roti Jantan", price: 2.00, category: "Roti", icon: "🫓" },
-            { id: 8, code: "R8", name: "Roti plastar", price: 1.40, category: "Roti", icon: "🫓" },
+            { id: 8, code: "R8", name: "Roti Plastar", price: 1.40, category: "Roti", icon: "🫓" },
             { id: 9, code: "R9", name: "Roti Bomb", price: 1.50, category: "Roti", icon: "🫓" },
             { id: 10, code: "R10", name: "Roti Tissue", price: 1.70, category: "Roti", icon: "🫓" },
             { id: 11, code: "R11", name: "Roti Sardin", price: 2.50, category: "Roti", icon: "🫓" },
             { id: 12, code: "R12", name: "Roti Planta", price: 1.50, category: "Roti", icon: "🫓" },
             { id: 13, code: "R13", name: "Roti Kaya", price: 1.50, category: "Roti", icon: "🫓" },
             { id: 14, code: "R14", name: "Roti Susu", price: 1.50, category: "Roti", icon: "🫓" },
-            { id: 15, code: "R15", name: "Roti Madu", price: 1.80, category: "Roti", icon: "🫓" },
-            { id: 16, code: "R16", name: "Roti Pisang", price: 2.00, category: "Roti", icon: "🫓" },
             { id: 17, code: "R17", name: "Roti John Ayam", price: 4.50, category: "Roti", icon: "🥪" },
             { id: 18, code: "R18", name: "Roti John Daging", price: 4.50, category: "Roti", icon: "🥪" },
-            { id: 19, code: "R19", name: "Murtabak Ayam", price: 4.50, category: "Murtabak", icon: "🫓" },
-            { id: 20, code: "R20", name: "Murtabak Daging", price: 4.50, category: "Murtabak", icon: "🫓" },
-            { id: 21, code: "R21", name: "Murtabak Special", price: 6.00, category: "Murtabak", icon: "🫓" },
-            { id: 22, code: "R22", name: "Tosai Kosong", price: 1.20, category: "Dosai", icon: "🥞" },
+            
+            // Dosai Category
+            { id: 22, code: "D1", name: "Tosai Kosong", price: 1.20, category: "Dosai", icon: "🥞" },
+            { id: 221, code: "D2", name: "Tosai Bawang", price: 1.50, category: "Dosai", icon: "🥞" },
+            { id: 222, code: "D3", name: "Tosai Telur", price: 1.80, category: "Dosai", icon: "🥞" },
+            { id: 223, code: "D4", name: "Tosai Telur Bawang", price: 2.00, category: "Dosai", icon: "🥞" },
+            { id: 224, code: "D5", name: "Tosai Ghee", price: 2.00, category: "Dosai", icon: "🥞" },
+            { id: 225, code: "D6", name: "Tosai Masala", price: 2.50, category: "Dosai", icon: "🥞" },
+            { id: 226, code: "D7", name: "Tosai Sardin", price: 3.00, category: "Dosai", icon: "🥞" },
+
+            // Bakso Category
+            { id: 231, code: "BK1", name: "Bakso Biasa", price: 3.00, category: "Bakso", icon: "🥣" },
+            { id: 232, code: "BK2", name: "Bakso Urat", price: 4.00, category: "Bakso", icon: "🥣" },
+            { id: 233, code: "BK3", name: "Bakso Ayam", price: 3.50, category: "Bakso", icon: "🥣" },
+            { id: 234, code: "BK4", name: "Bakso Daging", price: 3.50, category: "Bakso", icon: "🥣" },
+            { id: 235, code: "BK5", name: "Bakso Special", price: 5.00, category: "Bakso", icon: "🥣" },
+
+            // Nasi Goreng
+            { id: 26, code: "N1", name: "Nasi Goreng Biasa", price: 3.00, category: "Nasi Goreng", icon: "🍛" },
+            { id: 261, code: "N2", name: "Nasi Goreng Ayam", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 27, code: "N3", name: "Nasi Goreng Daging", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 28, code: "N4", name: "Nasi Goreng Kampung", price: 4.00, category: "Nasi Goreng", icon: "🍛" },
+            { id: 29, code: "N5", name: "Nasi Goreng Pattaya", price: 4.80, category: "Nasi Goreng", icon: "🍛" },
+            { id: 291, code: "N6", name: "Nasi Goreng Corned Beef", price: 5.00, category: "Nasi Goreng", icon: "🍛" },
+            { id: 292, code: "N7", name: "Nasi Goreng Ikan Masin", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 293, code: "N8", name: "Nasi Goreng Seafood", price: 5.50, category: "Nasi Goreng", icon: "🍛" },
+
+            // Mee Goreng
+            { id: 301, code: "MG1", name: "Mee Goreng Biasa", price: 3.00, category: "Mee Goreng", icon: "🍜" },
+            { id: 30, code: "MG2", name: "Mee Goreng Ayam", price: 4.50, category: "Mee Goreng", icon: "🍜" },
+            { id: 31, code: "MG3", name: "Mee Goreng Daging", price: 4.50, category: "Mee Goreng", icon: "🍜" },
+            { id: 311, code: "MG4", name: "Mee Goreng Corned Beef", price: 5.00, category: "Mee Goreng", icon: "🍜" },
+            { id: 312, code: "MG5", name: "Mee Goreng Seafood", price: 5.50, category: "Mee Goreng", icon: "🍜" },
+
+            // Kueh Teow Goreng
+            { id: 321, code: "KG1", name: "Kueh Teow Goreng Biasa", price: 3.00, category: "Kueh Teow Goreng", icon: "🍜" },
+            { id: 32, code: "KG2", name: "Kueh Teow Goreng Ayam", price: 4.50, category: "Kueh Teow Goreng", icon: "🍜" },
+            { id: 33, code: "KG3", name: "Kueh Teow Goreng Daging", price: 4.50, category: "Kueh Teow Goreng", icon: "🍜" },
+            { id: 331, code: "KG4", name: "Kueh Teow Goreng Corned Beef", price: 5.00, category: "Kueh Teow Goreng", icon: "🍜" },
+            { id: 332, code: "KG5", name: "Kueh Teow Goreng Seafood", price: 5.50, category: "Kueh Teow Goreng", icon: "🍜" },
+
+            // Bihun Goreng
+            { id: 341, code: "BG1", name: "Bihun Goreng Biasa", price: 3.00, category: "Bihun Goreng", icon: "🍜" },
+            { id: 34, code: "BG2", name: "Bihun Goreng Ayam", price: 4.50, category: "Bihun Goreng", icon: "🍜" },
+            { id: 35, code: "BG3", name: "Bihun Goreng Daging", price: 4.50, category: "Bihun Goreng", icon: "🍜" },
+            { id: 351, code: "BG4", name: "Bihun Goreng Corned Beef", price: 5.00, category: "Bihun Goreng", icon: "🍜" },
+            { id: 352, code: "BG5", name: "Bihun Goreng Seafood", price: 5.50, category: "Bihun Goreng", icon: "🍜" },
+
+            // Indomie
+            { id: 391, code: "I1", name: "Indomie Goreng Biasa", price: 2.00, category: "Indomie", icon: "🍜" },
+            { id: 39, code: "I2", name: "Indomie Goreng Special", price: 4.00, category: "Indomie", icon: "🍜" },
+            { id: 392, code: "I3", name: "Indomie Goreng Ayam", price: 4.00, category: "Indomie", icon: "🍜" },
+            { id: 393, code: "I4", name: "Indomie Goreng Daging", price: 4.00, category: "Indomie", icon: "🍜" },
+            { id: 394, code: "I5", name: "Indomie Goreng Corned Beef", price: 4.50, category: "Indomie", icon: "🍜" },
+
+            // Murtabak
+            { id: 19, code: "M1", name: "Murtabak Ayam", price: 4.50, category: "Murtabak", icon: "🫓" },
+            { id: 20, code: "M2", name: "Murtabak Daging", price: 4.50, category: "Murtabak", icon: "🫓" },
+            { id: 21, code: "M3", name: "Murtabak Special", price: 6.00, category: "Murtabak", icon: "🫓" },
+
+            // Burger
             { id: 23, code: "B1", name: "Burger Telur", price: 1.50, category: "Burger", icon: "🍔" },
             { id: 24, code: "B2", name: "Burger Ayam", price: 2.50, category: "Burger", icon: "🍔" },
             { id: 25, code: "B3", name: "Burger Daging", price: 2.50, category: "Burger", icon: "🍔" },
-            { id: 26, code: "N1", name: "Nasi Goreng Ayam", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
-            { id: 27, code: "N2", name: "Nasi Goreng Daging", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
-            { id: 28, code: "N3", name: "Nasi Goreng Kampung", price: 4.00, category: "Nasi Goreng", icon: "🍛" },
-            { id: 29, code: "N4", name: "Nasi Goreng Pattaya", price: 4.80, category: "Nasi Goreng", icon: "🍛" },
-            { id: 30, code: "MG1", name: "Mee Goreng Ayam", price: 4.50, category: "Mee Goreng", icon: "🍜" },
-            { id: 31, code: "MG2", name: "Mee Goreng Daging", price: 4.50, category: "Mee Goreng", icon: "🍜" },
-            { id: 32, code: "KG1", name: "Kueh Teow Goreng Ayam", price: 4.50, category: "Kueh Teow Goreng", icon: "🍜" },
-            { id: 33, code: "KG2", name: "Kueh Teow Goreng Daging", price: 4.50, category: "Kueh Teow Goreng", icon: "🍜" },
-            { id: 34, code: "BG1", name: "Bihun Goreng Ayam", price: 4.50, category: "Bihun Goreng", icon: "🍜" },
-            { id: 35, code: "BG2", name: "Bihun Goreng Daging", price: 4.50, category: "Bihun Goreng", icon: "🍜" },
+
+            // Mee Basah
             { id: 36, code: "MB1", name: "Mee Basah Ayam", price: 4.50, category: "Mee Basah", icon: "🍜" },
             { id: 37, code: "KB1", name: "Kueh Teow Basah Ayam", price: 4.50, category: "Kueh Teow Basah", icon: "🍜" },
             { id: 38, code: "BB1", name: "Bihun Basah Ayam", price: 4.50, category: "Bihun Basah", icon: "🍜" },
-            { id: 39, code: "I1", name: "Indomie Goreng Special", price: 4.00, category: "Indomie", icon: "🍜" },
+
+            // Drinks
             { id: 163, code: "T1", name: "Tea", price: 1.00, category: "Hot Drinks", icon: "☕" },
             { id: 164, code: "T2", name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "☕" },
             { id: 165, code: "T3", name: "Coffee", price: 1.20, category: "Hot Drinks", icon: "☕" },
@@ -483,7 +536,8 @@
         let dailyHistoryRecords = {};
         let staffShifts = {};
         let takeawaySequenceCounter = 100;
-        let defaultCategoryOrder = ["Roti", "Dosai", "Nasi Goreng", "Mee Goreng", "Kueh Teow Goreng", "Bihun Goreng", "Mee Basah", "Kueh Teow Basah", "Bihun Basah", "Indomie", "Murtabak", "Burger", "Nasi Campur", "Hot Drinks", "Sejuk", "Fresh Juice", "Milk Shake"];
+        
+        let defaultCategoryOrder = ["Roti", "Dosai", "Bakso", "Nasi Goreng", "Mee Goreng", "Kueh Teow Goreng", "Bihun Goreng", "Indomie", "Mee Basah", "Kueh Teow Basah", "Bihun Basah", "Murtabak", "Burger", "Nasi Campur", "Hot Drinks", "Sejuk", "Fresh Juice", "Milk Shake"];
         let categoryOrder = [];
 
         let cart = [];
@@ -878,11 +932,39 @@
                 return;
             }
 
+            const grouped = {};
             filtered.forEach(item => {
-                const card = document.createElement('div'); card.className = 'menu-card';
-                card.onclick = () => addToCart(item.id);
-                card.innerHTML = `<div class="card-code">${item.code || ''}</div><div class="card-icon">${item.icon || '🍽️'}</div><div class="card-title">${item.name}</div><div class="card-bottom"><div class="card-price">$${item.price.toFixed(2)}</div><div class="btn-add">+</div></div>`;
-                grid.appendChild(card);
+                if (!grouped[item.category]) grouped[item.category] = [];
+                grouped[item.category].push(item);
+            });
+
+            let sortedCategories = Object.keys(grouped).sort((a, b) => {
+                let idxA = categoryOrder.indexOf(a);
+                let idxB = categoryOrder.indexOf(b);
+                if(idxA === -1) idxA = 999;
+                if(idxB === -1) idxB = 999;
+                return idxA - idxB;
+            });
+
+            sortedCategories.forEach(cat => {
+                if (currentCategory === "All" || searchText !== "") {
+                    const header = document.createElement('div');
+                    header.className = 'category-section-header';
+                    let catIcon = "📁";
+                    if(cat.includes("Goreng")) catIcon = "🍛";
+                    if(cat.includes("Bakso")) catIcon = "🥣";
+                    if(cat.includes("Dosai")) catIcon = "🥞";
+                    if(cat.includes("Drink")) catIcon = "🥤";
+                    header.innerHTML = `<span>${catIcon}</span> ${cat}`;
+                    grid.appendChild(header);
+                }
+
+                grouped[cat].forEach(item => {
+                    const card = document.createElement('div'); card.className = 'menu-card';
+                    card.onclick = () => addToCart(item.id);
+                    card.innerHTML = `<div class="card-code">${item.code || ''}</div><div class="card-icon">${item.icon || '🍽️'}</div><div class="card-title">${item.name}</div><div class="card-bottom"><div class="card-price">$${item.price.toFixed(2)}</div><div class="btn-add">+</div></div>`;
+                    grid.appendChild(card);
+                });
             });
         }
 
