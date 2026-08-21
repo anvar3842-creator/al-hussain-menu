@@ -410,7 +410,8 @@
             </div>
 
             <div style="text-align: left; background: #f8fafc; padding: 10px 14px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" id="modal-print-checkbox" checked style="width: 18px; height: 18px; accent-color: #4f46e5; cursor: pointer;">
+                <!-- டிக் மார்க் இல்லாமல் ஆக்கப்பட்டது -->
+                <input type="checkbox" id="modal-print-checkbox" style="width: 18px; height: 18px; accent-color: #4f46e5; cursor: pointer;">
                 <label for="modal-print-checkbox" style="font-size: 14px; font-weight: 800; color: #334155; cursor: pointer;">🖨️ Print Receipt</label>
             </div>
 
@@ -601,13 +602,13 @@
             if (data && data.timestamp > lastBellTime) {
                 lastBellTime = data.timestamp;
                 
-                // Only alert if the user is an admin or staff (not a customer viewing the QR page)
-                if (loggedInRole !== "customer" && loggedInRole !== "") {
-                    // Play a distinct sound (Google's standard notification chime)
+                // Only alert if the user is Admin OR User1 (Staff)
+                if (loggedInRole === "admin" || loggedInRole === "user1") {
+                    // Play a distinct sound
                     const audio = new Audio('https://actions.google.com/sounds/v1/alarms/doorbell.ogg');
                     audio.play().catch(e => console.log("Audio block (Needs user interaction first): ", e));
                     
-                    // Show a pop-up alert so the staff knows immediately
+                    // Show a pop-up alert so the admin/staff knows immediately
                     alert(`🛎️ CUSTOMER CALLING:\n\n${data.table} needs your attention!`);
                 }
             }
@@ -652,7 +653,7 @@
                 document.getElementById('discount-row-elem').style.display = 'none';
                 document.getElementById('payment-method-row').style.display = 'none';
                 document.getElementById('staff-action-buttons').style.display = 'none'; 
-                document.getElementById('customer-action-div').style.display = 'flex'; // Changed to flex for proper layout
+                document.getElementById('customer-action-div').style.display = 'flex'; 
                 
                 document.getElementById('admin-dashboard-section').style.display = 'none';
 
@@ -1210,7 +1211,10 @@
             document.getElementById('modal-grand-total').innerText = currentGrandTotalForPay.toFixed(2);
             document.getElementById('modal-paid-input').value = currentGrandTotalForPay.toFixed(2);
             document.getElementById('modal-change-amount').innerText = "0.00";
-            document.getElementById('modal-print-checkbox').checked = true;
+            
+            // Uncheck default setting applied here
+            document.getElementById('modal-print-checkbox').checked = false;
+            
             document.getElementById('payment-modal').style.display = 'flex';
         }
         function closePaymentModal() { document.getElementById('payment-modal').style.display = 'none'; }
