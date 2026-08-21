@@ -39,7 +39,6 @@
         .btn-logout { background: #fef2f2; color: #ef4444; border: 1px solid #fca5a5; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 11px; transition: 0.2s; }
         .btn-logout:hover { background: #ef4444; color: white; }
         
-        /* Table Selection & Admin Grid View */
         #table-selection-view { display: flex; flex-direction: column; flex: 1; padding: 15px; box-sizing: border-box; overflow-y: auto; background: #f8fafc; gap: 12px; }
         .table-selection-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); flex-shrink: 0; }
         .table-selection-header h2 { margin: 0; color: #0f172a; font-size: 17px; font-weight: 900; }
@@ -56,7 +55,6 @@
         .big-table-card h3 { margin: 0 0 4px 0; font-size: 15px; font-weight: 900; color: #1e293b; }
         .big-table-card p { margin: 0; font-size: 11px; font-weight: 800; color: #64748b; line-height: 1.3; }
 
-        /* Main POS View */
         #pos-main-view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
         
         .mobile-tab-bar { display: none; background: white; padding: 8px 15px; gap: 10px; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
@@ -88,7 +86,6 @@
         .cat-btn { background: white; border: 1px solid #e2e8f0; padding: 5px 12px; border-radius: 20px; color: #64748b; font-weight: 700; cursor: pointer; white-space: nowrap; font-size: 12px; font-family: inherit; transition: 0.3s; }
         .cat-btn.active, .cat-btn:hover { background: #4f46e5; color: white; border-color: #4f46e5; transform: translateY(-1px); }
         
-        /* Menu Grid with Group Headers */
         .category-section-header { grid-column: 1 / -1; font-size: 16px; font-weight: 900; color: #0f172a; padding: 15px 0 5px 0; border-bottom: 2px solid #e2e8f0; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .category-section-header:first-child { padding-top: 0; }
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; overflow-y: auto; padding-right: 4px; padding-bottom: 15px; flex: 1; align-content: start; }
@@ -110,7 +107,7 @@
         
         table { width: 100%; border-collapse: separate; border-spacing: 0 5px; }
         th { color: #94a3b8; padding: 0 6px; text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; }
-        td { padding: 8px 6px; background: #fef08a; /* Soft Yellow Background */ vertical-align: top; }
+        td { padding: 8px 6px; background: #fef08a; /* Soft Yellow Background for Cart items */ vertical-align: top; }
         td:first-child { border-radius: 8px 0 0 8px; }
         td:last-child { border-radius: 0 8px 8px 0; }
         
@@ -124,7 +121,7 @@
         .qty-controls { display: flex; align-items: center; gap: 6px; background: white; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; width: max-content; }
         .qty-btn { background: transparent; border: none; width: 18px; height: 18px; border-radius: 3px; cursor: pointer; font-weight: bold; color: #4f46e5; font-size: 13px; display: flex; align-items: center; justify-content: center; }
         .qty-btn:hover { background: #f1f5f9; }
-        .qty-controls span { font-weight: 900; font-size: 13px; width: 16px; text-align: center; color: #dc2626; /* Red Quantity Highlight */ }
+        .qty-controls span { font-weight: 900; font-size: 14px; width: 18px; text-align: center; color: #dc2626; /* Bright Red Quantity Numbers */ }
         
         .bill-summary { background: #f8fafc; padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #f1f5f9; flex-shrink: 0; }
         .summary-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 5px; align-items: center; }
@@ -144,7 +141,6 @@
         .btn-drawer { grid-column: span 2; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0 !important; padding: 7px !important; }
         .btn-back-tables { grid-column: span 2; background: #64748b; color: white; padding: 9px; font-size: 12px; border-radius: 8px; }
 
-        /* Dedicated Customer Order Button */
         #customer-action-div { display: none; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
         .btn-customer-send { width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); transition: 0.3s; }
         .btn-customer-send:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3); }
@@ -152,8 +148,8 @@
         .btn-call-waiter { width: 100%; padding: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2); transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-call-waiter:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3); }
 
-        /* Super Clean & Compact Admin Dashboard Card Layout */
-        .admin-dashboard-container { background: white; padding: 10px 14px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: none; margin-top: 4px; }
+        /* Vertical Stacked Admin Dashboard Layout */
+        .admin-dashboard-container { background: white; padding: 12px 15px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: none; margin-top: 4px; }
         .admin-dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; margin-bottom: 8px; }
         .admin-dashboard-header h3 { margin: 0; color: #0f172a; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
         
@@ -161,9 +157,10 @@
         .btn-cat-add { background: #059669; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; font-family: inherit; }
         .stat-box { background: #f8fafc; padding: 4px 8px; border-radius: 6px; text-align: center; border: 1px solid #e2e8f0; font-size: 12px; font-weight: 900; color: #4f46e5; }
         
-        .admin-buttons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 5px; margin-top: 6px; }
-        .admin-btn { color: white; border: none; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; font-family: inherit; text-align: left; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .admin-btn:hover { opacity: 0.9; }
+        /* Vertical Stacked Buttons */
+        .admin-buttons-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+        .admin-btn { color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; font-family: inherit; text-align: left; display: flex; align-items: center; gap: 8px; transition: 0.2s; width: 100%; box-sizing: border-box; }
+        .admin-btn:hover { opacity: 0.9; transform: translateX(2px); }
         .manage-menu-btn { background: #0284c7; }
         .manage-cat-btn { background: #7c3aed; }
         .stock-btn { background: #8b5cf6; }
@@ -173,7 +170,7 @@
         .monthly-btn { background: #2563eb; }
         .staff-btn { background: #d97706; }
         .history-btn { background: #475569; }
-        .close-day-btn { background: #dc2626; text-align: center; justify-content: center; font-size: 11px; padding: 7px; grid-column: 1 / -1; }
+        .close-day-btn { background: #dc2626; text-align: center; justify-content: center; font-size: 12px; padding: 10px; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 15px; box-sizing: border-box; }
         .modal-content { background: white; width: 100%; max-width: 750px; max-height: 85vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
@@ -228,8 +225,8 @@
         <div class="login-box">
             <h2>✨ Welcome to POS</h2>
             <form onsubmit="handleLogin(event)">
-                <input type="text" id="login-user" placeholder="Username (admin/user1/user2)" required>
-                <input type="password" id="login-pass" placeholder="Password" required>
+                <input type="text" id="login-user" placeholder="Username (admin/user1/user2)" required autocomplete="username">
+                <input type="password" id="login-pass" placeholder="Password" required autocomplete="current-password">
                 <button type="submit" class="btn-login">Login Securely</button>
             </form>
             <p id="login-error" class="error-msg">Invalid Credentials!</p>
@@ -254,7 +251,7 @@
             </div>
             <div id="big-tables-grid" class="big-tables-grid"></div>
 
-            <!-- Compact & Clean Admin Dashboard Section placed right below the tables -->
+            <!-- Vertical Stacked Admin Dashboard Section -->
             <div id="admin-dashboard-section" class="admin-dashboard-container">
                 <div class="admin-dashboard-header">
                     <h3>⚙️ Admin Dashboard & Management</h3>
@@ -264,14 +261,15 @@
                     </div>
                 </div>
                 
-                <div style="margin-bottom: 6px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center;">
-                    <input type="text" id="add-m-name" placeholder="New Item Name" style="padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 2; outline: none; font-size: 11px; font-family: inherit;">
-                    <select id="add-m-cat" style="padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 1.5; outline: none; font-size: 11px; font-weight: bold; color: #4f46e5; background: white; font-family: inherit;"></select>
-                    <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; width: 60px; outline: none; font-size: 11px; font-family: inherit;">
-                    <button class="btn-small" style="padding: 5px 10px; font-size: 11px;" onclick="addNewMenuItem()">+ Add</button>
+                <div style="margin-bottom: 8px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center;">
+                    <input type="text" id="add-m-name" placeholder="New Item Name" style="padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 2; outline: none; font-size: 11px; font-family: inherit;">
+                    <select id="add-m-cat" style="padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 1.5; outline: none; font-size: 11px; font-weight: bold; color: #4f46e5; background: white; font-family: inherit;"></select>
+                    <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 6px; width: 60px; outline: none; font-size: 11px; font-family: inherit;">
+                    <button class="btn-small" style="padding: 6px 10px; font-size: 11px;" onclick="addNewMenuItem()">+ Add</button>
                     <button class="btn-cat-add" onclick="addNewCategoryPrompt()">+ Category</button>
                 </div>
 
+                <!-- Vertical Stacked Buttons Layout -->
                 <div class="admin-buttons-grid">
                     <button class="admin-btn manage-menu-btn" onclick="openMenuManagerModal()">⚙️ Manage Menu & Prices</button>
                     <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">📁 Categories Priority</button>
@@ -289,7 +287,6 @@
 
         <!-- VIEW 2: POS MENU & BILLING VIEW -->
         <div id="pos-main-view">
-            <!-- Mobile Tab Switcher -->
             <div class="mobile-tab-bar">
                 <button class="mob-tab-btn active" id="tab-menu-btn" onclick="switchMobileTab('menu')">📂 Menu Items</button>
                 <button class="mob-tab-btn" id="tab-cart-btn" onclick="switchMobileTab('cart')">🛒 Cart & Billing</button>
@@ -342,7 +339,6 @@
                         </div>
                     </div>
 
-                    <!-- Staff/Admin Action Buttons -->
                     <div class="action-buttons" id="staff-action-buttons">
                         <button class="btn-hold" id="btn-hold-elem" onclick="saveOrderToTableAndPrintKOT()">🕒 Hold & KOT</button>
                         <button class="btn-kitchen" id="btn-kitchen-elem" onclick="printKitchenKOT()">🍳 Kitchen</button>
@@ -352,7 +348,6 @@
                         <button class="btn-back-tables" onclick="backToTableSelection()">⬅️ Back to Tables Grid</button>
                     </div>
 
-                    <!-- Dedicated Customer Order Button & Calling Bell -->
                     <div id="customer-action-div">
                         <button class="btn-call-waiter" onclick="callWaiter()">🔔 Call Waiter</button>
                         <button class="btn-customer-send" onclick="customerSendOrder()">🚀 Send Order to Kitchen</button>
@@ -372,7 +367,6 @@
         </div>
     </div>
 
-    <!-- Customer Idle Timeout Overlay -->
     <div id="timeout-screen" class="timeout-overlay">
         <div class="timeout-box">
             <h1>⏳</h1>
@@ -381,7 +375,7 @@
         </div>
     </div>
 
-    <!-- Payment Modals & Others -->
+    <!-- Payment Modal -->
     <div id="payment-modal" class="modal-overlay">
         <div class="pay-modal-box">
             <h2>💳 Complete Payment</h2>
@@ -421,6 +415,7 @@
         </div>
     </div>
 
+    <!-- Modals -->
     <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📱 Customer Table QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">🖨️ Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 13px; color: #64748b; margin-top: 0;">Scan these QR codes to order. QR Pay transactions are routed directly to Al Hussain Company Bank Account.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">👥 Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
     <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Categories</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="🔍 Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; width: 220px; margin-bottom: 12px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
@@ -450,7 +445,6 @@
         const liveBaseUrl = "https://anvar3842-creator.github.io/al-hussain-menu/";
 
         const defaultMenuData = [
-            // Roti Category
             { id: 1, code: "R1", name: "Roti Kosong", price: 0.80, category: "Roti", icon: "🫓" },
             { id: 2, code: "R2", name: "Roti Kosong Cheese", price: 1.50, category: "Roti", icon: "🫓" },
             { id: 3, code: "R3", name: "Roti Kosong Bawang", price: 1.20, category: "Roti", icon: "🫓" },
@@ -468,7 +462,6 @@
             { id: 17, code: "R17", name: "Roti John Ayam", price: 4.50, category: "Roti", icon: "🥪" },
             { id: 18, code: "R18", name: "Roti John Daging", price: 4.50, category: "Roti", icon: "🥪" },
             
-            // Dosai Category
             { id: 22, code: "D1", name: "Tosai Kosong", price: 1.20, category: "Dosai", icon: "🥞" },
             { id: 221, code: "D2", name: "Tosai Bawang", price: 1.50, category: "Dosai", icon: "🥞" },
             { id: 222, code: "D3", name: "Tosai Telur", price: 1.80, category: "Dosai", icon: "🥞" },
@@ -477,14 +470,12 @@
             { id: 225, code: "D6", name: "Tosai Masala", price: 2.50, category: "Dosai", icon: "🥞" },
             { id: 226, code: "D7", name: "Tosai Sardin", price: 3.00, category: "Dosai", icon: "🥞" },
 
-            // Bakso Category
             { id: 231, code: "BK1", name: "Bakso Biasa", price: 3.00, category: "Bakso", icon: "🥣" },
             { id: 232, code: "BK2", name: "Bakso Urat", price: 4.00, category: "Bakso", icon: "🥣" },
             { id: 233, code: "BK3", name: "Bakso Ayam", price: 3.50, category: "Bakso", icon: "🥣" },
             { id: 234, code: "BK4", name: "Bakso Daging", price: 3.50, category: "Bakso", icon: "🥣" },
             { id: 235, code: "BK5", name: "Bakso Special", price: 5.00, category: "Bakso", icon: "🥣" },
 
-            // Nasi Goreng
             { id: 26, code: "N1", name: "Nasi Goreng Biasa", price: 3.00, category: "Nasi Goreng", icon: "🍛" },
             { id: 261, code: "N2", name: "Nasi Goreng Ayam", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
             { id: 27, code: "N3", name: "Nasi Goreng Daging", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
@@ -494,50 +485,42 @@
             { id: 292, code: "N7", name: "Nasi Goreng Ikan Masin", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
             { id: 293, code: "N8", name: "Nasi Goreng Seafood", price: 5.50, category: "Nasi Goreng", icon: "🍛" },
 
-            // Mee Goreng
             { id: 301, code: "MG1", name: "Mee Goreng Biasa", price: 3.00, category: "Mee Goreng", icon: "🍜" },
             { id: 30, code: "MG2", name: "Mee Goreng Ayam", price: 4.50, category: "Mee Goreng", icon: "🍜" },
             { id: 31, code: "MG3", name: "Mee Goreng Daging", price: 4.50, category: "Mee Goreng", icon: "🍜" },
             { id: 311, code: "MG4", name: "Mee Goreng Corned Beef", price: 5.00, category: "Mee Goreng", icon: "🍜" },
             { id: 312, code: "MG5", name: "Mee Goreng Seafood", price: 5.50, category: "Mee Goreng", icon: "🍜" },
 
-            // Kueh Teow Goreng
             { id: 321, code: "KG1", name: "Kueh Teow Goreng Biasa", price: 3.00, category: "Kueh Teow Goreng", icon: "🍜" },
             { id: 32, code: "KG2", name: "Kueh Teow Goreng Ayam", price: 4.50, category: "Kueh Teow Goreng", icon: "🍜" },
             { id: 33, code: "KG3", name: "Kueh Teow Goreng Daging", price: 4.50, category: "Kueh Teow Goreng", icon: "🍜" },
             { id: 331, code: "KG4", name: "Kueh Teow Goreng Corned Beef", price: 5.00, category: "Kueh Teow Goreng", icon: "🍜" },
             { id: 332, code: "KG5", name: "Kueh Teow Goreng Seafood", price: 5.50, category: "Kueh Teow Goreng", icon: "🍜" },
 
-            // Bihun Goreng
             { id: 341, code: "BG1", name: "Bihun Goreng Biasa", price: 3.00, category: "Bihun Goreng", icon: "🍜" },
             { id: 34, code: "BG2", name: "Bihun Goreng Ayam", price: 4.50, category: "Bihun Goreng", icon: "🍜" },
             { id: 35, code: "BG3", name: "Bihun Goreng Daging", price: 4.50, category: "Bihun Goreng", icon: "🍜" },
             { id: 351, code: "BG4", name: "Bihun Goreng Corned Beef", price: 5.00, category: "Bihun Goreng", icon: "🍜" },
             { id: 352, code: "BG5", name: "Bihun Goreng Seafood", price: 5.50, category: "Bihun Goreng", icon: "🍜" },
 
-            // Indomie
             { id: 391, code: "I1", name: "Indomie Goreng Biasa", price: 2.00, category: "Indomie", icon: "🍜" },
             { id: 39, code: "I2", name: "Indomie Goreng Special", price: 4.00, category: "Indomie", icon: "🍜" },
             { id: 392, code: "I3", name: "Indomie Goreng Ayam", price: 4.00, category: "Indomie", icon: "🍜" },
             { id: 393, code: "I4", name: "Indomie Goreng Daging", price: 4.00, category: "Indomie", icon: "🍜" },
             { id: 394, code: "I5", name: "Indomie Goreng Corned Beef", price: 4.50, category: "Indomie", icon: "🍜" },
 
-            // Murtabak
             { id: 19, code: "M1", name: "Murtabak Ayam", price: 4.50, category: "Murtabak", icon: "🫓" },
             { id: 20, code: "M2", name: "Murtabak Daging", price: 4.50, category: "Murtabak", icon: "🫓" },
             { id: 21, code: "M3", name: "Murtabak Special", price: 6.00, category: "Murtabak", icon: "🫓" },
 
-            // Burger
             { id: 23, code: "B1", name: "Burger Telur", price: 1.50, category: "Burger", icon: "🍔" },
             { id: 24, code: "B2", name: "Burger Ayam", price: 2.50, category: "Burger", icon: "🍔" },
             { id: 25, code: "B3", name: "Burger Daging", price: 2.50, category: "Burger", icon: "🍔" },
 
-            // Mee Basah
             { id: 36, code: "MB1", name: "Mee Basah Ayam", price: 4.50, category: "Mee Basah", icon: "🍜" },
             { id: 37, code: "KB1", name: "Kueh Teow Basah Ayam", price: 4.50, category: "Kueh Teow Basah", icon: "🍜" },
             { id: 38, code: "BB1", name: "Bihun Basah Ayam", price: 4.50, category: "Bihun Basah", icon: "🍜" },
 
-            // Drinks
             { id: 163, code: "T1", name: "Tea", price: 1.00, category: "Hot Drinks", icon: "☕" },
             { id: 164, code: "T2", name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "☕" },
             { id: 165, code: "T3", name: "Coffee", price: 1.20, category: "Hot Drinks", icon: "☕" },
@@ -593,7 +576,7 @@
             checkCustomerPaymentStatus(); 
         });
 
-        // --- RELIABLE AUDIO NOTIFICATION SYSTEM FOR ADMIN & USER1 ---
+        // --- RELIABLE AUDIO NOTIFICATION LISTENER FOR ADMIN & USER1 ---
         db.ref('alerts/bell').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.timestamp > lastBellTime) {
@@ -606,7 +589,7 @@
                         let playPromise = audio.play();
                         if (playPromise !== undefined) {
                             playPromise.catch(error => {
-                                console.log("Autoplay prevented. User interaction required first.");
+                                console.log("Autoplay policy blocked audio. User interaction required.");
                             });
                         }
                     } catch (e) {
@@ -696,6 +679,7 @@
             }
         });
 
+        // Fixed Robust Login Handler
         function handleLogin(event) {
             event.preventDefault();
             const user = document.getElementById('login-user').value.trim().toLowerCase();
@@ -730,12 +714,18 @@
                 roleKey = "Order Taker 📝";
                 grantAccess(roleKey);
             } 
-            else { document.getElementById('login-error').style.display = "block"; return; }
+            else { 
+                document.getElementById('login-error').style.display = "block"; 
+                return; 
+            }
 
             let todayDateKey = new Date().toISOString().split('T')[0];
             if (!staffShifts[todayDateKey]) staffShifts[todayDateKey] = {};
-            if (!staffShifts[todayDateKey][roleKey]) { staffShifts[todayDateKey][roleKey] = { loginTime: new Date().toLocaleTimeString(), billsCount: 0, totalCollected: 0 }; } 
-            else { staffShifts[todayDateKey][roleKey].loginTime = new Date().toLocaleTimeString(); }
+            if (!staffShifts[todayDateKey][roleKey]) { 
+                staffShifts[todayDateKey][roleKey] = { loginTime: new Date().toLocaleTimeString(), billsCount: 0, totalCollected: 0 }; 
+            } else { 
+                staffShifts[todayDateKey][roleKey].loginTime = new Date().toLocaleTimeString(); 
+            }
             db.ref('staffShifts').set(staffShifts);
         }
 
@@ -1071,7 +1061,7 @@
         function updateCart() {
             const tbody = document.getElementById('cart-items'); if(!tbody) return; tbody.innerHTML = ''; 
             let subtotal = 0;
-            cart.forEach(item => {
+            cart.forEach((item, index) => {
                 subtotal += item.customPrice * item.qty;
                 let catLower = (item.category || "").toLowerCase();
                 let nameLower = (item.name || "").toLowerCase();
@@ -1098,9 +1088,9 @@
 
                 noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value; saveOrderToTableSilent();">`;
                 
-                // Customer cart display with highlighted quantity in bright red and rows in soft yellow
+                // Cart Row Background Yellow, Quantity numbers Red with item counter (1, 2, 3...)
                 tbody.innerHTML += `<tr>
-                    <td><div class="cart-item-name">${item.name}</div>${noteHtml}</td>
+                    <td><div class="cart-item-name"><b>${index + 1}.</b> ${item.name}</div>${noteHtml}</td>
                     <td>
                         <div class="qty-controls">
                             <button class="qty-btn" onclick="decreaseQty(${item.id})">-</button>
@@ -1432,7 +1422,7 @@
             let sTotal = completedSales.reduce((s, x)=>s+x.amount, 0);
             let eTotal = dailyExpenses.reduce((s, x)=>s+x.amount, 0);
             if(document.getElementById('stat-sales')) document.getElementById('stat-sales').innerText = sTotal.toFixed(2);
-            if(document.getElementById('stat-expenses')) document.getElementById('stat-expenses').innerText = e.toFixed(2);
+            if(document.getElementById('stat-expenses')) document.getElementById('stat-expenses').innerText = eTotal.toFixed(2);
         }
     </script>
 </body>
