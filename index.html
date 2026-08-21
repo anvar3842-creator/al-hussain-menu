@@ -110,7 +110,7 @@
         
         table { width: 100%; border-collapse: separate; border-spacing: 0 5px; }
         th { color: #94a3b8; padding: 0 6px; text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; }
-        td { padding: 8px 6px; background: #f8fafc; vertical-align: top; }
+        td { padding: 8px 6px; background: #fef08a; /* Soft Yellow Background */ vertical-align: top; }
         td:first-child { border-radius: 8px 0 0 8px; }
         td:last-child { border-radius: 0 8px 8px 0; }
         
@@ -124,7 +124,7 @@
         .qty-controls { display: flex; align-items: center; gap: 6px; background: white; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; width: max-content; }
         .qty-btn { background: transparent; border: none; width: 18px; height: 18px; border-radius: 3px; cursor: pointer; font-weight: bold; color: #4f46e5; font-size: 13px; display: flex; align-items: center; justify-content: center; }
         .qty-btn:hover { background: #f1f5f9; }
-        .qty-controls span { font-weight: 800; font-size: 12px; width: 10px; text-align: center; }
+        .qty-controls span { font-weight: 900; font-size: 13px; width: 16px; text-align: center; color: #dc2626; /* Red Quantity Highlight */ }
         
         .bill-summary { background: #f8fafc; padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #f1f5f9; flex-shrink: 0; }
         .summary-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 5px; align-items: center; }
@@ -410,7 +410,6 @@
             </div>
 
             <div style="text-align: left; background: #f8fafc; padding: 10px 14px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                <!-- டிக் மார்க் இல்லாமல் ஆக்கப்பட்டது -->
                 <input type="checkbox" id="modal-print-checkbox" style="width: 18px; height: 18px; accent-color: #4f46e5; cursor: pointer;">
                 <label for="modal-print-checkbox" style="font-size: 14px; font-weight: 800; color: #334155; cursor: pointer;">🖨️ Print Receipt</label>
             </div>
@@ -566,9 +565,7 @@
         let currentOrderType = "Dine-In";
         
         let customerHadActiveOrder = false;
-
-        // --- NEW BELL LOGIC VARIABLES ---
-        let lastBellTime = Date.now(); // Ignore old bell calls when the page first loads
+        let lastBellTime = Date.now(); 
 
         db.ref('menuData').on('value', (snapshot) => {
             const val = snapshot.val();
@@ -596,19 +593,26 @@
             checkCustomerPaymentStatus(); 
         });
 
-        // --- LISTEN FOR CUSTOMER BELL ---
+        // --- RELIABLE AUDIO NOTIFICATION SYSTEM FOR ADMIN & USER1 ---
         db.ref('alerts/bell').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.timestamp > lastBellTime) {
                 lastBellTime = data.timestamp;
                 
-                // Only alert if the user is Admin OR User1 (Staff)
                 if (loggedInRole === "admin" || loggedInRole === "user1") {
-                    // Play a distinct sound
-                    const audio = new Audio('https://actions.google.com/sounds/v1/alarms/doorbell.ogg');
-                    audio.play().catch(e => console.log("Audio block (Needs user interaction first): ", e));
+                    try {
+                        const audio = new Audio('https://actions.google.com/sounds/v1/alarms/doorbell.ogg');
+                        audio.volume = 1.0;
+                        let playPromise = audio.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.log("Autoplay prevented. User interaction required first.");
+                            });
+                        }
+                    } catch (e) {
+                        console.log("Audio play error: ", e);
+                    }
                     
-                    // Show a pop-up alert so the admin/staff knows immediately
                     alert(`🛎️ CUSTOMER CALLING:\n\n${data.table} needs your attention!`);
                 }
             }
@@ -1093,7 +1097,19 @@
                 }
 
                 noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value; saveOrderToTableSilent();">`;
-                tbody.innerHTML += `<tr><td><div class="cart-item-name">${item.name}</div>${noteHtml}</td><td><div class="qty-controls"><button class="qty-btn" onclick="decreaseQty(${item.id})">-</button><span>${item.qty}</span><button class="qty-btn" onclick="increaseQty(${item.id})">+</button></div></td><td style="text-align:right;"><input type="number" class="price-input" value="${item.customPrice.toFixed(2)}" step="0.50" oninput="updateItemPrice(${item.id}, this.value)"></td></tr>`;
+                
+                // Customer cart display with highlighted quantity in bright red and rows in soft yellow
+                tbody.innerHTML += `<tr>
+                    <td><div class="cart-item-name">${item.name}</div>${noteHtml}</td>
+                    <td>
+                        <div class="qty-controls">
+                            <button class="qty-btn" onclick="decreaseQty(${item.id})">-</button>
+                            <span>${item.qty}</span>
+                            <button class="qty-btn" onclick="increaseQty(${item.id})">+</button>
+                        </div>
+                    </td>
+                    <td style="text-align:right;"><input type="number" class="price-input" value="${item.customPrice.toFixed(2)}" step="0.50" oninput="updateItemPrice(${item.id}, this.value)"></td>
+                </tr>`;
             });
             let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
             if(document.getElementById('sub-total')) document.getElementById('sub-total').innerText = subtotal.toFixed(2);
@@ -1148,7 +1164,6 @@
             updateCart();
         }
 
-        // --- NEW CUSTOMER BELL CALL FUNCTION ---
         function callWaiter() {
             if (!currentSelectedTable) return;
             db.ref('alerts/bell').set({
@@ -1211,10 +1226,7 @@
             document.getElementById('modal-grand-total').innerText = currentGrandTotalForPay.toFixed(2);
             document.getElementById('modal-paid-input').value = currentGrandTotalForPay.toFixed(2);
             document.getElementById('modal-change-amount').innerText = "0.00";
-            
-            // Uncheck default setting applied here
             document.getElementById('modal-print-checkbox').checked = false;
-            
             document.getElementById('payment-modal').style.display = 'flex';
         }
         function closePaymentModal() { document.getElementById('payment-modal').style.display = 'none'; }
@@ -1420,7 +1432,7 @@
             let sTotal = completedSales.reduce((s, x)=>s+x.amount, 0);
             let eTotal = dailyExpenses.reduce((s, x)=>s+x.amount, 0);
             if(document.getElementById('stat-sales')) document.getElementById('stat-sales').innerText = sTotal.toFixed(2);
-            if(document.getElementById('stat-expenses')) document.getElementById('stat-expenses').innerText = eTotal.toFixed(2);
+            if(document.getElementById('stat-expenses')) document.getElementById('stat-expenses').innerText = e.toFixed(2);
         }
     </script>
 </body>
