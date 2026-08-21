@@ -101,6 +101,9 @@
         .btn-add { background: #4f46e5; color: white; width: 24px; height: 24px; border-radius: 6px; font-size: 14px; display: flex; justify-content: center; align-items: center; font-weight: bold; opacity: 0; transition: 0.3s; }
         .menu-card:hover .btn-add { opacity: 1; }
 
+        /* Menu card quantity red badge */
+        .card-qty-badge { position: absolute; top: 8px; right: 35px; background: #dc2626; color: white; font-size: 11px; font-weight: 900; padding: 1px 6px; border-radius: 10px; box-shadow: 0 2px 5px rgba(220, 38, 38, 0.3); }
+
         .right-panel h3 { margin-top: 0; color: #0f172a; font-size: 15px; font-weight: 800; margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
         
         .cart-table-wrapper { height: auto; margin-bottom: 8px; padding-right: 4px; min-height: 80px; overflow-y: visible; flex-shrink: 0; }
@@ -148,7 +151,6 @@
         .btn-call-waiter { width: 100%; padding: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2); transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-call-waiter:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3); }
 
-        /* Vertical Stacked Admin Dashboard Layout */
         .admin-dashboard-container { background: white; padding: 12px 15px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: none; margin-top: 4px; }
         .admin-dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; margin-bottom: 8px; }
         .admin-dashboard-header h3 { margin: 0; color: #0f172a; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
@@ -157,7 +159,6 @@
         .btn-cat-add { background: #059669; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; font-family: inherit; }
         .stat-box { background: #f8fafc; padding: 4px 8px; border-radius: 6px; text-align: center; border: 1px solid #e2e8f0; font-size: 12px; font-weight: 900; color: #4f46e5; }
         
-        /* Vertical Stacked Buttons */
         .admin-buttons-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
         .admin-btn { color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; font-family: inherit; text-align: left; display: flex; align-items: center; gap: 8px; transition: 0.2s; width: 100%; box-sizing: border-box; }
         .admin-btn:hover { opacity: 0.9; transform: translateX(2px); }
@@ -233,7 +234,6 @@
         </div>
     </div>
 
-    <!-- MAIN APP SCREEN -->
     <div id="main-app" style="display: none; height: 100vh; flex-direction: column;">
         <div class="header">
             <div class="header-title">
@@ -243,7 +243,6 @@
             <button class="btn-logout" id="btn-logout-elem" onclick="logout()">Logout</button>
         </div>
 
-        <!-- VIEW 1: TABLE SELECTION & ADMIN DASHBOARD VIEW -->
         <div id="table-selection-view">
             <div class="table-selection-header">
                 <h2>🪑 Select Table / Order</h2>
@@ -251,7 +250,6 @@
             </div>
             <div id="big-tables-grid" class="big-tables-grid"></div>
 
-            <!-- Vertical Stacked Admin Dashboard Section -->
             <div id="admin-dashboard-section" class="admin-dashboard-container">
                 <div class="admin-dashboard-header">
                     <h3>⚙️ Admin Dashboard & Management</h3>
@@ -269,7 +267,6 @@
                     <button class="btn-cat-add" onclick="addNewCategoryPrompt()">+ Category</button>
                 </div>
 
-                <!-- Vertical Stacked Buttons Layout -->
                 <div class="admin-buttons-grid">
                     <button class="admin-btn manage-menu-btn" onclick="openMenuManagerModal()">⚙️ Manage Menu & Prices</button>
                     <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">📁 Categories Priority</button>
@@ -285,7 +282,6 @@
             </div>
         </div>
 
-        <!-- VIEW 2: POS MENU & BILLING VIEW -->
         <div id="pos-main-view">
             <div class="mobile-tab-bar">
                 <button class="mob-tab-btn active" id="tab-menu-btn" onclick="switchMobileTab('menu')">📂 Menu Items</button>
@@ -357,7 +353,6 @@
         </div>
     </div>
 
-    <!-- Customer Success Overlay -->
     <div id="customer-success-screen" class="timeout-overlay" style="z-index: 4000;">
         <div class="timeout-box" style="padding: 30px;">
             <h1 style="font-size: 55px; margin: 0 0 10px 0;">✅</h1>
@@ -375,7 +370,6 @@
         </div>
     </div>
 
-    <!-- Payment Modal -->
     <div id="payment-modal" class="modal-overlay">
         <div class="pay-modal-box">
             <h2>💳 Complete Payment</h2>
@@ -415,7 +409,6 @@
         </div>
     </div>
 
-    <!-- Modals -->
     <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📱 Customer Table QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">🖨️ Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 13px; color: #64748b; margin-top: 0;">Scan these QR codes to order. QR Pay transactions are routed directly to Al Hussain Company Bank Account.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">👥 Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
     <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Categories</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="🔍 Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; width: 220px; margin-bottom: 12px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
@@ -426,7 +419,6 @@
     <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📊 Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">🖨️ Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
     <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">🖨️ Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
 
-    <!-- Print Templates -->
     <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" style="font-size: 18px; background: #000; color: #fff; padding: 0 4px;"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" style="font-size: 22px; background: #000; color: #fff; padding: 0 4px;"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
     <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
@@ -576,26 +568,34 @@
             checkCustomerPaymentStatus(); 
         });
 
-        // --- RELIABLE AUDIO NOTIFICATION LISTENER FOR ADMIN & USER1 ---
+        // --- RELIABLE WEB AUDIO BEEP ALERTS FOR ADMIN & USER1 ---
+        function playBeepSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+                gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.6); // 600ms beep sound
+            } catch(e) {
+                console.log("Web audio error: ", e);
+            }
+        }
+
         db.ref('alerts/bell').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data && data.timestamp > lastBellTime) {
                 lastBellTime = data.timestamp;
                 
                 if (loggedInRole === "admin" || loggedInRole === "user1") {
-                    try {
-                        const audio = new Audio('https://actions.google.com/sounds/v1/alarms/doorbell.ogg');
-                        audio.volume = 1.0;
-                        let playPromise = audio.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(error => {
-                                console.log("Autoplay policy blocked audio. User interaction required.");
-                            });
-                        }
-                    } catch (e) {
-                        console.log("Audio play error: ", e);
-                    }
-                    
+                    playBeepSound();
                     alert(`🛎️ CUSTOMER CALLING:\n\n${data.table} needs your attention!`);
                 }
             }
@@ -679,7 +679,6 @@
             }
         });
 
-        // Fixed Robust Login Handler
         function handleLogin(event) {
             event.preventDefault();
             const user = document.getElementById('login-user').value.trim().toLowerCase();
@@ -993,7 +992,12 @@
                 grouped[cat].forEach(item => {
                     const card = document.createElement('div'); card.className = 'menu-card';
                     card.onclick = () => addToCart(item.id);
-                    card.innerHTML = `<div class="card-code">${item.code || ''}</div><div class="card-icon">${item.icon || '🍽️'}</div><div class="card-title">${item.name}</div><div class="card-bottom"><div class="card-price">$${item.price.toFixed(2)}</div><div class="btn-add">+</div></div>`;
+                    
+                    // Check if item is already in cart to show red quantity badge on the menu card
+                    let existingCartItem = cart.find(c => c.id === item.id);
+                    let badgeHtml = existingCartItem ? `<div class="card-qty-badge">${existingCartItem.qty}</div>` : '';
+
+                    card.innerHTML = `<div class="card-code">${item.code || ''}</div>${badgeHtml}<div class="card-icon">${item.icon || '🍽️'}</div><div class="card-title">${item.name}</div><div class="card-bottom"><div class="card-price">$${item.price.toFixed(2)}</div><div class="btn-add">+</div></div>`;
                     grid.appendChild(card);
                 });
             });
@@ -1044,6 +1048,7 @@
             if (cartItem) cartItem.qty += 1;
             else cart.push({ ...item, qty: 1, customPrice: item.price, selectedNotes: [], customComment: "" });
             updateCart();
+            renderMenu(); // Re-render menu so quantity red badge updates instantly
             saveOrderToTableSilent();
         }
 
@@ -1088,7 +1093,6 @@
 
                 noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value; saveOrderToTableSilent();">`;
                 
-                // Cart Row Background Yellow, Quantity numbers Red with item counter (1, 2, 3...)
                 tbody.innerHTML += `<tr>
                     <td><div class="cart-item-name"><b>${index + 1}.</b> ${item.name}</div>${noteHtml}</td>
                     <td>
@@ -1106,8 +1110,25 @@
             if(document.getElementById('total-amount')) document.getElementById('total-amount').innerText = Math.max(0, subtotal - discount).toFixed(2);
         }
 
-        function decreaseQty(id) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.qty -= 1; if (cartItem.qty <= 0) cart = cart.filter(c => c.id !== id); updateCart(); saveOrderToTableSilent(); } }
-        function increaseQty(id) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.qty += 1; updateCart(); saveOrderToTableSilent(); } }
+        function decreaseQty(id) { 
+            const cartItem = cart.find(c => c.id === id); 
+            if (cartItem) { 
+                cartItem.qty -= 1; 
+                if (cartItem.qty <= 0) cart = cart.filter(c => c.id !== id); 
+                updateCart(); 
+                renderMenu(); 
+                saveOrderToTableSilent(); 
+            } 
+        }
+        function increaseQty(id) { 
+            const cartItem = cart.find(c => c.id === id); 
+            if (cartItem) { 
+                cartItem.qty += 1; 
+                updateCart(); 
+                renderMenu(); 
+                saveOrderToTableSilent(); 
+            } 
+        }
         function updateItemPrice(id, val) { let p = parseFloat(val); if (!isNaN(p) && p >= 0) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.customPrice = p; updateCart(); saveOrderToTableSilent(); } } }
 
         function getFormattedItemNotes(item) {
@@ -1152,6 +1173,7 @@
             document.getElementById('customer-success-screen').style.display = 'flex';
             cart = [];
             updateCart();
+            renderMenu();
         }
 
         function callWaiter() {
@@ -1277,7 +1299,6 @@
             safePrint("print-customer");
         }
 
-        /* Admin Modals */
         function openMenuManagerModal() { 
             document.getElementById('menu-manager-search').value = ''; 
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
