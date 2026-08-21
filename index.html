@@ -141,6 +141,9 @@
         .btn-drawer { grid-column: span 2; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0 !important; padding: 7px !important; }
         .btn-back-tables { grid-column: span 2; background: #64748b; color: white; padding: 9px; font-size: 12px; border-radius: 8px; }
 
+        .btn-ready-order { grid-column: span 2; background: #10b981; color: white; border: none; padding: 9px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; }
+        .btn-ready-order:hover { background: #059669; }
+
         #customer-action-div { display: none; margin-top: 10px; flex-shrink: 0; flex-direction: column; gap: 8px; }
         .btn-customer-send { width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); transition: 0.3s; }
         .btn-customer-send:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3); }
@@ -216,6 +219,22 @@
     </style>
 </head>
 <body>
+
+    <!-- Takeaway Details Input Modal for Customers -->
+    <div id="takeaway-details-modal" class="timeout-overlay" style="display: none; z-index: 5000; background: rgba(15, 23, 42, 0.85);">
+        <div class="timeout-box" style="text-align: left; max-width: 380px;">
+            <h2 style="color: #4f46e5; text-align: center; margin-bottom: 20px;">📦 Takeaway Details</h2>
+            <form onsubmit="saveTakeawayCustomerDetails(event)">
+                <label style="font-size: 13px; font-weight: 800; color: #475569;">Your Name:</label>
+                <input type="text" id="tk-cust-name" placeholder="Enter your name" required style="width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-size: 14px; font-family: inherit;">
+                
+                <label style="font-size: 13px; font-weight: 800; color: #475569;">Phone Number:</label>
+                <input type="tel" id="tk-cust-phone" placeholder="Enter your phone number" required style="width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 20px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-size: 14px; font-family: inherit;">
+                
+                <button type="submit" class="btn-login" style="width: 100%; padding: 14px;">Continue to Menu</button>
+            </form>
+        </div>
+    </div>
 
     <div id="login-screen" class="login-overlay">
         <div class="login-box">
@@ -333,6 +352,7 @@
                     <div class="action-buttons" id="staff-action-buttons">
                         <button class="btn-hold" id="btn-hold-elem" onclick="saveOrderToTableAndPrintKOT()">🕒 Hold & KOT</button>
                         <button class="btn-kitchen" id="btn-kitchen-elem" onclick="printKitchenKOT()">🍳 Kitchen</button>
+                        <button class="btn-ready-order" id="btn-ready-order-elem" onclick="toggleOrderReadyStatus()">🔔 Mark Order Ready</button>
                         <button id="btn-print-bill-elem" class="btn-print-bill" onclick="printCustomerBillOnly()">🖨️ Print Bill</button>
                         <button id="btn-pay-elem" class="btn-pay" onclick="openPaymentModal()">💳 Pay Now</button>
                         <button id="btn-drawer-elem" class="btn-drawer" onclick="openCashDrawerOnly()">🔓 Open Drawer</button>
@@ -348,6 +368,16 @@
         </div>
     </div>
 
+    <!-- Customer Order Ready Notification Popup -->
+    <div id="customer-ready-screen" class="timeout-overlay" style="z-index: 4500;">
+        <div class="timeout-box" style="padding: 30px;">
+            <h1 style="font-size: 55px; margin: 0 0 10px 0;">🔔</h1>
+            <h2 style="color: #10b981;">Order Ready to Serve!</h2>
+            <p style="margin-bottom: 25px;">Your takeaway order is ready! Please collect it at the counter.</p>
+            <button onclick="document.getElementById('customer-ready-screen').style.display='none'" style="width: 100%; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer;">OK</button>
+        </div>
+    </div>
+
     <div id="customer-success-screen" class="timeout-overlay" style="z-index: 4000;">
         <div class="timeout-box" style="padding: 30px;">
             <h1 style="font-size: 55px; margin: 0 0 10px 0;">✅</h1>
@@ -360,8 +390,8 @@
     <div id="timeout-screen" class="timeout-overlay">
         <div class="timeout-box">
             <h1>⏳</h1>
-            <h2>Session Expired</h2>
-            <p>Please scan the QR code again to make an order.</p>
+            <h2>Session Closed</h2>
+            <p>Your payment is complete or session has ended. Thank you!</p>
         </div>
     </div>
 
@@ -414,8 +444,8 @@
     <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📊 Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">🖨️ Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
     <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">🖨️ Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
 
-    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" style="font-size: 18px; background: #000; color: #fff; padding: 0 4px;"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
-    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" style="font-size: 22px; background: #000; color: #fff; padding: 0 4px;"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
+    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" style="font-size: 18px; background: #000; color: #fff; padding: 0 4px;"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span> | <b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
+    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" style="font-size: 22px; background: #000; color: #fff; padding: 0 4px;"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Name:</b> <span id="k-cust-name-val"></span> | <b>Phone:</b> <span id="k-cust-phone-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
     <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>SALES HISTORY REPORT</b></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span>$<span id="print-history-grand-total">0.00</span></span></div></div>
     <div id="print-day-close"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>DAY CLOSE REPORT</b></p><p id="dc-date" style="margin:2px 0; font-size:13px;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 15px; font-weight: 900; margin-bottom: 8px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Sales:</span><span>$<span id="dc-sales">0.00</span></span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Expenses:</span><span>$<span id="dc-expenses">0.00</span></span></div><hr style="border-top: 2px dashed black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Net Balance:</span><span>$<span id="dc-net">0.00</span></span></div></div><div><p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>EXPENSES:</b></p><table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900; margin-top: 4px;"><tbody id="dc-expenses-list"></tbody></table></div></div>
@@ -593,6 +623,20 @@
                 }
             }
         });
+
+        // Listen for order status changes (e.g. Ready notification for customer)
+        db.ref('orderStatus').on('value', (snapshot) => {
+            const statuses = snapshot.val() || {};
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderParam = urlParams.get('order');
+            
+            if (orderParam && orderParam === "takeaway") {
+                let storedTkKey = sessionStorage.getItem('myTakeawayKey');
+                if (storedTkKey && statuses[storedTkKey] === "Ready") {
+                    document.getElementById('customer-ready-screen').style.display = 'flex';
+                }
+            }
+        });
         
         db.ref('sales').on('value', (snapshot) => { completedSales = snapshot.val() || []; updateStats(); });
         db.ref('rawMaterials').on('value', (snapshot) => { rawMaterials = snapshot.val() || []; });
@@ -606,13 +650,15 @@
             const urlParams = new URLSearchParams(window.location.search);
             const tableParam = urlParams.get('table');
             const orderParam = urlParams.get('order');
-            let targetKey = tableParam || orderParam;
+            let targetKey = tableParam || (orderParam === "takeaway" ? sessionStorage.getItem('myTakeawayKey') : "");
             
             if (targetKey) {
                 if (activeOrders[targetKey]) {
                     customerHadActiveOrder = true;
                 } else if (customerHadActiveOrder && !activeOrders[targetKey]) {
-                    window.location.href = "https://www.google.com";
+                    // Payment complete or order cleared -> Close customer session page
+                    document.getElementById('main-app').style.display = 'none';
+                    document.getElementById('timeout-screen').style.display = 'flex';
                 }
             }
         }
@@ -627,78 +673,76 @@
 
             if (orderParam && orderParam === "takeaway") {
                 isTakeawayQR = true;
-                // Generate a unique dynamic takeaway order name for this customer session if not already stored
                 let storedTkKey = sessionStorage.getItem('myTakeawayKey');
                 if (!storedTkKey) {
-                    let nextNum = takeawaySequenceCounter++;
-                    if (takeawaySequenceCounter > 1000) takeawaySequenceCounter = 100;
-                    db.ref('takeawaySequenceCounter').set(takeawaySequenceCounter);
-                    storedTkKey = `Order-${nextNum}`;
-                    sessionStorage.setItem('myTakeawayKey', storedTkKey);
+                    // Prompt or show details modal for takeaway customer
+                    document.getElementById('takeaway-details-modal').style.display = 'flex';
+                    return; // Wait for form submission
+                } else {
+                    customerTarget = storedTkKey;
                 }
-                customerTarget = storedTkKey;
             } else if (tableParam && tableParam.trim() !== "") {
                 customerTarget = tableParam;
             }
 
             if (customerTarget) {
-                loggedInRole = "customer";
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-app').style.display = 'flex';
-                document.getElementById('app-header-title').innerText = isTakeawayQR ? `📦 Al Hussain Restaurant - Takeaway` : `🍽️ Al Hussain Restaurant - ${customerTarget}`;
-                document.getElementById('display-user').innerText = isTakeawayQR ? "Takeaway Customer" : "Customer";
-                document.getElementById('btn-logout-elem').style.display = 'none';
-                
-                document.getElementById('table-selection-view').style.display = 'none';
-                document.getElementById('pos-main-view').style.display = 'flex';
-                
-                document.getElementById('discount-row-elem').style.display = 'none';
-                document.getElementById('payment-method-row').style.display = 'none';
-                document.getElementById('staff-action-buttons').style.display = 'none'; 
-                document.getElementById('customer-action-div').style.display = 'flex'; 
-                
-                // Customize call waiter button text for takeaway customers
-                const callBtn = document.getElementById('btn-call-waiter-elem');
-                if (isTakeawayQR) {
-                    callBtn.innerHTML = "🔔 Call Counter / Inquiry";
-                }
-
-                document.getElementById('admin-dashboard-section').style.display = 'none';
-
-                currentSelectedTable = customerTarget;
-                currentOrderType = isTakeawayQR ? "Takeaway" : "Dine-In";
-                document.getElementById('cart-panel-title').innerText = `🛒 My Order: ${customerTarget}`;
-
-                cart = []; 
-                updateCart();
-                switchMobileTab('menu');
-
-                let customerTimeout;
-                const timeoutDuration = 15 * 60 * 1000; 
-
-                function showTimeoutScreen() {
-                    document.getElementById('main-app').style.display = 'none';
-                    document.getElementById('timeout-screen').style.display = 'flex';
-                }
-
-                function resetCustomerTimeout() {
-                    clearTimeout(customerTimeout);
-                    customerTimeout = setTimeout(showTimeoutScreen, timeoutDuration);
-                }
-
-                window.addEventListener('load', resetCustomerTimeout);
-                window.addEventListener('mousemove', resetCustomerTimeout);
-                window.addEventListener('mousedown', resetCustomerTimeout);
-                window.addEventListener('touchstart', resetCustomerTimeout);
-                window.addEventListener('click', resetCustomerTimeout);
-                window.addEventListener('keypress', resetCustomerTimeout);
-                window.addEventListener('scroll', resetCustomerTimeout);
-
-            } else {
+                initializeCustomerSession(customerTarget, isTakeawayQR);
+            } else if (!orderParam && !tableParam) {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-app').style.display = 'none';
             }
         });
+
+        function saveTakeawayCustomerDetails(event) {
+            event.preventDefault();
+            const name = document.getElementById('tk-cust-name').value.trim();
+            const phone = document.getElementById('tk-cust-phone').value.trim();
+            if (!name || !phone) return alert("Please fill name and phone number!");
+
+            let nextNum = takeawaySequenceCounter++;
+            if (takeawaySequenceCounter > 1000) takeawaySequenceCounter = 100;
+            db.ref('takeawaySequenceCounter').set(takeawaySequenceCounter);
+            
+            let storedTkKey = `Order-${nextNum}`;
+            sessionStorage.setItem('myTakeawayKey', storedTkKey);
+            sessionStorage.setItem('myTkName', name);
+            sessionStorage.setItem('myTkPhone', phone);
+
+            document.getElementById('takeaway-details-modal').style.display = 'none';
+            initializeCustomerSession(storedTkKey, true);
+        }
+
+        function initializeCustomerSession(customerTarget, isTakeawayQR) {
+            loggedInRole = "customer";
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            document.getElementById('app-header-title').innerText = isTakeawayQR ? `📦 Al Hussain Restaurant - Takeaway` : `🍽️ Al Hussain Restaurant - ${customerTarget}`;
+            document.getElementById('display-user').innerText = isTakeawayQR ? "Takeaway Customer" : "Customer";
+            document.getElementById('btn-logout-elem').style.display = 'none';
+            
+            document.getElementById('table-selection-view').style.display = 'none';
+            document.getElementById('pos-main-view').style.display = 'flex';
+            
+            document.getElementById('discount-row-elem').style.display = 'none';
+            document.getElementById('payment-method-row').style.display = 'none';
+            document.getElementById('staff-action-buttons').style.display = 'none'; 
+            document.getElementById('customer-action-div').style.display = 'flex'; 
+            
+            const callBtn = document.getElementById('btn-call-waiter-elem');
+            if (isTakeawayQR) {
+                callBtn.innerHTML = "🔔 Call Counter / Inquiry";
+            }
+
+            document.getElementById('admin-dashboard-section').style.display = 'none';
+
+            currentSelectedTable = customerTarget;
+            currentOrderType = isTakeawayQR ? "Takeaway" : "Dine-In";
+            document.getElementById('cart-panel-title').innerText = `🛒 My Order: ${customerTarget}`;
+
+            cart = []; 
+            updateCart();
+            switchMobileTab('menu');
+        }
 
         function handleLogin(event) {
             event.preventDefault();
@@ -711,26 +755,27 @@
             const btnDrawer = document.getElementById('btn-drawer-elem');
             const btnHold = document.getElementById('btn-hold-elem');
             const btnKitchen = document.getElementById('btn-kitchen-elem');
+            const btnReadyOrder = document.getElementById('btn-ready-order-elem');
 
             let roleKey = "";
             if (user === "admin" && pass === "admin123") {
                 loggedInRole = "admin";
                 billSummaryContainer.style.display = "block";
-                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block";
+                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
                 roleKey = "Admin 👑";
                 grantAccess(roleKey);
             } 
             else if (user === "user1" && pass === "1234") {
                 loggedInRole = "user1";
                 billSummaryContainer.style.display = "block";
-                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block";
+                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
                 roleKey = "Staff 👨‍🍳";
                 grantAccess(roleKey);
             }
             else if (user === "user2" && pass === "1234") {
                 loggedInRole = "user2";
                 billSummaryContainer.style.display = "none";
-                btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block";
+                btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
                 roleKey = "Order Taker 📝";
                 grantAccess(roleKey);
             } 
@@ -820,12 +865,13 @@
             takeawayKeys.forEach(tkKey => {
                 let orderData = activeOrders[tkKey];
                 let count = orderData.items ? orderData.items.reduce((sum, i) => sum + i.qty, 0) : 0;
+                let custInfo = orderData.custName ? `<br>👤 ${orderData.custName} (${orderData.custPhone || ''})` : '';
                 let cancelBtn = loggedInRole === "admin" ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tkKey}', event)" style="position:absolute; top:6px; right:6px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; font-weight:bold; cursor:pointer;">X</button>` : '';
 
                 container.innerHTML += `<div class="big-table-card occupied" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;" onclick="selectTableForOrder('${tkKey}', 'Takeaway')">
                     ${cancelBtn}
                     <h3 style="color:#b45309;">📦 ${tkKey}</h3>
-                    <p style="color:#92400e;">${count} Items<br>⏱️ ${formatElapsedTime(orderData.time)}</p>
+                    <p style="color:#92400e;">${count} Items${custInfo}<br>⏱️ ${formatElapsedTime(orderData.time)}</p>
                 </div>`;
             });
         }
@@ -849,6 +895,15 @@
             if (takeawaySequenceCounter > 1000) takeawaySequenceCounter = 100;
             db.ref('takeawaySequenceCounter').set(takeawaySequenceCounter);
             let newTkName = `Order-${nextNum}`;
+            
+            let cName = prompt("Enter Customer Name for Takeaway:") || "Walk-in";
+            let cPhone = prompt("Enter Customer Phone Number:") || "";
+            
+            currentSelectedTable = newTkName;
+            currentOrderType = "Takeaway";
+            activeOrders[newTkName] = { time: Date.now(), type: "Takeaway", custName: cName, custPhone: cPhone, items: [] };
+            db.ref('activeOrders').set(activeOrders);
+
             selectTableForOrder(newTkName, 'Takeaway');
         }
 
@@ -869,7 +924,27 @@
         function cancelActiveOrder(key, event) {
             event.stopPropagation();
             if (loggedInRole !== "admin") return alert("⚠️ Admin only!");
-            if (confirm(`Cancel active order ${key}?`)) { delete activeOrders[key]; db.ref('activeOrders').set(activeOrders); renderBigTableSelectionGrid(); }
+            if (confirm(`Cancel active order ${key}?`)) { 
+                delete activeOrders[key]; 
+                db.ref('activeOrders').set(activeOrders); 
+                db.ref(`orderStatus/${key}`).remove();
+                renderBigTableSelectionGrid(); 
+            }
+        }
+
+        function toggleOrderReadyStatus() {
+            if (!currentSelectedTable) return;
+            let currentStatusRef = db.ref(`orderStatus/${currentSelectedTable}`);
+            currentStatusRef.once('value', (snap) => {
+                let st = snap.val();
+                if (st === "Ready") {
+                    currentStatusRef.remove();
+                    alert("Order marked as Preparing.");
+                } else {
+                    currentStatusRef.set("Ready");
+                    alert("🔔 Order marked as READY! Notification sent to customer.");
+                }
+            });
         }
 
         function getAllCategories() {
@@ -1161,8 +1236,12 @@
         function saveOrderToTableSilent() {
             if (loggedInRole === "customer") return; 
             if (cart.length === 0 || !currentSelectedTable) return;
-            let existingTime = (activeOrders[currentSelectedTable] && activeOrders[currentSelectedTable].time) ? activeOrders[currentSelectedTable].time : Date.now();
-            activeOrders[currentSelectedTable] = { time: existingTime, type: currentOrderType, items: JSON.parse(JSON.stringify(cart)) };
+            let existing = activeOrders[currentSelectedTable] || {};
+            let existingTime = existing.time || Date.now();
+            let cName = existing.custName || sessionStorage.getItem('myTkName') || "Walk-in";
+            let cPhone = existing.custPhone || sessionStorage.getItem('myTkPhone') || "";
+
+            activeOrders[currentSelectedTable] = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, items: JSON.parse(JSON.stringify(cart)) };
             db.ref('activeOrders').set(activeOrders);
         }
 
@@ -1175,14 +1254,20 @@
             
             let existingOrder = activeOrders[currentSelectedTable];
             let newItems = JSON.parse(JSON.stringify(cart));
+            let cName = sessionStorage.getItem('myTkName') || "Customer";
+            let cPhone = sessionStorage.getItem('myTkPhone') || "";
             
             if (existingOrder && existingOrder.items) {
                 existingOrder.items = existingOrder.items.concat(newItems);
                 existingOrder.time = Date.now(); 
+                existingOrder.custName = cName;
+                existingOrder.custPhone = cPhone;
             } else {
                 existingOrder = {
                     time: Date.now(),
                     type: currentOrderType,
+                    custName: cName,
+                    custPhone: cPhone,
                     items: newItems
                 };
             }
@@ -1231,7 +1316,18 @@
         }
 
         function printKitchenKOTSilent() {
-            document.getElementById('k-order-type').innerText = currentOrderType; document.getElementById('k-table').innerText = currentSelectedTable;
+            document.getElementById('k-order-type').innerText = currentOrderType; 
+            document.getElementById('k-table').innerText = currentSelectedTable;
+            
+            let orderData = activeOrders[currentSelectedTable];
+            if (orderData && orderData.custName) {
+                document.getElementById('k-cust-info').style.display = 'block';
+                document.getElementById('k-cust-name-val').innerText = orderData.custName;
+                document.getElementById('k-cust-phone-val').innerText = orderData.custPhone || 'N/A';
+            } else {
+                document.getElementById('k-cust-info').style.display = 'none';
+            }
+
             const kItems = document.getElementById('k-items'); kItems.innerHTML = '';
             cart.forEach(i => {
                 let noteStr = getFormattedItemNotes(i);
@@ -1294,14 +1390,28 @@
                 db.ref('staffShifts').set(staffShifts);
             }
 
-            delete activeOrders[currentSelectedTable]; db.ref('activeOrders').set(activeOrders);
+            delete activeOrders[currentSelectedTable]; 
+            db.ref('activeOrders').set(activeOrders);
+            db.ref(`orderStatus/${currentSelectedTable}`).remove(); // Clears order status so customer page auto closes
+
             cart = []; updateStats(); 
             backToTableSelection();
             alert("✅ Payment Successful! Change: $" + change.toFixed(2));
         }
 
         function fillReceiptDetails(orderType, ref, method, time, sub, disc, total, paid, change, items) {
-            document.getElementById('p-order-type').innerText = orderType; document.getElementById('p-table').innerText = ref;
+            document.getElementById('p-order-type').innerText = orderType; 
+            document.getElementById('p-table').innerText = ref;
+            
+            let orderData = activeOrders[ref];
+            if (orderData && orderData.custName) {
+                document.getElementById('p-cust-info').style.display = 'block';
+                document.getElementById('p-cust-name-val').innerText = orderData.custName;
+                document.getElementById('p-cust-phone-val').innerText = orderData.custPhone || 'N/A';
+            } else {
+                document.getElementById('p-cust-info').style.display = 'none';
+            }
+
             document.getElementById('p-method').innerText = method; document.getElementById('p-time').innerText = time;
             document.getElementById('p-subtotal').innerText = Number(sub).toFixed(2); document.getElementById('p-total').innerText = Number(total).toFixed(2);
             document.getElementById('p-paid').innerText = Number(paid).toFixed(2); document.getElementById('p-change').innerText = Number(change).toFixed(2);
@@ -1391,7 +1501,7 @@
 
         function openItemReportModal() {
             let tbody = document.getElementById('item-report-tbody'); tbody.innerHTML=''; let counts = {};
-            completedSales.forEach(s => { if(s.items) s.items.forEach(i => { counts[i.name] = (counts[i.name]||0)+i.qty; }); });
+            completedSales.completedSales?.forEach(s => { if(s.items) s.items.forEach(i => { counts[i.name] = (counts[i.name]||0)+i.qty; }); });
             for(let [n, q] of Object.entries(counts)) { tbody.innerHTML += `<tr><td><b>${n}</b></td><td style="text-align:right;">${q}</td></tr>`; }
             document.getElementById('item-report-modal').style.display = 'flex';
         }
@@ -1401,7 +1511,6 @@
         function openCustomerQRModal() {
             let grid = document.getElementById('qr-cards-grid'); grid.innerHTML='';
             
-            // Add Takeaway QR Code Card first
             let takeawayUrl = `${liveBaseUrl}?order=takeaway`;
             let tkCard = document.createElement('div'); tkCard.className='qr-card';
             tkCard.style.cssText = "background: #fef3c7; border: 2px dashed #f59e0b;";
@@ -1409,7 +1518,6 @@
             grid.appendChild(tkCard);
             new QRCode(document.getElementById(`qrcode-takeaway`), { text: takeawayUrl, width: 100, height: 100 });
 
-            // Add Table QR Codes
             for(let i=1; i<=13; i++) {
                 let url = `${liveBaseUrl}?table=Table ${i}`;
                 let card = document.createElement('div'); card.className='qr-card';
@@ -1424,14 +1532,12 @@
         function printAllTableQRs() {
             let pContainer = document.getElementById('print-qr-container'); pContainer.innerHTML='';
             
-            // Print Takeaway QR
             let takeawayUrl = `${liveBaseUrl}?order=takeaway`;
             let tkDiv = document.createElement('div'); tkDiv.style.cssText="border:1px solid #000; padding:10px; text-align:center; background:#fffbeb;";
             tkDiv.innerHTML = `<h3>Takeaway / Parcel</h3><div id="print-qrcode-takeaway"></div>`;
             pContainer.appendChild(tkDiv);
             new QRCode(document.getElementById(`print-qrcode-takeaway`), { text: takeawayUrl, width: 120, height: 120 });
 
-            // Print Table QRs
             for(let i=1; i<=13; i++) {
                 let url = `${liveBaseUrl}?table=Table ${i}`;
                 let div = document.createElement('div'); div.style.cssText="border:1px solid #000; padding:10px; text-align:center;";
@@ -1470,7 +1576,7 @@
                 document.getElementById('dc-net').innerText = (salesTotal - expTotal).toFixed(2);
                 
                 let exList = document.getElementById('dc-expenses-list'); exList.innerHTML='';
-                dailyExpenses.forEach(e => { exList.innerHTM += `<tr><td>${e.desc}</td><td style="text-align:right;">$${e.amount.toFixed(2)}</td></tr>`; });
+                dailyExpenses.forEach(e => { exList.innerHTML += `<tr><td>${e.desc}</td><td style="text-align:right;">$${e.amount.toFixed(2)}</td></tr>`; });
 
                 safePrint("print-day-close-mode");
                 completedSales = []; db.ref('sales').set([]);
