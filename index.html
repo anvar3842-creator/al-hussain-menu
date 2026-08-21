@@ -100,17 +100,14 @@
         .card-price { font-weight: 900; font-size: 15px; color: #4f46e5; }
         .btn-add { background: #4f46e5; color: white; width: 24px; height: 24px; border-radius: 6px; font-size: 14px; display: flex; justify-content: center; align-items: center; font-weight: bold; opacity: 0; transition: 0.3s; }
         .menu-card:hover .btn-add { opacity: 1; }
-
-        /* Menu card quantity red badge */
         .card-qty-badge { position: absolute; top: 8px; right: 35px; background: #dc2626; color: white; font-size: 11px; font-weight: 900; padding: 1px 6px; border-radius: 10px; box-shadow: 0 2px 5px rgba(220, 38, 38, 0.3); }
 
         .right-panel h3 { margin-top: 0; color: #0f172a; font-size: 15px; font-weight: 800; margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-        
         .cart-table-wrapper { height: auto; margin-bottom: 8px; padding-right: 4px; min-height: 80px; overflow-y: visible; flex-shrink: 0; }
         
         table { width: 100%; border-collapse: separate; border-spacing: 0 5px; }
         th { color: #94a3b8; padding: 0 6px; text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; }
-        td { padding: 8px 6px; background: #fef08a; /* Soft Yellow Background for Cart items */ vertical-align: top; }
+        td { padding: 8px 6px; background: #fef08a; vertical-align: top; }
         td:first-child { border-radius: 8px 0 0 8px; }
         td:last-child { border-radius: 0 8px 8px 0; }
         
@@ -124,7 +121,7 @@
         .qty-controls { display: flex; align-items: center; gap: 6px; background: white; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; width: max-content; }
         .qty-btn { background: transparent; border: none; width: 18px; height: 18px; border-radius: 3px; cursor: pointer; font-weight: bold; color: #4f46e5; font-size: 13px; display: flex; align-items: center; justify-content: center; }
         .qty-btn:hover { background: #f1f5f9; }
-        .qty-controls span { font-weight: 900; font-size: 14px; width: 18px; text-align: center; color: #dc2626; /* Bright Red Quantity Numbers */ }
+        .qty-controls span { font-weight: 900; font-size: 14px; width: 18px; text-align: center; color: #dc2626; }
         
         .bill-summary { background: #f8fafc; padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #f1f5f9; flex-shrink: 0; }
         .summary-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 5px; align-items: center; }
@@ -144,12 +141,10 @@
         .btn-drawer { grid-column: span 2; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0 !important; padding: 7px !important; }
         .btn-back-tables { grid-column: span 2; background: #64748b; color: white; padding: 9px; font-size: 12px; border-radius: 8px; }
 
-        #customer-action-div { display: none; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+        #customer-action-div { display: none; margin-top: 10px; flex-shrink: 0; flex-direction: column; gap: 8px; }
         .btn-customer-send { width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); transition: 0.3s; }
         .btn-customer-send:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3); }
-        
         .btn-call-waiter { width: 100%; padding: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2); transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-call-waiter:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3); }
 
         .admin-dashboard-container { background: white; padding: 12px 15px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: none; margin-top: 4px; }
         .admin-dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; margin-bottom: 8px; }
@@ -275,7 +270,7 @@
                     <button class="admin-btn staff-btn" onclick="openStaffPerformanceModal()">👥 Staff Shift Tracking</button>
                     <button class="admin-btn report-btn" onclick="openItemReportModal()">📊 Daily Items Report</button>
                     <button class="admin-btn monthly-btn" onclick="openMonthlyReportModal()">📅 Monthly History</button>
-                    <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">📱 Customer QR Code Link</button>
+                    <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">📱 Customer & Takeaway QR Codes</button>
                     <button class="admin-btn history-btn" onclick="openHistoryModal()">📋 Sales History</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">🔒 Day Close (End of Day)</button>
                 </div>
@@ -345,7 +340,7 @@
                     </div>
 
                     <div id="customer-action-div">
-                        <button class="btn-call-waiter" onclick="callWaiter()">🔔 Call Waiter</button>
+                        <button class="btn-call-waiter" id="btn-call-waiter-elem" onclick="callWaiter()">🔔 Call Waiter / Counter</button>
                         <button class="btn-customer-send" onclick="customerSendOrder()">🚀 Send Order to Kitchen</button>
                     </div>
                 </div>
@@ -366,7 +361,7 @@
         <div class="timeout-box">
             <h1>⏳</h1>
             <h2>Session Expired</h2>
-            <p>Please scan the QR code on your table again to make an order.</p>
+            <p>Please scan the QR code again to make an order.</p>
         </div>
     </div>
 
@@ -409,7 +404,7 @@
         </div>
     </div>
 
-    <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📱 Customer Table QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">🖨️ Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 13px; color: #64748b; margin-top: 0;">Scan these QR codes to order. QR Pay transactions are routed directly to Al Hussain Company Bank Account.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
+    <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📱 Customer & Takeaway QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">🖨️ Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 13px; color: #64748b; margin-top: 0;">Scan table QR codes for dine-in, or the Takeaway QR code for parcel orders.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">👥 Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
     <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Categories</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="🔍 Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; width: 220px; margin-bottom: 12px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
     <div id="category-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📁 Manage Categories & Order</h3><button class="close-modal" onclick="closeCategoryManagerModal()">X</button></div><div class="modal-body"><p style="font-size: 12px; color: #64748b; margin-top: 0;">Use Up/Down buttons to prioritize categories (important ones on top).</p><table class="admin-table"><thead><tr><th>Category Name</th><th style="text-align:center;">Priority Order</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="category-manager-tbody"></tbody></table></div></div></div>
@@ -568,7 +563,6 @@
             checkCustomerPaymentStatus(); 
         });
 
-        // --- RELIABLE WEB AUDIO BEEP ALERTS FOR ADMIN & USER1 ---
         function playBeepSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -576,14 +570,14 @@
                 const gainNode = audioCtx.createGain();
                 
                 oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); 
                 gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
                 
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
                 
                 oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.6); // 600ms beep sound
+                oscillator.stop(audioCtx.currentTime + 0.6); 
             } catch(e) {
                 console.log("Web audio error: ", e);
             }
@@ -593,10 +587,9 @@
             const data = snapshot.val();
             if (data && data.timestamp > lastBellTime) {
                 lastBellTime = data.timestamp;
-                
                 if (loggedInRole === "admin" || loggedInRole === "user1") {
                     playBeepSound();
-                    alert(`🛎️ CUSTOMER CALLING:\n\n${data.table} needs your attention!`);
+                    alert(`🛎️ NOTIFICATION:\n\n${data.table} needs your attention!`);
                 }
             }
         });
@@ -612,11 +605,13 @@
         function checkCustomerPaymentStatus() {
             const urlParams = new URLSearchParams(window.location.search);
             const tableParam = urlParams.get('table');
+            const orderParam = urlParams.get('order');
+            let targetKey = tableParam || orderParam;
             
-            if (tableParam) {
-                if (activeOrders[tableParam]) {
+            if (targetKey) {
+                if (activeOrders[targetKey]) {
                     customerHadActiveOrder = true;
-                } else if (customerHadActiveOrder && !activeOrders[tableParam]) {
+                } else if (customerHadActiveOrder && !activeOrders[targetKey]) {
                     window.location.href = "https://www.google.com";
                 }
             }
@@ -625,13 +620,33 @@
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const tableParam = urlParams.get('table');
+            const orderParam = urlParams.get('order');
 
-            if (tableParam && tableParam.trim() !== "" && (window.location.search.includes("table="))) {
+            let customerTarget = "";
+            let isTakeawayQR = false;
+
+            if (orderParam && orderParam === "takeaway") {
+                isTakeawayQR = true;
+                // Generate a unique dynamic takeaway order name for this customer session if not already stored
+                let storedTkKey = sessionStorage.getItem('myTakeawayKey');
+                if (!storedTkKey) {
+                    let nextNum = takeawaySequenceCounter++;
+                    if (takeawaySequenceCounter > 1000) takeawaySequenceCounter = 100;
+                    db.ref('takeawaySequenceCounter').set(takeawaySequenceCounter);
+                    storedTkKey = `Order-${nextNum}`;
+                    sessionStorage.setItem('myTakeawayKey', storedTkKey);
+                }
+                customerTarget = storedTkKey;
+            } else if (tableParam && tableParam.trim() !== "") {
+                customerTarget = tableParam;
+            }
+
+            if (customerTarget) {
                 loggedInRole = "customer";
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-app').style.display = 'flex';
-                document.getElementById('app-header-title').innerText = `🍽️ Al Hussain Restaurant - ${tableParam}`;
-                document.getElementById('display-user').innerText = "Customer";
+                document.getElementById('app-header-title').innerText = isTakeawayQR ? `📦 Al Hussain Restaurant - Takeaway` : `🍽️ Al Hussain Restaurant - ${customerTarget}`;
+                document.getElementById('display-user').innerText = isTakeawayQR ? "Takeaway Customer" : "Customer";
                 document.getElementById('btn-logout-elem').style.display = 'none';
                 
                 document.getElementById('table-selection-view').style.display = 'none';
@@ -642,11 +657,17 @@
                 document.getElementById('staff-action-buttons').style.display = 'none'; 
                 document.getElementById('customer-action-div').style.display = 'flex'; 
                 
+                // Customize call waiter button text for takeaway customers
+                const callBtn = document.getElementById('btn-call-waiter-elem');
+                if (isTakeawayQR) {
+                    callBtn.innerHTML = "🔔 Call Counter / Inquiry";
+                }
+
                 document.getElementById('admin-dashboard-section').style.display = 'none';
 
-                currentSelectedTable = tableParam;
-                currentOrderType = "Dine-In";
-                document.getElementById('cart-panel-title').innerText = `🛒 My Order: ${tableParam}`;
+                currentSelectedTable = customerTarget;
+                currentOrderType = isTakeawayQR ? "Takeaway" : "Dine-In";
+                document.getElementById('cart-panel-title').innerText = `🛒 My Order: ${customerTarget}`;
 
                 cart = []; 
                 updateCart();
@@ -993,7 +1014,6 @@
                     const card = document.createElement('div'); card.className = 'menu-card';
                     card.onclick = () => addToCart(item.id);
                     
-                    // Check if item is already in cart to show red quantity badge on the menu card
                     let existingCartItem = cart.find(c => c.id === item.id);
                     let badgeHtml = existingCartItem ? `<div class="card-qty-badge">${existingCartItem.qty}</div>` : '';
 
@@ -1048,7 +1068,7 @@
             if (cartItem) cartItem.qty += 1;
             else cart.push({ ...item, qty: 1, customPrice: item.price, selectedNotes: [], customComment: "" });
             updateCart();
-            renderMenu(); // Re-render menu so quantity red badge updates instantly
+            renderMenu(); 
             saveOrderToTableSilent();
         }
 
@@ -1182,7 +1202,7 @@
                 table: currentSelectedTable,
                 timestamp: Date.now()
             });
-            alert("🛎️ Waiter has been notified! They will be at your table shortly.");
+            alert("🔔 Notification sent! Staff will attend to you shortly.");
         }
 
         function closeCustomerSuccess() {
@@ -1380,6 +1400,16 @@
 
         function openCustomerQRModal() {
             let grid = document.getElementById('qr-cards-grid'); grid.innerHTML='';
+            
+            // Add Takeaway QR Code Card first
+            let takeawayUrl = `${liveBaseUrl}?order=takeaway`;
+            let tkCard = document.createElement('div'); tkCard.className='qr-card';
+            tkCard.style.cssText = "background: #fef3c7; border: 2px dashed #f59e0b;";
+            tkCard.innerHTML = `<h4 style="color:#b45309;">📦 Takeaway / Parcel QR</h4><div id="qrcode-takeaway"></div>`;
+            grid.appendChild(tkCard);
+            new QRCode(document.getElementById(`qrcode-takeaway`), { text: takeawayUrl, width: 100, height: 100 });
+
+            // Add Table QR Codes
             for(let i=1; i<=13; i++) {
                 let url = `${liveBaseUrl}?table=Table ${i}`;
                 let card = document.createElement('div'); card.className='qr-card';
@@ -1390,8 +1420,18 @@
             document.getElementById('qr-modal').style.display = 'flex';
         }
         function closeCustomerQRModal() { document.getElementById('qr-modal').style.display='none'; }
+        
         function printAllTableQRs() {
             let pContainer = document.getElementById('print-qr-container'); pContainer.innerHTML='';
+            
+            // Print Takeaway QR
+            let takeawayUrl = `${liveBaseUrl}?order=takeaway`;
+            let tkDiv = document.createElement('div'); tkDiv.style.cssText="border:1px solid #000; padding:10px; text-align:center; background:#fffbeb;";
+            tkDiv.innerHTML = `<h3>Takeaway / Parcel</h3><div id="print-qrcode-takeaway"></div>`;
+            pContainer.appendChild(tkDiv);
+            new QRCode(document.getElementById(`print-qrcode-takeaway`), { text: takeawayUrl, width: 120, height: 120 });
+
+            // Print Table QRs
             for(let i=1; i<=13; i++) {
                 let url = `${liveBaseUrl}?table=Table ${i}`;
                 let div = document.createElement('div'); div.style.cssText="border:1px solid #000; padding:10px; text-align:center;";
@@ -1430,7 +1470,7 @@
                 document.getElementById('dc-net').innerText = (salesTotal - expTotal).toFixed(2);
                 
                 let exList = document.getElementById('dc-expenses-list'); exList.innerHTML='';
-                dailyExpenses.forEach(e => { exList.innerHTML += `<tr><td>${e.desc}</td><td style="text-align:right;">$${e.amount.toFixed(2)}</td></tr>`; });
+                dailyExpenses.forEach(e => { exList.innerHTM += `<tr><td>${e.desc}</td><td style="text-align:right;">$${e.amount.toFixed(2)}</td></tr>`; });
 
                 safePrint("print-day-close-mode");
                 completedSales = []; db.ref('sales').set([]);
