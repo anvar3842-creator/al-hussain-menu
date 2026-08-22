@@ -116,7 +116,7 @@
         .note-label { background: white; color: #64748b; border: 1px solid #e2e8f0; padding: 2px 5px; border-radius: 5px; font-size: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
         .note-label input { accent-color: #4f46e5; width: 10px; height: 10px; cursor: pointer; }
         .comment-input { width: 95%; padding: 4px 6px; margin-top: 3px; border: 1px solid #e2e8f0; background: white; border-radius: 5px; font-size: 11px; outline: none; font-family: inherit; }
-        .price-input { width: 55px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 5px; text-align: right; font-weight: 800; font-size: 12px; outline: none; background: white; color: #4f46e5; font-family: inherit; }
+        .price-input { width: 50px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 5px; text-align: right; font-weight: 800; font-size: 12px; outline: none; background: white; color: #4f46e5; font-family: inherit; }
         
         .qty-controls { display: flex; align-items: center; gap: 6px; background: white; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; width: max-content; }
         .qty-btn { background: transparent; border: none; width: 18px; height: 18px; border-radius: 3px; cursor: pointer; font-weight: bold; color: #4f46e5; font-size: 13px; display: flex; align-items: center; justify-content: center; }
@@ -207,7 +207,7 @@
             body.print-kitchen-mode #print-kitchen { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-drawer-mode #print-drawer, body.print-drawer-mode #print-drawer * { visibility: visible !important; }
             body.print-drawer-mode #print-drawer { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 16px !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
-            body.print-history-mode #print-sales-history, body.print-history-mode #print-sales-history * { visibility: visible !important; }
+            body.print-history-mode #print-sales-history, body.print-sales-history #print-sales-history * { visibility: visible !important; }
             body.print-sales-history { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-item-report-mode #print-item-report, body.print-item-report-mode #print-item-report * { visibility: visible !important; }
             body.print-item-report-mode #print-item-report { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
@@ -220,9 +220,10 @@
 </head>
 <body>
 
+    <!-- Takeaway Customer Details Input Modal (Applies ONLY to Takeaway QR Customers) -->
     <div id="takeaway-details-modal" class="timeout-overlay" style="display: none; z-index: 5000; background: rgba(15, 23, 42, 0.85);">
         <div class="timeout-box" style="text-align: left; max-width: 380px;">
-            <h2 style="color: #4f46e5; text-align: center; margin-bottom: 20px;">📦 Takeaway Details</h2>
+            <h2 style="color: #4f46e5; text-align: center; margin-bottom: 20px;">?? Takeaway Details</h2>
             <form onsubmit="saveTakeawayCustomerDetails(event)">
                 <label style="font-size: 13px; font-weight: 800; color: #475569;">Your Name:</label>
                 <input type="text" id="tk-cust-name" placeholder="Enter your name" required style="width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-size: 14px; font-family: inherit;">
@@ -237,7 +238,7 @@
 
     <div id="login-screen" class="login-overlay">
         <div class="login-box">
-            <h2>✨ Welcome to POS</h2>
+            <h2>? Welcome to POS</h2>
             <form onsubmit="handleLogin(event)">
                 <input type="text" id="login-user" placeholder="Username (admin/user1/user2)" required autocomplete="username">
                 <input type="password" id="login-pass" placeholder="Password" required autocomplete="current-password">
@@ -250,7 +251,7 @@
     <div id="main-app" style="display: none; height: 100vh; flex-direction: column;">
         <div class="header">
             <div class="header-title">
-                <h2 id="app-header-title">🍽️ Al Hussain Restaurant POS</h2>
+                <h2 id="app-header-title">??? Al Hussain Restaurant POS</h2>
                 <span class="badge" id="display-user">Admin</span>
             </div>
             <button class="btn-logout" id="btn-logout-elem" onclick="logout()">Logout</button>
@@ -258,14 +259,14 @@
 
         <div id="table-selection-view">
             <div class="table-selection-header">
-                <h2>🪑 Select Table / Order</h2>
-                <button class="btn-small" style="background:#059669; padding: 7px 12px; font-size: 12px;" onclick="startTakeawayOrder()">📦 + New Takeaway</button>
+                <h2>?? Select Table / Order</h2>
+                <button class="btn-small" style="background:#059669; padding: 7px 12px; font-size: 12px;" onclick="startTakeawayOrder()">?? + New Takeaway</button>
             </div>
             <div id="big-tables-grid" class="big-tables-grid"></div>
 
             <div id="admin-dashboard-section" class="admin-dashboard-container">
                 <div class="admin-dashboard-header">
-                    <h3>⚙️ Admin Dashboard & Management</h3>
+                    <h3>?? Admin Dashboard & Management</h3>
                     <div style="display:flex; gap:8px;">
                         <div class="stat-box">Sales: $<span id="stat-sales">0.00</span></div>
                         <div class="stat-box" style="color:#ea580c;">Exp: $<span id="stat-expenses">0.00</span></div>
@@ -281,33 +282,33 @@
                 </div>
 
                 <div class="admin-buttons-grid">
-                    <button class="admin-btn manage-menu-btn" onclick="openMenuManagerModal()">⚙️ Manage Menu & Prices</button>
-                    <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">📁 Categories Priority</button>
-                    <button class="admin-btn stock-btn" onclick="openStockModal()">📦 Manual Stock</button>
-                    <button class="admin-btn expense-btn" onclick="openExpenseModal()">💸 Daily Expense (Jamans)</button>
-                    <button class="admin-btn staff-btn" onclick="openStaffPerformanceModal()">👥 Staff Shift Tracking</button>
-                    <button class="admin-btn report-btn" onclick="openItemReportModal()">📊 Daily Items Report</button>
-                    <button class="admin-btn monthly-btn" onclick="openMonthlyReportModal()">📅 Monthly History</button>
-                    <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">📱 Customer & Takeaway QR Codes</button>
-                    <button class="admin-btn history-btn" onclick="openHistoryModal()">📋 Sales History</button>
-                    <button class="admin-btn close-day-btn" onclick="closeDay()">🔒 Day Close (End of Day)</button>
+                    <button class="admin-btn manage-menu-btn" onclick="openMenuManagerModal()">?? Manage Menu & Prices</button>
+                    <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">?? Categories Priority</button>
+                    <button class="admin-btn stock-btn" onclick="openStockModal()">?? Manual Stock</button>
+                    <button class="admin-btn expense-btn" onclick="openExpenseModal()">?? Daily Expense (Jamans)</button>
+                    <button class="admin-btn staff-btn" onclick="openStaffPerformanceModal()">?? Staff Shift Tracking</button>
+                    <button class="admin-btn report-btn" onclick="openItemReportModal()">?? Daily Items Report</button>
+                    <button class="admin-btn monthly-btn" onclick="openMonthlyReportModal()">?? Monthly History</button>
+                    <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">?? Customer & Takeaway QR Codes</button>
+                    <button class="admin-btn history-btn" onclick="openHistoryModal()">?? Sales History</button>
+                    <button class="admin-btn close-day-btn" onclick="closeDay()">?? Day Close (End of Day)</button>
                 </div>
             </div>
         </div>
 
         <div id="pos-main-view">
             <div class="mobile-tab-bar">
-                <button class="mob-tab-btn active" id="tab-menu-btn" onclick="switchMobileTab('menu')">📂 Menu Items</button>
-                <button class="mob-tab-btn" id="tab-cart-btn" onclick="switchMobileTab('cart')">🛒 Cart & Billing</button>
+                <button class="mob-tab-btn active" id="tab-menu-btn" onclick="switchMobileTab('menu')">?? Menu Items</button>
+                <button class="mob-tab-btn" id="tab-cart-btn" onclick="switchMobileTab('cart')">?? Cart & Billing</button>
             </div>
 
             <div class="main-layout">
                 <div class="left-panel" id="panel-menu">
                     <div class="controls-bar">
                         <div class="search-container">
-                            <input type="text" id="search-input" class="search-box" placeholder="🔍 Search item or code (e.g. R1)..." onkeyup="handleSearchInput(event)">
-                            <button class="btn-menu-refresh btn-clear" onclick="clearSearch()" title="Clear Search">❌</button>
-                            <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">🔄</button>
+                            <input type="text" id="search-input" class="search-box" placeholder="?? Search item or code (e.g. R1)..." onkeyup="handleSearchInput(event)">
+                            <button class="btn-menu-refresh btn-clear" onclick="clearSearch()" title="Clear Search">?</button>
+                            <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">??</button>
                         </div>
                         <div class="category-filters" id="category-filters"></div>
                     </div>
@@ -315,11 +316,11 @@
                 </div>
 
                 <div class="right-panel mobile-hidden" id="panel-cart">
-                    <h3 id="cart-panel-title">🛒 Order: Table 1</h3>
+                    <h3 id="cart-panel-title">?? Order: Table 1</h3>
                     
                     <div class="cart-table-wrapper">
                         <table>
-                            <thead><tr><th>Item & Notes</th><th>Qty</th><th id="th-price-header" style="text-align:right;">Price ($)</th></tr></thead>
+                            <thead><tr><th>Item & Notes</th><th>Qty</th><th style="text-align:right;">Price ($)</th></tr></thead>
                             <tbody id="cart-items"></tbody>
                         </table>
                     </div>
@@ -341,52 +342,54 @@
                         <div id="payment-method-row" style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
                             <span style="font-size: 12px; font-weight: 800; color: #64748b;">Method:</span>
                             <select id="payment-method">
-                                <option value="Cash">Cash 💵</option>
-                                <option value="Card">Card 💳</option>
-                                <option value="QR Pay">QR Pay 📱</option>
+                                <option value="Cash">Cash ??</option>
+                                <option value="Card">Card ??</option>
+                                <option value="QR Pay">QR Pay ??</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="action-buttons" id="staff-action-buttons">
-                        <button class="btn-hold" id="btn-hold-elem" onclick="saveOrderToTableAndPrintKOT()">🕒 Hold & KOT</button>
-                        <button class="btn-kitchen" id="btn-kitchen-elem" onclick="printKitchenKOT()">🍳 Kitchen</button>
-                        <button class="btn-ready-order" id="btn-ready-order-elem" onclick="toggleOrderReadyStatus()">🔔 Mark Order Ready</button>
-                        <button id="btn-print-bill-elem" class="btn-print-bill" onclick="printCustomerBillOnly()">🖨️ Print Bill</button>
-                        <button id="btn-pay-elem" class="btn-pay" onclick="openPaymentModal()">💳 Pay Now</button>
-                        <button id="btn-drawer-elem" class="btn-drawer" onclick="openCashDrawerOnly()">🔓 Open Drawer</button>
-                        <button class="btn-back-tables" onclick="backToTableSelection()">⬅️ Back to Tables Grid</button>
+                        <button class="btn-hold" id="btn-hold-elem" onclick="saveOrderToTableAndPrintKOT()">?? Hold & KOT</button>
+                        <button class="btn-kitchen" id="btn-kitchen-elem" onclick="printKitchenKOT()">?? Kitchen</button>
+                        <button class="btn-ready-order" id="btn-ready-order-elem" onclick="toggleOrderReadyStatus()">?? Mark Order Ready</button>
+                        <button id="btn-print-bill-elem" class="btn-print-bill" onclick="printCustomerBillOnly()">??? Print Bill</button>
+                        <button id="btn-pay-elem" class="btn-pay" onclick="openPaymentModal()">?? Pay Now</button>
+                        <button id="btn-drawer-elem" class="btn-drawer" onclick="openCashDrawerOnly()">?? Open Drawer</button>
+                        <button class="btn-back-tables" onclick="backToTableSelection()">?? Back to Tables Grid</button>
                     </div>
 
                     <div id="customer-action-div">
-                        <button class="btn-call-waiter" id="btn-call-waiter-elem" onclick="callWaiter()">🔔 Call Waiter / Counter</button>
-                        <button class="btn-customer-send" onclick="customerSendOrder()">🚀 Send Order to Kitchen</button>
+                        <button class="btn-call-waiter" id="btn-call-waiter-elem" onclick="callWaiter()">?? Call Waiter / Counter</button>
+                        <button class="btn-customer-send" onclick="customerSendOrder()">?? Send Order to Kitchen</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Shop Offline / Closed Overlay for Customers -->
     <div id="shop-closed-screen" class="timeout-overlay" style="z-index: 6000; background: #f1f5f9;">
         <div class="timeout-box">
-            <h1 style="font-size: 55px; margin: 0 0 10px 0;">🔒</h1>
+            <h1 style="font-size: 55px; margin: 0 0 10px 0;">??</h1>
             <h2 style="color: #ef4444;">Shop is Currently Closed</h2>
             <p>The restaurant POS is offline or closed for the day. Please try again later or contact staff.</p>
         </div>
     </div>
 
+    <!-- Customer Order Ready Notification Popup -->
     <div id="customer-ready-screen" class="timeout-overlay" style="z-index: 4500;">
         <div class="timeout-box" style="padding: 30px;">
-            <h1 style="font-size: 55px; margin: 0 0 10px 0;">🔔</h1>
+            <h1 style="font-size: 55px; margin: 0 0 10px 0;">??</h1>
             <h2 style="color: #10b981;">Order Ready to Serve!</h2>
-            <p style="margin-bottom: 25px;">Your order is ready! Please collect it at the counter.</p>
+            <p style="margin-bottom: 25px;">Your takeaway order is ready! Please collect it at the counter.</p>
             <button onclick="document.getElementById('customer-ready-screen').style.display='none'" style="width: 100%; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer;">OK</button>
         </div>
     </div>
 
     <div id="customer-success-screen" class="timeout-overlay" style="z-index: 4000;">
         <div class="timeout-box" style="padding: 30px;">
-            <h1 style="font-size: 55px; margin: 0 0 10px 0;">✅</h1>
+            <h1 style="font-size: 55px; margin: 0 0 10px 0;">?</h1>
             <h2 style="color: #10b981;">Order Sent Successfully!</h2>
             <p style="margin-bottom: 25px;">The kitchen has received your order and is preparing it right now.</p>
             <button onclick="closeCustomerSuccess()" style="width: 100%; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer;">View Menu Again</button>
@@ -395,15 +398,15 @@
 
     <div id="timeout-screen" class="timeout-overlay">
         <div class="timeout-box">
-            <h1>⏳</h1>
+            <h1>?</h1>
             <h2>Session Closed</h2>
-            <p>Your payment is complete. Redirecting to Google...</p>
+            <p>Your payment is complete or session has ended. Thank you!</p>
         </div>
     </div>
 
     <div id="payment-modal" class="modal-overlay">
         <div class="pay-modal-box">
-            <h2>💳 Complete Payment</h2>
+            <h2>?? Complete Payment</h2>
             
             <div class="pay-row" style="background:#e0e7ff; border-color:#c7d2fe;">
                 <span style="color:#3730a3;">Total Due:</span>
@@ -430,7 +433,7 @@
 
             <div style="text-align: left; background: #f8fafc; padding: 10px 14px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
                 <input type="checkbox" id="modal-print-checkbox" style="width: 18px; height: 18px; accent-color: #4f46e5; cursor: pointer;">
-                <label for="modal-print-checkbox" style="font-size: 14px; font-weight: 800; color: #334155; cursor: pointer;">🖨️ Print Receipt</label>
+                <label for="modal-print-checkbox" style="font-size: 14px; font-weight: 800; color: #334155; cursor: pointer;">??? Print Receipt</label>
             </div>
 
             <div class="pay-btn-group">
@@ -440,87 +443,21 @@
         </div>
     </div>
 
-    <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📱 Customer & Takeaway QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">🖨️ Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 13px; color: #64748b; margin-top: 0;">Scan table QR codes for dine-in, or the Takeaway QR code for parcel orders.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
-    <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">👥 Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
-    
-    <div id="menu-manager-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 style="margin:0; font-size:18px;">Manage Menu Items & Categories</h3>
-                <button class="close-modal" onclick="closeMenuManagerModal()">X</button>
-            </div>
-            <div class="modal-body">
-                <input type="text" id="menu-manager-search" placeholder="🔍 Type to search item..." onkeyup="filterMenuManagerList()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; width: 250px; margin-bottom: 12px; outline: none;">
-                <p style="font-size: 11px; color: #64748b; margin: 0 0 8px 0;" id="menu-manager-count-info"></p>
-                <table class="admin-table">
-                    <thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Action</th></tr></thead>
-                    <tbody id="menu-manager-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">?? Customer & Takeaway QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">??? Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 13px; color: #64748b; margin-top: 0;">Scan table QR codes for dine-in, or the Takeaway QR code for parcel orders.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
+    <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">?? Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
+    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Categories</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="?? Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; width: 220px; margin-bottom: 12px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
+    <div id="category-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">?? Manage Categories & Order</h3><button class="close-modal" onclick="closeCategoryManagerModal()">X</button></div><div class="modal-body"><p style="font-size: 12px; color: #64748b; margin-top: 0;">Use Up/Down buttons to prioritize categories (important ones on top).</p><table class="admin-table"><thead><tr><th>Category Name</th><th style="text-align:center;">Priority Order</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="category-manager-tbody"></tbody></table></div></div></div>
+    <div id="stock-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">?? Manual Raw Material Stock</h3><div><button class="btn-small" onclick="addNewRawMaterial()">+ Add Material</button><button class="close-modal" onclick="closeStockModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead><tbody id="stock-tbody"></tbody></table></div></div></div>
+    <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">?? Add Daily Expense / Jamans</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 12px;"><label style="font-size: 13px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; font-family: inherit;"></div><div style="margin-bottom: 15px;"><label style="font-size: 13px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; font-family: inherit;"></div><button class="btn-small" style="width: 100%; padding: 12px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
+    <div id="monthly-report-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">?? Daily & Monthly History</h3><button class="close-modal" onclick="closeMonthlyReportModal()">X</button></div><div class="modal-body"><div id="monthly-report-container"></div></div></div></div>
+    <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">?? Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">??? Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
+    <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">??? Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
 
-    <div id="category-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📁 Manage Categories & Order</h3><button class="close-modal" onclick="closeCategoryManagerModal()">X</button></div><div class="modal-body"><p style="font-size: 12px; color: #64748b; margin-top: 0;">Use Up/Down buttons to prioritize categories (important ones on top).</p><table class="admin-table"><thead><tr><th>Category Name</th><th style="text-align:center;">Priority Order</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="category-manager-tbody"></tbody></table></div></div></div>
-    <div id="stock-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📦 Manual Raw Material Stock</h3><div><button class="btn-small" onclick="addNewRawMaterial()">+ Add Material</button><button class="close-modal" onclick="closeStockModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead><tbody id="stock-tbody"></tbody></table></div></div></div>
-    <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">💸 Add Daily Expense / Jamans</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 12px;"><label style="font-size: 13px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; font-family: inherit;"></div><div style="margin-bottom: 15px;"><label style="font-size: 13px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; font-family: inherit;"></div><button class="btn-small" style="width: 100%; padding: 12px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
-    <div id="monthly-report-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📅 Daily & Monthly History</h3><button class="close-modal" onclick="closeMonthlyReportModal()">X</button></div><div class="modal-body"><div id="monthly-report-container"></div></div></div></div>
-    <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📊 Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">🖨️ Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
-    <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">🖨️ Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
-
-    <div id="print-receipt">
-        <div style="text-align: center; margin-bottom: 6px;">
-            <h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
-            <p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p>
-            <p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p>
-            <hr style="border-top: 3px solid black; margin: 4px 0;">
-        </div>
-        <div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;">
-            <div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" style="font-size: 18px; background: #000; color: #fff; padding: 0 4px;"></span></div>
-            <div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span></div>
-            <div id="p-phone-info" style="display:none; margin-top:2px;"><b>Phone:</b> <span id="p-cust-phone-val"></span></div>
-            <div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div>
-        </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;">
-            <thead>
-                <tr style="border-bottom: 3px solid black;">
-                    <th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th>
-                    <th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th>
-                    <th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th>
-                </tr>
-            </thead>
-            <tbody id="p-items"></tbody>
-        </table>
-        <hr style="border-top: 3px solid black; margin: 4px 0;">
-        <div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div>
-        <div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div>
-        <div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;">
-            <div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div>
-            <div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div>
-        </div>
-        <div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div>
-        <div style="display:none;">\x1B\x70\x00\x19\xFA</div>
-    </div>
+    <!-- Receipt prints Customer Name only -->
+    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" style="font-size: 18px; background: #000; color: #fff; padding: 0 4px;"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     
-    <div id="print-kitchen">
-        <div style="text-align: center; margin-bottom: 6px;">
-            <h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2>
-            <hr style="border-top: 4px solid black; margin: 4px 0;">
-        </div>
-        <div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;">
-            <div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" style="font-size: 22px; background: #000; color: #fff; padding: 0 4px;"></span></div>
-            <div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div>
-            <div id="k-phone-info" style="display:none; margin-top:2px;"><b>Phone:</b> <span id="k-cust-phone-val"></span></div>
-        </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;">
-            <thead>
-                <tr style="border-bottom: 3px solid black;">
-                    <th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th>
-                    <th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th>
-                </tr>
-            </thead>
-            <tbody id="k-items"></tbody>
-        </table>
-    </div>
+    <!-- Kitchen KOT prints Customer Name only -->
+    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" style="font-size: 22px; background: #000; color: #fff; padding: 0 4px;"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
     
     <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>SALES HISTORY REPORT</b></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span>$<span id="print-history-grand-total">0.00</span></span></div></div>
@@ -538,87 +475,87 @@
         const liveBaseUrl = "https://anvar3842-creator.github.io/al-hussain-menu/";
 
         const defaultMenuData = [
-            { id: 1, code: "R1", name: "Roti Kosong", price: 0.80, category: "Roti", icon: "🫓" },
-            { id: 2, code: "R2", name: "Roti Kosong Cheese", price: 1.50, category: "Roti", icon: "🫓" },
-            { id: 3, code: "R3", name: "Roti Kosong Bawang", price: 1.20, category: "Roti", icon: "🫓" },
-            { id: 4, code: "R4", name: "Roti Telur", price: 1.40, category: "Roti", icon: "🫓" },
-            { id: 5, code: "R5", name: "Roti Telur Bawang", price: 1.70, category: "Roti", icon: "🫓" },
-            { id: 6, code: "R6", name: "Roti Telur Cheese", price: 2.00, category: "Roti", icon: "🫓" },
-            { id: 7, code: "R7", name: "Roti Jantan", price: 2.00, category: "Roti", icon: "🫓" },
-            { id: 8, code: "R8", name: "Roti Plastar", price: 1.40, category: "Roti", icon: "🫓" },
-            { id: 9, code: "R9", name: "Roti Bomb", price: 1.50, category: "Roti", icon: "🫓" },
-            { id: 10, code: "R10", name: "Roti Tissue", price: 1.70, category: "Roti", icon: "🫓" },
-            { id: 11, code: "R11", name: "Roti Sardin", price: 2.50, category: "Roti", icon: "🫓" },
-            { id: 12, code: "R12", name: "Roti Planta", price: 1.50, category: "Roti", icon: "🫓" },
-            { id: 13, code: "R13", name: "Roti Kaya", price: 1.50, category: "Roti", icon: "🫓" },
-            { id: 14, code: "R14", name: "Roti Susu", price: 1.50, category: "Roti", icon: "🫓" },
-            { id: 17, code: "R17", name: "Roti John Ayam", price: 4.50, category: "Roti", icon: "🥪" },
-            { id: 18, code: "R18", name: "Roti John Daging", price: 4.50, category: "Roti", icon: "🥪" },
+            { id: 1, code: "R1", name: "Roti Kosong", price: 0.80, category: "Roti", icon: "??" },
+            { id: 2, code: "R2", name: "Roti Kosong Cheese", price: 1.50, category: "Roti", icon: "??" },
+            { id: 3, code: "R3", name: "Roti Kosong Bawang", price: 1.20, category: "Roti", icon: "??" },
+            { id: 4, code: "R4", name: "Roti Telur", price: 1.40, category: "Roti", icon: "??" },
+            { id: 5, code: "R5", name: "Roti Telur Bawang", price: 1.70, category: "Roti", icon: "??" },
+            { id: 6, code: "R6", name: "Roti Telur Cheese", price: 2.00, category: "Roti", icon: "??" },
+            { id: 7, code: "R7", name: "Roti Jantan", price: 2.00, category: "Roti", icon: "??" },
+            { id: 8, code: "R8", name: "Roti Plastar", price: 1.40, category: "Roti", icon: "??" },
+            { id: 9, code: "R9", name: "Roti Bomb", price: 1.50, category: "Roti", icon: "??" },
+            { id: 10, code: "R10", name: "Roti Tissue", price: 1.70, category: "Roti", icon: "??" },
+            { id: 11, code: "R11", name: "Roti Sardin", price: 2.50, category: "Roti", icon: "??" },
+            { id: 12, code: "R12", name: "Roti Planta", price: 1.50, category: "Roti", icon: "??" },
+            { id: 13, code: "R13", name: "Roti Kaya", price: 1.50, category: "Roti", icon: "??" },
+            { id: 14, code: "R14", name: "Roti Susu", price: 1.50, category: "Roti", icon: "??" },
+            { id: 17, code: "R17", name: "Roti John Ayam", price: 4.50, category: "Roti", icon: "??" },
+            { id: 18, code: "R18", name: "Roti John Daging", price: 4.50, category: "Roti", icon: "??" },
             
-            { id: 22, code: "D1", name: "Tosai Kosong", price: 1.20, category: "Dosai", icon: "🥞" },
-            { id: 221, code: "D2", name: "Tosai Bawang", price: 1.50, category: "Dosai", icon: "🥞" },
-            { id: 222, code: "D3", name: "Tosai Telur", price: 1.80, category: "Dosai", icon: "🥞" },
-            { id: 223, code: "D4", name: "Tosai Telur Bawang", price: 2.00, category: "Dosai", icon: "🥞" },
-            { id: 224, code: "D5", name: "Tosai Ghee", price: 2.00, category: "Dosai", icon: "🥞" },
-            { id: 225, code: "D6", name: "Tosai Masala", price: 2.50, category: "Dosai", icon: "🥞" },
-            { id: 226, code: "D7", name: "Tosai Sardin", price: 3.00, category: "Dosai", icon: "🥞" },
+            { id: 22, code: "D1", name: "Tosai Kosong", price: 1.20, category: "Dosai", icon: "??" },
+            { id: 221, code: "D2", name: "Tosai Bawang", price: 1.50, category: "Dosai", icon: "??" },
+            { id: 222, code: "D3", name: "Tosai Telur", price: 1.80, category: "Dosai", icon: "??" },
+            { id: 223, code: "D4", name: "Tosai Telur Bawang", price: 2.00, category: "Dosai", icon: "??" },
+            { id: 224, code: "D5", name: "Tosai Ghee", price: 2.00, category: "Dosai", icon: "??" },
+            { id: 225, code: "D6", name: "Tosai Masala", price: 2.50, category: "Dosai", icon: "??" },
+            { id: 226, code: "D7", name: "Tosai Sardin", price: 3.00, category: "Dosai", icon: "??" },
 
-            { id: 231, code: "BK1", name: "Bakso Biasa", price: 3.00, category: "Bakso", icon: "🥣" },
-            { id: 232, code: "BK2", name: "Bakso Urat", price: 4.00, category: "Bakso", icon: "🥣" },
-            { id: 233, code: "BK3", name: "Bakso Ayam", price: 3.50, category: "Bakso", icon: "🥣" },
-            { id: 234, code: "BK4", name: "Bakso Daging", price: 3.50, category: "Bakso", icon: "🥣" },
-            { id: 235, code: "BK5", name: "Bakso Special", price: 5.00, category: "Bakso", icon: "🥣" },
+            { id: 231, code: "BK1", name: "Bakso Biasa", price: 3.00, category: "Bakso", icon: "??" },
+            { id: 232, code: "BK2", name: "Bakso Urat", price: 4.00, category: "Bakso", icon: "??" },
+            { id: 233, code: "BK3", name: "Bakso Ayam", price: 3.50, category: "Bakso", icon: "??" },
+            { id: 234, code: "BK4", name: "Bakso Daging", price: 3.50, category: "Bakso", icon: "??" },
+            { id: 235, code: "BK5", name: "Bakso Special", price: 5.00, category: "Bakso", icon: "??" },
 
-            { id: 26, code: "N1", name: "Nasi Goreng Biasa", price: 3.00, category: "Nasi Goreng", icon: "🍛" },
-            { id: 261, code: "N2", name: "Nasi Goreng Ayam", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
-            { id: 27, code: "N3", name: "Nasi Goreng Daging", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
-            { id: 28, code: "N4", name: "Nasi Goreng Kampung", price: 4.00, category: "Nasi Goreng", icon: "🍛" },
-            { id: 29, code: "N5", name: "Nasi Goreng Pattaya", price: 4.80, category: "Nasi Goreng", icon: "🍛" },
-            { id: 291, code: "N6", name: "Nasi Goreng Corned Beef", price: 5.00, category: "Nasi Goreng", icon: "🍛" },
-            { id: 292, code: "N7", name: "Nasi Goreng Ikan Masin", price: 4.50, category: "Nasi Goreng", icon: "🍛" },
-            { id: 293, code: "N8", name: "Nasi Goreng Seafood", price: 5.50, category: "Nasi Goreng", icon: "🍛" },
+            { id: 26, code: "N1", name: "Nasi Goreng Biasa", price: 3.00, category: "Nasi Goreng", icon: "??" },
+            { id: 261, code: "N2", name: "Nasi Goreng Ayam", price: 4.50, category: "Nasi Goreng", icon: "??" },
+            { id: 27, code: "N3", name: "Nasi Goreng Daging", price: 4.50, category: "Nasi Goreng", icon: "??" },
+            { id: 28, code: "N4", name: "Nasi Goreng Kampung", price: 4.00, category: "Nasi Goreng", icon: "??" },
+            { id: 29, code: "N5", name: "Nasi Goreng Pattaya", price: 4.80, category: "Nasi Goreng", icon: "??" },
+            { id: 291, code: "N6", name: "Nasi Goreng Corned Beef", price: 5.00, category: "Nasi Goreng", icon: "??" },
+            { id: 292, code: "N7", name: "Nasi Goreng Ikan Masin", price: 4.50, category: "Nasi Goreng", icon: "??" },
+            { id: 293, code: "N8", name: "Nasi Goreng Seafood", price: 5.50, category: "Nasi Goreng", icon: "??" },
 
-            { id: 301, code: "MG1", name: "Mee Goreng Biasa", price: 3.00, category: "Mee Goreng", icon: "🍜" },
-            { id: 30, code: "MG2", name: "Mee Goreng Ayam", price: 4.50, category: "Mee Goreng", icon: "🍜" },
-            { id: 31, code: "MG3", name: "Mee Goreng Daging", price: 4.50, category: "Mee Goreng", icon: "🍜" },
-            { id: 311, code: "MG4", name: "Mee Goreng Corned Beef", price: 5.00, category: "Mee Goreng", icon: "🍜" },
-            { id: 312, code: "MG5", name: "Mee Goreng Seafood", price: 5.50, category: "Mee Goreng", icon: "🍜" },
+            { id: 301, code: "MG1", name: "Mee Goreng Biasa", price: 3.00, category: "Mee Goreng", icon: "??" },
+            { id: 30, code: "MG2", name: "Mee Goreng Ayam", price: 4.50, category: "Mee Goreng", icon: "??" },
+            { id: 31, code: "MG3", name: "Mee Goreng Daging", price: 4.50, category: "Mee Goreng", icon: "??" },
+            { id: 311, code: "MG4", name: "Mee Goreng Corned Beef", price: 5.00, category: "Mee Goreng", icon: "??" },
+            { id: 312, code: "MG5", name: "Mee Goreng Seafood", price: 5.50, category: "Mee Goreng", icon: "??" },
 
-            { id: 321, code: "KG1", name: "Kueh Teow Goreng Biasa", price: 3.00, category: "Kueh Teow Goreng", icon: "🍜" },
-            { id: 32, code: "KG2", name: "Kueh Teow Goreng Ayam", price: 4.50, category: "Kueh Teow Goreng", icon: "🍜" },
-            { id: 33, code: "KG3", name: "Kueh Teow Goreng Daging", price: 4.50, category: "Kueh Teow Goreng", icon: "🍜" },
-            { id: 331, code: "KG4", name: "Kueh Teow Goreng Corned Beef", price: 5.00, category: "Kueh Teow Goreng", icon: "🍜" },
-            { id: 332, code: "KG5", name: "Kueh Teow Goreng Seafood", price: 5.50, category: "Kueh Teow Goreng", icon: "🍜" },
+            { id: 321, code: "KG1", name: "Kueh Teow Goreng Biasa", price: 3.00, category: "Kueh Teow Goreng", icon: "??" },
+            { id: 32, code: "KG2", name: "Kueh Teow Goreng Ayam", price: 4.50, category: "Kueh Teow Goreng", icon: "??" },
+            { id: 33, code: "KG3", name: "Kueh Teow Goreng Daging", price: 4.50, category: "Kueh Teow Goreng", icon: "??" },
+            { id: 331, code: "KG4", name: "Kueh Teow Goreng Corned Beef", price: 5.00, category: "Kueh Teow Goreng", icon: "??" },
+            { id: 332, code: "KG5", name: "Kueh Teow Goreng Seafood", price: 5.50, category: "Kueh Teow Goreng", icon: "??" },
 
-            { id: 341, code: "BG1", name: "Bihun Goreng Biasa", price: 3.00, category: "Bihun Goreng", icon: "🍜" },
-            { id: 34, code: "BG2", name: "Bihun Goreng Ayam", price: 4.50, category: "Bihun Goreng", icon: "🍜" },
-            { id: 35, code: "BG3", name: "Bihun Goreng Daging", price: 4.50, category: "Bihun Goreng", icon: "🍜" },
-            { id: 351, code: "BG4", name: "Bihun Goreng Corned Beef", price: 5.00, category: "Bihun Goreng", icon: "🍜" },
-            { id: 352, code: "BG5", name: "Bihun Goreng Seafood", price: 5.50, category: "Bihun Goreng", icon: "🍜" },
+            { id: 341, code: "BG1", name: "Bihun Goreng Biasa", price: 3.00, category: "Bihun Goreng", icon: "??" },
+            { id: 34, code: "BG2", name: "Bihun Goreng Ayam", price: 4.50, category: "Bihun Goreng", icon: "??" },
+            { id: 35, code: "BG3", name: "Bihun Goreng Daging", price: 4.50, category: "Bihun Goreng", icon: "??" },
+            { id: 351, code: "BG4", name: "Bihun Goreng Corned Beef", price: 5.00, category: "Bihun Goreng", icon: "??" },
+            { id: 352, code: "BG5", name: "Bihun Goreng Seafood", price: 5.50, category: "Bihun Goreng", icon: "??" },
 
-            { id: 391, code: "I1", name: "Indomie Goreng Biasa", price: 2.00, category: "Indomie", icon: "🍜" },
-            { id: 39, code: "I2", name: "Indomie Goreng Special", price: 4.00, category: "Indomie", icon: "🍜" },
-            { id: 392, code: "I3", name: "Indomie Goreng Ayam", price: 4.00, category: "Indomie", icon: "🍜" },
-            { id: 393, code: "I4", name: "Indomie Goreng Daging", price: 4.00, category: "Indomie", icon: "🍜" },
-            { id: 394, code: "I5", name: "Indomie Goreng Corned Beef", price: 4.50, category: "Indomie", icon: "🍜" },
+            { id: 391, code: "I1", name: "Indomie Goreng Biasa", price: 2.00, category: "Indomie", icon: "??" },
+            { id: 39, code: "I2", name: "Indomie Goreng Special", price: 4.00, category: "Indomie", icon: "??" },
+            { id: 392, code: "I3", name: "Indomie Goreng Ayam", price: 4.00, category: "Indomie", icon: "??" },
+            { id: 393, code: "I4", name: "Indomie Goreng Daging", price: 4.00, category: "Indomie", icon: "??" },
+            { id: 394, code: "I5", name: "Indomie Goreng Corned Beef", price: 4.50, category: "Indomie", icon: "??" },
 
-            { id: 19, code: "M1", name: "Murtabak Ayam", price: 4.50, category: "Murtabak", icon: "🫓" },
-            { id: 20, code: "M2", name: "Murtabak Daging", price: 4.50, category: "Murtabak", icon: "🫓" },
-            { id: 21, code: "M3", name: "Murtabak Special", price: 6.00, category: "Murtabak", icon: "🫓" },
+            { id: 19, code: "M1", name: "Murtabak Ayam", price: 4.50, category: "Murtabak", icon: "??" },
+            { id: 20, code: "M2", name: "Murtabak Daging", price: 4.50, category: "Murtabak", icon: "??" },
+            { id: 21, code: "M3", name: "Murtabak Special", price: 6.00, category: "Murtabak", icon: "??" },
 
-            { id: 23, code: "B1", name: "Burger Telur", price: 1.50, category: "Burger", icon: "🍔" },
-            { id: 24, code: "B2", name: "Burger Ayam", price: 2.50, category: "Burger", icon: "🍔" },
-            { id: 25, code: "B3", name: "Burger Daging", price: 2.50, category: "Burger", icon: "🍔" },
+            { id: 23, code: "B1", name: "Burger Telur", price: 1.50, category: "Burger", icon: "??" },
+            { id: 24, code: "B2", name: "Burger Ayam", price: 2.50, category: "Burger", icon: "??" },
+            { id: 25, code: "B3", name: "Burger Daging", price: 2.50, category: "Burger", icon: "??" },
 
-            { id: 36, code: "MB1", name: "Mee Basah Ayam", price: 4.50, category: "Mee Basah", icon: "🍜" },
-            { id: 37, code: "KB1", name: "Kueh Teow Basah Ayam", price: 4.50, category: "Kueh Teow Basah", icon: "🍜" },
-            { id: 38, code: "BB1", name: "Bihun Basah Ayam", price: 4.50, category: "Bihun Basah", icon: "🍜" },
+            { id: 36, code: "MB1", name: "Mee Basah Ayam", price: 4.50, category: "Mee Basah", icon: "??" },
+            { id: 37, code: "KB1", name: "Kueh Teow Basah Ayam", price: 4.50, category: "Kueh Teow Basah", icon: "??" },
+            { id: 38, code: "BB1", name: "Bihun Basah Ayam", price: 4.50, category: "Bihun Basah", icon: "??" },
 
-            { id: 163, code: "T1", name: "Tea", price: 1.00, category: "Hot Drinks", icon: "☕" },
-            { id: 164, code: "T2", name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "☕" },
-            { id: 165, code: "T3", name: "Coffee", price: 1.20, category: "Hot Drinks", icon: "☕" },
-            { id: 166, code: "T4", name: "Nescafe", price: 1.50, category: "Hot Drinks", icon: "☕" },
-            { id: 300, code: "NC1", name: "Ayam Kurma", price: 2.00, category: "Nasi Campur", icon: "🍛" }
+            { id: 163, code: "T1", name: "Tea", price: 1.00, category: "Hot Drinks", icon: "?" },
+            { id: 164, code: "T2", name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "?" },
+            { id: 165, code: "T3", name: "Coffee", price: 1.20, category: "Hot Drinks", icon: "?" },
+            { id: 166, code: "T4", name: "Nescafe", price: 1.50, category: "Hot Drinks", icon: "?" },
+            { id: 300, code: "NC1", name: "Ayam Kurma", price: 2.00, category: "Nasi Campur", icon: "??" }
         ];
 
         let menuData = [];
@@ -642,7 +579,6 @@
         
         let customerHadActiveOrder = false;
         let lastBellTime = Date.now(); 
-        let hasPlayedReadySound = false;
 
         db.ref('menuData').on('value', (snapshot) => {
             const val = snapshot.val();
@@ -673,9 +609,6 @@
         function playBeepSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
                 
@@ -699,7 +632,7 @@
                 lastBellTime = data.timestamp;
                 if (loggedInRole === "admin" || loggedInRole === "user1") {
                     playBeepSound();
-                    alert(`🛎️ NOTIFICATION:\n\n${data.table} needs your attention!`);
+                    alert(`??? NOTIFICATION:\n\n${data.table} needs your attention!`);
                 }
             }
         });
@@ -708,20 +641,12 @@
             const statuses = snapshot.val() || {};
             const urlParams = new URLSearchParams(window.location.search);
             const orderParam = urlParams.get('order');
-            const tableParam = urlParams.get('table');
             
-            let targetKey = "";
-            if (orderParam === "takeaway") targetKey = sessionStorage.getItem('myTakeawayKey');
-            else if (tableParam) targetKey = tableParam;
-
-            if (targetKey && statuses[targetKey] === "Ready") {
-                document.getElementById('customer-ready-screen').style.display = 'flex';
-                if (!hasPlayedReadySound) {
-                    playBeepSound();
-                    hasPlayedReadySound = true;
+            if (orderParam && orderParam === "takeaway") {
+                let storedTkKey = sessionStorage.getItem('myTakeawayKey');
+                if (storedTkKey && statuses[storedTkKey] === "Ready") {
+                    document.getElementById('customer-ready-screen').style.display = 'flex';
                 }
-            } else {
-                hasPlayedReadySound = false;
             }
         });
         
@@ -743,16 +668,8 @@
                 if (activeOrders[targetKey]) {
                     customerHadActiveOrder = true;
                 } else if (customerHadActiveOrder && !activeOrders[targetKey]) {
-                    sessionStorage.removeItem('myTakeawayKey');
-                    sessionStorage.removeItem('myTkName');
-                    sessionStorage.removeItem('myTkPhone');
-
                     document.getElementById('main-app').style.display = 'none';
                     document.getElementById('timeout-screen').style.display = 'flex';
-                    
-                    setTimeout(() => {
-                        window.location.href = "https://www.google.com";
-                    }, 2000);
                 }
             }
         }
@@ -762,7 +679,12 @@
             const tableParam = urlParams.get('table');
             const orderParam = urlParams.get('order');
 
+            let customerTarget = "";
+            let isTakeawayQR = false;
+
             if (orderParam && orderParam === "takeaway") {
+                isTakeawayQR = true;
+                
                 db.ref('shopOnline').once('value', (snap) => {
                     let isOnline = snap.val();
                     if (!isOnline) {
@@ -817,7 +739,7 @@
             loggedInRole = "customer";
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'flex';
-            document.getElementById('app-header-title').innerText = isTakeawayQR ? `📦 Al Hussain Restaurant - Takeaway` : `🍽️ Al Hussain Restaurant - ${customerTarget}`;
+            document.getElementById('app-header-title').innerText = isTakeawayQR ? `?? Al Hussain Restaurant - Takeaway` : `??? Al Hussain Restaurant - ${customerTarget}`;
             document.getElementById('display-user').innerText = isTakeawayQR ? "Takeaway Customer" : "Customer";
             document.getElementById('btn-logout-elem').style.display = 'none';
             
@@ -831,14 +753,14 @@
             
             const callBtn = document.getElementById('btn-call-waiter-elem');
             if (isTakeawayQR) {
-                callBtn.innerHTML = "🔔 Call Counter / Inquiry";
+                callBtn.innerHTML = "?? Call Counter / Inquiry";
             }
 
             document.getElementById('admin-dashboard-section').style.display = 'none';
 
             currentSelectedTable = customerTarget;
             currentOrderType = isTakeawayQR ? "Takeaway" : "Dine-In";
-            document.getElementById('cart-panel-title').innerText = `🛒 My Order: ${customerTarget}`;
+            document.getElementById('cart-panel-title').innerText = `?? My Order: ${customerTarget}`;
 
             cart = []; 
             updateCart();
@@ -847,11 +769,8 @@
 
         function handleLogin(event) {
             event.preventDefault();
-            const userInput = document.getElementById('login-user').value;
-            const passInput = document.getElementById('login-pass').value;
-            
-            const user = userInput ? userInput.trim().toLowerCase() : "";
-            const pass = passInput ? passInput.trim() : "";
+            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value.trim();
             
             const billSummaryContainer = document.getElementById('bill-summary-container');
             const btnPrintBill = document.getElementById('btn-print-bill-elem');
@@ -861,66 +780,43 @@
             const btnKitchen = document.getElementById('btn-kitchen-elem');
             const btnReadyOrder = document.getElementById('btn-ready-order-elem');
 
-            if (btnReadyOrder) btnReadyOrder.style.display = "none"; 
-
             let roleKey = "";
             if (user === "admin" && pass === "admin123") {
                 loggedInRole = "admin";
-                if (billSummaryContainer) billSummaryContainer.style.display = "block";
-                if (btnPrintBill) btnPrintBill.style.display = "block"; 
-                if (btnPay) btnPay.style.display = "block"; 
-                if (btnDrawer) btnDrawer.style.display = "block"; 
-                if (btnHold) btnHold.style.display = "block"; 
-                if (btnKitchen) btnKitchen.style.display = "block";
-                roleKey = "Admin 👑";
+                billSummaryContainer.style.display = "block";
+                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                roleKey = "Admin ??";
+                grantAccess(roleKey);
             } 
             else if (user === "user1" && pass === "1234") {
                 loggedInRole = "user1";
-                if (billSummaryContainer) billSummaryContainer.style.display = "block";
-                if (btnPrintBill) btnPrintBill.style.display = "block"; 
-                if (btnPay) btnPay.style.display = "block"; 
-                if (btnDrawer) btnDrawer.style.display = "block"; 
-                if (btnHold) btnHold.style.display = "block"; 
-                if (btnKitchen) btnKitchen.style.display = "block";
-                roleKey = "Staff 👨‍🍳";
+                billSummaryContainer.style.display = "block";
+                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                roleKey = "Staff ?????";
+                grantAccess(roleKey);
             }
             else if (user === "user2" && pass === "1234") {
                 loggedInRole = "user2";
-                if (billSummaryContainer) billSummaryContainer.style.display = "none";
-                if (btnPrintBill) btnPrintBill.style.display = "none"; 
-                if (btnPay) btnPay.style.display = "none"; 
-                if (btnDrawer) btnDrawer.style.display = "none"; 
-                if (btnHold) btnHold.style.display = "block"; 
-                if (btnKitchen) btnKitchen.style.display = "block";
-                roleKey = "Order Taker 📝";
+                billSummaryContainer.style.display = "none";
+                btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                roleKey = "Order Taker ??";
+                grantAccess(roleKey);
             } 
             else { 
-                const errElem = document.getElementById('login-error');
-                if (errElem) errElem.style.display = "block"; 
+                document.getElementById('login-error').style.display = "block"; 
                 return; 
             }
 
-            grantAccess(roleKey);
+            db.ref('shopOnline').set(true);
 
-            try {
-                db.ref('shopOnline').set(true).catch(e => console.log(e));
-
-                let todayDateKey = new Date().toISOString().split('T')[0];
-                db.ref('staffShifts').once('value', (snap) => {
-                    let shiftsData = snap.val() || {};
-                    if (!shiftsData[todayDateKey]) shiftsData[todayDateKey] = {};
-                    if (!shiftsData[todayDateKey][roleKey]) { 
-                        shiftsData[todayDateKey][roleKey] = { loginTime: new Date().toLocaleTimeString(), billsCount: 0, totalCollected: 0 }; 
-                    } else { 
-                        shiftsData[todayDateKey][roleKey].loginTime = new Date().toLocaleTimeString(); 
-                    }
-                    db.ref('staffShifts').set(shiftsData).catch(e => console.log(e));
-                }, (err) => {
-                    console.log(err);
-                });
-            } catch(e) {
-                console.log(e);
+            let todayDateKey = new Date().toISOString().split('T')[0];
+            if (!staffShifts[todayDateKey]) staffShifts[todayDateKey] = {};
+            if (!staffShifts[todayDateKey][roleKey]) { 
+                staffShifts[todayDateKey][roleKey] = { loginTime: new Date().toLocaleTimeString(), billsCount: 0, totalCollected: 0 }; 
+            } else { 
+                staffShifts[todayDateKey][roleKey].loginTime = new Date().toLocaleTimeString(); 
             }
+            db.ref('staffShifts').set(staffShifts);
         }
 
         function grantAccess(role) {
@@ -945,11 +841,11 @@
         }
 
         function logout() { 
-            db.ref('shopOnline').set(false).catch(e => console.log(e));
+            db.ref('shopOnline').set(false);
             location.href = liveBaseUrl; 
         }
 
-        function refreshMenuData() { renderMenu(); alert("🔄 Menu Refreshed!"); }
+        function refreshMenuData() { renderMenu(); alert("?? Menu Refreshed!"); }
 
         function switchMobileTab(tabName) {
             const menuPanel = document.getElementById('panel-menu');
@@ -982,9 +878,9 @@
             for (let i = 1; i <= 13; i++) {
                 let tableName = `Table ${i}`;
                 let orderData = activeOrders[tableName];
-                let isOccupied = orderData !== undefined && orderData.items && orderData.items.length > 0;
+                let isOccupied = orderData !== undefined;
                 let cardClass = isOccupied ? "big-table-card occupied" : "big-table-card free";
-                let statusText = isOccupied ? `Occupied<br>⏱️ ${formatElapsedTime(orderData.time)}` : "Free Table";
+                let statusText = isOccupied ? `Occupied<br>?? ${formatElapsedTime(orderData.time)}` : "Free Table";
                 let cancelBtn = (isOccupied && loggedInRole === "admin") ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tableName}', event)" style="position:absolute; top:6px; right:6px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; font-weight:bold; cursor:pointer;">X</button>` : '';
 
                 container.innerHTML += `<div class="${cardClass}" onclick="selectTableForOrder('${tableName}', 'Dine-In')">
@@ -997,17 +893,14 @@
             let takeawayKeys = Object.keys(activeOrders).filter(k => k.startsWith('Order-')).sort((a, b) => parseInt(a.replace('Order-','')) - parseInt(b.replace('Order-','')));
             takeawayKeys.forEach(tkKey => {
                 let orderData = activeOrders[tkKey];
-                let isOccupied = orderData !== undefined && orderData.items && orderData.items.length > 0;
-                if (!isOccupied) return; 
-
                 let count = orderData.items ? orderData.items.reduce((sum, i) => sum + i.qty, 0) : 0;
-                let custInfo = orderData.custName ? `<br>👤 ${orderData.custName} (${orderData.custPhone || 'No Phone'})` : '';
+                let custInfo = orderData.custName ? `<br>?? ${orderData.custName}` : '';
                 let cancelBtn = loggedInRole === "admin" ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tkKey}', event)" style="position:absolute; top:6px; right:6px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; font-weight:bold; cursor:pointer;">X</button>` : '';
 
                 container.innerHTML += `<div class="big-table-card occupied" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;" onclick="selectTableForOrder('${tkKey}', 'Takeaway')">
                     ${cancelBtn}
-                    <h3 style="color:#b45309;">📦 ${tkKey}</h3>
-                    <p style="color:#92400e;">${count} Items${custInfo}<br>⏱️ ${formatElapsedTime(orderData.time)}</p>
+                    <h3 style="color:#b45309;">?? ${tkKey}</h3>
+                    <p style="color:#92400e;">${count} Items${custInfo}<br>?? ${formatElapsedTime(orderData.time)}</p>
                 </div>`;
             });
         }
@@ -1015,15 +908,9 @@
         function selectTableForOrder(tableName, orderType) {
             currentSelectedTable = tableName;
             currentOrderType = orderType;
-            let orderData = activeOrders[tableName];
-            let cName = orderData && orderData.custName ? ` (${orderData.custName})` : '';
-            document.getElementById('cart-panel-title').innerText = `🛒 Order: ${tableName}${cName}`;
+            document.getElementById('cart-panel-title').innerText = `?? Order: ${tableName}`;
             
-            if (loggedInRole !== "customer") {
-                document.getElementById('btn-ready-order-elem').style.display = (orderType === "Takeaway") ? "block" : "none";
-            }
-
-            cart = activeOrders[tableName] && activeOrders[tableName].items ? JSON.parse(JSON.stringify(activeOrders[tableName].items)) : [];
+            cart = activeOrders[tableName] ? JSON.parse(JSON.stringify(activeOrders[tableName].items)) : [];
             document.getElementById('discount-input').value = "0.00";
             updateCart();
 
@@ -1033,17 +920,17 @@
         }
 
         function startTakeawayOrder() {
-            let name = prompt("Enter Customer Name for Takeaway:");
-            if (!name || name.trim() === "") return;
-            let phone = prompt("Enter Customer Phone Number:");
-            if (!phone || phone.trim() === "") return;
-
             let nextNum = takeawaySequenceCounter++;
             if (takeawaySequenceCounter > 1000) takeawaySequenceCounter = 100;
             db.ref('takeawaySequenceCounter').set(takeawaySequenceCounter);
             let newTkName = `Order-${nextNum}`;
             
-            activeOrders[newTkName] = { time: Date.now(), type: 'Takeaway', custName: name.trim(), custPhone: phone.trim(), items: [] };
+            let cName = prompt("Enter Customer Name for Takeaway:") || "Walk-in";
+            let cPhone = prompt("Enter Customer Phone Number:") || "";
+            
+            currentSelectedTable = newTkName;
+            currentOrderType = "Takeaway";
+            activeOrders[newTkName] = { time: Date.now(), type: "Takeaway", custName: cName, custPhone: cPhone, items: [] };
             db.ref('activeOrders').set(activeOrders);
 
             selectTableForOrder(newTkName, 'Takeaway');
@@ -1065,7 +952,7 @@
 
         function cancelActiveOrder(key, event) {
             event.stopPropagation();
-            if (loggedInRole !== "admin") return alert("⚠️ Admin only!");
+            if (loggedInRole !== "admin") return alert("?? Admin only!");
             if (confirm(`Cancel active order ${key}?`)) { 
                 delete activeOrders[key]; 
                 db.ref('activeOrders').set(activeOrders); 
@@ -1084,7 +971,7 @@
                     alert("Order marked as Preparing.");
                 } else {
                     currentStatusRef.set("Ready");
-                    alert("🔔 Order marked as READY! Notification sent to customer.");
+                    alert("?? Order marked as READY! Notification sent to customer.");
                 }
             });
         }
@@ -1107,7 +994,7 @@
                 let formattedCat = newCat.trim();
                 if (!categoryOrder.includes(formattedCat)) { categoryOrder.push(formattedCat); db.ref('categoryOrder').set(categoryOrder); }
                 populateCategoryDropdown(); renderCategories(); document.getElementById('add-m-cat').value = formattedCat;
-                alert("✅ Category Added!");
+                alert("? Category Added!");
             }
         }
 
@@ -1118,8 +1005,8 @@
                 tbody.innerHTML += `<tr>
                     <td><input type="text" id="cat-rename-${index}" value="${cat}" style="padding:6px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; width:120px;"> <button class="btn-small" style="padding:5px 6px; font-size:10px;" onclick="renameCategory('${cat}', ${index})">Rename</button></td>
                     <td style="text-align:center;">
-                        <button class="btn-small" style="padding:4px 8px; font-size:11px;" onclick="moveCategoryOrder(${index}, -1)">⬆️ Up</button>
-                        <button class="btn-small" style="padding:4px 8px; font-size:11px;" onclick="moveCategoryOrder(${index}, 1)">⬇️ Down</button>
+                        <button class="btn-small" style="padding:4px 8px; font-size:11px;" onclick="moveCategoryOrder(${index}, -1)">?? Up</button>
+                        <button class="btn-small" style="padding:4px 8px; font-size:11px;" onclick="moveCategoryOrder(${index}, 1)">?? Down</button>
                     </td>
                     <td style="text-align:right;"><button onclick="deleteCategory('${cat}')" style="background:#ef4444; color:white; border:none; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold;">Del</button></td>
                 </tr>`;
@@ -1149,7 +1036,7 @@
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
             activeSource.forEach(item => { if (item.category === oldName) item.category = newName; });
             db.ref('menuData').set(activeSource);
-            openCategoryManagerModal(); alert("✅ Renamed successfully!");
+            openCategoryManagerModal(); alert("? Renamed successfully!");
         }
         function deleteCategory(catName) {
             if (confirm(`Delete category "${catName}"?`)) {
@@ -1218,11 +1105,11 @@
                 if (currentCategory === "All" || searchText !== "") {
                     const header = document.createElement('div');
                     header.className = 'category-section-header';
-                    let catIcon = "📁";
-                    if(cat.includes("Goreng")) catIcon = "🍛";
-                    if(cat.includes("Bakso")) catIcon = "🥣";
-                    if(cat.includes("Dosai")) catIcon = "🥞";
-                    if(cat.includes("Drink")) catIcon = "🥤";
+                    let catIcon = "??";
+                    if(cat.includes("Goreng")) catIcon = "??";
+                    if(cat.includes("Bakso")) catIcon = "??";
+                    if(cat.includes("Dosai")) catIcon = "??";
+                    if(cat.includes("Drink")) catIcon = "??";
                     header.innerHTML = `<span>${catIcon}</span> ${cat}`;
                     grid.appendChild(header);
                 }
@@ -1234,7 +1121,7 @@
                     let existingCartItem = cart.find(c => c.id === item.id);
                     let badgeHtml = existingCartItem ? `<div class="card-qty-badge">${existingCartItem.qty}</div>` : '';
 
-                    card.innerHTML = `<div class="card-code">${item.code || ''}</div>${badgeHtml}<div class="card-icon">${item.icon || '🍽️'}</div><div class="card-title">${item.name}</div><div class="card-bottom"><div class="card-price">$${item.price.toFixed(2)}</div><div class="btn-add">+</div></div>`;
+                    card.innerHTML = `<div class="card-code">${item.code || ''}</div>${badgeHtml}<div class="card-icon">${item.icon || '???'}</div><div class="card-title">${item.name}</div><div class="card-bottom"><div class="card-price">$${item.price.toFixed(2)}</div><div class="btn-add">+</div></div>`;
                     grid.appendChild(card);
                 });
             });
@@ -1271,10 +1158,10 @@
             if (!name || !category || isNaN(price)) return alert("Please fill all fields!");
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
             const newId = activeSource.length > 0 ? Math.max(...activeSource.map(m => m.id)) + 1 : 1;
-            activeSource.push({ id: newId, code: "X" + newId, name: name, category: category, price: price, icon: "🍲" });
+            activeSource.push({ id: newId, code: "X" + newId, name: name, category: category, price: price, icon: "??" });
             db.ref('menuData').set(activeSource);
             document.getElementById('add-m-name').value = ''; document.getElementById('add-m-price').value = '';
-            alert("✅ Menu Item Added!");
+            alert("? Menu Item Added!");
         }
 
         function addToCart(id) {
@@ -1300,37 +1187,9 @@
             }
         }
 
-        function updateItemComment(id, val) {
-            const cartItem = cart.find(c => c.id === id);
-            if (cartItem) {
-                cartItem.customComment = val;
-                saveOrderToTableSilent();
-            }
-        }
-
-        function updateItemPriceManual(id, val) {
-            const cartItem = cart.find(c => c.id === id);
-            if (cartItem) {
-                let parsed = parseFloat(val);
-                if (!isNaN(parsed) && parsed >= 0) {
-                    cartItem.customPrice = parsed;
-                } else if (val === "" || val === ".") {
-                    cartItem.customPrice = 0;
-                }
-                let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
-                let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
-                if(document.getElementById('sub-total')) document.getElementById('sub-total').innerText = subtotal.toFixed(2);
-                if(document.getElementById('total-amount')) document.getElementById('total-amount').innerText = Math.max(0, subtotal - discount).toFixed(2);
-                saveOrderToTableSilent();
-            }
-        }
-
         function updateCart() {
             const tbody = document.getElementById('cart-items'); if(!tbody) return; tbody.innerHTML = ''; 
             let subtotal = 0;
-            
-            let canEditPrice = (loggedInRole === "admin" || loggedInRole === "user1");
-
             cart.forEach((item, index) => {
                 subtotal += item.customPrice * item.qty;
                 let catLower = (item.category || "").toLowerCase();
@@ -1356,15 +1215,8 @@
                     </div>`;
                 }
 
-                noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${item.customComment || ''}" oninput="updateItemComment(${item.id}, this.value)">`;
+                noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value; saveOrderToTableSilent();">`;
                 
-                let priceColHtml = '';
-                if (canEditPrice) {
-                    priceColHtml = `<td style="text-align:right;"><input type="number" class="price-input" value="${item.customPrice}" step="0.10" oninput="updateItemPriceManual(${item.id}, this.value)"></td>`;
-                } else {
-                    priceColHtml = `<td style="text-align:right; vertical-align:middle; font-weight:900; color:#4f46e5; font-size:14px;">$${(item.customPrice * item.qty).toFixed(2)}</td>`;
-                }
-
                 tbody.innerHTML += `<tr>
                     <td><div class="cart-item-name"><b>${index + 1}.</b> ${item.name}</div>${noteHtml}</td>
                     <td>
@@ -1374,7 +1226,7 @@
                             <button class="qty-btn" onclick="increaseQty(${item.id})">+</button>
                         </div>
                     </td>
-                    ${priceColHtml}
+                    <td style="text-align:right;"><input type="number" class="price-input" value="${item.customPrice.toFixed(2)}" step="0.50" oninput="updateItemPrice(${item.id}, this.value)"></td>
                 </tr>`;
             });
             let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
@@ -1401,6 +1253,7 @@
                 saveOrderToTableSilent(); 
             } 
         }
+        function updateItemPrice(id, val) { let p = parseFloat(val); if (!isNaN(p) && p >= 0) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.customPrice = p; updateCart(); saveOrderToTableSilent(); } } }
 
         function getFormattedItemNotes(item) {
             let parts = [];
@@ -1411,20 +1264,11 @@
 
         function saveOrderToTableSilent() {
             if (loggedInRole === "customer") return; 
-            if (!currentSelectedTable) return;
-            
-            if (cart.length === 0) {
-                if (activeOrders[currentSelectedTable]) {
-                    delete activeOrders[currentSelectedTable];
-                    db.ref('activeOrders').set(activeOrders);
-                }
-                return;
-            }
-
+            if (cart.length === 0 || !currentSelectedTable) return;
             let existing = activeOrders[currentSelectedTable] || {};
             let existingTime = existing.time || Date.now();
-            let cName = existing.custName || "Walk-in";
-            let cPhone = existing.custPhone || "";
+            let cName = existing.custName || sessionStorage.getItem('myTkName') || "Walk-in";
+            let cPhone = existing.custPhone || sessionStorage.getItem('myTkPhone') || "";
 
             activeOrders[currentSelectedTable] = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, items: JSON.parse(JSON.stringify(cart)) };
             db.ref('activeOrders').set(activeOrders);
@@ -1472,7 +1316,7 @@
                 table: currentSelectedTable,
                 timestamp: Date.now()
             });
-            alert("🔔 Notification sent! Staff will attend to you shortly.");
+            alert("?? Notification sent! Staff will attend to you shortly.");
         }
 
         function closeCustomerSuccess() {
@@ -1505,18 +1349,11 @@
             document.getElementById('k-table').innerText = currentSelectedTable;
             
             let orderData = activeOrders[currentSelectedTable];
-            if (orderData && orderData.custName && orderData.custName !== "Walk-in") {
+            if (orderData && orderData.custName) {
                 document.getElementById('k-cust-info').style.display = 'block';
                 document.getElementById('k-cust-name-val').innerText = orderData.custName;
             } else {
                 document.getElementById('k-cust-info').style.display = 'none';
-            }
-
-            if (orderData && orderData.custPhone && orderData.custPhone !== "") {
-                document.getElementById('k-phone-info').style.display = 'block';
-                document.getElementById('k-cust-phone-val').innerText = orderData.custPhone;
-            } else {
-                document.getElementById('k-phone-info').style.display = 'none';
             }
 
             const kItems = document.getElementById('k-items'); kItems.innerHTML = '';
@@ -1554,7 +1391,7 @@
 
         function confirmPaymentProcess() {
             let paid = parseFloat(document.getElementById('modal-paid-input').value) || 0;
-            if (paid < currentGrandTotalForPay) return alert("⚠️ Insufficient amount!");
+            if (paid < currentGrandTotalForPay) return alert("?? Insufficient amount!");
             let change = paid - currentGrandTotalForPay;
             let shouldPrint = document.getElementById('modal-print-checkbox').checked;
             
@@ -1574,35 +1411,20 @@
             db.ref('sales').set(completedSales);
 
             let todayKey = new Date().toISOString().split('T')[0];
-            let roleKey = loggedInRole === "user1" ? "Staff 👨‍🍳" : "Admin 👑";
-            db.ref('staffShifts').once('value', (snap) => {
-                let shiftsData = snap.val() || {};
-                if (shiftsData[todayKey] && shiftsData[todayKey][roleKey]) {
-                    shiftsData[todayKey][roleKey].billsCount += 1;
-                    shiftsData[todayKey][roleKey].totalCollected += currentGrandTotalForPay;
-                    db.ref('staffShifts').set(shiftsData);
-                }
-            });
+            let roleKey = loggedInRole === "user1" ? "Staff ?????" : "Admin ??";
+            if (staffShifts[todayKey] && staffShifts[todayKey][roleKey]) {
+                staffShifts[todayKey][roleKey].billsCount += 1;
+                staffShifts[todayKey][roleKey].totalCollected += currentGrandTotalForPay;
+                db.ref('staffShifts').set(staffShifts);
+            }
 
             delete activeOrders[currentSelectedTable]; 
             db.ref('activeOrders').set(activeOrders);
             db.ref(`orderStatus/${currentSelectedTable}`).remove(); 
 
-            sessionStorage.removeItem('myTakeawayKey');
-            sessionStorage.removeItem('myTkName');
-            sessionStorage.removeItem('myTkPhone');
-
             cart = []; updateStats(); 
-            if (loggedInRole === "customer") {
-                document.getElementById('main-app').style.display = 'none';
-                document.getElementById('timeout-screen').style.display = 'flex';
-                setTimeout(() => {
-                    window.location.href = "https://www.google.com";
-                }, 2000);
-            } else {
-                backToTableSelection();
-            }
-            alert("✅ Payment Successful! Change: $" + change.toFixed(2));
+            backToTableSelection();
+            alert("? Payment Successful! Change: $" + change.toFixed(2));
         }
 
         function fillReceiptDetails(orderType, ref, method, time, sub, disc, total, paid, change, items) {
@@ -1610,18 +1432,11 @@
             document.getElementById('p-table').innerText = ref;
             
             let orderData = activeOrders[ref];
-            if (orderData && orderData.custName && orderData.custName !== "Walk-in") {
+            if (orderData && orderData.custName) {
                 document.getElementById('p-cust-info').style.display = 'block';
                 document.getElementById('p-cust-name-val').innerText = orderData.custName;
             } else {
                 document.getElementById('p-cust-info').style.display = 'none';
-            }
-
-            if (orderData && orderData.custPhone && orderData.custPhone !== "") {
-                document.getElementById('p-phone-info').style.display = 'block';
-                document.getElementById('p-cust-phone-val').innerText = orderData.custPhone;
-            } else {
-                document.getElementById('p-phone-info').style.display = 'none';
             }
 
             document.getElementById('p-method').innerText = method; document.getElementById('p-time').innerText = time;
@@ -1644,49 +1459,26 @@
         function openMenuManagerModal() { 
             document.getElementById('menu-manager-search').value = ''; 
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            populateMenuManagerTable(activeSource.slice(0, 30)); 
-            document.getElementById('menu-manager-count-info').innerText = `Showing first 30 items out of ${activeSource.length}. Use search to find specific items.`;
+            populateMenuManagerTable(activeSource); 
             document.getElementById('menu-manager-modal').style.display = 'flex'; 
         }
-
         function filterMenuManagerList() { 
-            const q = document.getElementById('menu-manager-search').value.toLowerCase().trim(); 
+            const q = document.getElementById('menu-manager-search').value.toLowerCase(); 
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            
-            let filtered = activeSource.filter(i => {
+            populateMenuManagerTable(activeSource.filter(i => {
                 let safeName = i.name ? String(i.name).toLowerCase() : "";
-                let safeCat = i.category ? String(i.category).toLowerCase() : "";
-                let safeCode = i.code ? String(i.code).toLowerCase() : "";
-                return safeName.includes(q) || safeCat.includes(q) || safeCode.includes(q);
-            });
-
-            populateMenuManagerTable(filtered.slice(0, 50)); 
-            document.getElementById('menu-manager-count-info').innerText = `Showing ${Math.min(filtered.length, 50)} of ${filtered.length} matching items.`;
+                return safeName.includes(q);
+            })); 
         }
-
         function populateMenuManagerTable(items) {
             const tbody = document.getElementById('menu-manager-tbody'); if(!tbody) return; tbody.innerHTML = '';
             let cats = getAllCategories();
-            let fragment = document.createDocumentFragment();
-
             items.forEach(item => {
-                let tr = document.createElement('tr');
-                let opt = ''; 
-                cats.forEach(c => { opt += `<option value="${c}" ${c === item.category ? 'selected' : ''}>${c}</option>`; });
-                
-                tr.innerHTML = `
-                    <td><input type="text" value="${item.name}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:6px;"></td>
-                    <td><select onchange="updateMenuField(${item.id}, 'category', this.value)">${opt}</select></td>
-                    <td style="text-align:right;"><input type="number" value="${item.price.toFixed(2)}" step="0.50" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:60px; text-align:right;"></td>
-                    <td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">Del</button></td>
-                `;
-                fragment.appendChild(tr);
+                let opt = ''; cats.forEach(c => { opt += `<option value="${c}" ${c === item.category ? 'selected' : ''}>${c}</option>`; });
+                tbody.innerHTML += `<tr><td><input type="text" value="${item.name}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:6px;"></td><td><select onchange="updateMenuField(${item.id}, 'category', this.value)">${opt}</select></td><td style="text-align:right;"><input type="number" value="${item.price.toFixed(2)}" step="0.50" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:60px; text-align:right;"></td><td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">Del</button></td></tr>`;
             });
-            tbody.appendChild(fragment);
         }
-
         function closeMenuManagerModal() { document.getElementById('menu-manager-modal').style.display = 'none'; }
-        
         function updateMenuField(id, field, val) { 
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
             let item = activeSource.find(m => m.id === id); 
@@ -1697,7 +1489,6 @@
                 db.ref('menuData').set(activeSource); 
             } 
         }
-
         function deleteMenuItem(id) { 
             if(confirm("Delete item?")) { 
                 let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
@@ -1718,7 +1509,7 @@
 
         function openExpenseModal() { document.getElementById('expense-desc').value=''; document.getElementById('expense-amount').value=''; document.getElementById('expense-modal').style.display='flex'; }
         function closeExpenseModal() { document.getElementById('expense-modal').style.display='none'; }
-        function saveExpenseItem() { let desc=document.getElementById('expense-desc').value.trim(); let amt=parseFloat(document.getElementById('expense-amount').value); if(!desc||isNaN(amt)) return alert("Invalid details!"); dailyExpenses.push({ time: new Date().toLocaleTimeString(), desc: desc, amount: amt }); db.ref('dailyExpenses').set(dailyExpenses); closeExpenseModal(); updateStats(); alert("✅ Expense saved!"); }
+        function saveExpenseItem() { let desc=document.getElementById('expense-desc').value.trim(); let amt=parseFloat(document.getElementById('expense-amount').value); if(!desc||isNaN(amt)) return alert("Invalid details!"); dailyExpenses.push({ time: new Date().toLocaleTimeString(), desc: desc, amount: amt }); db.ref('dailyExpenses').set(dailyExpenses); closeExpenseModal(); updateStats(); alert("? Expense saved!"); }
 
         function openStaffPerformanceModal() {
             const tbody = document.getElementById('staff-performance-tbody'); if(!tbody) return; tbody.innerHTML='';
@@ -1730,7 +1521,7 @@
 
         function openMonthlyReportModal() {
             let container = document.getElementById('monthly-report-container'); container.innerHTML='';
-            for(let [date, rec] of Object.entries(dailyHistoryRecords)) { container.innerHTML += `<div style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:8px;"><b>📅 ${date}</b> | Sales: $${rec.sales.toFixed(2)} | Exp: $${rec.expenses.toFixed(2)}</div>`; }
+            for(let [date, rec] of Object.entries(dailyHistoryRecords)) { container.innerHTML += `<div style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:8px;"><b>?? ${date}</b> | Sales: $${rec.sales.toFixed(2)} | Exp: $${rec.expenses.toFixed(2)}</div>`; }
             document.getElementById('monthly-report-modal').style.display = 'flex';
         }
         function closeMonthlyReportModal() { document.getElementById('monthly-report-modal').style.display='none'; }
@@ -1750,7 +1541,7 @@
             let takeawayUrl = `${liveBaseUrl}?order=takeaway`;
             let tkCard = document.createElement('div'); tkCard.className='qr-card';
             tkCard.style.cssText = "background: #fef3c7; border: 2px dashed #f59e0b;";
-            tkCard.innerHTML = `<h4 style="color:#b45309;">📦 Takeaway / Parcel QR</h4><div id="qrcode-takeaway"></div>`;
+            tkCard.innerHTML = `<h4 style="color:#b45309;">?? Takeaway / Parcel QR</h4><div id="qrcode-takeaway"></div>`;
             grid.appendChild(tkCard);
             new QRCode(document.getElementById(`qrcode-takeaway`), { text: takeawayUrl, width: 100, height: 100 });
 
@@ -1814,10 +1605,7 @@
                 document.getElementById('dc-net').innerText = (salesTotal - expTotal).toFixed(2);
                 
                 let exList = document.getElementById('dc-expenses-list'); exList.innerHTML='';
-                dailyExpenses.forEach(e => { 
-                    let safeAmt = typeof e.amount === 'number' ? e.amount.toFixed(2) : Number(e.amount || 0).toFixed(2);
-                    exList.innerHTML += `<tr><td>${e.desc}</td><td style="text-align:right;">$${safeAmt}</td></tr>`; 
-                });
+                dailyExpenses.forEach(e => { exList.innerHTML += `<tr><td>${e.desc}</td><td style="text-align:right;">$${e.amount.toFixed(2)}</td></tr>`; });
 
                 safePrint("print-day-close-mode");
                 completedSales = []; db.ref('sales').set([]);
