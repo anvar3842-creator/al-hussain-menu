@@ -116,7 +116,7 @@
         .note-label { background: white; color: #64748b; border: 1px solid #e2e8f0; padding: 2px 5px; border-radius: 5px; font-size: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
         .note-label input { accent-color: #4f46e5; width: 10px; height: 10px; cursor: pointer; }
         .comment-input { width: 95%; padding: 4px 6px; margin-top: 3px; border: 1px solid #e2e8f0; background: white; border-radius: 5px; font-size: 11px; outline: none; font-family: inherit; }
-        .price-input { width: 50px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 5px; text-align: right; font-weight: 800; font-size: 12px; outline: none; background: white; color: #4f46e5; font-family: inherit; }
+        .price-input { width: 55px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 5px; text-align: right; font-weight: 800; font-size: 12px; outline: none; background: white; color: #4f46e5; font-family: inherit; }
         
         .qty-controls { display: flex; align-items: center; gap: 6px; background: white; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; width: max-content; }
         .qty-btn { background: transparent; border: none; width: 18px; height: 18px; border-radius: 3px; cursor: pointer; font-weight: bold; color: #4f46e5; font-size: 13px; display: flex; align-items: center; justify-content: center; }
@@ -320,7 +320,7 @@
                     
                     <div class="cart-table-wrapper">
                         <table>
-                            <thead><tr><th>Item & Notes</th><th>Qty</th><th style="text-align:right;">Price ($)</th></tr></thead>
+                            <thead><tr><th>Item & Notes</th><th>Qty</th><th id="th-price-header" style="text-align:right;">Price ($)</th></tr></thead>
                             <tbody id="cart-items"></tbody>
                         </table>
                     </div>
@@ -382,7 +382,7 @@
         <div class="timeout-box" style="padding: 30px;">
             <h1 style="font-size: 55px; margin: 0 0 10px 0;">🔔</h1>
             <h2 style="color: #10b981;">Order Ready to Serve!</h2>
-            <p style="margin-bottom: 25px;">Your takeaway order is ready! Please collect it at the counter.</p>
+            <p style="margin-bottom: 25px;">Your order is ready! Please collect it at the counter.</p>
             <button onclick="document.getElementById('customer-ready-screen').style.display='none'" style="width: 100%; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer;">OK</button>
         </div>
     </div>
@@ -396,11 +396,12 @@
         </div>
     </div>
 
+    <!-- Timeout / Payment complete screen -->
     <div id="timeout-screen" class="timeout-overlay">
         <div class="timeout-box">
             <h1>⏳</h1>
             <h2>Session Closed</h2>
-            <p>Your payment is complete or session has ended. Thank you!</p>
+            <p>Your payment is complete. Redirecting to Google...</p>
         </div>
     </div>
 
@@ -579,6 +580,7 @@
         
         let customerHadActiveOrder = false;
         let lastBellTime = Date.now(); 
+        let hasPlayedReadySound = false;
 
         db.ref('menuData').on('value', (snapshot) => {
             const val = snapshot.val();
@@ -609,6 +611,9 @@
         function playBeepSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
                 
@@ -641,12 +646,20 @@
             const statuses = snapshot.val() || {};
             const urlParams = new URLSearchParams(window.location.search);
             const orderParam = urlParams.get('order');
+            const tableParam = urlParams.get('table');
             
-            if (orderParam && orderParam === "takeaway") {
-                let storedTkKey = sessionStorage.getItem('myTakeawayKey');
-                if (storedTkKey && statuses[storedTkKey] === "Ready") {
-                    document.getElementById('customer-ready-screen').style.display = 'flex';
+            let targetKey = "";
+            if (orderParam === "takeaway") targetKey = sessionStorage.getItem('myTakeawayKey');
+            else if (tableParam) targetKey = tableParam;
+
+            if (targetKey && statuses[targetKey] === "Ready") {
+                document.getElementById('customer-ready-screen').style.display = 'flex';
+                if (!hasPlayedReadySound) {
+                    playBeepSound();
+                    hasPlayedReadySound = true;
                 }
+            } else {
+                hasPlayedReadySound = false;
             }
         });
         
@@ -670,6 +683,10 @@
                 } else if (customerHadActiveOrder && !activeOrders[targetKey]) {
                     document.getElementById('main-app').style.display = 'none';
                     document.getElementById('timeout-screen').style.display = 'flex';
+                    
+                    setTimeout(() => {
+                        window.location.href = "https://www.google.com";
+                    }, 2000);
                 }
             }
         }
@@ -780,25 +797,27 @@
             const btnKitchen = document.getElementById('btn-kitchen-elem');
             const btnReadyOrder = document.getElementById('btn-ready-order-elem');
 
+            btnReadyOrder.style.display = "none"; 
+
             let roleKey = "";
             if (user === "admin" && pass === "admin123") {
                 loggedInRole = "admin";
                 billSummaryContainer.style.display = "block";
-                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block";
                 roleKey = "Admin 👑";
                 grantAccess(roleKey);
             } 
             else if (user === "user1" && pass === "1234") {
                 loggedInRole = "user1";
                 billSummaryContainer.style.display = "block";
-                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block";
                 roleKey = "Staff 👨‍🍳";
                 grantAccess(roleKey);
             }
             else if (user === "user2" && pass === "1234") {
                 loggedInRole = "user2";
                 billSummaryContainer.style.display = "none";
-                btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block";
                 roleKey = "Order Taker 📝";
                 grantAccess(roleKey);
             } 
@@ -910,6 +929,10 @@
             currentOrderType = orderType;
             document.getElementById('cart-panel-title').innerText = `🛒 Order: ${tableName}`;
             
+            if (loggedInRole !== "customer") {
+                document.getElementById('btn-ready-order-elem').style.display = (orderType === "Takeaway") ? "block" : "none";
+            }
+
             cart = activeOrders[tableName] ? JSON.parse(JSON.stringify(activeOrders[tableName].items)) : [];
             document.getElementById('discount-input').value = "0.00";
             updateCart();
@@ -1187,9 +1210,37 @@
             }
         }
 
+        function updateItemComment(id, val) {
+            const cartItem = cart.find(c => c.id === id);
+            if (cartItem) {
+                cartItem.customComment = val;
+                saveOrderToTableSilent();
+            }
+        }
+
+        function updateItemPriceManual(id, val) {
+            const cartItem = cart.find(c => c.id === id);
+            if (cartItem) {
+                let parsed = parseFloat(val);
+                if (!isNaN(parsed) && parsed >= 0) {
+                    cartItem.customPrice = parsed;
+                } else if (val === "" || val === ".") {
+                    cartItem.customPrice = 0;
+                }
+                let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
+                let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
+                if(document.getElementById('sub-total')) document.getElementById('sub-total').innerText = subtotal.toFixed(2);
+                if(document.getElementById('total-amount')) document.getElementById('total-amount').innerText = Math.max(0, subtotal - discount).toFixed(2);
+                saveOrderToTableSilent();
+            }
+        }
+
         function updateCart() {
             const tbody = document.getElementById('cart-items'); if(!tbody) return; tbody.innerHTML = ''; 
             let subtotal = 0;
+            
+            let canEditPrice = (loggedInRole === "admin" || loggedInRole === "user1");
+
             cart.forEach((item, index) => {
                 subtotal += item.customPrice * item.qty;
                 let catLower = (item.category || "").toLowerCase();
@@ -1215,8 +1266,15 @@
                     </div>`;
                 }
 
-                noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value; saveOrderToTableSilent();">`;
+                noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${item.customComment || ''}" oninput="updateItemComment(${item.id}, this.value)">`;
                 
+                let priceColHtml = '';
+                if (canEditPrice) {
+                    priceColHtml = `<td style="text-align:right;"><input type="number" class="price-input" value="${item.customPrice}" step="0.10" oninput="updateItemPriceManual(${item.id}, this.value)"></td>`;
+                } else {
+                    priceColHtml = `<td style="text-align:right; vertical-align:middle; font-weight:900; color:#4f46e5; font-size:14px;">$${(item.customPrice * item.qty).toFixed(2)}</td>`;
+                }
+
                 tbody.innerHTML += `<tr>
                     <td><div class="cart-item-name"><b>${index + 1}.</b> ${item.name}</div>${noteHtml}</td>
                     <td>
@@ -1226,7 +1284,7 @@
                             <button class="qty-btn" onclick="increaseQty(${item.id})">+</button>
                         </div>
                     </td>
-                    <td style="text-align:right;"><input type="number" class="price-input" value="${item.customPrice.toFixed(2)}" step="0.50" oninput="updateItemPrice(${item.id}, this.value)"></td>
+                    ${priceColHtml}
                 </tr>`;
             });
             let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
@@ -1253,7 +1311,6 @@
                 saveOrderToTableSilent(); 
             } 
         }
-        function updateItemPrice(id, val) { let p = parseFloat(val); if (!isNaN(p) && p >= 0) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.customPrice = p; updateCart(); saveOrderToTableSilent(); } } }
 
         function getFormattedItemNotes(item) {
             let parts = [];
@@ -1423,7 +1480,15 @@
             db.ref(`orderStatus/${currentSelectedTable}`).remove(); 
 
             cart = []; updateStats(); 
-            backToTableSelection();
+            if (loggedInRole === "customer") {
+                document.getElementById('main-app').style.display = 'none';
+                document.getElementById('timeout-screen').style.display = 'flex';
+                setTimeout(() => {
+                    window.location.href = "https://www.google.com";
+                }, 2000);
+            } else {
+                backToTableSelection();
+            }
             alert("✅ Payment Successful! Change: $" + change.toFixed(2));
         }
 
