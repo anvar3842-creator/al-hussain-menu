@@ -556,7 +556,7 @@
             { id: 164, code: "T2", name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "☕" },
             { id: 165, code: "T3", name: "Coffee", price: 1.20, category: "Hot Drinks", icon: "☕" },
             { id: 166, code: "T4", name: "Nescafe", price: 1.50, category: "Hot Drinks", icon: "☕" },
-            { id: 300, code: "NC1", name: "Ayam Kurma", price: 2.00, category: "Nasi Campur", icon: "🍛" }
+            { id: 300, code: "NC1", name: "Ayam Kurma", page: 2.00, category: "Nasi Campur", icon: "🍛" }
         ];
 
         let menuData = [];
@@ -681,6 +681,10 @@
                 if (activeOrders[targetKey]) {
                     customerHadActiveOrder = true;
                 } else if (customerHadActiveOrder && !activeOrders[targetKey]) {
+                    sessionStorage.removeItem('myTakeawayKey');
+                    sessionStorage.removeItem('myTkName');
+                    sessionStorage.removeItem('myTkPhone');
+
                     document.getElementById('main-app').style.display = 'none';
                     document.getElementById('timeout-screen').style.display = 'flex';
                     
@@ -696,12 +700,7 @@
             const tableParam = urlParams.get('table');
             const orderParam = urlParams.get('order');
 
-            let customerTarget = "";
-            let isTakeawayQR = false;
-
             if (orderParam && orderParam === "takeaway") {
-                isTakeawayQR = true;
-                
                 db.ref('shopOnline').once('value', (snap) => {
                     let isOnline = snap.val();
                     if (!isOnline) {
@@ -1478,6 +1477,10 @@
             delete activeOrders[currentSelectedTable]; 
             db.ref('activeOrders').set(activeOrders);
             db.ref(`orderStatus/${currentSelectedTable}`).remove(); 
+
+            sessionStorage.removeItem('myTakeawayKey');
+            sessionStorage.removeItem('myTkName');
+            sessionStorage.removeItem('myTkPhone');
 
             cart = []; updateStats(); 
             if (loggedInRole === "customer") {
