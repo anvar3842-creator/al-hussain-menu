@@ -684,10 +684,17 @@
                 if (activeOrders[targetKey]) {
                     customerHadActiveOrder = true;
                 } else if (customerHadActiveOrder && !activeOrders[targetKey]) {
+                    sessionStorage.setItem('paid_' + targetKey, 'true'); // ரெப்ரெஷ் செய்தால் மீண்டும் வராமல் தடுக்க
+                    if(orderParam === "takeaway") {
+                        sessionStorage.removeItem('myTakeawayKey');
+                        sessionStorage.removeItem('myTkName');
+                        sessionStorage.removeItem('myTkPhone');
+                    }
+                    
                     document.getElementById('main-app').style.display = 'none';
                     document.getElementById('timeout-screen').style.display = 'flex';
                     setTimeout(() => {
-                        window.location.href = "https://www.google.com";
+                        window.location.replace("https://www.google.com");
                     }, 2000); // 2 விநாடிகள் கழித்து கூகுள் பக்கத்திற்கு செல்லும்
                 }
             }
@@ -712,6 +719,13 @@
                     }
 
                     let storedTkKey = sessionStorage.getItem('myTakeawayKey');
+                    
+                    // கஸ்டமர் பேமெண்ட் முடித்த பின் ரெப்ரெஷ் செய்தால் கூகுளுக்கு அனுப்பும் செக்
+                    if (storedTkKey && sessionStorage.getItem('paid_' + storedTkKey) === 'true') {
+                        window.location.replace("https://www.google.com");
+                        return;
+                    }
+
                     if (!storedTkKey) {
                         document.getElementById('takeaway-details-modal').style.display = 'flex';
                     } else {
@@ -720,6 +734,12 @@
                 });
                 return;
             } else if (tableParam && tableParam.trim() !== "") {
+                // கஸ்டமர் பேமெண்ட் முடித்த பின் ரெப்ரெஷ் செய்தால் கூகுளுக்கு அனுப்பும் செக்
+                if (sessionStorage.getItem('paid_' + tableParam) === 'true') {
+                    window.location.replace("https://www.google.com");
+                    return;
+                }
+
                 db.ref('shopOnline').once('value', (snap) => {
                     let isOnline = snap.val();
                     if (!isOnline) {
@@ -1445,7 +1465,6 @@
             cart = []; updateStats(); 
             backToTableSelection();
             
-            // அட்மினுக்கு கூகுள் பக்கம் வராமல், வெற்றிகரமான மெசேஜ் மட்டும் காட்டப்படும்
             alert("Payment Successful! Change: $" + change.toFixed(2));
         }
 
