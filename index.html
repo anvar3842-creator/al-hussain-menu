@@ -600,8 +600,21 @@
             else { takeawaySequenceCounter = 100; db.ref('takeawaySequenceCounter').set(100); }
         });
 
+        // புதிய ஆர்டர் வரும்போது அட்மினுக்கு மட்டும் சவுண்ட் ஒலிக்கச் செய்யும்
+        let previousActiveOrdersCount = -1;
         db.ref('activeOrders').on('value', (snapshot) => { 
-            activeOrders = snapshot.val() || {}; 
+            const newOrders = snapshot.val() || {}; 
+            let newOrdersCount = Object.keys(newOrders).length;
+            
+            if (previousActiveOrdersCount !== -1 && newOrdersCount > previousActiveOrdersCount) {
+                // அட்மின் அல்லது ஸ்டாப் உள்நுழைந்திருந்தால் மட்டும் சவுண்ட் கேட்கும்
+                if (loggedInRole === "admin" || loggedInRole === "user1" || loggedInRole === "user2") {
+                    playBeepSound();
+                }
+            }
+            previousActiveOrdersCount = newOrdersCount;
+            
+            activeOrders = newOrders; 
             renderBigTableSelectionGrid(); 
             checkCustomerPaymentStatus(); 
         });
@@ -658,7 +671,10 @@
 
         setInterval(() => { renderBigTableSelectionGrid(); }, 1000);
 
+        // கஸ்டமர்க்கு மட்டும் பேமெண்ட் முடிந்து ஆர்டர் கேன்சல் ஆனதும் கூகுள் பக்கத்திற்கு மாறும் பகுதி
         function checkCustomerPaymentStatus() {
+            if (loggedInRole !== "customer") return; // அட்மினுக்கு வேலை செய்யாது
+
             const urlParams = new URLSearchParams(window.location.search);
             const tableParam = urlParams.get('table');
             const orderParam = urlParams.get('order');
@@ -670,6 +686,9 @@
                 } else if (customerHadActiveOrder && !activeOrders[targetKey]) {
                     document.getElementById('main-app').style.display = 'none';
                     document.getElementById('timeout-screen').style.display = 'flex';
+                    setTimeout(() => {
+                        window.location.href = "https://www.google.com";
+                    }, 2000); // 2 விநாடிகள் கழித்து கூகுள் பக்கத்திற்கு செல்லும்
                 }
             }
         }
@@ -933,7 +952,6 @@
             currentSelectedTable = newTkName;
             currentOrderType = "Takeaway";
             
-            // Bug Fix: Do not save empty order to database until items are added
             cart = [];
             document.getElementById('discount-input').value = "0.00";
             updateCart();
@@ -1426,6 +1444,8 @@
 
             cart = []; updateStats(); 
             backToTableSelection();
+            
+            // அட்மினுக்கு கூகுள் பக்கம் வராமல், வெற்றிகரமான மெசேஜ் மட்டும் காட்டப்படும்
             alert("Payment Successful! Change: $" + change.toFixed(2));
         }
 
@@ -1587,7 +1607,7 @@
             let total = completedSales.reduce((s, x)=>s+x.amount, 0);
             document.getElementById('print-history-grand-total').innerText = total.toFixed(2);
             let tbody = document.getElementById('print-history-items'); tbody.innerHTML='';
-            completedSales.completedSales.forEach(s => { tbody.innerHTML += `<tr><td>${s.time}<br>${s.ref}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td></tr>`; });
+            completedSales.forEach(s => { tbody.innerHTML += `<tr><td>${s.time}<br>${s.ref}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td></tr>`; });
             safePrint("print-history-mode");
         }
 
@@ -1604,7 +1624,7 @@
                 document.getElementById('dc-date').innerText = new Date().toLocaleString();
                 document.getElementById('dc-sales').innerText = salesTotal.toFixed(2);
                 document.getElementById('dc-expenses').innerText = expTotal.toFixed(2);
-                document.getElementById('dc-net').innerText = (salesTotal - expTotal).net = (salesTotal - expTotal).toFixed(2);
+                document.getElementById('dc-net').innerText = (salesTotal - expTotal).toFixed(2);
                 
                 let exList = document.getElementById('dc-expenses-list'); exList.innerHTML='';
                 dailyExpenses.forEach(e => { exList.innerHTML += `<tr><td>${e.desc}</td><td style="text-align:right;">$${e.amount.toFixed(2)}</td></tr>`; });
