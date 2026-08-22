@@ -207,7 +207,7 @@
             body.print-kitchen-mode #print-kitchen { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-drawer-mode #print-drawer, body.print-drawer-mode #print-drawer * { visibility: visible !important; }
             body.print-drawer-mode #print-drawer { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 16px !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
-            body.print-history-mode #print-sales-history, body.print-sales-history #print-sales-history * { visibility: visible !important; }
+            body.print-history-mode #print-sales-history, body.print-history-mode #print-sales-history * { visibility: visible !important; }
             body.print-sales-history { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-item-report-mode #print-item-report, body.print-item-report-mode #print-item-report * { visibility: visible !important; }
             body.print-item-report-mode #print-item-report { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
@@ -220,7 +220,6 @@
 </head>
 <body>
 
-    <!-- Takeaway Customer Details Input Modal (Applies ONLY to Takeaway QR Customers) -->
     <div id="takeaway-details-modal" class="timeout-overlay" style="display: none; z-index: 5000; background: rgba(15, 23, 42, 0.85);">
         <div class="timeout-box" style="text-align: left; max-width: 380px;">
             <h2 style="color: #4f46e5; text-align: center; margin-bottom: 20px;">📦 Takeaway Details</h2>
@@ -368,7 +367,6 @@
         </div>
     </div>
 
-    <!-- Shop Offline / Closed Overlay for Customers -->
     <div id="shop-closed-screen" class="timeout-overlay" style="z-index: 6000; background: #f1f5f9;">
         <div class="timeout-box">
             <h1 style="font-size: 55px; margin: 0 0 10px 0;">🔒</h1>
@@ -377,7 +375,6 @@
         </div>
     </div>
 
-    <!-- Customer Order Ready Notification Popup -->
     <div id="customer-ready-screen" class="timeout-overlay" style="z-index: 4500;">
         <div class="timeout-box" style="padding: 30px;">
             <h1 style="font-size: 55px; margin: 0 0 10px 0;">🔔</h1>
@@ -396,7 +393,6 @@
         </div>
     </div>
 
-    <!-- Timeout / Payment complete screen -->
     <div id="timeout-screen" class="timeout-overlay">
         <div class="timeout-box">
             <h1>⏳</h1>
@@ -447,7 +443,6 @@
     <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📱 Customer & Takeaway QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">🖨️ Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 13px; color: #64748b; margin-top: 0;">Scan table QR codes for dine-in, or the Takeaway QR code for parcel orders.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">👥 Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
     
-    <!-- Optimized Menu Manager Modal -->
     <div id="menu-manager-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -472,7 +467,6 @@
     <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📊 Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">🖨️ Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
     <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">🖨️ Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
 
-    <!-- Receipt prints Customer Name & Phone -->
     <div id="print-receipt">
         <div style="text-align: center; margin-bottom: 6px;">
             <h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
@@ -507,7 +501,6 @@
         <div style="display:none;">\x1B\x70\x00\x19\xFA</div>
     </div>
     
-    <!-- Kitchen KOT prints Customer Name & Phone -->
     <div id="print-kitchen">
         <div style="text-align: center; margin-bottom: 6px;">
             <h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2>
@@ -984,7 +977,7 @@
                 if (!isOccupied) return; 
 
                 let count = orderData.items ? orderData.items.reduce((sum, i) => sum + i.qty, 0) : 0;
-                let custInfo = orderData.custName ? `<br>👤 ${orderData.custName}` : '';
+                let custInfo = orderData.custName ? `<br>👤 ${orderData.custName} (${orderData.custPhone || 'No Phone'})` : '';
                 let cancelBtn = loggedInRole === "admin" ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tkKey}', event)" style="position:absolute; top:6px; right:6px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; font-weight:bold; cursor:pointer;">X</button>` : '';
 
                 container.innerHTML += `<div class="big-table-card occupied" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;" onclick="selectTableForOrder('${tkKey}', 'Takeaway')">
@@ -998,7 +991,9 @@
         function selectTableForOrder(tableName, orderType) {
             currentSelectedTable = tableName;
             currentOrderType = orderType;
-            document.getElementById('cart-panel-title').innerText = `🛒 Order: ${tableName}`;
+            let orderData = activeOrders[tableName];
+            let cName = orderData && orderData.custName ? ` (${orderData.custName})` : '';
+            document.getElementById('cart-panel-title').innerText = `🛒 Order: ${tableName}${cName}`;
             
             if (loggedInRole !== "customer") {
                 document.getElementById('btn-ready-order-elem').style.display = (orderType === "Takeaway") ? "block" : "none";
@@ -1014,11 +1009,19 @@
         }
 
         function startTakeawayOrder() {
+            let name = prompt("Enter Customer Name for Takeaway:");
+            if (!name || name.trim() === "") return;
+            let phone = prompt("Enter Customer Phone Number:");
+            if (!phone || phone.trim() === "") return;
+
             let nextNum = takeawaySequenceCounter++;
             if (takeawaySequenceCounter > 1000) takeawaySequenceCounter = 100;
             db.ref('takeawaySequenceCounter').set(takeawaySequenceCounter);
             let newTkName = `Order-${nextNum}`;
             
+            activeOrders[newTkName] = { time: Date.now(), type: 'Takeaway', custName: name.trim(), custPhone: phone.trim(), items: [] };
+            db.ref('activeOrders').set(activeOrders);
+
             selectTableForOrder(newTkName, 'Takeaway');
         }
 
@@ -1611,11 +1614,9 @@
             safePrint("print-customer");
         }
 
-        // Optimized Menu Manager Functions with Limit / Search Restriction
         function openMenuManagerModal() { 
             document.getElementById('menu-manager-search').value = ''; 
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            // Initially load only the first 30 items to prevent freezing
             populateMenuManagerTable(activeSource.slice(0, 30)); 
             document.getElementById('menu-manager-count-info').innerText = `Showing first 30 items out of ${activeSource.length}. Use search to find specific items.`;
             document.getElementById('menu-manager-modal').style.display = 'flex'; 
@@ -1632,7 +1633,6 @@
                 return safeName.includes(q) || safeCat.includes(q) || safeCode.includes(q);
             });
 
-            // Limit rendered rows to 50 for smooth UI performance
             populateMenuManagerTable(filtered.slice(0, 50)); 
             document.getElementById('menu-manager-count-info').innerText = `Showing ${Math.min(filtered.length, 50)} of ${filtered.length} matching items.`;
         }
@@ -1640,8 +1640,6 @@
         function populateMenuManagerTable(items) {
             const tbody = document.getElementById('menu-manager-tbody'); if(!tbody) return; tbody.innerHTML = '';
             let cats = getAllCategories();
-            
-            // Use DocumentFragment to optimize DOM rendering speed
             let fragment = document.createDocumentFragment();
 
             items.forEach(item => {
@@ -1761,7 +1759,7 @@
 
         function openHistoryModal() {
             let tbody = document.getElementById('history-table-body'); tbody.innerHTML='';
-            completedSales.forEach((s, idx) => { tbody.innerHTML += `<tr><td>${s.time}</td><td>${s.ref}</td><td>${s.method}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td><td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:4px 8px;">Print</button></td></tr>`; });
+            completedSales.completedSales.forEach((s, idx) => { tbody.innerHTML += `<tr><td>${s.time}</td><td>${s.ref}</td><td>${s.method}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td><td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:4px 8px;">Print</button></td></tr>`; });
             document.getElementById('history-modal').style.display = 'flex';
         }
         function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
@@ -1769,7 +1767,7 @@
             let total = completedSales.reduce((s, x)=>s+x.amount, 0);
             document.getElementById('print-history-grand-total').innerText = total.toFixed(2);
             let tbody = document.getElementById('print-history-items'); tbody.innerHTML='';
-            completedSales.completedSales.forEach(s => { tbody.innerHTML += `<tr><td>${s.time}<br>${s.ref}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td></tr>`; });
+            completedSales.forEach(s => { tbody.innerHTML += `<tr><td>${s.time}<br>${s.ref}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td></tr>`; });
             safePrint("print-history-mode");
         }
 
@@ -1785,7 +1783,7 @@
 
                 document.getElementById('dc-date').innerText = new Date().toLocaleString();
                 document.getElementById('dc-sales').innerText = salesTotal.toFixed(2);
-                document.getElementById('dc-expenses').innerText, expTotal.toFixed(2);
+                document.getElementById('dc-expenses').innerText = expTotal.toFixed(2);
                 document.getElementById('dc-net').innerText = (salesTotal - expTotal).toFixed(2);
                 
                 let exList = document.getElementById('dc-expenses-list'); exList.innerHTML='';
@@ -1801,7 +1799,7 @@
         function updateStats() {
             let sTotal = completedSales.reduce((s, x)=>s+x.amount, 0);
             let eTotal = dailyExpenses.reduce((s, x)=>s+x.amount, 0);
-            if(document.getElementById('stat-sales')) document.getElementById('stat-sales'].innerText = sTotal.toFixed(2);
+            if(document.getElementById('stat-sales')) document.getElementById('stat-sales').innerText = sTotal.toFixed(2);
             if(document.getElementById('stat-expenses')) document.getElementById('stat-expenses').innerText = eTotal.toFixed(2);
         }
     </script>
