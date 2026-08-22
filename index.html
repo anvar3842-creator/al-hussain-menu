@@ -207,7 +207,7 @@
             body.print-kitchen-mode #print-kitchen { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-drawer-mode #print-drawer, body.print-drawer-mode #print-drawer * { visibility: visible !important; }
             body.print-drawer-mode #print-drawer { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 16px !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
-            body.print-history-mode #print-sales-history, body.print-history-mode #print-sales-history * { visibility: visible !important; }
+            body.print-history-mode #print-sales-history, body.print-sales-history #print-sales-history * { visibility: visible !important; }
             body.print-sales-history { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-item-report-mode #print-item-report, body.print-item-report-mode #print-item-report * { visibility: visible !important; }
             body.print-item-report-mode #print-item-report { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
@@ -977,13 +977,12 @@
                 if (!isOccupied) return; 
 
                 let count = orderData.items ? orderData.items.reduce((sum, i) => sum + i.qty, 0) : 0;
-                let custInfo = orderData.custName ? `<br>👤 ${orderData.custName} (${orderData.custPhone || 'No Phone'})` : '';
                 let cancelBtn = loggedInRole === "admin" ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tkKey}', event)" style="position:absolute; top:6px; right:6px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; font-weight:bold; cursor:pointer;">X</button>` : '';
 
                 container.innerHTML += `<div class="big-table-card occupied" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;" onclick="selectTableForOrder('${tkKey}', 'Takeaway')">
                     ${cancelBtn}
                     <h3 style="color:#b45309;">📦 ${tkKey}</h3>
-                    <p style="color:#92400e;">${count} Items${custInfo}<br>⏱️ ${formatElapsedTime(orderData.time)}</p>
+                    <p style="color:#92400e;">${count} Items<br>⏱️ ${formatElapsedTime(orderData.time)}</p>
                 </div>`;
             });
         }
@@ -991,9 +990,7 @@
         function selectTableForOrder(tableName, orderType) {
             currentSelectedTable = tableName;
             currentOrderType = orderType;
-            let orderData = activeOrders[tableName];
-            let cName = orderData && orderData.custName ? ` (${orderData.custName})` : '';
-            document.getElementById('cart-panel-title').innerText = `🛒 Order: ${tableName}${cName}`;
+            document.getElementById('cart-panel-title').innerText = `🛒 Order: ${tableName}`;
             
             if (loggedInRole !== "customer") {
                 document.getElementById('btn-ready-order-elem').style.display = (orderType === "Takeaway") ? "block" : "none";
@@ -1009,17 +1006,12 @@
         }
 
         function startTakeawayOrder() {
-            let name = prompt("Enter Customer Name for Takeaway:");
-            if (!name || name.trim() === "") return;
-            let phone = prompt("Enter Customer Phone Number:");
-            if (!phone || phone.trim() === "") return;
-
             let nextNum = takeawaySequenceCounter++;
             if (takeawaySequenceCounter > 1000) takeawaySequenceCounter = 100;
             db.ref('takeawaySequenceCounter').set(takeawaySequenceCounter);
             let newTkName = `Order-${nextNum}`;
             
-            activeOrders[newTkName] = { time: Date.now(), type: 'Takeaway', custName: name.trim(), custPhone: phone.trim(), items: [] };
+            activeOrders[newTkName] = { time: Date.now(), type: 'Takeaway', custName: 'Walk-in Takeaway', custPhone: '', items: [] };
             db.ref('activeOrders').set(activeOrders);
 
             selectTableForOrder(newTkName, 'Takeaway');
@@ -1481,7 +1473,7 @@
             document.getElementById('k-table').innerText = currentSelectedTable;
             
             let orderData = activeOrders[currentSelectedTable];
-            if (orderData && orderData.custName && orderData.custName !== "Walk-in") {
+            if (orderData && orderData.custName && orderData.custName !== "Walk-in" && orderData.custName !== "Walk-in Takeaway") {
                 document.getElementById('k-cust-info').style.display = 'block';
                 document.getElementById('k-cust-name-val').innerText = orderData.custName;
             } else {
@@ -1583,7 +1575,7 @@
             document.getElementById('p-table').innerText = ref;
             
             let orderData = activeOrders[ref];
-            if (orderData && orderData.custName && orderData.custName !== "Walk-in") {
+            if (orderData && orderData.custName && orderData.custName !== "Walk-in" && orderData.custName !== "Walk-in Takeaway") {
                 document.getElementById('p-cust-info').style.display = 'block';
                 document.getElementById('p-cust-name-val').innerText = orderData.custName;
             } else {
@@ -1759,7 +1751,7 @@
 
         function openHistoryModal() {
             let tbody = document.getElementById('history-table-body'); tbody.innerHTML='';
-            completedSales.completedSales.forEach((s, idx) => { tbody.innerHTML += `<tr><td>${s.time}</td><td>${s.ref}</td><td>${s.method}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td><td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:4px 8px;">Print</button></td></tr>`; });
+            completedSales.forEach((s, idx) => { tbody.innerHTML += `<tr><td>${s.time}</td><td>${s.ref}</td><td>${s.method}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td><td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:4px 8px;">Print</button></td></tr>`; });
             document.getElementById('history-modal').style.display = 'flex';
         }
         function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
