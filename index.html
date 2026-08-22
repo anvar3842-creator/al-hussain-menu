@@ -947,7 +947,7 @@
             for (let i = 1; i <= 13; i++) {
                 let tableName = `Table ${i}`;
                 let orderData = activeOrders[tableName];
-                let isOccupied = orderData !== undefined;
+                let isOccupied = orderData !== undefined && orderData.items && orderData.items.length > 0;
                 let cardClass = isOccupied ? "big-table-card occupied" : "big-table-card free";
                 let statusText = isOccupied ? `Occupied<br>⏱️ ${formatElapsedTime(orderData.time)}` : "Free Table";
                 let cancelBtn = (isOccupied && loggedInRole === "admin") ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tableName}', event)" style="position:absolute; top:6px; right:6px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; font-weight:bold; cursor:pointer;">X</button>` : '';
@@ -962,6 +962,9 @@
             let takeawayKeys = Object.keys(activeOrders).filter(k => k.startsWith('Order-')).sort((a, b) => parseInt(a.replace('Order-','')) - parseInt(b.replace('Order-','')));
             takeawayKeys.forEach(tkKey => {
                 let orderData = activeOrders[tkKey];
+                let isOccupied = orderData !== undefined && orderData.items && orderData.items.length > 0;
+                if (!isOccupied) return; 
+
                 let count = orderData.items ? orderData.items.reduce((sum, i) => sum + i.qty, 0) : 0;
                 let custInfo = orderData.custName ? `<br>👤 ${orderData.custName}` : '';
                 let cancelBtn = loggedInRole === "admin" ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tkKey}', event)" style="position:absolute; top:6px; right:6px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; font-weight:bold; cursor:pointer;">X</button>` : '';
@@ -998,14 +1001,6 @@
             db.ref('takeawaySequenceCounter').set(takeawaySequenceCounter);
             let newTkName = `Order-${nextNum}`;
             
-            let cName = "Walk-in";
-            let cPhone = "";
-            
-            currentSelectedTable = newTkName;
-            currentOrderType = "Takeaway";
-            activeOrders[newTkName] = { time: Date.now(), type: "Takeaway", custName: cName, custPhone: cPhone, items: [] };
-            db.ref('activeOrders').set(activeOrders);
-
             selectTableForOrder(newTkName, 'Takeaway');
         }
 
@@ -1372,6 +1367,15 @@
         function saveOrderToTableSilent() {
             if (loggedInRole === "customer") return; 
             if (!currentSelectedTable) return;
+            
+            if (cart.length === 0) {
+                if (activeOrders[currentSelectedTable]) {
+                    delete activeOrders[currentSelectedTable];
+                    db.ref('activeOrders').set(activeOrders);
+                }
+                return;
+            }
+
             let existing = activeOrders[currentSelectedTable] || {};
             let existingTime = existing.time || Date.now();
             let cName = existing.custName || "Walk-in";
