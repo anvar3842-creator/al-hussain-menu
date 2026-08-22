@@ -446,7 +446,25 @@
 
     <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📱 Customer & Takeaway QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">🖨️ Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 13px; color: #64748b; margin-top: 0;">Scan table QR codes for dine-in, or the Takeaway QR code for parcel orders.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">👥 Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
-    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Categories</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="🔍 Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; width: 220px; margin-bottom: 12px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
+    
+    <!-- Optimized Menu Manager Modal -->
+    <div id="menu-manager-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0; font-size:18px;">Manage Menu Items & Categories</h3>
+                <button class="close-modal" onclick="closeMenuManagerModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="menu-manager-search" placeholder="🔍 Type to search item..." onkeyup="filterMenuManagerList()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; width: 250px; margin-bottom: 12px; outline: none;">
+                <p style="font-size: 11px; color: #64748b; margin: 0 0 8px 0;" id="menu-manager-count-info"></p>
+                <table class="admin-table">
+                    <thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Action</th></tr></thead>
+                    <tbody id="menu-manager-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <div id="category-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📁 Manage Categories & Order</h3><button class="close-modal" onclick="closeCategoryManagerModal()">X</button></div><div class="modal-body"><p style="font-size: 12px; color: #64748b; margin-top: 0;">Use Up/Down buttons to prioritize categories (important ones on top).</p><table class="admin-table"><thead><tr><th>Category Name</th><th style="text-align:center;">Priority Order</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="category-manager-tbody"></tbody></table></div></div></div>
     <div id="stock-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">📦 Manual Raw Material Stock</h3><div><button class="btn-small" onclick="addNewRawMaterial()">+ Add Material</button><button class="close-modal" onclick="closeStockModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead><tbody id="stock-tbody"></tbody></table></div></div></div>
     <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">💸 Add Daily Expense / Jamans</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 12px;"><label style="font-size: 13px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; font-family: inherit;"></div><div style="margin-bottom: 15px;"><label style="font-size: 13px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; font-family: inherit;"></div><button class="btn-small" style="width: 100%; padding: 12px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
@@ -1593,29 +1611,57 @@
             safePrint("print-customer");
         }
 
+        // Optimized Menu Manager Functions with Limit / Search Restriction
         function openMenuManagerModal() { 
             document.getElementById('menu-manager-search').value = ''; 
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            populateMenuManagerTable(activeSource); 
+            // Initially load only the first 30 items to prevent freezing
+            populateMenuManagerTable(activeSource.slice(0, 30)); 
+            document.getElementById('menu-manager-count-info').innerText = `Showing first 30 items out of ${activeSource.length}. Use search to find specific items.`;
             document.getElementById('menu-manager-modal').style.display = 'flex'; 
         }
+
         function filterMenuManagerList() { 
-            const q = document.getElementById('menu-manager-search').value.toLowerCase(); 
+            const q = document.getElementById('menu-manager-search').value.toLowerCase().trim(); 
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            populateMenuManagerTable(activeSource.filter(i => {
+            
+            let filtered = activeSource.filter(i => {
                 let safeName = i.name ? String(i.name).toLowerCase() : "";
-                return safeName.includes(q);
-            })); 
+                let safeCat = i.category ? String(i.category).toLowerCase() : "";
+                let safeCode = i.code ? String(i.code).toLowerCase() : "";
+                return safeName.includes(q) || safeCat.includes(q) || safeCode.includes(q);
+            });
+
+            // Limit rendered rows to 50 for smooth UI performance
+            populateMenuManagerTable(filtered.slice(0, 50)); 
+            document.getElementById('menu-manager-count-info').innerText = `Showing ${Math.min(filtered.length, 50)} of ${filtered.length} matching items.`;
         }
+
         function populateMenuManagerTable(items) {
             const tbody = document.getElementById('menu-manager-tbody'); if(!tbody) return; tbody.innerHTML = '';
             let cats = getAllCategories();
+            
+            // Use DocumentFragment to optimize DOM rendering speed
+            let fragment = document.createDocumentFragment();
+
             items.forEach(item => {
-                let opt = ''; cats.forEach(c => { opt += `<option value="${c}" ${c === item.category ? 'selected' : ''}>${c}</option>`; });
-                tbody.innerHTML += `<tr><td><input type="text" value="${item.name}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:6px;"></td><td><select onchange="updateMenuField(${item.id}, 'category', this.value)">${opt}</select></td><td style="text-align:right;"><input type="number" value="${item.price.toFixed(2)}" step="0.50" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:60px; text-align:right;"></td><td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">Del</button></td></tr>`;
+                let tr = document.createElement('tr');
+                let opt = ''; 
+                cats.forEach(c => { opt += `<option value="${c}" ${c === item.category ? 'selected' : ''}>${c}</option>`; });
+                
+                tr.innerHTML = `
+                    <td><input type="text" value="${item.name}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:6px;"></td>
+                    <td><select onchange="updateMenuField(${item.id}, 'category', this.value)">${opt}</select></td>
+                    <td style="text-align:right;"><input type="number" value="${item.price.toFixed(2)}" step="0.50" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:60px; text-align:right;"></td>
+                    <td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">Del</button></td>
+                `;
+                fragment.appendChild(tr);
             });
+            tbody.appendChild(fragment);
         }
+
         function closeMenuManagerModal() { document.getElementById('menu-manager-modal').style.display = 'none'; }
+        
         function updateMenuField(id, field, val) { 
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
             let item = activeSource.find(m => m.id === id); 
@@ -1626,6 +1672,7 @@
                 db.ref('menuData').set(activeSource); 
             } 
         }
+
         function deleteMenuItem(id) { 
             if(confirm("Delete item?")) { 
                 let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
@@ -1722,7 +1769,7 @@
             let total = completedSales.reduce((s, x)=>s+x.amount, 0);
             document.getElementById('print-history-grand-total').innerText = total.toFixed(2);
             let tbody = document.getElementById('print-history-items'); tbody.innerHTML='';
-            completedSales.forEach(s => { tbody.innerHTML += `<tr><td>${s.time}<br>${s.ref}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td></tr>`; });
+            completedSales.completedSales.forEach(s => { tbody.innerHTML += `<tr><td>${s.time}<br>${s.ref}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td></tr>`; });
             safePrint("print-history-mode");
         }
 
@@ -1738,7 +1785,7 @@
 
                 document.getElementById('dc-date').innerText = new Date().toLocaleString();
                 document.getElementById('dc-sales').innerText = salesTotal.toFixed(2);
-                document.getElementById('dc-expenses').innerText = expTotal.toFixed(2);
+                document.getElementById('dc-expenses').innerText, expTotal.toFixed(2);
                 document.getElementById('dc-net').innerText = (salesTotal - expTotal).toFixed(2);
                 
                 let exList = document.getElementById('dc-expenses-list'); exList.innerHTML='';
@@ -1754,7 +1801,7 @@
         function updateStats() {
             let sTotal = completedSales.reduce((s, x)=>s+x.amount, 0);
             let eTotal = dailyExpenses.reduce((s, x)=>s+x.amount, 0);
-            if(document.getElementById('stat-sales')) document.getElementById('stat-sales').innerText = sTotal.toFixed(2);
+            if(document.getElementById('stat-sales')) document.getElementById('stat-sales'].innerText = sTotal.toFixed(2);
             if(document.getElementById('stat-expenses')) document.getElementById('stat-expenses').innerText = eTotal.toFixed(2);
         }
     </script>
