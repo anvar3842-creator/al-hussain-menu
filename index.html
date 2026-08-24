@@ -131,13 +131,18 @@
         .menu-card { background: var(--card-bg); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; position: relative; border: 1px solid rgba(226, 232, 240, 0.5); cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); height: 125px; box-sizing: border-box; box-shadow: var(--shadow-sm); }
         .menu-card:hover { border-color: #c7d2fe; box-shadow: var(--shadow-lg); transform: translateY(-4px); }
         
+        /* Out of Stock Card Styling */
+        .menu-card.out-of-stock { background: #f1f5f9 !important; opacity: 0.6; cursor: not-allowed; border-color: #cbd5e1 !important; box-shadow: none !important; }
+        .menu-card.out-of-stock:hover { transform: none !important; box-shadow: none !important; }
+        .sold-out-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-12deg); background: var(--danger); color: white; font-size: 14px; font-weight: 900; padding: 4px 12px; border-radius: 8px; letter-spacing: 1px; z-index: 3; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); border: 2px solid white; pointer-events: none; }
+
         .card-code { position: absolute; top: 12px; left: 12px; background: #f1f5f9; color: var(--text-muted); font-size: 11px; font-weight: 900; padding: 4px 8px; border-radius: 8px; letter-spacing: 0.5px; }
         .card-title { font-weight: 800; font-size: 14px; margin-top: 30px; color: var(--text-main); line-height: 1.3; }
         .card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
         .card-price { font-weight: 900; font-size: 17px; color: var(--primary); }
         
         .btn-add { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; width: 32px; height: 32px; border-radius: 10px; font-size: 18px; display: flex; justify-content: center; align-items: center; font-weight: bold; opacity: 0; transition: all 0.3s; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
-        .menu-card:hover .btn-add { opacity: 1; transform: scale(1.1); }
+        .menu-card:hover:not(.out-of-stock) .btn-add { opacity: 1; transform: scale(1.1); }
         .card-qty-badge { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; font-size: 12px; font-weight: 900; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); border: 2px solid white; z-index: 2; }
 
         /* Cart Panel */
@@ -273,7 +278,7 @@
             body.print-kitchen-mode #print-kitchen { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-drawer-mode #print-drawer, body.print-drawer-mode #print-drawer * { visibility: visible !important; }
             body.print-drawer-mode #print-drawer { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 16px !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
-            body.print-history-mode #print-sales-history, body.print-sales-history #print-sales-history * { visibility: visible !important; }
+            body.print-history-mode #print-sales-history, body.print-history-mode #print-sales-history * { visibility: visible !important; }
             body.print-sales-history { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-item-report-mode #print-item-report, body.print-item-report-mode #print-item-report * { visibility: visible !important; }
             body.print-item-report-mode #print-item-report { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
@@ -788,7 +793,7 @@ body {
     <!-- Modals (QR, Staff, Menu Manager, etc.) -->
     <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Customer & Takeaway QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 14px; font-weight:bold; color: #64748b; margin-top: 0;">Scan table QR codes for dine-in, or the Takeaway QR code for parcel orders.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
-    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
+    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Stock Status</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
     <div id="category-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Categories & Order</h3><button class="close-modal" onclick="closeCategoryManagerModal()">X</button></div><div class="modal-body"><p style="font-size: 13px; font-weight:bold; color: #64748b; margin-top: 0;">Use Up/Down buttons to prioritize categories.</p><table class="admin-table"><thead><tr><th>Category Name</th><th style="text-align:center;">Priority Order</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="category-manager-tbody"></tbody></table></div></div></div>
     <div id="stock-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manual Raw Material Stock</h3><div><button class="btn-small" onclick="addNewRawMaterial()">+ Add Material</button><button class="close-modal" onclick="closeStockModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead><tbody id="stock-tbody"></tbody></table></div></div></div>
     <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Add Daily Expense</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 15px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><div style="margin-bottom: 20px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><button class="btn-small" style="width: 100%; padding: 14px; font-size:15px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
@@ -817,87 +822,87 @@ body {
         const liveBaseUrl = "https://anvar3842-creator.github.io/al-hussain-menu/";
 
         const defaultMenuData = [
-            { id: 1, code: "R1", name: "Roti Kosong", price: 0.80, category: "Roti", icon: "" },
-            { id: 2, code: "R2", name: "Roti Kosong Cheese", price: 1.50, category: "Roti", icon: "" },
-            { id: 3, code: "R3", name: "Roti Kosong Bawang", price: 1.20, category: "Roti", icon: "" },
-            { id: 4, code: "R4", name: "Roti Telur", price: 1.40, category: "Roti", icon: "" },
-            { id: 5, code: "R5", name: "Roti Telur Bawang", price: 1.70, category: "Roti", icon: "" },
-            { id: 6, code: "R6", name: "Roti Telur Cheese", price: 2.00, category: "Roti", icon: "" },
-            { id: 7, code: "R7", name: "Roti Jantan", price: 2.00, category: "Roti", icon: "" },
-            { id: 8, code: "R8", name: "Roti Plastar", price: 1.40, category: "Roti", icon: "" },
-            { id: 9, code: "R9", name: "Roti Bomb", price: 1.50, category: "Roti", icon: "" },
-            { id: 10, code: "R10", name: "Roti Tissue", price: 1.70, category: "Roti", icon: "" },
-            { id: 11, code: "R11", name: "Roti Sardin", price: 2.50, category: "Roti", icon: "" },
-            { id: 12, code: "R12", name: "Roti Planta", price: 1.50, category: "Roti", icon: "" },
-            { id: 13, code: "R13", name: "Roti Kaya", price: 1.50, category: "Roti", icon: "" },
-            { id: 14, code: "R14", name: "Roti Susu", price: 1.50, category: "Roti", icon: "" },
-            { id: 17, code: "R17", name: "Roti John Ayam", price: 4.50, category: "Roti", icon: "" },
-            { id: 18, code: "R18", name: "Roti John Daging", price: 4.50, category: "Roti", icon: "" },
+            { id: 1, code: "R1", name: "Roti Kosong", price: 0.80, category: "Roti", icon: "", outOfStock: false },
+            { id: 2, code: "R2", name: "Roti Kosong Cheese", price: 1.50, category: "Roti", icon: "", outOfStock: false },
+            { id: 3, code: "R3", name: "Roti Kosong Bawang", price: 1.20, category: "Roti", icon: "", outOfStock: false },
+            { id: 4, code: "R4", name: "Roti Telur", price: 1.40, category: "Roti", icon: "", outOfStock: false },
+            { id: 5, code: "R5", name: "Roti Telur Bawang", price: 1.70, category: "Roti", icon: "", outOfStock: false },
+            { id: 6, code: "R6", name: "Roti Telur Cheese", price: 2.00, category: "Roti", icon: "", outOfStock: false },
+            { id: 7, code: "R7", name: "Roti Jantan", price: 2.00, category: "Roti", icon: "", outOfStock: false },
+            { id: 8, code: "R8", name: "Roti Plastar", price: 1.40, category: "Roti", icon: "", outOfStock: false },
+            { id: 9, code: "R9", name: "Roti Bomb", price: 1.50, category: "Roti", icon: "", outOfStock: false },
+            { id: 10, code: "R10", name: "Roti Tissue", price: 1.70, category: "Roti", icon: "", outOfStock: false },
+            { id: 11, code: "R11", name: "Roti Sardin", price: 2.50, category: "Roti", icon: "", outOfStock: false },
+            { id: 12, code: "R12", name: "Roti Planta", price: 1.50, category: "Roti", icon: "", outOfStock: false },
+            { id: 13, code: "R13", name: "Roti Kaya", price: 1.50, category: "Roti", icon: "", outOfStock: false },
+            { id: 14, code: "R14", name: "Roti Susu", price: 1.50, category: "Roti", icon: "", outOfStock: false },
+            { id: 17, code: "R17", name: "Roti John Ayam", price: 4.50, category: "Roti", icon: "", outOfStock: false },
+            { id: 18, code: "R18", name: "Roti John Daging", price: 4.50, category: "Roti", icon: "", outOfStock: false },
             
-            { id: 22, code: "D1", name: "Tosai Kosong", price: 1.20, category: "Dosai", icon: "" },
-            { id: 221, code: "D2", name: "Tosai Bawang", price: 1.50, category: "Dosai", icon: "" },
-            { id: 222, code: "D3", name: "Tosai Telur", price: 1.80, category: "Dosai", icon: "" },
-            { id: 223, code: "D4", name: "Tosai Telur Bawang", price: 2.00, category: "Dosai", icon: "" },
-            { id: 224, code: "D5", name: "Tosai Ghee", price: 2.00, category: "Dosai", icon: "" },
-            { id: 225, code: "D6", name: "Tosai Masala", price: 2.50, category: "Dosai", icon: "" },
-            { id: 226, code: "D7", name: "Tosai Sardin", price: 3.00, category: "Dosai", icon: "" },
+            { id: 22, code: "D1", name: "Tosai Kosong", price: 1.20, category: "Dosai", icon: "", outOfStock: false },
+            { id: 221, code: "D2", name: "Tosai Bawang", price: 1.50, category: "Dosai", icon: "", outOfStock: false },
+            { id: 222, code: "D3", name: "Tosai Telur", price: 1.80, category: "Dosai", icon: "", outOfStock: false },
+            { id: 223, code: "D4", name: "Tosai Telur Bawang", price: 2.00, category: "Dosai", icon: "", outOfStock: false },
+            { id: 224, code: "D5", name: "Tosai Ghee", price: 2.00, category: "Dosai", icon: "", outOfStock: false },
+            { id: 225, code: "D6", name: "Tosai Masala", price: 2.50, category: "Dosai", icon: "", outOfStock: false },
+            { id: 226, code: "D7", name: "Tosai Sardin", price: 3.00, category: "Dosai", icon: "", outOfStock: false },
 
-            { id: 231, code: "BK1", name: "Bakso Biasa", price: 3.00, category: "Bakso", icon: "" },
-            { id: 232, code: "BK2", name: "Bakso Urat", price: 4.00, category: "Bakso", icon: "" },
-            { id: 233, code: "BK3", name: "Bakso Ayam", price: 3.50, category: "Bakso", icon: "" },
-            { id: 234, code: "BK4", name: "Bakso Daging", price: 3.50, category: "Bakso", icon: "" },
-            { id: 235, code: "BK5", name: "Bakso Special", price: 5.00, category: "Bakso", icon: "" },
+            { id: 231, code: "BK1", name: "Bakso Biasa", price: 3.00, category: "Bakso", icon: "", outOfStock: false },
+            { id: 232, code: "BK2", name: "Bakso Urat", price: 4.00, category: "Bakso", icon: "", outOfStock: false },
+            { id: 233, code: "BK3", name: "Bakso Ayam", price: 3.50, category: "Bakso", icon: "", outOfStock: false },
+            { id: 234, code: "BK4", name: "Bakso Daging", price: 3.50, category: "Bakso", icon: "", outOfStock: false },
+            { id: 235, code: "BK5", name: "Bakso Special", price: 5.00, category: "Bakso", icon: "", outOfStock: false },
 
-            { id: 26, code: "N1", name: "Nasi Goreng Biasa", price: 3.00, category: "Nasi Goreng", icon: "" },
-            { id: 261, code: "N2", name: "Nasi Goreng Ayam", price: 4.50, category: "Nasi Goreng", icon: "" },
-            { id: 27, code: "N3", name: "Nasi Goreng Daging", price: 4.50, category: "Nasi Goreng", icon: "" },
-            { id: 28, code: "N4", name: "Nasi Goreng Kampung", price: 4.00, category: "Nasi Goreng", icon: "" },
-            { id: 29, code: "N5", name: "Nasi Goreng Pattaya", price: 4.80, category: "Nasi Goreng", icon: "" },
-            { id: 291, code: "N6", name: "Nasi Goreng Corned Beef", price: 5.00, category: "Nasi Goreng", icon: "" },
-            { id: 292, code: "N7", name: "Nasi Goreng Ikan Masin", price: 4.50, category: "Nasi Goreng", icon: "" },
-            { id: 293, code: "N8", name: "Nasi Goreng Seafood", price: 5.50, category: "Nasi Goreng", icon: "" },
+            { id: 26, code: "N1", name: "Nasi Goreng Biasa", price: 3.00, category: "Nasi Goreng", icon: "", outOfStock: false },
+            { id: 261, code: "N2", name: "Nasi Goreng Ayam", price: 4.50, category: "Nasi Goreng", icon: "", outOfStock: false },
+            { id: 27, code: "N3", name: "Nasi Goreng Daging", price: 4.50, category: "Nasi Goreng", icon: "", outOfStock: false },
+            { id: 28, code: "N4", name: "Nasi Goreng Kampung", price: 4.00, category: "Nasi Goreng", icon: "", outOfStock: false },
+            { id: 29, code: "N5", name: "Nasi Goreng Pattaya", price: 4.80, category: "Nasi Goreng", icon: "", outOfStock: false },
+            { id: 291, code: "N6", name: "Nasi Goreng Corned Beef", price: 5.00, category: "Nasi Goreng", icon: "", outOfStock: false },
+            { id: 292, code: "N7", name: "Nasi Goreng Ikan Masin", price: 4.50, category: "Nasi Goreng", icon: "", outOfStock: false },
+            { id: 293, code: "N8", name: "Nasi Goreng Seafood", price: 5.50, category: "Nasi Goreng", icon: "", outOfStock: false },
 
-            { id: 301, code: "MG1", name: "Mee Goreng Biasa", price: 3.00, category: "Mee Goreng", icon: "" },
-            { id: 30, code: "MG2", name: "Mee Goreng Ayam", price: 4.50, category: "Mee Goreng", icon: "" },
-            { id: 31, code: "MG3", name: "Mee Goreng Daging", price: 4.50, category: "Mee Goreng", icon: "" },
-            { id: 311, code: "MG4", name: "Mee Goreng Corned Beef", price: 5.00, category: "Mee Goreng", icon: "" },
-            { id: 312, code: "MG5", name: "Mee Goreng Seafood", price: 5.50, category: "Mee Goreng", icon: "" },
+            { id: 301, code: "MG1", name: "Mee Goreng Biasa", price: 3.00, category: "Mee Goreng", icon: "", outOfStock: false },
+            { id: 30, code: "MG2", name: "Mee Goreng Ayam", price: 4.50, category: "Mee Goreng", icon: "", outOfStock: false },
+            { id: 31, code: "MG3", name: "Mee Goreng Daging", price: 4.50, category: "Mee Goreng", icon: "", outOfStock: false },
+            { id: 311, code: "MG4", name: "Mee Goreng Corned Beef", price: 5.00, category: "Mee Goreng", icon: "", outOfStock: false },
+            { id: 312, code: "MG5", name: "Mee Goreng Seafood", price: 5.50, category: "Mee Goreng", icon: "", outOfStock: false },
 
-            { id: 321, code: "KG1", name: "Kueh Teow Goreng Biasa", price: 3.00, category: "Kueh Teow Goreng", icon: "" },
-            { id: 32, code: "KG2", name: "Kueh Teow Goreng Ayam", price: 4.50, category: "Kueh Teow Goreng", icon: "" },
-            { id: 33, code: "KG3", name: "Kueh Teow Goreng Daging", price: 4.50, category: "Kueh Teow Goreng", icon: "" },
-            { id: 331, code: "KG4", name: "Kueh Teow Goreng Corned Beef", price: 5.00, category: "Kueh Teow Goreng", icon: "" },
-            { id: 332, code: "KG5", name: "Kueh Teow Goreng Seafood", price: 5.50, category: "Kueh Teow Goreng", icon: "" },
+            { id: 321, code: "KG1", name: "Kueh Teow Goreng Biasa", price: 3.00, category: "Kueh Teow Goreng", icon: "", outOfStock: false },
+            { id: 32, code: "KG2", name: "Kueh Teow Goreng Ayam", price: 4.50, category: "Kueh Teow Goreng", icon: "", outOfStock: false },
+            { id: 33, code: "KG3", name: "Kueh Teow Goreng Daging", price: 4.50, category: "Kueh Teow Goreng", icon: "", outOfStock: false },
+            { id: 331, code: "KG4", name: "Kueh Teow Goreng Corned Beef", price: 5.00, category: "Kueh Teow Goreng", icon: "", outOfStock: false },
+            { id: 332, code: "KG5", name: "Kueh Teow Goreng Seafood", price: 5.50, category: "Kueh Teow Goreng", icon: "", outOfStock: false },
 
-            { id: 341, code: "BG1", name: "Bihun Goreng Biasa", price: 3.00, category: "Bihun Goreng", icon: "" },
-            { id: 34, code: "BG2", name: "Bihun Goreng Ayam", price: 4.50, category: "Bihun Goreng", icon: "" },
-            { id: 35, code: "BG3", name: "Bihun Goreng Daging", price: 4.50, category: "Bihun Goreng", icon: "" },
-            { id: 351, code: "BG4", name: "Bihun Goreng Corned Beef", price: 5.00, category: "Bihun Goreng", icon: "" },
-            { id: 352, code: "BG5", name: "Bihun Goreng Seafood", price: 5.50, category: "Bihun Goreng", icon: "" },
+            { id: 341, code: "BG1", name: "Bihun Goreng Biasa", price: 3.00, category: "Bihun Goreng", icon: "", outOfStock: false },
+            { id: 34, code: "BG2", name: "Bihun Goreng Ayam", price: 4.50, category: "Bihun Goreng", icon: "", outOfStock: false },
+            { id: 35, code: "BG3", name: "Bihun Goreng Daging", price: 4.50, category: "Bihun Goreng", icon: "", outOfStock: false },
+            { id: 351, code: "BG4", name: "Bihun Goreng Corned Beef", price: 5.00, category: "Bihun Goreng", icon: "", outOfStock: false },
+            { id: 352, code: "BG5", name: "Bihun Goreng Seafood", price: 5.50, category: "Bihun Goreng", icon: "", outOfStock: false },
 
-            { id: 391, code: "I1", name: "Indomie Goreng Biasa", price: 2.00, category: "Indomie", icon: "" },
-            { id: 39, code: "I2", name: "Indomie Goreng Special", price: 4.00, category: "Indomie", icon: "" },
-            { id: 392, code: "I3", name: "Indomie Goreng Ayam", price: 4.00, category: "Indomie", icon: "" },
-            { id: 393, code: "I4", name: "Indomie Goreng Daging", price: 4.00, category: "Indomie", icon: "" },
-            { id: 394, code: "I5", name: "Indomie Goreng Corned Beef", price: 4.50, category: "Indomie", icon: "" },
+            { id: 391, code: "I1", name: "Indomie Goreng Biasa", price: 2.00, category: "Indomie", icon: "", outOfStock: false },
+            { id: 39, code: "I2", name: "Indomie Goreng Special", price: 4.00, category: "Indomie", icon: "", outOfStock: false },
+            { id: 392, code: "I3", name: "Indomie Goreng Ayam", price: 4.00, category: "Indomie", icon: "", outOfStock: false },
+            { id: 393, code: "I4", name: "Indomie Goreng Daging", price: 4.00, category: "Indomie", icon: "", outOfStock: false },
+            { id: 394, code: "I5", name: "Indomie Goreng Corned Beef", price: 4.50, category: "Indomie", icon: "", outOfStock: false },
 
-            { id: 19, code: "M1", name: "Murtabak Ayam", price: 4.50, category: "Murtabak", icon: "" },
-            { id: 20, code: "M2", name: "Murtabak Daging", price: 4.50, category: "Murtabak", icon: "" },
-            { id: 21, code: "M3", name: "Murtabak Special", price: 6.00, category: "Murtabak", icon: "" },
+            { id: 19, code: "M1", name: "Murtabak Ayam", price: 4.50, category: "Murtabak", icon: "", outOfStock: false },
+            { id: 20, code: "M2", name: "Murtabak Daging", price: 4.50, category: "Murtabak", icon: "", outOfStock: false },
+            { id: 21, code: "M3", name: "Murtabak Special", price: 6.00, category: "Murtabak", icon: "", outOfStock: false },
 
-            { id: 23, code: "B1", name: "Burger Telur", price: 1.50, category: "Burger", icon: "" },
-            { id: 24, code: "B2", name: "Burger Ayam", price: 2.50, category: "Burger", icon: "" },
-            { id: 25, code: "B3", name: "Burger Daging", price: 2.50, category: "Burger", icon: "" },
+            { id: 23, code: "B1", name: "Burger Telur", price: 1.50, category: "Burger", icon: "", outOfStock: false },
+            { id: 24, code: "B2", name: "Burger Ayam", price: 2.50, category: "Burger", icon: "", outOfStock: false },
+            { id: 25, code: "B3", name: "Burger Daging", price: 2.50, category: "Burger", icon: "", outOfStock: false },
 
-            { id: 36, code: "MB1", name: "Mee Basah Ayam", price: 4.50, category: "Mee Basah", icon: "" },
-            { id: 37, code: "KB1", name: "Kueh Teow Basah Ayam", price: 4.50, category: "Kueh Teow Basah", icon: "" },
-            { id: 38, code: "BB1", name: "Bihun Basah Ayam", price: 4.50, category: "Bihun Basah", icon: "" },
+            { id: 36, code: "MB1", name: "Mee Basah Ayam", price: 4.50, category: "Mee Basah", icon: "", outOfStock: false },
+            { id: 37, code: "KB1", name: "Kueh Teow Basah Ayam", price: 4.50, category: "Kueh Teow Basah", icon: "", outOfStock: false },
+            { id: 38, code: "BB1", name: "Bihun Basah Ayam", price: 4.50, category: "Bihun Basah", icon: "", outOfStock: false },
 
-            { id: 163, code: "T1", name: "Tea", price: 1.00, category: "Hot Drinks", icon: "" },
-            { id: 164, code: "T2", name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "" },
-            { id: 165, code: "T3", name: "Coffee", price: 1.20, category: "Hot Drinks", icon: "" },
-            { id: 166, code: "T4", name: "Nescafe", price: 1.50, category: "Hot Drinks", icon: "" },
-            { id: 300, code: "NC1", name: "Ayam Kurma", price: 2.00, category: "Nasi Campur", icon: "" }
+            { id: 163, code: "T1", name: "Tea", price: 1.00, category: "Hot Drinks", icon: "", outOfStock: false },
+            { id: 164, code: "T2", name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "", outOfStock: false },
+            { id: 165, code: "T3", name: "Coffee", price: 1.20, category: "Hot Drinks", icon: "", outOfStock: false },
+            { id: 166, code: "T4", name: "Nescafe", price: 1.50, category: "Hot Drinks", icon: "", outOfStock: false },
+            { id: 300, code: "NC1", name: "Ayam Kurma", price: 2.00, category: "Nasi Campur", icon: "", outOfStock: false }
         ];
 
         let menuData = [];
@@ -996,8 +1001,8 @@ body {
             try {
                 let msg = new SpeechSynthesisUtterance();
                 msg.text = text;
-                msg.lang = 'en-US'; // English voice
-                msg.rate = 0.9;     // Normal speed
+                msg.lang = 'en-US'; 
+                msg.rate = 0.9;     
                 window.speechSynthesis.speak(msg);
             } catch(e) {
                 console.log("Voice error: ", e);
@@ -1220,6 +1225,7 @@ body {
                 return; 
             }
 
+            // FIXED: Enable online status for ANY authorized login (Admin or Staff)
             db.ref('shopOnline').set(true);
 
             let todayDateKey = new Date().toISOString().split('T')[0];
@@ -1338,8 +1344,6 @@ body {
         }
 
         function startTakeawayOrder() {
-            // Reserve the next takeaway number atomically in Firebase
-            // so two users cannot receive the same Order number.
             let counterRef = db.ref('takeawaySequenceCounter');
             let nextNum = null;
 
@@ -1548,15 +1552,13 @@ body {
                     grid.appendChild(header);
                 }
 
-                // --- SMART AUTO-SORT & DEFAULT PRIORITY LOGIC ---
                 grouped[cat].sort((a, b) => {
                     let popA = a.popularity || 0;
                     let popB = b.popularity || 0;
                     
-                    // Artificial instant boost for common items if they haven't made sales yet
                     if (popA === 0 && popB === 0) {
-                        const topTier = [1, 26, 301, 321, 341, 300, 22, 231]; // Kosong/Biasa items (Roti, Nasi, Mee, etc.)
-                        const midTier = [4, 261, 30, 32, 34, 232]; // Telur/Ayam items
+                        const topTier = [1, 26, 301, 321, 341, 300, 22, 231];
+                        const midTier = [4, 261, 30, 32, 34, 232];
                         
                         let boostA = topTier.includes(a.id) ? 100 : (midTier.includes(a.id) ? 90 : 0);
                         let boostB = topTier.includes(b.id) ? 100 : (midTier.includes(b.id) ? 90 : 0);
@@ -1564,22 +1566,28 @@ body {
                         if (boostA !== boostB) return boostB - boostA;
                     }
 
-                    // Sort by real sales popularity
                     if (popB !== popA) return popB - popA;
-                    
-                    // Fallback to original order
                     return a.id - b.id; 
                 });
-                // ----------------------------------------------
 
                 grouped[cat].forEach(item => {
-                    const card = document.createElement('div'); card.className = 'menu-card';
-                    card.onclick = () => addToCart(item.id);
+                    const card = document.createElement('div'); 
+                    const isOut = item.outOfStock === true;
+                    card.className = isOut ? 'menu-card out-of-stock' : 'menu-card';
+                    
+                    card.onclick = () => {
+                        if (isOut) {
+                            alert(`"${item.name}" is currently Out of Stock!`);
+                            return;
+                        }
+                        addToCart(item.id);
+                    };
                     
                     let existingCartItem = cart.find(c => c.id === item.id);
                     let badgeHtml = existingCartItem ? `<div class="card-qty-badge">${existingCartItem.qty}</div>` : '';
+                    let soldOutOverlay = isOut ? `<div class="sold-out-badge">SOLD OUT</div>` : '';
 
-                    card.innerHTML = `<div class="card-code">${item.code || ''}</div>${badgeHtml}<div class="card-title">${item.name}</div><div class="card-bottom"><div class="card-price">$${item.price.toFixed(2)}</div><div class="btn-add">+</div></div>`;
+                    card.innerHTML = `<div class="card-code">${item.code || ''}</div>${badgeHtml}${soldOutOverlay}<div class="card-title">${item.name}</div><div class="card-bottom"><div class="card-price">$${item.price.toFixed(2)}</div><div class="btn-add">+</div></div>`;
                     grid.appendChild(card);
                 });
             });
@@ -1600,9 +1608,13 @@ body {
                     return c === searchCode;
                 });
                 if (foundItem) { 
-                    addToCart(foundItem.id); 
-                    document.getElementById('search-input').value = ''; 
-                    renderMenu(); 
+                    if (foundItem.outOfStock) {
+                        alert(`"${foundItem.name}" is currently Out of Stock!`);
+                    } else {
+                        addToCart(foundItem.id); 
+                        document.getElementById('search-input').value = ''; 
+                        renderMenu(); 
+                    }
                 }
             } else {
                 renderMenu();
@@ -1616,7 +1628,7 @@ body {
             if (!name || !category || isNaN(price)) return alert("Please fill all fields!");
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
             const newId = activeSource.length > 0 ? Math.max(...activeSource.map(m => m.id)) + 1 : 1;
-            activeSource.push({ id: newId, code: "X" + newId, name: name, category: category, price: price, icon: "", popularity: 0 });
+            activeSource.push({ id: newId, code: "X" + newId, name: name, category: category, price: price, icon: "", popularity: 0, outOfStock: false });
             db.ref('menuData').set(activeSource);
             document.getElementById('add-m-name').value = ''; document.getElementById('add-m-price').value = '';
             alert("Menu Item Added!");
@@ -1625,7 +1637,7 @@ body {
         function addToCart(id) {
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
             const item = activeSource.find(m => m.id === id);
-            if(!item) return;
+            if(!item || item.outOfStock) return;
             const cartItem = cart.find(c => c.id === id);
             if (cartItem) cartItem.qty += 1;
             else cart.push({ ...item, qty: 1, customPrice: item.price, selectedNotes: [], customComment: "" });
@@ -1656,7 +1668,6 @@ body {
                 let isRoti = catLower.includes('roti') || catLower.includes('dosai') || nameLower.includes('roti') || nameLower.includes('dosai');
                 let isGorengOrBasah = !isRoti && !catLower.includes('drink') && !catLower.includes('juice') && !catLower.includes('milk') && !catLower.includes('tin');
 
-                // Keep existing quick-note behavior; ONLY Sejuk removes the quick-note options.
                 let isChizCategory = !/sejuk/i.test(catLower) && (isRoti || isGorengOrBasah);
                 let noteHtml = '';
 
@@ -1669,8 +1680,6 @@ body {
                     </div>`;
                 }
 
-                // Quick options for Mee Goreng, Indomie, Mee Basah,
-                // and Nasi Goreng categories.
                 const isMeeGoreng = /mee\s*goreng/i.test(catLower);
                 const isIndomie = /indomie/i.test(catLower);
                 const isMeeBasah = /mee\s*basah/i.test(catLower);
@@ -1944,7 +1953,6 @@ body {
                 safePrint("print-customer");
             }
 
-            // Record Sales to increase item popularity
             incrementItemPopularity(cart);
 
             completedSales.push({ time: timeStr, ref: `${currentOrderType} (${currentSelectedTable})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: currentSelectedTable, subtotal: subtotal, discount: discount, paid: paid, change: change, items: JSON.parse(JSON.stringify(cart)) });
@@ -2030,10 +2038,32 @@ body {
             let cats = getAllCategories();
             items.forEach(item => {
                 let opt = ''; cats.forEach(c => { opt += `<option value="${c}" ${c === item.category ? 'selected' : ''}>${c}</option>`; });
-                tbody.innerHTML += `<tr><td><input type="text" value="${item.name}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td><td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opt}</select></td><td style="text-align:right;"><input type="number" value="${item.price.toFixed(2)}" step="0.50" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:60px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"></td><td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;">Del</button></td></tr>`;
+                let stockStatusOpt = `<select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:bold; color:${item.outOfStock ? '#ef4444' : '#10b981'};" onchange="updateMenuStockStatus(${item.id}, this.value)">
+                    <option value="in" ${!item.outOfStock ? 'selected' : ''}>In Stock</option>
+                    <option value="out" ${item.outOfStock ? 'selected' : ''}>Out of Stock</option>
+                </select>`;
+
+                tbody.innerHTML += `<tr>
+                    <td><input type="text" value="${escapeHtml(item.name)}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td>
+                    <td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opt}</select></td>
+                    <td style="text-align:right;"><input type="number" value="${item.price.toFixed(2)}" step="0.50" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:60px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"></td>
+                    <td style="text-align:center;">${stockStatusOpt}</td>
+                    <td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;">Del</button></td>
+                </tr>`;
             });
         }
         function closeMenuManagerModal() { document.getElementById('menu-manager-modal').style.display = 'none'; }
+        
+        function updateMenuStockStatus(id, val) {
+            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+            let item = activeSource.find(m => m.id === id);
+            if (item) {
+                item.outOfStock = (val === 'out');
+                db.ref('menuData').set(activeSource);
+                renderMenu();
+            }
+        }
+
         function updateMenuField(id, field, val) { 
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
             let item = activeSource.find(m => m.id === id); 
