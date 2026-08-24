@@ -278,7 +278,7 @@
             body.print-kitchen-mode #print-kitchen { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-drawer-mode #print-drawer, body.print-drawer-mode #print-drawer * { visibility: visible !important; }
             body.print-drawer-mode #print-drawer { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 16px !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
-            body.print-history-mode #print-sales-history, body.print-history-mode #print-sales-history * { visibility: visible !important; }
+            body.print-history-mode #print-sales-history, body.print-sales-history #print-sales-history * { visibility: visible !important; }
             body.print-sales-history { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-item-report-mode #print-item-report, body.print-item-report-mode #print-item-report * { visibility: visible !important; }
             body.print-item-report-mode #print-item-report { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
@@ -2163,7 +2163,7 @@ body {
 
         function openHistoryModal() {
             let tbody = document.getElementById('history-table-body'); tbody.innerHTML='';
-            completedSales.forEach((s, idx) => { tbody.innerHTML += `<tr><td><span style="font-size:12px; color:#64748b;">${s.time}</span></td><td><b>${s.ref}</b></td><td>${s.method}</td><td style="text-align:right; font-weight:900;">$${s.amount.toFixed(2)}</td><td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button></td></tr>`; });
+            completedSales.completedSales.forEach((s, idx) => { tbody.innerHTML += `<tr><td><span style="font-size:12px; color:#64748b;">${s.time}</span></td><td><b>${s.ref}</b></td><td>${s.method}</td><td style="text-align:right; font-weight:900;">$${s.amount.toFixed(2)}</td><td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button></td></tr>`; });
             document.getElementById('history-modal').style.display = 'flex';
         }
         function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
