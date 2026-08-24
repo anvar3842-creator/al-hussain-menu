@@ -942,41 +942,78 @@ body {
             else { takeawaySequenceCounter = 100; db.ref('takeawaySequenceCounter').set(100); }
         });
 
-        let previousActiveOrdersCount = -1;
-        db.ref('activeOrders').on('value', (snapshot) => { 
-            const newOrders = snapshot.val() || {}; 
-            let newOrdersCount = Object.keys(newOrders).length;
-            
-            if (previousActiveOrdersCount !== -1 && newOrdersCount > previousActiveOrdersCount) {
-                if (loggedInRole === "admin" || loggedInRole === "user1" || loggedInRole === "user2") {
-                    playBeepSound();
+        let previousOrderStates = {};
+        let isFirstOrdersLoad = true;
+
+        db.ref('activeOrders').on('value', (snapshot) => {
+            const newOrders = snapshot.val() || {};
+            let shouldPlayNewOrder = false;
+            let shouldPlayUpdate = false;
+            let notifications = [];
+
+            if (!isFirstOrdersLoad) {
+                for (let key in newOrders) {
+                    let currentOrder = newOrders[key];
+                    let currentItemsCount = currentOrder.items ? currentOrder.items.length : 0;
+                    let prevOrder = previousOrderStates[key];
+
+                    if (!prevOrder) {
+                        shouldPlayNewOrder = true;
+                        notifications.push(`New Order from ${key}!`);
+                    } else if (currentOrder.time > prevOrder.time || currentItemsCount > prevOrder.itemCount) {
+                        shouldPlayUpdate = true;
+                        notifications.push(`Items added to ${key}!`);
+                    }
                 }
             }
-            previousActiveOrdersCount = newOrdersCount;
-            
-            activeOrders = newOrders; 
-            renderBigTableSelectionGrid(); 
-            checkCustomerPaymentStatus(); 
+
+            previousOrderStates = {};
+            for (let key in newOrders) {
+                 previousOrderStates[key] = {
+                     time: newOrders[key].time,
+                     itemCount: newOrders[key].items ? newOrders[key].items.length : 0
+                 };
+            }
+
+            isFirstOrdersLoad = false;
+            activeOrders = newOrders;
+
+            if (loggedInRole === "admin" || loggedInRole === "user1" || loggedInRole === "user2") {
+                if (shouldPlayNewOrder) {
+                    playOrderVoice("New Order");
+                    showCustomNotification(notifications.join("\n"));
+                } else if (shouldPlayUpdate) {
+                    playOrderVoice("Order Updated");
+                    showCustomNotification(notifications.join("\n"));
+                }
+            }
+
+            renderBigTableSelectionGrid();
+            checkCustomerPaymentStatus();
         });
 
-        function playBeepSound() {
+        function playOrderVoice(text) {
             try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); 
-                gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.6); 
+                let msg = new SpeechSynthesisUtterance();
+                msg.text = text;
+                msg.lang = 'en-US'; // English voice
+                msg.rate = 0.9;     // Normal speed
+                window.speechSynthesis.speak(msg);
             } catch(e) {
-                console.log("Web audio error: ", e);
+                console.log("Voice error: ", e);
             }
+        }
+
+        function showCustomNotification(message) {
+            if (!message) return;
+            let notif = document.createElement('div');
+            notif.innerText = message;
+            notif.style.cssText = "position:fixed; top:20px; right:20px; background: linear-gradient(135deg, #10b981, #059669); color:white; padding:15px 25px; border-radius:12px; font-weight:900; font-size:16px; z-index:9999; box-shadow:0 10px 30px rgba(16, 185, 129, 0.4); transition: 0.5s opacity;";
+            document.body.appendChild(notif);
+            setTimeout(() => { 
+                notif.style.opacity = '0'; 
+                setTimeout(() => notif.remove(), 500); 
+            }, 4000);
         }
 
         db.ref('alerts/bell').on('value', (snapshot) => {
@@ -984,8 +1021,8 @@ body {
             if (data && data.timestamp > lastBellTime) {
                 lastBellTime = data.timestamp;
                 if (loggedInRole === "admin" || loggedInRole === "user1") {
-                    playBeepSound();
-                    alert(`NOTIFICATION:\n\n${data.table} needs your attention!`);
+                    playOrderVoice("Waiter Called");
+                    showCustomNotification(`Alert: ${data.table} needs your attention!`);
                 }
             }
         });
