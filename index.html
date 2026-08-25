@@ -2224,16 +2224,33 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         }
 
         function openHistoryModal() {
-            let tbody = document.getElementById('history-table-body'); tbody.innerHTML='';
-            completedSales.completedSales.forEach((s, idx) => { tbody.innerHTML += `<tr><td><span style="font-size:12px; color:#64748b;">${s.time}</span></td><td><b>${s.ref}</b></td><td>${s.method}</td><td style="text-align:right; font-weight:900;">$${s.amount.toFixed(2)}</td><td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button></td></tr>`; });
+            let tbody = document.getElementById('history-table-body'); 
+            let rowsHtml = '';
+            let salesData = Array.isArray(completedSales) ? completedSales : [];
+            salesData.forEach((s, idx) => { 
+                rowsHtml += `<tr>
+                    <td><span style="font-size:12px; color:#64748b;">${s.time}</span></td>
+                    <td><b>${s.ref}</b></td>
+                    <td>${s.method}</td>
+                    <td style="text-align:right; font-weight:900;">$${s.amount.toFixed(2)}</td>
+                    <td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button></td>
+                </tr>`; 
+            });
+            tbody.innerHTML = rowsHtml; 
             document.getElementById('history-modal').style.display = 'flex';
         }
+
         function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
+        
         function printSalesHistory() {
             let total = completedSales.reduce((s, x)=>s+x.amount, 0);
             document.getElementById('print-history-grand-total').innerText = total.toFixed(2);
-            let tbody = document.getElementById('print-history-items'); tbody.innerHTML='';
-            completedSales.forEach(s => { tbody.innerHTML += `<tr><td>${s.time}<br>${s.ref}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td></tr>`; });
+            let tbody = document.getElementById('print-history-items'); 
+            let printRowsHtml = '';
+            completedSales.forEach(s => { 
+                printRowsHtml += `<tr><td>${s.time}<br>${s.ref}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td></tr>`; 
+            });
+            tbody.innerHTML = printRowsHtml;
             safePrint("print-history-mode");
         }
 
