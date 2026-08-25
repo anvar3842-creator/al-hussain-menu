@@ -826,7 +826,7 @@ body {
     <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
     <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
 
-    <!-- Print Templates -->
+    <div id="sale-view-modal" class="modal-overlay" style="display:none;"><div class="modal-content" style="max-width:650px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">Sale Details</h3><div><button id="sale-view-print" class="btn-small">Print</button><button class="close-modal" onclick="closeSaleViewModal()" style="margin-left:5px;">X</button></div></div><div class="modal-body" id="sale-view-details"></div></div></div> <!-- Print Templates -->
     <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     
     <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
@@ -2245,14 +2245,43 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                     <td><b>${s.ref}</b></td>
                     <td>${s.method}</td>
                     <td style="text-align:right; font-weight:900;">$${s.amount.toFixed(2)}</td>
-                    <td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button></td>
+                    <td style="text-align:center; white-space:nowrap;"><button onclick="viewSale(${idx})" class="btn-small" style="padding:6px 12px; margin-right:4px;">View</button><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button></td>
                 </tr>`; 
             });
             tbody.innerHTML = rowsHtml; 
             document.getElementById('history-modal').style.display = 'flex';
         }
 
-        function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
+        function viewSale(index) {
+    const sale = completedSales[index];
+    if (!sale) return;
+    const items = (sale.items || []).map(i => `
+        <tr>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;"><b>${i.name || ''}</b></td>
+            <td style="padding:8px;text-align:center;border-bottom:1px solid #e2e8f0;"><b>${i.qty || 0}</b></td>
+            <td style="padding:8px;text-align:right;border-bottom:1px solid #e2e8f0;"><b>$${(Number(i.customPrice || i.price || 0) * Number(i.qty || 0)).toFixed(2)}</b></td>
+        </tr>`).join('');
+    const customer = sale.customerName || sale.customer || '';
+    const phone = sale.customerPhone || sale.phone || '';
+    const ref = sale.refName || sale.ref || sale.orderType || '';
+    const detail = document.getElementById('sale-view-details');
+    detail.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;font-size:14px;">
+            <div><b>Time:</b> ${sale.time || ''}</div><div><b>Reference:</b> ${ref}</div>
+            <div><b>Payment:</b> ${sale.method || ''}</div><div><b>Total:</b> $${Number(sale.amount || 0).toFixed(2)}</div>
+            ${customer ? `<div><b>Customer:</b> ${customer}</div>` : ''}
+            ${phone ? `<div><b>Phone:</b> ${phone}</div>` : ''}
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+            <thead><tr style="background:#f1f5f9;"><th style="padding:8px;text-align:left;">Item</th><th style="padding:8px;">Qty</th><th style="padding:8px;text-align:right;">Amount</th></tr></thead>
+            <tbody>${items}</tbody>
+        </table>`;
+    document.getElementById('sale-view-modal').style.display = 'flex';
+    document.getElementById('sale-view-print').onclick = () => reprintBill(index);
+}
+function closeSaleViewModal() { document.getElementById('sale-view-modal').style.display = 'none'; }
+
+function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
         
         function printSalesHistory() {
             let total = completedSales.reduce((s, x)=>s+x.amount, 0);
