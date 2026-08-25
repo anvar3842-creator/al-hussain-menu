@@ -824,8 +824,7 @@ body {
     <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Add Daily Expense</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 15px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><div style="margin-bottom: 20px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><button class="btn-small" style="width: 100%; padding: 14px; font-size:15px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
     <div id="monthly-report-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily & Monthly History</h3><button class="close-modal" onclick="closeMonthlyReportModal()">X</button></div><div class="modal-body"><div id="monthly-report-container"></div></div></div></div>
     <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
-    <div id="history-modal" class="modal-overlay"><div class="modal-content" style="max-width: 1000px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Customer</th><th>Phone</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
-    <div id="sale-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sale Details</h3><button class="close-modal" onclick="closeSaleViewModal()">X</button></div><div class="modal-body"><div id="sale-view-content"></div><div style="display:flex; gap:10px; margin-top:15px;"><button id="sale-view-print-btn" class="btn-small" style="flex:1; padding:11px; font-size:14px; font-weight:900;" onclick="printViewedSale()">Print</button><button class="btn-small" style="flex:1; padding:11px; font-size:14px; font-weight:900; background:#e2e8f0; color:#1e293b;" onclick="closeSaleViewModal()">Close</button></div></div></div></div>
+    <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
 
     <!-- Print Templates -->
     <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
@@ -956,15 +955,27 @@ body {
 
         db.ref('menuData').on('value', (snapshot) => {
             const val = snapshot.val();
-            if (val && Array.isArray(val) && val.length > 0) { menuData = val; }
-            else { menuData = defaultMenuData; db.ref('menuData').set(defaultMenuData); }
+            if (val && Array.isArray(val) && val.length > 0) {
+                menuData = val;
+                // Keep the existing menu untouched, but restore the original Bakso items
+                // if the category/items were accidentally removed from Firebase.
+                const baksoDefaults = defaultMenuData.filter(item => item.category === "Bakso");
+                const hasBaksoItems = menuData.some(item => item.category === "Bakso");
+                if (!hasBaksoItems && baksoDefaults.length) {
+                    menuData = [...menuData, ...baksoDefaults];
+                    db.ref('menuData').set(menuData);
+                }
+            } else { menuData = defaultMenuData; db.ref('menuData').set(defaultMenuData); }
             renderCategories(); populateCategoryDropdown(); renderMenu();
         });
 
         db.ref('categoryOrder').on('value', (snapshot) => {
             const val = snapshot.val();
-            if (val && Array.isArray(val)) { categoryOrder = val; }
-            else { categoryOrder = defaultCategoryOrder; db.ref('categoryOrder').set(defaultCategoryOrder); }
+            if (val && Array.isArray(val)) {
+                // Preserve the user's existing category order and add only missing default categories.
+                categoryOrder = [...val, ...defaultCategoryOrder.filter(c => !val.includes(c))];
+                if (categoryOrder.length !== val.length) db.ref('categoryOrder').set(categoryOrder);
+            } else { categoryOrder = defaultCategoryOrder; db.ref('categoryOrder').set(defaultCategoryOrder); }
             renderCategories(); populateCategoryDropdown();
         });
 
@@ -2017,7 +2028,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
             incrementItemPopularity(cart);
 
-            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${getOrderDisplayRef(currentSelectedTable)})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: getOrderDisplayRef(currentSelectedTable), custName: (activeOrders[getLinkedOrderKey(currentSelectedTable)] || {}).custName || sessionStorage.getItem('myTkName') || '', custPhone: (activeOrders[getLinkedOrderKey(currentSelectedTable)] || {}).custPhone || sessionStorage.getItem('myTkPhone') || '', subtotal: subtotal, discount: discount, paid: paid, change: change, items: JSON.parse(JSON.stringify(cart)) });
+            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${getOrderDisplayRef(currentSelectedTable)})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: getOrderDisplayRef(currentSelectedTable), subtotal: subtotal, discount: discount, paid: paid, change: change, items: JSON.parse(JSON.stringify(cart)) });
             db.ref('sales').set(completedSales);
 
             let todayKey = new Date().toISOString().split('T')[0];
@@ -2039,16 +2050,14 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             alert("Payment Successful! Change: $" + change.toFixed(2));
         }
 
-        function fillReceiptDetails(orderType, ref, method, time, sub, disc, total, paid, change, items, savedCustName, savedCustPhone) {
+        function fillReceiptDetails(orderType, ref, method, time, sub, disc, total, paid, change, items) {
             document.getElementById('p-order-type').innerText = orderType; 
             document.getElementById('p-table').innerText = ref;
             
             let orderData = activeOrders[ref];
-            const customerName = savedCustName || (orderData && orderData.custName) || '';
-            const customerPhone = savedCustPhone || (orderData && orderData.custPhone) || '';
-            if (customerName || customerPhone) {
+            if (orderData && orderData.custName) {
                 document.getElementById('p-cust-info').style.display = 'block';
-                document.getElementById('p-cust-name-val').innerText = customerName + (customerPhone ? ' | ' + customerPhone : '');
+                document.getElementById('p-cust-name-val').innerText = orderData.custName;
             } else {
                 document.getElementById('p-cust-info').style.display = 'none';
             }
@@ -2080,7 +2089,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
         function reprintBill(index) {
             let sale = completedSales[index]; if (!sale) return;
-            fillReceiptDetails(sale.orderType, sale.refName, sale.method, sale.time, sale.subtotal, sale.discount, sale.amount, sale.paid, sale.change, sale.items, sale.custName, sale.custPhone);
+            fillReceiptDetails(sale.orderType, sale.refName, sale.method, sale.time, sale.subtotal, sale.discount, sale.amount, sale.paid, sale.change, sale.items);
             safePrint("print-customer");
         }
 
@@ -2232,13 +2241,11 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             let salesData = Array.isArray(completedSales) ? completedSales : [];
             salesData.forEach((s, idx) => { 
                 rowsHtml += `<tr>
-                    <td><span style="font-size:12px; color:#64748b;">${s.time || ''}</span></td>
-                    <td><b>${s.ref || ''}</b></td>
-                    <td><b>${s.custName || '-'}</b></td>
-                    <td><b style="font-size:14px;">${s.custPhone || '-'}</b></td>
-                    <td>${s.method || ''}</td>
-                    <td style="text-align:right; font-weight:900;">$${Number(s.amount || 0).toFixed(2)}</td>
-                    <td style="text-align:center; white-space:nowrap;"><button onclick="viewSale(${idx})" class="btn-small" style="padding:6px 10px; margin-right:5px; background:#e0f2fe; color:#0284c7;">View</button><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 10px;">Print</button></td>
+                    <td><span style="font-size:12px; color:#64748b;">${s.time}</span></td>
+                    <td><b>${s.ref}</b></td>
+                    <td>${s.method}</td>
+                    <td style="text-align:right; font-weight:900;">$${s.amount.toFixed(2)}</td>
+                    <td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button></td>
                 </tr>`; 
             });
             tbody.innerHTML = rowsHtml; 
@@ -2246,51 +2253,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         }
 
         function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
-
-        let viewedSaleIndex = -1;
-        function viewSale(index) {
-            const sale = completedSales[index];
-            if (!sale) return;
-            viewedSaleIndex = index;
-            const items = Array.isArray(sale.items) ? sale.items : [];
-            let itemRows = '';
-            items.forEach(i => {
-                const qty = Number(i.qty || 0);
-                const price = Number(i.customPrice || i.price || 0);
-                const notes = Array.isArray(i.notes) && i.notes.length ? ` <span style="font-size:12px;color:#64748b;">(${escapeHtml(i.notes.join(', '))})</span>` : '';
-                itemRows += `<tr><td style="padding:8px 4px;"><b>${escapeHtml(i.name || '')}</b>${notes}</td><td style="padding:8px 4px;text-align:center;"><b>${qty}</b></td><td style="padding:8px 4px;text-align:right;"><b>$${(price * qty).toFixed(2)}</b></td></tr>`;
-            });
-            const type = sale.orderType || '';
-            const ref = sale.refName || sale.ref || '';
-            const customer = sale.custName || '-';
-            const phone = sale.custPhone || '-';
-            document.getElementById('sale-view-content').innerHTML = `
-                <div style="background:#f8fafc;border:2px solid #e2e8f0;border-radius:14px;padding:14px;margin-bottom:12px;">
-                    <div style="font-size:20px;font-weight:900;margin-bottom:8px;">${escapeHtml(type)} — ${escapeHtml(ref)}</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px;">
-                        <div><b>Customer:</b> ${escapeHtml(customer)}</div>
-                        <div><b>Phone:</b> ${escapeHtml(phone)}</div>
-                        <div><b>Payment:</b> ${escapeHtml(sale.method || '-')}</div>
-                        <div><b>Time:</b> ${escapeHtml(sale.time || '-')}</div>
-                    </div>
-                </div>
-                <table style="width:100%;border-collapse:collapse;font-size:14px;"><thead><tr style="border-bottom:2px solid #cbd5e1;"><th style="text-align:left;padding:7px 4px;">Item</th><th style="text-align:center;padding:7px 4px;">Qty</th><th style="text-align:right;padding:7px 4px;">Amount</th></tr></thead><tbody>${itemRows}</tbody></table>
-                <div style="border-top:2px dashed #cbd5e1;margin-top:10px;padding-top:10px;font-weight:900;">
-                    <div style="display:flex;justify-content:space-between;"><span>Subtotal</span><span>$${Number(sale.subtotal || 0).toFixed(2)}</span></div>
-                    <div style="display:flex;justify-content:space-between;"><span>Discount</span><span>$${Number(sale.discount || 0).toFixed(2)}</span></div>
-                    <div style="display:flex;justify-content:space-between;font-size:20px;margin-top:6px;"><span>TOTAL</span><span>$${Number(sale.amount || 0).toFixed(2)}</span></div>
-                </div>`;
-            document.getElementById('sale-view-modal').style.display='flex';
-        }
-
-        function closeSaleViewModal() {
-            document.getElementById('sale-view-modal').style.display='none';
-            viewedSaleIndex = -1;
-        }
-
-        function printViewedSale() {
-            if (viewedSaleIndex >= 0) reprintBill(viewedSaleIndex);
-        }
         
         function printSalesHistory() {
             let total = completedSales.reduce((s, x)=>s+x.amount, 0);
