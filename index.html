@@ -210,6 +210,12 @@
         .admin-dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #f1f5f9; padding-bottom: 12px; margin-bottom: 15px; }
         .admin-dashboard-header h3 { margin: 0; color: var(--text-main); font-size: 16px; font-weight: 900; }
         
+        
+        .stat-toggle-box { cursor: pointer; border: 1px solid var(--border-light); user-select: none; transition: all .2s ease; }
+        .stat-toggle-box:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
+        .stat-eye { margin-left: 5px; font-size: 12px; opacity: .7; }
+        .stat-expense-toggle { color:#ea580c; border-color:#fed7aa; }
+
         .stat-box { background: #f8fafc; padding: 8px 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-light); font-size: 13px; font-weight: 900; color: var(--primary); }
         
         .admin-buttons-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
@@ -563,6 +569,19 @@ body {
             }
         }
 
+
+/* === TABLE LINKING: Tables 1-13 only === */
+.table-link-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.btn-link-tables { background:#ede9fe; color:#6d28d9; border:2px solid #ddd6fe; padding:8px 12px; border-radius:10px; font-weight:900; cursor:pointer; }
+.btn-link-tables:hover { background:#ddd6fe; }
+.linked-table-card { outline:3px solid #8b5cf6 !important; }
+.table-link-badge { position:absolute; top:10px; right:10px; background:#7c3aed; color:#fff; padding:4px 7px; border-radius:8px; font-size:10px; font-weight:900; }
+#table-link-modal { display:none; position:fixed; inset:0; z-index:4000; background:rgba(15,23,42,.65); align-items:center; justify-content:center; padding:20px; box-sizing:border-box; }
+#table-link-modal .table-link-box { background:#fff; width:100%; max-width:420px; border-radius:20px; padding:20px; box-shadow:0 20px 50px rgba(0,0,0,.2); }
+.table-link-list { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:15px 0; }
+.table-link-item { border:2px solid #e2e8f0; border-radius:10px; padding:10px; text-align:center; font-weight:900; cursor:pointer; background:#f8fafc; }
+.table-link-item.selected { border-color:#7c3aed; background:#ede9fe; color:#6d28d9; }
+
 </style>
 </head>
 <body>
@@ -606,7 +625,7 @@ body {
 
         <div id="table-selection-view">
             <div class="table-selection-header">
-                <h2>Select Table / Order</h2>
+                <div style="display:flex;align-items:center;gap:10px;"><h2>Select Table / Order</h2><div class="table-link-controls"><button class="btn-link-tables" onclick="openTableLinkModal()">🔗 Link Tables</button></div></div>
                 <button class="btn-small" style="background:#059669; padding: 7px 12px; font-size: 13px;" onclick="startTakeawayOrder()">+ New Takeaway</button>
             </div>
             <div id="big-tables-grid" class="big-tables-grid"></div>
@@ -614,9 +633,15 @@ body {
             <div id="admin-dashboard-section" class="admin-dashboard-container">
                 <div class="admin-dashboard-header">
                     <h3>Admin Dashboard & Management</h3>
-                    <div style="display:flex; gap:8px;">
-                        <div class="stat-box">Sales: $<span id="stat-sales">0.00</span></div>
-                        <div class="stat-box" style="color:#ea580c; border-color:#fed7aa;">Exp: $<span id="stat-expenses">0.00</span></div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" class="stat-box stat-toggle-box" onclick="togglePrivateStat('sales')" title="Tap to show/hide Sales">
+                            <span>Sales: </span><span id="stat-sales-mask">••••</span><span id="stat-sales" style="display:none;">0.00</span>
+                            <span id="stat-sales-eye" class="stat-eye">👁</span>
+                        </button>
+                        <button type="button" class="stat-box stat-toggle-box stat-expense-toggle" onclick="togglePrivateStat('expenses')" title="Tap to show/hide Expenses">
+                            <span>Exp: </span><span id="stat-expenses-mask">••••</span><span id="stat-expenses" style="display:none;">0.00</span>
+                            <span id="stat-expenses-eye" class="stat-eye">👁</span>
+                        </button>
                     </div>
                 </div>
                 
@@ -923,6 +948,7 @@ body {
         let loggedInRole = ""; 
         let currentSelectedTable = "";
         let currentOrderType = "Dine-In";
+        let tableLinks = {};
         
         let customerHadActiveOrder = false;
         let lastBellTime = Date.now(); 
@@ -941,7 +967,12 @@ body {
             renderCategories(); populateCategoryDropdown();
         });
 
-        db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
+        db.ref('tableLinks').on('value', (snapshot) => {
+            tableLinks = snapshot.val() || {};
+            renderBigTableSelectionGrid();
+        });
+
+db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             const val = snapshot.val();
             if (val && typeof val === 'number') { takeawaySequenceCounter = val; } 
             else { takeawaySequenceCounter = 100; db.ref('takeawaySequenceCounter').set(100); }
@@ -1060,6 +1091,7 @@ body {
             const tableParam = urlParams.get('table');
             const orderParam = urlParams.get('order');
             let targetKey = tableParam || (orderParam === "takeaway" ? sessionStorage.getItem('myTakeawayKey') : "");
+            if (tableParam) targetKey = getLinkedOrderKey(tableParam);
             
             if (targetKey) {
                 if (activeOrders[targetKey]) {
@@ -1291,19 +1323,42 @@ body {
             return mins < 60 ? `${mins}m ${secs}s` : `${Math.floor(mins / 60)}h ${mins % 60}m`;
         }
 
+        function getLinkedOrderKey(tableName) {
+            const link = tableLinks[tableName];
+            if (link && link.groupId) return link.groupId;
+            return tableName;
+        }
+
+        function getLinkedTableNames(tableName) {
+            const link = tableLinks[tableName];
+            if (link && Array.isArray(link.tables) && link.tables.length) {
+                return link.tables.map(n => typeof n === 'number' ? `Table ${n}` : String(n));
+            }
+            return [String(tableName)];
+        }
+
+        function getOrderDisplayRef(tableName) {
+            const names = getLinkedTableNames(tableName);
+            return names.length > 1 ? names.map(n => n.replace('Table ', 'T')).join(' + ') : tableName;
+        }
+
         function renderBigTableSelectionGrid() {
             const container = document.getElementById('big-tables-grid'); if(!container) return; container.innerHTML = '';
             
             for (let i = 1; i <= 13; i++) {
                 let tableName = `Table ${i}`;
-                let orderData = activeOrders[tableName];
+                let orderData = activeOrders[getLinkedOrderKey(tableName)];
                 let isOccupied = orderData !== undefined;
                 let cardClass = isOccupied ? "big-table-card occupied" : "big-table-card free";
                 let statusText = isOccupied ? `Occupied<br>${formatElapsedTime(orderData.time)}` : "Free Table";
                 let cancelBtn = (isOccupied && loggedInRole === "admin") ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tableName}', event)" style="position:absolute; top:8px; right:8px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:bold; cursor:pointer; z-index:2;">X</button>` : '';
 
-                container.innerHTML += `<div class="${cardClass}" onclick="selectTableForOrder('${tableName}', 'Dine-In')">
+                const linkedNames = getLinkedTableNames(tableName);
+                const linkBadge = linkedNames.length > 1 ? `<span class="table-link-badge">LINKED: ${linkedNames.map(n=>n.replace('Table ','T')).join(' + ')}</span>` : '';
+                const linkedClass = linkedNames.length > 1 ? ' linked-table-card' : '';
+                container.innerHTML += `<div class="${cardClass}${linkedClass}" onclick="selectTableForOrder('${tableName}', 'Dine-In')">
                     ${cancelBtn}
+                    ${linkBadge}
                     <h3>${tableName}</h3>
                     <p>${statusText}</p>
                 </div>`;
@@ -1327,10 +1382,12 @@ body {
         function selectTableForOrder(tableName, orderType) {
             currentSelectedTable = tableName;
             currentOrderType = orderType;
-            document.getElementById('cart-panel-title').innerText = `Order: ${tableName}`;
+            const orderKey = getLinkedOrderKey(tableName);
+            const displayRef = getOrderDisplayRef(tableName);
+            document.getElementById('cart-panel-title').innerText = `Order: ${displayRef}`;
             
-            if (activeOrders[tableName] && activeOrders[tableName].items) {
-                cart = JSON.parse(JSON.stringify(activeOrders[tableName].items));
+            if (activeOrders[orderKey] && activeOrders[orderKey].items) {
+                cart = JSON.parse(JSON.stringify(activeOrders[orderKey].items));
             } else {
                 cart = [];
             }
@@ -1397,16 +1454,17 @@ body {
             event.stopPropagation();
             if (loggedInRole !== "admin") return alert("Admin only!");
             if (confirm(`Cancel active order ${key}?`)) { 
-                delete activeOrders[key]; 
+                const orderKey = getLinkedOrderKey(key);
+                delete activeOrders[orderKey]; 
                 db.ref('activeOrders').set(activeOrders); 
-                db.ref(`orderStatus/${key}`).remove();
+                db.ref(`orderStatus/${orderKey}`).remove();
                 renderBigTableSelectionGrid(); 
             }
         }
 
         function toggleOrderReadyStatus() {
             if (!currentSelectedTable) return;
-            let currentStatusRef = db.ref(`orderStatus/${currentSelectedTable}`);
+            let currentStatusRef = db.ref(`orderStatus/${getLinkedOrderKey(currentSelectedTable)}`);
             currentStatusRef.once('value', (snap) => {
                 let st = snap.val();
                 if (st === "Ready") {
@@ -1781,12 +1839,13 @@ body {
         function saveOrderToTableSilent() {
             if (loggedInRole === "customer") return; 
             if (cart.length === 0 || !currentSelectedTable) return;
-            let existing = activeOrders[currentSelectedTable] || {};
+            const orderKey = getLinkedOrderKey(currentSelectedTable);
+            let existing = activeOrders[orderKey] || {};
             let existingTime = existing.time || Date.now();
             let cName = existing.custName || sessionStorage.getItem('myTkName') || "Walk-in";
             let cPhone = existing.custPhone || sessionStorage.getItem('myTkPhone') || "";
 
-            activeOrders[currentSelectedTable] = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, items: JSON.parse(JSON.stringify(cart)) };
+            activeOrders[orderKey] = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, tables: getLinkedTableNames(currentSelectedTable), items: JSON.parse(JSON.stringify(cart)) };
             db.ref('activeOrders').set(activeOrders);
         }
 
@@ -1797,7 +1856,8 @@ body {
                 return;
             }
             
-            let existingOrder = activeOrders[currentSelectedTable];
+            const orderKey = getLinkedOrderKey(currentSelectedTable);
+            let existingOrder = activeOrders[orderKey];
             let newItems = JSON.parse(JSON.stringify(cart));
             let cName = sessionStorage.getItem('myTkName') || "Customer";
             let cPhone = sessionStorage.getItem('myTkPhone') || "";
@@ -1817,7 +1877,8 @@ body {
                 };
             }
             
-            activeOrders[currentSelectedTable] = existingOrder;
+            existingOrder.tables = getLinkedTableNames(currentSelectedTable);
+            activeOrders[orderKey] = existingOrder;
             db.ref('activeOrders').set(activeOrders);
             
             document.getElementById('customer-success-screen').style.display = 'flex';
@@ -1829,7 +1890,7 @@ body {
         function callWaiter() {
             if (!currentSelectedTable) return;
             db.ref('alerts/bell').set({
-                table: currentSelectedTable,
+                table: getOrderDisplayRef(currentSelectedTable),
                 timestamp: Date.now()
             });
             alert("Notification sent! Staff will attend to you shortly.");
@@ -1862,9 +1923,9 @@ body {
 
         function printKitchenKOTSilent() {
             document.getElementById('k-order-type').innerText = currentOrderType; 
-            document.getElementById('k-table').innerText = currentSelectedTable;
+            document.getElementById('k-table').innerText = getOrderDisplayRef(currentSelectedTable);
             
-            let orderData = activeOrders[currentSelectedTable];
+            let orderData = activeOrders[getLinkedOrderKey(currentSelectedTable)];
             if (orderData && orderData.custName) {
                 document.getElementById('k-cust-info').style.display = 'block';
                 document.getElementById('k-cust-name-val').innerText = orderData.custName;
@@ -1901,7 +1962,7 @@ body {
             if (cart.length === 0) return alert("Cart is empty!");
             let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
             let discount = parseFloat(document.getElementById('discount-input').value) || 0;
-            fillReceiptDetails(currentOrderType, currentSelectedTable, document.getElementById('payment-method').value, new Date().toLocaleString(), subtotal, discount, Math.max(0, subtotal - discount), 0, 0, cart);
+            fillReceiptDetails(currentOrderType, getOrderDisplayRef(currentSelectedTable), document.getElementById('payment-method').value, new Date().toLocaleString(), subtotal, discount, Math.max(0, subtotal - discount), 0, 0, cart);
             safePrint("print-customer");
         }
 
@@ -1947,7 +2008,7 @@ body {
             let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
             let discount = parseFloat(document.getElementById('discount-input').value) || 0;
 
-            fillReceiptDetails(currentOrderType, currentSelectedTable, payMethod, timeStr, subtotal, discount, currentGrandTotalForPay, paid, change, cart);
+            fillReceiptDetails(currentOrderType, getOrderDisplayRef(currentSelectedTable), payMethod, timeStr, subtotal, discount, currentGrandTotalForPay, paid, change, cart);
             
             if (shouldPrint) {
                 safePrint("print-customer");
@@ -1955,7 +2016,7 @@ body {
 
             incrementItemPopularity(cart);
 
-            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${currentSelectedTable})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: currentSelectedTable, subtotal: subtotal, discount: discount, paid: paid, change: change, items: JSON.parse(JSON.stringify(cart)) });
+            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${getOrderDisplayRef(currentSelectedTable)})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: getOrderDisplayRef(currentSelectedTable), subtotal: subtotal, discount: discount, paid: paid, change: change, items: JSON.parse(JSON.stringify(cart)) });
             db.ref('sales').set(completedSales);
 
             let todayKey = new Date().toISOString().split('T')[0];
@@ -1966,9 +2027,10 @@ body {
                 db.ref('staffShifts').set(staffShifts);
             }
 
-            delete activeOrders[currentSelectedTable]; 
+            const paymentOrderKey = getLinkedOrderKey(currentSelectedTable);
+            delete activeOrders[paymentOrderKey]; 
             db.ref('activeOrders').set(activeOrders);
-            db.ref(`orderStatus/${currentSelectedTable}`).remove(); 
+            db.ref(`orderStatus/${paymentOrderKey}`).remove(); 
 
             cart = []; updateStats(); 
             backToTableSelection();
@@ -2203,9 +2265,265 @@ body {
         function updateStats() {
             let sTotal = completedSales.reduce((s, x)=>s+x.amount, 0);
             let eTotal = dailyExpenses.reduce((s, x)=>s+x.amount, 0);
-            if(document.getElementById('stat-sales')) document.getElementById('stat-sales').innerText = sTotal.toFixed(2);
-            if(document.getElementById('stat-expenses')) document.getElementById('stat-expenses').innerText = eTotal.toFixed(2);
+
+            const salesEl = document.getElementById('stat-sales');
+            const expEl = document.getElementById('stat-expenses');
+            const salesMask = document.getElementById('stat-sales-mask');
+            const expMask = document.getElementById('stat-expenses-mask');
+
+            if (salesEl) salesEl.innerText = sTotal.toFixed(2);
+            if (expEl) expEl.innerText = eTotal.toFixed(2);
+
+            if (salesMask) salesMask.style.display = salesEl && salesEl.style.display !== 'none' ? 'none' : 'inline';
+            if (expMask) expMask.style.display = expEl && expEl.style.display !== 'none' ? 'none' : 'inline';
+        }
+
+        function togglePrivateStat(type) {
+            const valueId = type === 'sales' ? 'stat-sales' : 'stat-expenses';
+            const maskId = type === 'sales' ? 'stat-sales-mask' : 'stat-expenses-mask';
+            const eyeId = type === 'sales' ? 'stat-sales-eye' : 'stat-expenses-eye';
+
+            const valueEl = document.getElementById(valueId);
+            const maskEl = document.getElementById(maskId);
+            const eyeEl = document.getElementById(eyeId);
+            if (!valueEl || !maskEl) return;
+
+            const showing = valueEl.style.display !== 'none';
+            valueEl.style.display = showing ? 'none' : 'inline';
+            maskEl.style.display = showing ? 'inline' : 'none';
+            if (eyeEl) eyeEl.innerText = showing ? '👁' : '🙈';
         }
     </script>
+
+<div id="table-link-modal">
+  <div class="table-link-box">
+    <h3 style="margin:0 0 6px;font-weight:900;">🔗 Link Tables</h3>
+    <p style="margin:0;color:#64748b;font-size:13px;font-weight:700;">Select any two or more tables (1–13) to use as one order.</p>
+    <div id="table-link-list" class="table-link-list"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button onclick="unlinkSelectedTables()" style="flex:1;min-width:130px;border:0;padding:12px;border-radius:10px;background:#fee2e2;color:#b91c1c;font-weight:900;cursor:pointer;">🔓 Unlink</button>
+      <button onclick="saveTableLink()" style="flex:1;border:0;padding:12px;border-radius:10px;background:#7c3aed;color:#fff;font-weight:900;cursor:pointer;">Link Selected</button>
+      <button onclick="closeTableLinkModal()" style="flex:1;border:0;padding:12px;border-radius:10px;background:#e2e8f0;color:#334155;font-weight:900;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* === OPTIONAL TABLE LINKING: Tables 1-13 === */
+let selectedTablesForLink = [];
+
+function openTableLinkModal() {
+    selectedTablesForLink = [];
+    const list = document.getElementById('table-link-list');
+    if (!list) return;
+    list.innerHTML = '';
+    for (let n = 1; n <= 13; n++) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'table-link-item';
+        b.textContent = 'Table ' + n;
+        b.onclick = () => {
+            const i = selectedTablesForLink.indexOf(n);
+            if (i >= 0) selectedTablesForLink.splice(i, 1);
+            else selectedTablesForLink.push(n);
+            b.classList.toggle('selected', selectedTablesForLink.includes(n));
+        };
+        list.appendChild(b);
+    }
+    document.getElementById('table-link-modal').style.display = 'flex';
+}
+
+function closeTableLinkModal() {
+    const m = document.getElementById('table-link-modal');
+    if (m) m.style.display = 'none';
+}
+
+function unlinkSelectedTables() {
+    if (!selectedTablesForLink || selectedTablesForLink.length < 1) {
+        alert('Select a linked table first.');
+        return;
+    }
+
+    const selected = selectedTablesForLink.map(n => Number(n)).filter(n => n >= 1 && n <= 13);
+    if (!selected.length) {
+        alert('Select a linked table first.');
+        return;
+    }
+
+    const firstTable = 'Table ' + selected[0];
+
+    db.ref('tableLinks/' + firstTable).once('value').then(snap => {
+        const link = snap.val();
+
+        if (!link || !Array.isArray(link.tables) || link.tables.length < 2) {
+            alert('This table is not linked.');
+            return;
+        }
+
+        // Only remove the link. The existing combined order/bill remains
+        // attached to the first table so no order is silently deleted.
+        const linkedNames = link.tables.map(n => 'Table ' + Number(n));
+        const updates = {};
+
+        linkedNames.forEach(name => {
+            updates['tableLinks/' + name] = null;
+        });
+        updates['linkedTables/' + String(link.groupId)] = null;
+        updates['activeOrders/' + String(link.groupId)] = null;
+
+        const groupOrder = activeOrders && activeOrders[String(link.groupId)];
+        if (groupOrder && Array.isArray(groupOrder.items) && groupOrder.items.length) {
+            groupOrder.tables = [linkedNames[0]];
+            updates['activeOrders/' + linkedNames[0]] = groupOrder;
+            activeOrders[linkedNames[0]] = groupOrder;
+        }
+
+        if (activeOrders) delete activeOrders[String(link.groupId)];
+
+        db.ref().update(updates).then(() => {
+            closeTableLinkModal();
+            if (typeof renderBigTableSelectionGrid === 'function') {
+                renderBigTableSelectionGrid();
+            }
+        }).catch(err => {
+            console.error('Table unlink error:', err);
+            alert('Unable to unlink tables: ' + (err && err.message ? err.message : err));
+        });
+    });
+}
+
+function saveTableLink() {
+    if (window.__tableLinkBusy) return;
+    if (selectedTablesForLink.length < 2) {
+        alert('Please select at least 2 tables.');
+        return;
+    }
+
+    const tableNums = selectedTablesForLink
+        .map(n => Number(n))
+        .filter(n => Number.isInteger(n) && n >= 1 && n <= 13)
+        .sort((a, b) => a - b);
+
+    if (tableNums.length < 2) {
+        alert('Please select at least 2 tables.');
+        return;
+    }
+
+    const tableNames = tableNums.map(n => 'Table ' + n);
+    const groupId = 'TL_' + tableNums.join('_');
+
+    // Merge any existing orders from the selected tables into one order.
+    const sourceKeys = new Set();
+    tableNames.forEach(name => {
+        if (typeof getLinkedOrderKey === 'function') {
+            sourceKeys.add(String(getLinkedOrderKey(String(name))));
+        } else {
+            sourceKeys.add(String(name));
+        }
+    });
+
+    let mergedOrder = null;
+
+    sourceKeys.forEach(key => {
+        const order = activeOrders && activeOrders[key];
+        if (!order || !Array.isArray(order.items)) return;
+
+        if (!mergedOrder) {
+            mergedOrder = JSON.parse(JSON.stringify(order));
+            mergedOrder.items = [];
+        }
+
+        mergedOrder.items = mergedOrder.items.concat(
+            JSON.parse(JSON.stringify(order.items))
+        );
+
+        mergedOrder.time = Math.min(
+            mergedOrder.time || Date.now(),
+            order.time || Date.now()
+        );
+        mergedOrder.custName = order.custName || mergedOrder.custName || 'Walk-in';
+        mergedOrder.custPhone = order.custPhone || mergedOrder.custPhone || '';
+    });
+
+    // Remove the old individual order keys before creating the linked key.
+    sourceKeys.forEach(key => {
+        if (activeOrders) delete activeOrders[key];
+    });
+
+    const updates = {};
+
+    sourceKeys.forEach(key => {
+        updates['activeOrders/' + key] = null;
+    });
+
+    updates['linkedTables/' + groupId] = {
+        tables: tableNums,
+        createdAt: Date.now()
+    };
+
+    tableNames.forEach(name => {
+        updates['tableLinks/' + name] = {
+            groupId: groupId,
+            tables: tableNums
+        };
+    });
+
+    if (mergedOrder && mergedOrder.items.length > 0) {
+        mergedOrder.tables = tableNames;
+        updates['activeOrders/' + groupId] = mergedOrder;
+        activeOrders[groupId] = mergedOrder;
+    }
+
+    window.__tableLinkBusy = true;
+    const linkButton = document.querySelector('#table-link-modal button[onclick="saveTableLink()"]');
+    if (linkButton) { linkButton.disabled = true; linkButton.textContent = 'Linking...'; }
+
+    db.ref().update(updates).then(() => {
+        window.__tableLinkBusy = false;
+        closeTableLinkModal();
+
+        if (typeof currentSelectedTable !== 'undefined' &&
+            tableNames.includes(String(currentSelectedTable))) {
+            currentSelectedTable = groupId;
+        }
+
+        if (typeof renderBigTableSelectionGrid === 'function') {
+            renderBigTableSelectionGrid();
+        }
+    }).catch(err => {
+        window.__tableLinkBusy = false;
+        const linkButton = document.querySelector('#table-link-modal button[onclick="saveTableLink()"]');
+        if (linkButton) { linkButton.disabled = false; linkButton.textContent = 'Link Selected'; }
+        console.error('Table linking error:', err);
+        alert('Unable to link tables: ' + (err && err.message ? err.message : err));
+    });
+}
+
+function unlinkTable(tableNo) {
+    db.ref('tableLinks/' + tableNo).once('value', snap => {
+        const link = snap.val();
+        if (!link || !Array.isArray(link.tables)) return;
+
+        const tables = link.tables.map(n => typeof n === 'number' ? `Table ${n}` : String(n));
+        const groupId = link.groupId;
+        const groupOrder = activeOrders[groupId];
+        const keepTable = tables[0];
+        const updates = {};
+
+        tables.forEach(t => updates['tableLinks/' + t] = null);
+        updates['linkedTables/' + groupId] = null;
+        updates['activeOrders/' + groupId] = null;
+
+        if (groupOrder && Array.isArray(groupOrder.items) && groupOrder.items.length) {
+            groupOrder.tables = [keepTable];
+            updates['activeOrders/' + keepTable] = groupOrder;
+        }
+
+        db.ref().update(updates).then(() => renderBigTableSelectionGrid());
+    });
+}
+</script>
+
 </body>
 </html>
