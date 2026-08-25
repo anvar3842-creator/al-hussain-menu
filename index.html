@@ -131,18 +131,13 @@
         .menu-card { background: var(--card-bg); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; position: relative; border: 1px solid rgba(226, 232, 240, 0.5); cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); height: 125px; box-sizing: border-box; box-shadow: var(--shadow-sm); }
         .menu-card:hover { border-color: #c7d2fe; box-shadow: var(--shadow-lg); transform: translateY(-4px); }
         
-        /* Out of Stock Card Styling */
-        .menu-card.out-of-stock { background: #f1f5f9 !important; opacity: 0.6; cursor: not-allowed; border-color: #cbd5e1 !important; box-shadow: none !important; }
-        .menu-card.out-of-stock:hover { transform: none !important; box-shadow: none !important; }
-        .sold-out-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-12deg); background: var(--danger); color: white; font-size: 14px; font-weight: 900; padding: 4px 12px; border-radius: 8px; letter-spacing: 1px; z-index: 3; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); border: 2px solid white; pointer-events: none; }
-
         .card-code { position: absolute; top: 12px; left: 12px; background: #f1f5f9; color: var(--text-muted); font-size: 11px; font-weight: 900; padding: 4px 8px; border-radius: 8px; letter-spacing: 0.5px; }
         .card-title { font-weight: 800; font-size: 14px; margin-top: 30px; color: var(--text-main); line-height: 1.3; }
         .card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
         .card-price { font-weight: 900; font-size: 17px; color: var(--primary); }
         
         .btn-add { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; width: 32px; height: 32px; border-radius: 10px; font-size: 18px; display: flex; justify-content: center; align-items: center; font-weight: bold; opacity: 0; transition: all 0.3s; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
-        .menu-card:hover:not(.out-of-stock) .btn-add { opacity: 1; transform: scale(1.1); }
+        .menu-card:hover .btn-add { opacity: 1; transform: scale(1.1); }
         .card-qty-badge { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; font-size: 12px; font-weight: 900; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); border: 2px solid white; z-index: 2; }
 
         /* Cart Panel */
@@ -210,12 +205,6 @@
         .admin-dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #f1f5f9; padding-bottom: 12px; margin-bottom: 15px; }
         .admin-dashboard-header h3 { margin: 0; color: var(--text-main); font-size: 16px; font-weight: 900; }
         
-        
-        .stat-toggle-box { cursor: pointer; border: 1px solid var(--border-light); user-select: none; transition: all .2s ease; }
-        .stat-toggle-box:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
-        .stat-eye { margin-left: 5px; font-size: 12px; opacity: .7; }
-        .stat-expense-toggle { color:#ea580c; border-color:#fed7aa; }
-
         .stat-box { background: #f8fafc; padding: 8px 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-light); font-size: 13px; font-weight: 900; color: var(--primary); }
         
         .admin-buttons-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
@@ -279,7 +268,13 @@
             body { background: white !important; margin: 0 !important; padding: 0 !important; font-family: 'Courier New', Courier, monospace !important; height: auto !important; }
             body * { visibility: hidden !important; }
             body.print-customer #print-receipt, body.print-customer #print-receipt * { visibility: visible !important; }
-            body.print-customer #print-receipt { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 16px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
+            body.print-customer #print-receipt { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 19px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
+            body.print-customer #print-receipt table { font-size: 18px !important; }
+            body.print-customer #print-receipt th,
+            body.print-customer #print-receipt td { font-size: 18px !important; padding-top: 3px !important; padding-bottom: 3px !important; }
+            body.print-customer #print-receipt h1,
+            body.print-customer #print-receipt h2,
+            body.print-customer #print-receipt h3 { font-size: 21px !important; }
             body.print-kitchen-mode #print-kitchen, body.print-kitchen-mode #print-kitchen * { visibility: visible !important; }
             body.print-kitchen-mode #print-kitchen { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-drawer-mode #print-drawer, body.print-drawer-mode #print-drawer * { visibility: visible !important; }
@@ -293,296 +288,7 @@
             body.print-qr-mode #print-qr-batch, body.print-qr-mode #print-qr-batch * { visibility: visible !important; }
             body.print-qr-mode #print-qr-batch { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: white !important; }
         }
-    
-/* =========================================================
-   AL HUSSAIN POS — PREMIUM 2026 VISUAL REFRESH
-   Visual-only layer: keeps existing application logic intact.
-   ========================================================= */
-:root {
-    --primary: #7c3aed;
-    --primary-hover: #6d28d9;
-    --secondary: #06b6d4;
-    --success: #059669;
-    --danger: #dc2626;
-    --warning: #d97706;
-    --bg-color: #f5f7fb;
-    --card-bg: #ffffff;
-    --text-main: #172033;
-    --text-muted: #64748b;
-    --border-light: #e5e7eb;
-    --shadow-sm: 0 4px 14px rgba(15, 23, 42, .05);
-    --shadow-md: 0 10px 28px rgba(15, 23, 42, .08);
-    --shadow-lg: 0 18px 45px rgba(76, 29, 149, .14);
-}
-
-body {
-    background:
-        radial-gradient(circle at 0% 0%, rgba(124,58,237,.08), transparent 28%),
-        radial-gradient(circle at 100% 0%, rgba(6,182,212,.07), transparent 25%),
-        #f5f7fb;
-}
-
-.header {
-    margin: 14px 16px 0;
-    padding: 14px 18px;
-    border-radius: 18px;
-    background: rgba(255,255,255,.92);
-    border: 1px solid rgba(226,232,240,.9);
-    box-shadow: 0 8px 25px rgba(15,23,42,.06);
-}
-
-.header h2 {
-    font-size: 20px;
-    letter-spacing: .2px;
-}
-
-.badge {
-    background: #ede9fe;
-    color: #6d28d9;
-    padding: 7px 12px;
-}
-
-.btn-logout {
-    border-radius: 10px;
-}
-
-.table-selection-header,
-.controls-bar,
-.right-panel,
-.menu-card,
-.big-table-card {
-    border: 1px solid rgba(226,232,240,.85);
-}
-
-.table-selection-header {
-    background: rgba(255,255,255,.94);
-    box-shadow: var(--shadow-sm);
-}
-
-.big-tables-grid {
-    gap: 16px;
-}
-
-.big-table-card {
-    min-height: 120px;
-    padding: 22px 16px;
-    border-radius: 18px;
-    box-shadow: 0 5px 18px rgba(15,23,42,.055);
-}
-
-.big-table-card::before {
-    height: 5px;
-}
-
-.big-table-card:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: var(--shadow-lg);
-}
-
-.controls-bar {
-    padding: 14px;
-    border-radius: 18px;
-}
-
-.search-box {
-    border-radius: 12px;
-    background: #fff;
-}
-
-.cat-btn {
-    border-radius: 12px;
-    padding: 9px 16px;
-}
-
-.cat-btn.active {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.menu-grid {
-    gap: 14px;
-}
-
-.menu-card {
-    height: 138px;
-    border-radius: 18px;
-    padding: 17px;
-    background: rgba(255,255,255,.98);
-    box-shadow: 0 4px 14px rgba(15,23,42,.045);
-}
-
-.menu-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(76,29,149,.13);
-    border-color: #c4b5fd;
-}
-
-.card-code {
-    background: #f3f4f6;
-    color: #64748b;
-}
-
-.card-price {
-    color: #6d28d9;
-}
-
-.btn-add {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.right-panel {
-    border-radius: 22px;
-    background: rgba(255,255,255,.96);
-    box-shadow: 0 12px 35px rgba(15,23,42,.08);
-}
-
-.right-panel h3 {
-    font-size: 19px;
-}
-
-.bill-summary {
-    border-radius: 15px;
-    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
-}
-
-.action-buttons button,
-.btn-ready-order,
-.btn-customer-send {
-    border-radius: 11px;
-}
-
-.btn-pay {
-    background: linear-gradient(135deg, #059669, #10b981);
-}
-
-.btn-pay:hover {
-    transform: translateY(-2px);
-}
-
-.mobile-tab-bar {
-    background: rgba(255,255,255,.96);
-    backdrop-filter: blur(12px);
-}
-
-.mob-tab-btn.active {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.login-overlay {
-    background:
-        radial-gradient(circle at 15% 20%, rgba(255,255,255,.18), transparent 22%),
-        radial-gradient(circle at 85% 80%, rgba(255,255,255,.15), transparent 25%),
-        linear-gradient(135deg, #2e1065, #6d28d9 48%, #0891b2);
-}
-
-.login-box {
-    border: 1px solid rgba(255,255,255,.55);
-    box-shadow: 0 30px 70px rgba(15,23,42,.30);
-}
-
-.login-box h2 {
-    letter-spacing: .3px;
-}
-
-.login-box input {
-    background: #f8fafc;
-}
-
-.btn-login {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.timeout-box {
-    border: 1px solid #e5e7eb;
-}
-
-@media (max-width: 900px) {
-    .header {
-        margin: 8px 10px 0;
-        border-radius: 15px;
-    }
-
-    .main-layout {
-        padding: 8px;
-        gap: 10px;
-    }
-
-    .menu-grid {
-        grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-        gap: 10px;
-    }
-
-    .menu-card {
-        height: 132px;
-        padding: 14px;
-    }
-
-    .big-tables-grid {
-        gap: 10px;
-    }
-}
-
-@media (max-width: 550px) {
-    .header {
-        padding: 11px 13px;
-    }
-
-    .header h2 {
-        font-size: 16px;
-    }
-
-    .badge {
-        padding: 5px 9px;
-        font-size: 11px;
-    }
-
-    .menu-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .menu-card {
-        height: 128px;
-    }
-
-    .btn-add {
-        opacity: 1;
-    }
-
-    .table-selection-header {
-        padding: 12px 14px;
-    }
-}
-
-
-        @media print {
-            body.print-customer #print-receipt .print-ref-strong,
-            body.print-kitchen-mode #print-kitchen .print-ref-strong {
-                display: inline-block !important;
-                font-size: 25px !important;
-                font-weight: 900 !important;
-                line-height: 1.15 !important;
-                letter-spacing: 1px !important;
-                border: 3px solid #000 !important;
-                padding: 3px 8px !important;
-                margin-left: 3px !important;
-                background: #fff !important;
-                color: #000 !important;
-            }
-        }
-
-
-/* === TABLE LINKING: Tables 1-13 only === */
-.table-link-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-.btn-link-tables { background:#ede9fe; color:#6d28d9; border:2px solid #ddd6fe; padding:8px 12px; border-radius:10px; font-weight:900; cursor:pointer; }
-.btn-link-tables:hover { background:#ddd6fe; }
-.linked-table-card { outline:3px solid #8b5cf6 !important; }
-.table-link-badge { position:absolute; top:10px; right:10px; background:#7c3aed; color:#fff; padding:4px 7px; border-radius:8px; font-size:10px; font-weight:900; }
-#table-link-modal { display:none; position:fixed; inset:0; z-index:4000; background:rgba(15,23,42,.65); align-items:center; justify-content:center; padding:20px; box-sizing:border-box; }
-#table-link-modal .table-link-box { background:#fff; width:100%; max-width:420px; border-radius:20px; padding:20px; box-shadow:0 20px 50px rgba(0,0,0,.2); }
-.table-link-list { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:15px 0; }
-.table-link-item { border:2px solid #e2e8f0; border-radius:10px; padding:10px; text-align:center; font-weight:900; cursor:pointer; background:#f8fafc; }
-.table-link-item.selected { border-color:#7c3aed; background:#ede9fe; color:#6d28d9; }
-
-</style>
+    </style>
 </head>
 <body>
 
@@ -625,7 +331,7 @@ body {
 
         <div id="table-selection-view">
             <div class="table-selection-header">
-                <div style="display:flex;align-items:center;gap:10px;"><h2>Select Table / Order</h2><div class="table-link-controls"><button class="btn-link-tables" onclick="openTableLinkModal()">🔗 Link Tables</button></div></div>
+                <h2>Select Table / Order</h2>
                 <button class="btn-small" style="background:#059669; padding: 7px 12px; font-size: 13px;" onclick="startTakeawayOrder()">+ New Takeaway</button>
             </div>
             <div id="big-tables-grid" class="big-tables-grid"></div>
@@ -633,15 +339,9 @@ body {
             <div id="admin-dashboard-section" class="admin-dashboard-container">
                 <div class="admin-dashboard-header">
                     <h3>Admin Dashboard & Management</h3>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                        <button type="button" class="stat-box stat-toggle-box" onclick="togglePrivateStat('sales')" title="Tap to show/hide Sales">
-                            <span>Sales: </span><span id="stat-sales-mask">••••</span><span id="stat-sales" style="display:none;">0.00</span>
-                            <span id="stat-sales-eye" class="stat-eye">👁</span>
-                        </button>
-                        <button type="button" class="stat-box stat-toggle-box stat-expense-toggle" onclick="togglePrivateStat('expenses')" title="Tap to show/hide Expenses">
-                            <span>Exp: </span><span id="stat-expenses-mask">••••</span><span id="stat-expenses" style="display:none;">0.00</span>
-                            <span id="stat-expenses-eye" class="stat-eye">👁</span>
-                        </button>
+                    <div style="display:flex; gap:8px;">
+                        <div class="stat-box">Sales: $<span id="stat-sales">0.00</span></div>
+                        <div class="stat-box" style="color:#ea580c; border-color:#fed7aa;">Exp: $<span id="stat-expenses">0.00</span></div>
                     </div>
                 </div>
                 
@@ -818,7 +518,7 @@ body {
     <!-- Modals (QR, Staff, Menu Manager, etc.) -->
     <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Customer & Takeaway QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 14px; font-weight:bold; color: #64748b; margin-top: 0;">Scan table QR codes for dine-in, or the Takeaway QR code for parcel orders.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
-    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Stock Status</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
+    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
     <div id="category-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Categories & Order</h3><button class="close-modal" onclick="closeCategoryManagerModal()">X</button></div><div class="modal-body"><p style="font-size: 13px; font-weight:bold; color: #64748b; margin-top: 0;">Use Up/Down buttons to prioritize categories.</p><table class="admin-table"><thead><tr><th>Category Name</th><th style="text-align:center;">Priority Order</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="category-manager-tbody"></tbody></table></div></div></div>
     <div id="stock-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manual Raw Material Stock</h3><div><button class="btn-small" onclick="addNewRawMaterial()">+ Add Material</button><button class="close-modal" onclick="closeStockModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead><tbody id="stock-tbody"></tbody></table></div></div></div>
     <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Add Daily Expense</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 15px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><div style="margin-bottom: 20px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><button class="btn-small" style="width: 100%; padding: 14px; font-size:15px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
@@ -827,9 +527,9 @@ body {
     <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
 
     <!-- Print Templates -->
-    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
+    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" style="font-size: 18px; background: #000; color: #fff; padding: 0 4px;"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     
-    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
+    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" style="font-size: 22px; background: #000; color: #fff; padding: 0 4px;"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
     
     <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>SALES HISTORY REPORT</b></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span>$<span id="print-history-grand-total">0.00</span></span></div></div>
@@ -847,87 +547,87 @@ body {
         const liveBaseUrl = "https://anvar3842-creator.github.io/al-hussain-menu/";
 
         const defaultMenuData = [
-            { id: 1, code: "R1", name: "Roti Kosong", price: 0.80, category: "Roti", icon: "", outOfStock: false },
-            { id: 2, code: "R2", name: "Roti Kosong Cheese", price: 1.50, category: "Roti", icon: "", outOfStock: false },
-            { id: 3, code: "R3", name: "Roti Kosong Bawang", price: 1.20, category: "Roti", icon: "", outOfStock: false },
-            { id: 4, code: "R4", name: "Roti Telur", price: 1.40, category: "Roti", icon: "", outOfStock: false },
-            { id: 5, code: "R5", name: "Roti Telur Bawang", price: 1.70, category: "Roti", icon: "", outOfStock: false },
-            { id: 6, code: "R6", name: "Roti Telur Cheese", price: 2.00, category: "Roti", icon: "", outOfStock: false },
-            { id: 7, code: "R7", name: "Roti Jantan", price: 2.00, category: "Roti", icon: "", outOfStock: false },
-            { id: 8, code: "R8", name: "Roti Plastar", price: 1.40, category: "Roti", icon: "", outOfStock: false },
-            { id: 9, code: "R9", name: "Roti Bomb", price: 1.50, category: "Roti", icon: "", outOfStock: false },
-            { id: 10, code: "R10", name: "Roti Tissue", price: 1.70, category: "Roti", icon: "", outOfStock: false },
-            { id: 11, code: "R11", name: "Roti Sardin", price: 2.50, category: "Roti", icon: "", outOfStock: false },
-            { id: 12, code: "R12", name: "Roti Planta", price: 1.50, category: "Roti", icon: "", outOfStock: false },
-            { id: 13, code: "R13", name: "Roti Kaya", price: 1.50, category: "Roti", icon: "", outOfStock: false },
-            { id: 14, code: "R14", name: "Roti Susu", price: 1.50, category: "Roti", icon: "", outOfStock: false },
-            { id: 17, code: "R17", name: "Roti John Ayam", price: 4.50, category: "Roti", icon: "", outOfStock: false },
-            { id: 18, code: "R18", name: "Roti John Daging", price: 4.50, category: "Roti", icon: "", outOfStock: false },
+            { id: 1, code: "R1", name: "Roti Kosong", price: 0.80, category: "Roti", icon: "" },
+            { id: 2, code: "R2", name: "Roti Kosong Cheese", price: 1.50, category: "Roti", icon: "" },
+            { id: 3, code: "R3", name: "Roti Kosong Bawang", price: 1.20, category: "Roti", icon: "" },
+            { id: 4, code: "R4", name: "Roti Telur", price: 1.40, category: "Roti", icon: "" },
+            { id: 5, code: "R5", name: "Roti Telur Bawang", price: 1.70, category: "Roti", icon: "" },
+            { id: 6, code: "R6", name: "Roti Telur Cheese", price: 2.00, category: "Roti", icon: "" },
+            { id: 7, code: "R7", name: "Roti Jantan", price: 2.00, category: "Roti", icon: "" },
+            { id: 8, code: "R8", name: "Roti Plastar", price: 1.40, category: "Roti", icon: "" },
+            { id: 9, code: "R9", name: "Roti Bomb", price: 1.50, category: "Roti", icon: "" },
+            { id: 10, code: "R10", name: "Roti Tissue", price: 1.70, category: "Roti", icon: "" },
+            { id: 11, code: "R11", name: "Roti Sardin", price: 2.50, category: "Roti", icon: "" },
+            { id: 12, code: "R12", name: "Roti Planta", price: 1.50, category: "Roti", icon: "" },
+            { id: 13, code: "R13", name: "Roti Kaya", price: 1.50, category: "Roti", icon: "" },
+            { id: 14, code: "R14", name: "Roti Susu", price: 1.50, category: "Roti", icon: "" },
+            { id: 17, code: "R17", name: "Roti John Ayam", price: 4.50, category: "Roti", icon: "" },
+            { id: 18, code: "R18", name: "Roti John Daging", price: 4.50, category: "Roti", icon: "" },
             
-            { id: 22, code: "D1", name: "Tosai Kosong", price: 1.20, category: "Dosai", icon: "", outOfStock: false },
-            { id: 221, code: "D2", name: "Tosai Bawang", price: 1.50, category: "Dosai", icon: "", outOfStock: false },
-            { id: 222, code: "D3", name: "Tosai Telur", price: 1.80, category: "Dosai", icon: "", outOfStock: false },
-            { id: 223, code: "D4", name: "Tosai Telur Bawang", price: 2.00, category: "Dosai", icon: "", outOfStock: false },
-            { id: 224, code: "D5", name: "Tosai Ghee", price: 2.00, category: "Dosai", icon: "", outOfStock: false },
-            { id: 225, code: "D6", name: "Tosai Masala", price: 2.50, category: "Dosai", icon: "", outOfStock: false },
-            { id: 226, code: "D7", name: "Tosai Sardin", price: 3.00, category: "Dosai", icon: "", outOfStock: false },
+            { id: 22, code: "D1", name: "Tosai Kosong", price: 1.20, category: "Dosai", icon: "" },
+            { id: 221, code: "D2", name: "Tosai Bawang", price: 1.50, category: "Dosai", icon: "" },
+            { id: 222, code: "D3", name: "Tosai Telur", price: 1.80, category: "Dosai", icon: "" },
+            { id: 223, code: "D4", name: "Tosai Telur Bawang", price: 2.00, category: "Dosai", icon: "" },
+            { id: 224, code: "D5", name: "Tosai Ghee", price: 2.00, category: "Dosai", icon: "" },
+            { id: 225, code: "D6", name: "Tosai Masala", price: 2.50, category: "Dosai", icon: "" },
+            { id: 226, code: "D7", name: "Tosai Sardin", price: 3.00, category: "Dosai", icon: "" },
 
-            { id: 231, code: "BK1", name: "Bakso Biasa", price: 3.00, category: "Bakso", icon: "", outOfStock: false },
-            { id: 232, code: "BK2", name: "Bakso Urat", price: 4.00, category: "Bakso", icon: "", outOfStock: false },
-            { id: 233, code: "BK3", name: "Bakso Ayam", price: 3.50, category: "Bakso", icon: "", outOfStock: false },
-            { id: 234, code: "BK4", name: "Bakso Daging", price: 3.50, category: "Bakso", icon: "", outOfStock: false },
-            { id: 235, code: "BK5", name: "Bakso Special", price: 5.00, category: "Bakso", icon: "", outOfStock: false },
+            { id: 231, code: "BK1", name: "Bakso Biasa", price: 3.00, category: "Bakso", icon: "" },
+            { id: 232, code: "BK2", name: "Bakso Urat", price: 4.00, category: "Bakso", icon: "" },
+            { id: 233, code: "BK3", name: "Bakso Ayam", price: 3.50, category: "Bakso", icon: "" },
+            { id: 234, code: "BK4", name: "Bakso Daging", price: 3.50, category: "Bakso", icon: "" },
+            { id: 235, code: "BK5", name: "Bakso Special", price: 5.00, category: "Bakso", icon: "" },
 
-            { id: 26, code: "N1", name: "Nasi Goreng Biasa", price: 3.00, category: "Nasi Goreng", icon: "", outOfStock: false },
-            { id: 261, code: "N2", name: "Nasi Goreng Ayam", price: 4.50, category: "Nasi Goreng", icon: "", outOfStock: false },
-            { id: 27, code: "N3", name: "Nasi Goreng Daging", price: 4.50, category: "Nasi Goreng", icon: "", outOfStock: false },
-            { id: 28, code: "N4", name: "Nasi Goreng Kampung", price: 4.00, category: "Nasi Goreng", icon: "", outOfStock: false },
-            { id: 29, code: "N5", name: "Nasi Goreng Pattaya", price: 4.80, category: "Nasi Goreng", icon: "", outOfStock: false },
-            { id: 291, code: "N6", name: "Nasi Goreng Corned Beef", price: 5.00, category: "Nasi Goreng", icon: "", outOfStock: false },
-            { id: 292, code: "N7", name: "Nasi Goreng Ikan Masin", price: 4.50, category: "Nasi Goreng", icon: "", outOfStock: false },
-            { id: 293, code: "N8", name: "Nasi Goreng Seafood", price: 5.50, category: "Nasi Goreng", icon: "", outOfStock: false },
+            { id: 26, code: "N1", name: "Nasi Goreng Biasa", price: 3.00, category: "Nasi Goreng", icon: "" },
+            { id: 261, code: "N2", name: "Nasi Goreng Ayam", price: 4.50, category: "Nasi Goreng", icon: "" },
+            { id: 27, code: "N3", name: "Nasi Goreng Daging", price: 4.50, category: "Nasi Goreng", icon: "" },
+            { id: 28, code: "N4", name: "Nasi Goreng Kampung", price: 4.00, category: "Nasi Goreng", icon: "" },
+            { id: 29, code: "N5", name: "Nasi Goreng Pattaya", price: 4.80, category: "Nasi Goreng", icon: "" },
+            { id: 291, code: "N6", name: "Nasi Goreng Corned Beef", price: 5.00, category: "Nasi Goreng", icon: "" },
+            { id: 292, code: "N7", name: "Nasi Goreng Ikan Masin", price: 4.50, category: "Nasi Goreng", icon: "" },
+            { id: 293, code: "N8", name: "Nasi Goreng Seafood", price: 5.50, category: "Nasi Goreng", icon: "" },
 
-            { id: 301, code: "MG1", name: "Mee Goreng Biasa", price: 3.00, category: "Mee Goreng", icon: "", outOfStock: false },
-            { id: 30, code: "MG2", name: "Mee Goreng Ayam", price: 4.50, category: "Mee Goreng", icon: "", outOfStock: false },
-            { id: 31, code: "MG3", name: "Mee Goreng Daging", price: 4.50, category: "Mee Goreng", icon: "", outOfStock: false },
-            { id: 311, code: "MG4", name: "Mee Goreng Corned Beef", price: 5.00, category: "Mee Goreng", icon: "", outOfStock: false },
-            { id: 312, code: "MG5", name: "Mee Goreng Seafood", price: 5.50, category: "Mee Goreng", icon: "", outOfStock: false },
+            { id: 301, code: "MG1", name: "Mee Goreng Biasa", price: 3.00, category: "Mee Goreng", icon: "" },
+            { id: 30, code: "MG2", name: "Mee Goreng Ayam", price: 4.50, category: "Mee Goreng", icon: "" },
+            { id: 31, code: "MG3", name: "Mee Goreng Daging", price: 4.50, category: "Mee Goreng", icon: "" },
+            { id: 311, code: "MG4", name: "Mee Goreng Corned Beef", price: 5.00, category: "Mee Goreng", icon: "" },
+            { id: 312, code: "MG5", name: "Mee Goreng Seafood", price: 5.50, category: "Mee Goreng", icon: "" },
 
-            { id: 321, code: "KG1", name: "Kueh Teow Goreng Biasa", price: 3.00, category: "Kueh Teow Goreng", icon: "", outOfStock: false },
-            { id: 32, code: "KG2", name: "Kueh Teow Goreng Ayam", price: 4.50, category: "Kueh Teow Goreng", icon: "", outOfStock: false },
-            { id: 33, code: "KG3", name: "Kueh Teow Goreng Daging", price: 4.50, category: "Kueh Teow Goreng", icon: "", outOfStock: false },
-            { id: 331, code: "KG4", name: "Kueh Teow Goreng Corned Beef", price: 5.00, category: "Kueh Teow Goreng", icon: "", outOfStock: false },
-            { id: 332, code: "KG5", name: "Kueh Teow Goreng Seafood", price: 5.50, category: "Kueh Teow Goreng", icon: "", outOfStock: false },
+            { id: 321, code: "KG1", name: "Kueh Teow Goreng Biasa", price: 3.00, category: "Kueh Teow Goreng", icon: "" },
+            { id: 32, code: "KG2", name: "Kueh Teow Goreng Ayam", price: 4.50, category: "Kueh Teow Goreng", icon: "" },
+            { id: 33, code: "KG3", name: "Kueh Teow Goreng Daging", price: 4.50, category: "Kueh Teow Goreng", icon: "" },
+            { id: 331, code: "KG4", name: "Kueh Teow Goreng Corned Beef", price: 5.00, category: "Kueh Teow Goreng", icon: "" },
+            { id: 332, code: "KG5", name: "Kueh Teow Goreng Seafood", price: 5.50, category: "Kueh Teow Goreng", icon: "" },
 
-            { id: 341, code: "BG1", name: "Bihun Goreng Biasa", price: 3.00, category: "Bihun Goreng", icon: "", outOfStock: false },
-            { id: 34, code: "BG2", name: "Bihun Goreng Ayam", price: 4.50, category: "Bihun Goreng", icon: "", outOfStock: false },
-            { id: 35, code: "BG3", name: "Bihun Goreng Daging", price: 4.50, category: "Bihun Goreng", icon: "", outOfStock: false },
-            { id: 351, code: "BG4", name: "Bihun Goreng Corned Beef", price: 5.00, category: "Bihun Goreng", icon: "", outOfStock: false },
-            { id: 352, code: "BG5", name: "Bihun Goreng Seafood", price: 5.50, category: "Bihun Goreng", icon: "", outOfStock: false },
+            { id: 341, code: "BG1", name: "Bihun Goreng Biasa", price: 3.00, category: "Bihun Goreng", icon: "" },
+            { id: 34, code: "BG2", name: "Bihun Goreng Ayam", price: 4.50, category: "Bihun Goreng", icon: "" },
+            { id: 35, code: "BG3", name: "Bihun Goreng Daging", price: 4.50, category: "Bihun Goreng", icon: "" },
+            { id: 351, code: "BG4", name: "Bihun Goreng Corned Beef", price: 5.00, category: "Bihun Goreng", icon: "" },
+            { id: 352, code: "BG5", name: "Bihun Goreng Seafood", price: 5.50, category: "Bihun Goreng", icon: "" },
 
-            { id: 391, code: "I1", name: "Indomie Goreng Biasa", price: 2.00, category: "Indomie", icon: "", outOfStock: false },
-            { id: 39, code: "I2", name: "Indomie Goreng Special", price: 4.00, category: "Indomie", icon: "", outOfStock: false },
-            { id: 392, code: "I3", name: "Indomie Goreng Ayam", price: 4.00, category: "Indomie", icon: "", outOfStock: false },
-            { id: 393, code: "I4", name: "Indomie Goreng Daging", price: 4.00, category: "Indomie", icon: "", outOfStock: false },
-            { id: 394, code: "I5", name: "Indomie Goreng Corned Beef", price: 4.50, category: "Indomie", icon: "", outOfStock: false },
+            { id: 391, code: "I1", name: "Indomie Goreng Biasa", price: 2.00, category: "Indomie", icon: "" },
+            { id: 39, code: "I2", name: "Indomie Goreng Special", price: 4.00, category: "Indomie", icon: "" },
+            { id: 392, code: "I3", name: "Indomie Goreng Ayam", price: 4.00, category: "Indomie", icon: "" },
+            { id: 393, code: "I4", name: "Indomie Goreng Daging", price: 4.00, category: "Indomie", icon: "" },
+            { id: 394, code: "I5", name: "Indomie Goreng Corned Beef", price: 4.50, category: "Indomie", icon: "" },
 
-            { id: 19, code: "M1", name: "Murtabak Ayam", price: 4.50, category: "Murtabak", icon: "", outOfStock: false },
-            { id: 20, code: "M2", name: "Murtabak Daging", price: 4.50, category: "Murtabak", icon: "", outOfStock: false },
-            { id: 21, code: "M3", name: "Murtabak Special", price: 6.00, category: "Murtabak", icon: "", outOfStock: false },
+            { id: 19, code: "M1", name: "Murtabak Ayam", price: 4.50, category: "Murtabak", icon: "" },
+            { id: 20, code: "M2", name: "Murtabak Daging", price: 4.50, category: "Murtabak", icon: "" },
+            { id: 21, code: "M3", name: "Murtabak Special", price: 6.00, category: "Murtabak", icon: "" },
 
-            { id: 23, code: "B1", name: "Burger Telur", price: 1.50, category: "Burger", icon: "", outOfStock: false },
-            { id: 24, code: "B2", name: "Burger Ayam", price: 2.50, category: "Burger", icon: "", outOfStock: false },
-            { id: 25, code: "B3", name: "Burger Daging", price: 2.50, category: "Burger", icon: "", outOfStock: false },
+            { id: 23, code: "B1", name: "Burger Telur", price: 1.50, category: "Burger", icon: "" },
+            { id: 24, code: "B2", name: "Burger Ayam", price: 2.50, category: "Burger", icon: "" },
+            { id: 25, code: "B3", name: "Burger Daging", price: 2.50, category: "Burger", icon: "" },
 
-            { id: 36, code: "MB1", name: "Mee Basah Ayam", price: 4.50, category: "Mee Basah", icon: "", outOfStock: false },
-            { id: 37, code: "KB1", name: "Kueh Teow Basah Ayam", price: 4.50, category: "Kueh Teow Basah", icon: "", outOfStock: false },
-            { id: 38, code: "BB1", name: "Bihun Basah Ayam", price: 4.50, category: "Bihun Basah", icon: "", outOfStock: false },
+            { id: 36, code: "MB1", name: "Mee Basah Ayam", price: 4.50, category: "Mee Basah", icon: "" },
+            { id: 37, code: "KB1", name: "Kueh Teow Basah Ayam", price: 4.50, category: "Kueh Teow Basah", icon: "" },
+            { id: 38, code: "BB1", name: "Bihun Basah Ayam", price: 4.50, category: "Bihun Basah", icon: "" },
 
-            { id: 163, code: "T1", name: "Tea", price: 1.00, category: "Hot Drinks", icon: "", outOfStock: false },
-            { id: 164, code: "T2", name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "", outOfStock: false },
-            { id: 165, code: "T3", name: "Coffee", price: 1.20, category: "Hot Drinks", icon: "", outOfStock: false },
-            { id: 166, code: "T4", name: "Nescafe", price: 1.50, category: "Hot Drinks", icon: "", outOfStock: false },
-            { id: 300, code: "NC1", name: "Ayam Kurma", price: 2.00, category: "Nasi Campur", icon: "", outOfStock: false }
+            { id: 163, code: "T1", name: "Tea", price: 1.00, category: "Hot Drinks", icon: "" },
+            { id: 164, code: "T2", name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "" },
+            { id: 165, code: "T3", name: "Coffee", price: 1.20, category: "Hot Drinks", icon: "" },
+            { id: 166, code: "T4", name: "Nescafe", price: 1.50, category: "Hot Drinks", icon: "" },
+            { id: 300, code: "NC1", name: "Ayam Kurma", price: 2.00, category: "Nasi Campur", icon: "" }
         ];
 
         let menuData = [];
@@ -948,7 +648,6 @@ body {
         let loggedInRole = ""; 
         let currentSelectedTable = "";
         let currentOrderType = "Dine-In";
-        let tableLinks = {};
         
         let customerHadActiveOrder = false;
         let lastBellTime = Date.now(); 
@@ -967,89 +666,47 @@ body {
             renderCategories(); populateCategoryDropdown();
         });
 
-        db.ref('tableLinks').on('value', (snapshot) => {
-            tableLinks = snapshot.val() || {};
-            renderBigTableSelectionGrid();
-        });
-
-db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
+        db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             const val = snapshot.val();
             if (val && typeof val === 'number') { takeawaySequenceCounter = val; } 
             else { takeawaySequenceCounter = 100; db.ref('takeawaySequenceCounter').set(100); }
         });
 
-        let previousOrderStates = {};
-        let isFirstOrdersLoad = true;
-
-        db.ref('activeOrders').on('value', (snapshot) => {
-            const newOrders = snapshot.val() || {};
-            let shouldPlayNewOrder = false;
-            let shouldPlayUpdate = false;
-            let notifications = [];
-
-            if (!isFirstOrdersLoad) {
-                for (let key in newOrders) {
-                    let currentOrder = newOrders[key];
-                    let currentItemsCount = currentOrder.items ? currentOrder.items.length : 0;
-                    let prevOrder = previousOrderStates[key];
-
-                    if (!prevOrder) {
-                        shouldPlayNewOrder = true;
-                        notifications.push(`New Order from ${key}!`);
-                    } else if (currentOrder.time > prevOrder.time || currentItemsCount > prevOrder.itemCount) {
-                        shouldPlayUpdate = true;
-                        notifications.push(`Items added to ${key}!`);
-                    }
+        let previousActiveOrdersCount = -1;
+        db.ref('activeOrders').on('value', (snapshot) => { 
+            const newOrders = snapshot.val() || {}; 
+            let newOrdersCount = Object.keys(newOrders).length;
+            
+            if (previousActiveOrdersCount !== -1 && newOrdersCount > previousActiveOrdersCount) {
+                if (loggedInRole === "admin" || loggedInRole === "user1" || loggedInRole === "user2") {
+                    playBeepSound();
                 }
             }
-
-            previousOrderStates = {};
-            for (let key in newOrders) {
-                 previousOrderStates[key] = {
-                     time: newOrders[key].time,
-                     itemCount: newOrders[key].items ? newOrders[key].items.length : 0
-                 };
-            }
-
-            isFirstOrdersLoad = false;
-            activeOrders = newOrders;
-
-            if (loggedInRole === "admin" || loggedInRole === "user1" || loggedInRole === "user2") {
-                if (shouldPlayNewOrder) {
-                    playOrderVoice("New Order");
-                    showCustomNotification(notifications.join("\n"));
-                } else if (shouldPlayUpdate) {
-                    playOrderVoice("Order Updated");
-                    showCustomNotification(notifications.join("\n"));
-                }
-            }
-
-            renderBigTableSelectionGrid();
-            checkCustomerPaymentStatus();
+            previousActiveOrdersCount = newOrdersCount;
+            
+            activeOrders = newOrders; 
+            renderBigTableSelectionGrid(); 
+            checkCustomerPaymentStatus(); 
         });
 
-        function playOrderVoice(text) {
+        function playBeepSound() {
             try {
-                let msg = new SpeechSynthesisUtterance();
-                msg.text = text;
-                msg.lang = 'en-US'; 
-                msg.rate = 0.9;     
-                window.speechSynthesis.speak(msg);
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); 
+                gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.6); 
             } catch(e) {
-                console.log("Voice error: ", e);
+                console.log("Web audio error: ", e);
             }
-        }
-
-        function showCustomNotification(message) {
-            if (!message) return;
-            let notif = document.createElement('div');
-            notif.innerText = message;
-            notif.style.cssText = "position:fixed; top:20px; right:20px; background: linear-gradient(135deg, #10b981, #059669); color:white; padding:15px 25px; border-radius:12px; font-weight:900; font-size:16px; z-index:9999; box-shadow:0 10px 30px rgba(16, 185, 129, 0.4); transition: 0.5s opacity;";
-            document.body.appendChild(notif);
-            setTimeout(() => { 
-                notif.style.opacity = '0'; 
-                setTimeout(() => notif.remove(), 500); 
-            }, 4000);
         }
 
         db.ref('alerts/bell').on('value', (snapshot) => {
@@ -1057,8 +714,8 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             if (data && data.timestamp > lastBellTime) {
                 lastBellTime = data.timestamp;
                 if (loggedInRole === "admin" || loggedInRole === "user1") {
-                    playOrderVoice("Waiter Called");
-                    showCustomNotification(`Alert: ${data.table} needs your attention!`);
+                    playBeepSound();
+                    alert(`NOTIFICATION:\n\n${data.table} needs your attention!`);
                 }
             }
         });
@@ -1091,7 +748,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             const tableParam = urlParams.get('table');
             const orderParam = urlParams.get('order');
             let targetKey = tableParam || (orderParam === "takeaway" ? sessionStorage.getItem('myTakeawayKey') : "");
-            if (tableParam) targetKey = getLinkedOrderKey(tableParam);
             
             if (targetKey) {
                 if (activeOrders[targetKey]) {
@@ -1124,8 +780,8 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             if (orderParam && orderParam === "takeaway") {
                 isTakeawayQR = true;
                 
-                db.ref('shopOnline').once('value', (snap) => {
-                    let isOnline = snap.val();
+                db.ref('onlineUsers').once('value', (snap) => {
+                    let isOnline = snap.exists() && Object.keys(snap.val() || {}).length > 0;
                     if (!isOnline) {
                         document.getElementById('shop-closed-screen').style.display = 'flex';
                         return;
@@ -1151,8 +807,8 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                     return;
                 }
 
-                db.ref('shopOnline').once('value', (snap) => {
-                    let isOnline = snap.val();
+                db.ref('onlineUsers').once('value', (snap) => {
+                    let isOnline = snap.exists() && Object.keys(snap.val() || {}).length > 0;
                     if (!isOnline) {
                         document.getElementById('shop-closed-screen').style.display = 'flex';
                         return;
@@ -1257,8 +913,9 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 return; 
             }
 
-            // FIXED: Enable online status for ANY authorized login (Admin or Staff)
-            db.ref('shopOnline').set(true);
+            const onlineRef = db.ref('onlineUsers/' + roleKey);
+            onlineRef.onDisconnect().remove();
+            onlineRef.set({ role: roleKey, loginTime: firebase.database.ServerValue.TIMESTAMP });
 
             let todayDateKey = new Date().toISOString().split('T')[0];
             if (!staffShifts[todayDateKey]) staffShifts[todayDateKey] = {};
@@ -1292,7 +949,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         }
 
         function logout() { 
-            db.ref('shopOnline').set(false);
+            db.ref('onlineUsers/' + roleKey).remove();
             location.href = liveBaseUrl; 
         }
 
@@ -1323,42 +980,19 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             return mins < 60 ? `${mins}m ${secs}s` : `${Math.floor(mins / 60)}h ${mins % 60}m`;
         }
 
-        function getLinkedOrderKey(tableName) {
-            const link = tableLinks[tableName];
-            if (link && link.groupId) return link.groupId;
-            return tableName;
-        }
-
-        function getLinkedTableNames(tableName) {
-            const link = tableLinks[tableName];
-            if (link && Array.isArray(link.tables) && link.tables.length) {
-                return link.tables.map(n => typeof n === 'number' ? `Table ${n}` : String(n));
-            }
-            return [String(tableName)];
-        }
-
-        function getOrderDisplayRef(tableName) {
-            const names = getLinkedTableNames(tableName);
-            return names.length > 1 ? names.map(n => n.replace('Table ', 'T')).join(' + ') : tableName;
-        }
-
         function renderBigTableSelectionGrid() {
             const container = document.getElementById('big-tables-grid'); if(!container) return; container.innerHTML = '';
             
             for (let i = 1; i <= 13; i++) {
                 let tableName = `Table ${i}`;
-                let orderData = activeOrders[getLinkedOrderKey(tableName)];
+                let orderData = activeOrders[tableName];
                 let isOccupied = orderData !== undefined;
                 let cardClass = isOccupied ? "big-table-card occupied" : "big-table-card free";
                 let statusText = isOccupied ? `Occupied<br>${formatElapsedTime(orderData.time)}` : "Free Table";
                 let cancelBtn = (isOccupied && loggedInRole === "admin") ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tableName}', event)" style="position:absolute; top:8px; right:8px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:bold; cursor:pointer; z-index:2;">X</button>` : '';
 
-                const linkedNames = getLinkedTableNames(tableName);
-                const linkBadge = linkedNames.length > 1 ? `<span class="table-link-badge">LINKED: ${linkedNames.map(n=>n.replace('Table ','T')).join(' + ')}</span>` : '';
-                const linkedClass = linkedNames.length > 1 ? ' linked-table-card' : '';
-                container.innerHTML += `<div class="${cardClass}${linkedClass}" onclick="selectTableForOrder('${tableName}', 'Dine-In')">
+                container.innerHTML += `<div class="${cardClass}" onclick="selectTableForOrder('${tableName}', 'Dine-In')">
                     ${cancelBtn}
-                    ${linkBadge}
                     <h3>${tableName}</h3>
                     <p>${statusText}</p>
                 </div>`;
@@ -1382,12 +1016,10 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         function selectTableForOrder(tableName, orderType) {
             currentSelectedTable = tableName;
             currentOrderType = orderType;
-            const orderKey = getLinkedOrderKey(tableName);
-            const displayRef = getOrderDisplayRef(tableName);
-            document.getElementById('cart-panel-title').innerText = `Order: ${displayRef}`;
+            document.getElementById('cart-panel-title').innerText = `Order: ${tableName}`;
             
-            if (activeOrders[orderKey] && activeOrders[orderKey].items) {
-                cart = JSON.parse(JSON.stringify(activeOrders[orderKey].items));
+            if (activeOrders[tableName] && activeOrders[tableName].items) {
+                cart = JSON.parse(JSON.stringify(activeOrders[tableName].items));
             } else {
                 cart = [];
             }
@@ -1401,39 +1033,21 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         }
 
         function startTakeawayOrder() {
-            let counterRef = db.ref('takeawaySequenceCounter');
-            let nextNum = null;
+            let nextNum = takeawaySequenceCounter++;
+            if (takeawaySequenceCounter > 1000) takeawaySequenceCounter = 100;
+            db.ref('takeawaySequenceCounter').set(takeawaySequenceCounter);
+            let newTkName = `Order-${nextNum}`;
+            
+            currentSelectedTable = newTkName;
+            currentOrderType = "Takeaway";
+            
+            cart = [];
+            document.getElementById('discount-input').value = "0.00";
+            updateCart();
 
-            counterRef.transaction(current => {
-                let counter = Number(current);
-                if (!Number.isFinite(counter) || counter < 100) counter = 100;
-
-                nextNum = counter;
-
-                let nextCounter = counter + 1;
-                if (nextCounter > 1000) nextCounter = 100;
-
-                return nextCounter;
-            }, (error, committed, snapshot) => {
-                if (error || !committed || nextNum === null) {
-                    alert("Unable to create a takeaway order number. Please try again.");
-                    return;
-                }
-
-                takeawaySequenceCounter = Number(snapshot.val());
-                let newTkName = `Order-${nextNum}`;
-
-                currentSelectedTable = newTkName;
-                currentOrderType = "Takeaway";
-
-                cart = [];
-                document.getElementById('discount-input').value = "0.00";
-                updateCart();
-
-                document.getElementById('table-selection-view').style.display = 'none';
-                document.getElementById('pos-main-view').style.display = 'flex';
-                switchMobileTab('menu');
-            });
+            document.getElementById('table-selection-view').style.display = 'none';
+            document.getElementById('pos-main-view').style.display = 'flex';
+            switchMobileTab('menu');
         }
 
         function backToTableSelection() {
@@ -1454,17 +1068,16 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             event.stopPropagation();
             if (loggedInRole !== "admin") return alert("Admin only!");
             if (confirm(`Cancel active order ${key}?`)) { 
-                const orderKey = getLinkedOrderKey(key);
-                delete activeOrders[orderKey]; 
+                delete activeOrders[key]; 
                 db.ref('activeOrders').set(activeOrders); 
-                db.ref(`orderStatus/${orderKey}`).remove();
+                db.ref(`orderStatus/${key}`).remove();
                 renderBigTableSelectionGrid(); 
             }
         }
 
         function toggleOrderReadyStatus() {
             if (!currentSelectedTable) return;
-            let currentStatusRef = db.ref(`orderStatus/${getLinkedOrderKey(currentSelectedTable)}`);
+            let currentStatusRef = db.ref(`orderStatus/${currentSelectedTable}`);
             currentStatusRef.once('value', (snap) => {
                 let st = snap.val();
                 if (st === "Ready") {
@@ -1610,13 +1223,15 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                     grid.appendChild(header);
                 }
 
+                // --- SMART AUTO-SORT & DEFAULT PRIORITY LOGIC ---
                 grouped[cat].sort((a, b) => {
                     let popA = a.popularity || 0;
                     let popB = b.popularity || 0;
                     
+                    // Artificial instant boost for common items if they haven't made sales yet
                     if (popA === 0 && popB === 0) {
-                        const topTier = [1, 26, 301, 321, 341, 300, 22, 231];
-                        const midTier = [4, 261, 30, 32, 34, 232];
+                        const topTier = [1, 26, 301, 321, 341, 300, 22, 231]; // Kosong/Biasa items (Roti, Nasi, Mee, etc.)
+                        const midTier = [4, 261, 30, 32, 34, 232]; // Telur/Ayam items
                         
                         let boostA = topTier.includes(a.id) ? 100 : (midTier.includes(a.id) ? 90 : 0);
                         let boostB = topTier.includes(b.id) ? 100 : (midTier.includes(b.id) ? 90 : 0);
@@ -1624,28 +1239,22 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                         if (boostA !== boostB) return boostB - boostA;
                     }
 
+                    // Sort by real sales popularity
                     if (popB !== popA) return popB - popA;
+                    
+                    // Fallback to original order
                     return a.id - b.id; 
                 });
+                // ----------------------------------------------
 
                 grouped[cat].forEach(item => {
-                    const card = document.createElement('div'); 
-                    const isOut = item.outOfStock === true;
-                    card.className = isOut ? 'menu-card out-of-stock' : 'menu-card';
-                    
-                    card.onclick = () => {
-                        if (isOut) {
-                            alert(`"${item.name}" is currently Out of Stock!`);
-                            return;
-                        }
-                        addToCart(item.id);
-                    };
+                    const card = document.createElement('div'); card.className = 'menu-card';
+                    card.onclick = () => addToCart(item.id);
                     
                     let existingCartItem = cart.find(c => c.id === item.id);
                     let badgeHtml = existingCartItem ? `<div class="card-qty-badge">${existingCartItem.qty}</div>` : '';
-                    let soldOutOverlay = isOut ? `<div class="sold-out-badge">SOLD OUT</div>` : '';
 
-                    card.innerHTML = `<div class="card-code">${item.code || ''}</div>${badgeHtml}${soldOutOverlay}<div class="card-title">${item.name}</div><div class="card-bottom"><div class="card-price">$${item.price.toFixed(2)}</div><div class="btn-add">+</div></div>`;
+                    card.innerHTML = `<div class="card-code">${item.code || ''}</div>${badgeHtml}<div class="card-title">${item.name}</div><div class="card-bottom"><div class="card-price">$${item.price.toFixed(2)}</div><div class="btn-add">+</div></div>`;
                     grid.appendChild(card);
                 });
             });
@@ -1666,13 +1275,9 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                     return c === searchCode;
                 });
                 if (foundItem) { 
-                    if (foundItem.outOfStock) {
-                        alert(`"${foundItem.name}" is currently Out of Stock!`);
-                    } else {
-                        addToCart(foundItem.id); 
-                        document.getElementById('search-input').value = ''; 
-                        renderMenu(); 
-                    }
+                    addToCart(foundItem.id); 
+                    document.getElementById('search-input').value = ''; 
+                    renderMenu(); 
                 }
             } else {
                 renderMenu();
@@ -1686,7 +1291,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             if (!name || !category || isNaN(price)) return alert("Please fill all fields!");
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
             const newId = activeSource.length > 0 ? Math.max(...activeSource.map(m => m.id)) + 1 : 1;
-            activeSource.push({ id: newId, code: "X" + newId, name: name, category: category, price: price, icon: "", popularity: 0, outOfStock: false });
+            activeSource.push({ id: newId, code: "X" + newId, name: name, category: category, price: price, icon: "", popularity: 0 });
             db.ref('menuData').set(activeSource);
             document.getElementById('add-m-name').value = ''; document.getElementById('add-m-price').value = '';
             alert("Menu Item Added!");
@@ -1695,7 +1300,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         function addToCart(id) {
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
             const item = activeSource.find(m => m.id === id);
-            if(!item || item.outOfStock) return;
+            if(!item) return;
             const cartItem = cart.find(c => c.id === id);
             if (cartItem) cartItem.qty += 1;
             else cart.push({ ...item, qty: 1, customPrice: item.price, selectedNotes: [], customComment: "" });
@@ -1726,50 +1331,25 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 let isRoti = catLower.includes('roti') || catLower.includes('dosai') || nameLower.includes('roti') || nameLower.includes('dosai');
                 let isGorengOrBasah = !isRoti && !catLower.includes('drink') && !catLower.includes('juice') && !catLower.includes('milk') && !catLower.includes('tin');
 
-                let isChizCategory = !/sejuk/i.test(catLower) && (isRoti || isGorengOrBasah);
                 let noteHtml = '';
-
-                if (isChizCategory && (isRoti || /dosa/i.test(catLower))) {
+                if (isRoti) {
                     if (!item.selectedNotes) item.selectedNotes = [];
                     noteHtml = `<div class="note-checkboxes">
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Ayam Kari') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Ayam Kari', this)"> Ayam Kari</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Ikan Kari') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Ikan Kari', this)"> Ikan Kari</label>
+                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Curry Ayam') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Curry Ayam', this)"> Ayam</label>
                         <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Dhal') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Dhal', this)"> Dhal</label>
+                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Ikan') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Ikan', this)"> Ikan</label>
                     </div>`;
-                }
-
-                const isMeeGoreng = /mee\s*goreng/i.test(catLower);
-                const isIndomie = /indomie/i.test(catLower);
-                const isMeeBasah = /mee\s*basah/i.test(catLower);
-                const isNasiGoreng = /nasi\s*goreng/i.test(catLower);
-
-                if (isChizCategory && (isMeeGoreng || isIndomie || isMeeBasah || isNasiGoreng)) {
+                } else if (isGorengOrBasah) {
                     if (!item.selectedNotes) item.selectedNotes = [];
                     noteHtml = `<div class="note-checkboxes">
                         <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('No Sayur') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'No Sayur', this)"> No Sayur</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('No Padas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'No Padas', this)"> No Padas</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Extra Padas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Extra Padas', this)"> Extra Padas</label>
+                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('No Pedas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'No Pedas', this)"> No Pedas</label>
+                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Extra Pedas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Extra Pedas', this)"> Extra Pedas</label>
                     </div>`;
                 }
 
-                const isSoto = /soto/i.test(catLower);
-                const isSoup = /soup/i.test(catLower);
-                const isTomYum = /tom\s*yum/i.test(catLower);
-                const isMeeSoup = /mee\s*soup/i.test(catLower);
-                const isKuehteowSoup = /kueh?teow\s*soup/i.test(catLower);
-                const isKoloMee = /kolo\s*mee/i.test(catLower);
-
-                if (isChizCategory && (isSoto || isSoup || isTomYum || isMeeSoup || isKuehteowSoup || isKoloMee)) {
-                    if (!item.selectedNotes) item.selectedNotes = [];
-                    noteHtml = `<div class="note-checkboxes">
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('No Sayur') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'No Sayur', this)"> No Sayur</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('No Padas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'No Padas', this)"> No Padas</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Extra Padas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Extra Padas', this)"> Extra Padas</label>
-                    </div>`;
-                }
-
-                noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${escapeHtml(item.customComment || '')}" oninput="updateCustomComment(${item.id}, this.value);">`;
-
+                noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${item.customComment || ''}" oninput="item.customComment=this.value; saveOrderToTableSilent();">`;
+                
                 tbody.innerHTML += `<tr>
                     <td><div class="cart-item-name"><b>${index + 1}.</b> ${item.name}</div>${noteHtml}</td>
                     <td>
@@ -1808,44 +1388,22 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         }
         function updateItemPrice(id, val) { let p = parseFloat(val); if (!isNaN(p) && p >= 0) { const cartItem = cart.find(c => c.id === id); if (cartItem) { cartItem.customPrice = p; updateCart(); saveOrderToTableSilent(); } } }
 
-        function escapeHtml(text) {
-            if (text === null || text === undefined) return '';
-            return String(text)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
         function getFormattedItemNotes(item) {
             let parts = [];
-            if (Array.isArray(item.selectedNotes) && item.selectedNotes.length > 0) {
-                parts.push(item.selectedNotes.join(', '));
-            }
-            if (typeof item.customComment === 'string' && item.customComment.trim() !== '') {
-                parts.push(item.customComment.trim());
-            }
+            if (item.selectedNotes && item.selectedNotes.length > 0) parts.push(item.selectedNotes.join(', '));
+            if (item.customComment && item.customComment.trim() !== '') parts.push(item.customComment.trim());
             return parts.join(' | ');
-        }
-
-        function updateCustomComment(id, value) {
-            const cartItem = cart.find(item => item.id === id);
-            if (!cartItem) return;
-            cartItem.customComment = value;
-            saveOrderToTableSilent();
         }
 
         function saveOrderToTableSilent() {
             if (loggedInRole === "customer") return; 
             if (cart.length === 0 || !currentSelectedTable) return;
-            const orderKey = getLinkedOrderKey(currentSelectedTable);
-            let existing = activeOrders[orderKey] || {};
+            let existing = activeOrders[currentSelectedTable] || {};
             let existingTime = existing.time || Date.now();
             let cName = existing.custName || sessionStorage.getItem('myTkName') || "Walk-in";
             let cPhone = existing.custPhone || sessionStorage.getItem('myTkPhone') || "";
 
-            activeOrders[orderKey] = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, tables: getLinkedTableNames(currentSelectedTable), items: JSON.parse(JSON.stringify(cart)) };
+            activeOrders[currentSelectedTable] = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, items: JSON.parse(JSON.stringify(cart)) };
             db.ref('activeOrders').set(activeOrders);
         }
 
@@ -1856,8 +1414,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 return;
             }
             
-            const orderKey = getLinkedOrderKey(currentSelectedTable);
-            let existingOrder = activeOrders[orderKey];
+            let existingOrder = activeOrders[currentSelectedTable];
             let newItems = JSON.parse(JSON.stringify(cart));
             let cName = sessionStorage.getItem('myTkName') || "Customer";
             let cPhone = sessionStorage.getItem('myTkPhone') || "";
@@ -1877,8 +1434,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 };
             }
             
-            existingOrder.tables = getLinkedTableNames(currentSelectedTable);
-            activeOrders[orderKey] = existingOrder;
+            activeOrders[currentSelectedTable] = existingOrder;
             db.ref('activeOrders').set(activeOrders);
             
             document.getElementById('customer-success-screen').style.display = 'flex';
@@ -1890,7 +1446,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         function callWaiter() {
             if (!currentSelectedTable) return;
             db.ref('alerts/bell').set({
-                table: getOrderDisplayRef(currentSelectedTable),
+                table: currentSelectedTable,
                 timestamp: Date.now()
             });
             alert("Notification sent! Staff will attend to you shortly.");
@@ -1923,9 +1479,9 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
         function printKitchenKOTSilent() {
             document.getElementById('k-order-type').innerText = currentOrderType; 
-            document.getElementById('k-table').innerText = getOrderDisplayRef(currentSelectedTable);
+            document.getElementById('k-table').innerText = currentSelectedTable;
             
-            let orderData = activeOrders[getLinkedOrderKey(currentSelectedTable)];
+            let orderData = activeOrders[currentSelectedTable];
             if (orderData && orderData.custName) {
                 document.getElementById('k-cust-info').style.display = 'block';
                 document.getElementById('k-cust-name-val').innerText = orderData.custName;
@@ -1935,24 +1491,9 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
             const kItems = document.getElementById('k-items'); kItems.innerHTML = '';
             cart.forEach(i => {
-                const noteStr = getFormattedItemNotes(i);
-                const safeName = escapeHtml(i.name || '');
-                const safeNote = escapeHtml(noteStr);
-
-                const noteHtml = noteStr
-                    ? `<br><span style="display:block;font-size:16px;font-weight:900;margin-top:3px;white-space:pre-wrap;">NOTE: ${safeNote}</span>`
-                    : '';
-
-                kItems.innerHTML += `
-                    <tr>
-                        <td style="padding:6px 0;border-bottom:1px dashed #000;">
-                            <b>${safeName}</b>
-                            ${noteHtml}
-                        </td>
-                        <td style="text-align:center;border-bottom:1px dashed #000;">
-                            <b>${i.qty}</b>
-                        </td>
-                    </tr>`;
+                let noteStr = getFormattedItemNotes(i);
+                let noteHtml = noteStr ? `<br><span style="font-size:16px;">Note: ${noteStr}</span>` : '';
+                kItems.innerHTML += `<tr><td style="padding: 6px 0; border-bottom: 1px dashed #000;"><b>${i.name}</b>${noteHtml}</td><td style="text-align:center; border-bottom: 1px dashed #000;"><b>${i.qty}</b></td></tr>`;
             });
             safePrint("print-kitchen-mode");
         }
@@ -1962,7 +1503,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             if (cart.length === 0) return alert("Cart is empty!");
             let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
             let discount = parseFloat(document.getElementById('discount-input').value) || 0;
-            fillReceiptDetails(currentOrderType, getOrderDisplayRef(currentSelectedTable), document.getElementById('payment-method').value, new Date().toLocaleString(), subtotal, discount, Math.max(0, subtotal - discount), 0, 0, cart);
+            fillReceiptDetails(currentOrderType, currentSelectedTable, document.getElementById('payment-method').value, new Date().toLocaleString(), subtotal, discount, Math.max(0, subtotal - discount), 0, 0, cart);
             safePrint("print-customer");
         }
 
@@ -2008,15 +1549,16 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
             let discount = parseFloat(document.getElementById('discount-input').value) || 0;
 
-            fillReceiptDetails(currentOrderType, getOrderDisplayRef(currentSelectedTable), payMethod, timeStr, subtotal, discount, currentGrandTotalForPay, paid, change, cart);
+            fillReceiptDetails(currentOrderType, currentSelectedTable, payMethod, timeStr, subtotal, discount, currentGrandTotalForPay, paid, change, cart);
             
             if (shouldPrint) {
                 safePrint("print-customer");
             }
 
+            // Record Sales to increase item popularity
             incrementItemPopularity(cart);
 
-            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${getOrderDisplayRef(currentSelectedTable)})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: getOrderDisplayRef(currentSelectedTable), subtotal: subtotal, discount: discount, paid: paid, change: change, items: JSON.parse(JSON.stringify(cart)) });
+            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${currentSelectedTable})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: currentSelectedTable, subtotal: subtotal, discount: discount, paid: paid, change: change, items: JSON.parse(JSON.stringify(cart)) });
             db.ref('sales').set(completedSales);
 
             let todayKey = new Date().toISOString().split('T')[0];
@@ -2027,10 +1569,9 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 db.ref('staffShifts').set(staffShifts);
             }
 
-            const paymentOrderKey = getLinkedOrderKey(currentSelectedTable);
-            delete activeOrders[paymentOrderKey]; 
+            delete activeOrders[currentSelectedTable]; 
             db.ref('activeOrders').set(activeOrders);
-            db.ref(`orderStatus/${paymentOrderKey}`).remove(); 
+            db.ref(`orderStatus/${currentSelectedTable}`).remove(); 
 
             cart = []; updateStats(); 
             backToTableSelection();
@@ -2055,23 +1596,9 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             document.getElementById('p-paid').innerText = Number(paid).toFixed(2); document.getElementById('p-change').innerText = Number(change).toFixed(2);
             const pItems = document.getElementById('p-items'); pItems.innerHTML = '';
             items.forEach(i => {
-                const noteStr = getFormattedItemNotes(i);
-                const safeName = escapeHtml(i.name || '');
-                const safeNote = escapeHtml(noteStr);
-
-                const noteHtml = noteStr
-                    ? `<br><span style="display:block;margin-top:3px;font-size:14px;font-weight:700;white-space:pre-wrap;">Note: ${safeNote}</span>`
-                    : '';
-
-                pItems.innerHTML += `
-                    <tr>
-                        <td>
-                            <b>${safeName}</b>
-                            ${noteHtml}
-                        </td>
-                        <td style="text-align:center;"><b>${i.qty}</b></td>
-                        <td style="text-align:right;"><b>$${(Number(i.customPrice) * Number(i.qty)).toFixed(2)}</b></td>
-                    </tr>`;
+                let noteStr = getFormattedItemNotes(i);
+                let noteHtml = noteStr ? `<br><span>Note: ${noteStr}</span>` : '';
+                pItems.innerHTML += `<tr><td><b>${i.name}</b>${noteHtml}</td><td style="text-align:center;"><b>${i.qty}</b></td><td style="text-align:right;"><b>$${(i.customPrice * i.qty).toFixed(2)}</b></td></tr>`;
             });
         }
 
@@ -2100,32 +1627,10 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             let cats = getAllCategories();
             items.forEach(item => {
                 let opt = ''; cats.forEach(c => { opt += `<option value="${c}" ${c === item.category ? 'selected' : ''}>${c}</option>`; });
-                let stockStatusOpt = `<select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:bold; color:${item.outOfStock ? '#ef4444' : '#10b981'};" onchange="updateMenuStockStatus(${item.id}, this.value)">
-                    <option value="in" ${!item.outOfStock ? 'selected' : ''}>In Stock</option>
-                    <option value="out" ${item.outOfStock ? 'selected' : ''}>Out of Stock</option>
-                </select>`;
-
-                tbody.innerHTML += `<tr>
-                    <td><input type="text" value="${escapeHtml(item.name)}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td>
-                    <td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opt}</select></td>
-                    <td style="text-align:right;"><input type="number" value="${item.price.toFixed(2)}" step="0.50" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:60px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"></td>
-                    <td style="text-align:center;">${stockStatusOpt}</td>
-                    <td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;">Del</button></td>
-                </tr>`;
+                tbody.innerHTML += `<tr><td><input type="text" value="${item.name}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td><td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opt}</select></td><td style="text-align:right;"><input type="number" value="${item.price.toFixed(2)}" step="0.50" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:60px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"></td><td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;">Del</button></td></tr>`;
             });
         }
         function closeMenuManagerModal() { document.getElementById('menu-manager-modal').style.display = 'none'; }
-        
-        function updateMenuStockStatus(id, val) {
-            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            let item = activeSource.find(m => m.id === id);
-            if (item) {
-                item.outOfStock = (val === 'out');
-                db.ref('menuData').set(activeSource);
-                renderMenu();
-            }
-        }
-
         function updateMenuField(id, field, val) { 
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
             let item = activeSource.find(m => m.id === id); 
@@ -2224,33 +1729,16 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         }
 
         function openHistoryModal() {
-            let tbody = document.getElementById('history-table-body'); 
-            let rowsHtml = '';
-            let salesData = Array.isArray(completedSales) ? completedSales : [];
-            salesData.forEach((s, idx) => { 
-                rowsHtml += `<tr>
-                    <td><span style="font-size:12px; color:#64748b;">${s.time}</span></td>
-                    <td><b>${s.ref}</b></td>
-                    <td>${s.method}</td>
-                    <td style="text-align:right; font-weight:900;">$${s.amount.toFixed(2)}</td>
-                    <td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button></td>
-                </tr>`; 
-            });
-            tbody.innerHTML = rowsHtml; 
+            let tbody = document.getElementById('history-table-body'); tbody.innerHTML='';
+            completedSales.forEach((s, idx) => { tbody.innerHTML += `<tr><td><span style="font-size:12px; color:#64748b;">${s.time}</span></td><td><b>${s.ref}</b></td><td>${s.method}</td><td style="text-align:right; font-weight:900;">$${s.amount.toFixed(2)}</td><td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button></td></tr>`; });
             document.getElementById('history-modal').style.display = 'flex';
         }
-
         function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
-        
         function printSalesHistory() {
             let total = completedSales.reduce((s, x)=>s+x.amount, 0);
             document.getElementById('print-history-grand-total').innerText = total.toFixed(2);
-            let tbody = document.getElementById('print-history-items'); 
-            let printRowsHtml = '';
-            completedSales.forEach(s => { 
-                printRowsHtml += `<tr><td>${s.time}<br>${s.ref}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td></tr>`; 
-            });
-            tbody.innerHTML = printRowsHtml;
+            let tbody = document.getElementById('print-history-items'); tbody.innerHTML='';
+            completedSales.forEach(s => { tbody.innerHTML += `<tr><td>${s.time}<br>${s.ref}</td><td style="text-align:right;">$${s.amount.toFixed(2)}</td></tr>`; });
             safePrint("print-history-mode");
         }
 
@@ -2261,8 +1749,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 let dateKey = new Date().toISOString().split('T')[0];
                 dailyHistoryRecords[dateKey] = { sales: salesTotal, expenses: expTotal };
                 db.ref('dailyHistoryRecords').set(dailyHistoryRecords);
-
-                db.ref('shopOnline').set(false);
 
                 document.getElementById('dc-date').innerText = new Date().toLocaleString();
                 document.getElementById('dc-sales').innerText = salesTotal.toFixed(2);
@@ -2282,265 +1768,9 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         function updateStats() {
             let sTotal = completedSales.reduce((s, x)=>s+x.amount, 0);
             let eTotal = dailyExpenses.reduce((s, x)=>s+x.amount, 0);
-
-            const salesEl = document.getElementById('stat-sales');
-            const expEl = document.getElementById('stat-expenses');
-            const salesMask = document.getElementById('stat-sales-mask');
-            const expMask = document.getElementById('stat-expenses-mask');
-
-            if (salesEl) salesEl.innerText = sTotal.toFixed(2);
-            if (expEl) expEl.innerText = eTotal.toFixed(2);
-
-            if (salesMask) salesMask.style.display = salesEl && salesEl.style.display !== 'none' ? 'none' : 'inline';
-            if (expMask) expMask.style.display = expEl && expEl.style.display !== 'none' ? 'none' : 'inline';
-        }
-
-        function togglePrivateStat(type) {
-            const valueId = type === 'sales' ? 'stat-sales' : 'stat-expenses';
-            const maskId = type === 'sales' ? 'stat-sales-mask' : 'stat-expenses-mask';
-            const eyeId = type === 'sales' ? 'stat-sales-eye' : 'stat-expenses-eye';
-
-            const valueEl = document.getElementById(valueId);
-            const maskEl = document.getElementById(maskId);
-            const eyeEl = document.getElementById(eyeId);
-            if (!valueEl || !maskEl) return;
-
-            const showing = valueEl.style.display !== 'none';
-            valueEl.style.display = showing ? 'none' : 'inline';
-            maskEl.style.display = showing ? 'inline' : 'none';
-            if (eyeEl) eyeEl.innerText = showing ? '👁' : '🙈';
+            if(document.getElementById('stat-sales')) document.getElementById('stat-sales').innerText = sTotal.toFixed(2);
+            if(document.getElementById('stat-expenses')) document.getElementById('stat-expenses').innerText = eTotal.toFixed(2);
         }
     </script>
-
-<div id="table-link-modal">
-  <div class="table-link-box">
-    <h3 style="margin:0 0 6px;font-weight:900;">🔗 Link Tables</h3>
-    <p style="margin:0;color:#64748b;font-size:13px;font-weight:700;">Select any two or more tables (1–13) to use as one order.</p>
-    <div id="table-link-list" class="table-link-list"></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button onclick="unlinkSelectedTables()" style="flex:1;min-width:130px;border:0;padding:12px;border-radius:10px;background:#fee2e2;color:#b91c1c;font-weight:900;cursor:pointer;">🔓 Unlink</button>
-      <button onclick="saveTableLink()" style="flex:1;border:0;padding:12px;border-radius:10px;background:#7c3aed;color:#fff;font-weight:900;cursor:pointer;">Link Selected</button>
-      <button onclick="closeTableLinkModal()" style="flex:1;border:0;padding:12px;border-radius:10px;background:#e2e8f0;color:#334155;font-weight:900;cursor:pointer;">Cancel</button>
-    </div>
-  </div>
-</div>
-
-
-<script>
-/* === OPTIONAL TABLE LINKING: Tables 1-13 === */
-let selectedTablesForLink = [];
-
-function openTableLinkModal() {
-    selectedTablesForLink = [];
-    const list = document.getElementById('table-link-list');
-    if (!list) return;
-    list.innerHTML = '';
-    for (let n = 1; n <= 13; n++) {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'table-link-item';
-        b.textContent = 'Table ' + n;
-        b.onclick = () => {
-            const i = selectedTablesForLink.indexOf(n);
-            if (i >= 0) selectedTablesForLink.splice(i, 1);
-            else selectedTablesForLink.push(n);
-            b.classList.toggle('selected', selectedTablesForLink.includes(n));
-        };
-        list.appendChild(b);
-    }
-    document.getElementById('table-link-modal').style.display = 'flex';
-}
-
-function closeTableLinkModal() {
-    const m = document.getElementById('table-link-modal');
-    if (m) m.style.display = 'none';
-}
-
-function unlinkSelectedTables() {
-    if (!selectedTablesForLink || selectedTablesForLink.length < 1) {
-        alert('Select a linked table first.');
-        return;
-    }
-
-    const selected = selectedTablesForLink.map(n => Number(n)).filter(n => n >= 1 && n <= 13);
-    if (!selected.length) {
-        alert('Select a linked table first.');
-        return;
-    }
-
-    const firstTable = 'Table ' + selected[0];
-
-    db.ref('tableLinks/' + firstTable).once('value').then(snap => {
-        const link = snap.val();
-
-        if (!link || !Array.isArray(link.tables) || link.tables.length < 2) {
-            alert('This table is not linked.');
-            return;
-        }
-
-        // Only remove the link. The existing combined order/bill remains
-        // attached to the first table so no order is silently deleted.
-        const linkedNames = link.tables.map(n => 'Table ' + Number(n));
-        const updates = {};
-
-        linkedNames.forEach(name => {
-            updates['tableLinks/' + name] = null;
-        });
-        updates['linkedTables/' + String(link.groupId)] = null;
-        updates['activeOrders/' + String(link.groupId)] = null;
-
-        const groupOrder = activeOrders && activeOrders[String(link.groupId)];
-        if (groupOrder && Array.isArray(groupOrder.items) && groupOrder.items.length) {
-            groupOrder.tables = [linkedNames[0]];
-            updates['activeOrders/' + linkedNames[0]] = groupOrder;
-            activeOrders[linkedNames[0]] = groupOrder;
-        }
-
-        if (activeOrders) delete activeOrders[String(link.groupId)];
-
-        db.ref().update(updates).then(() => {
-            closeTableLinkModal();
-            if (typeof renderBigTableSelectionGrid === 'function') {
-                renderBigTableSelectionGrid();
-            }
-        }).catch(err => {
-            console.error('Table unlink error:', err);
-            alert('Unable to unlink tables: ' + (err && err.message ? err.message : err));
-        });
-    });
-}
-
-function saveTableLink() {
-    if (window.__tableLinkBusy) return;
-    if (selectedTablesForLink.length < 2) {
-        alert('Please select at least 2 tables.');
-        return;
-    }
-
-    const tableNums = selectedTablesForLink
-        .map(n => Number(n))
-        .filter(n => Number.isInteger(n) && n >= 1 && n <= 13)
-        .sort((a, b) => a - b);
-
-    if (tableNums.length < 2) {
-        alert('Please select at least 2 tables.');
-        return;
-    }
-
-    const tableNames = tableNums.map(n => 'Table ' + n);
-    const groupId = 'TL_' + tableNums.join('_');
-
-    // Merge any existing orders from the selected tables into one order.
-    const sourceKeys = new Set();
-    tableNames.forEach(name => {
-        if (typeof getLinkedOrderKey === 'function') {
-            sourceKeys.add(String(getLinkedOrderKey(String(name))));
-        } else {
-            sourceKeys.add(String(name));
-        }
-    });
-
-    let mergedOrder = null;
-
-    sourceKeys.forEach(key => {
-        const order = activeOrders && activeOrders[key];
-        if (!order || !Array.isArray(order.items)) return;
-
-        if (!mergedOrder) {
-            mergedOrder = JSON.parse(JSON.stringify(order));
-            mergedOrder.items = [];
-        }
-
-        mergedOrder.items = mergedOrder.items.concat(
-            JSON.parse(JSON.stringify(order.items))
-        );
-
-        mergedOrder.time = Math.min(
-            mergedOrder.time || Date.now(),
-            order.time || Date.now()
-        );
-        mergedOrder.custName = order.custName || mergedOrder.custName || 'Walk-in';
-        mergedOrder.custPhone = order.custPhone || mergedOrder.custPhone || '';
-    });
-
-    // Remove the old individual order keys before creating the linked key.
-    sourceKeys.forEach(key => {
-        if (activeOrders) delete activeOrders[key];
-    });
-
-    const updates = {};
-
-    sourceKeys.forEach(key => {
-        updates['activeOrders/' + key] = null;
-    });
-
-    updates['linkedTables/' + groupId] = {
-        tables: tableNums,
-        createdAt: Date.now()
-    };
-
-    tableNames.forEach(name => {
-        updates['tableLinks/' + name] = {
-            groupId: groupId,
-            tables: tableNums
-        };
-    });
-
-    if (mergedOrder && mergedOrder.items.length > 0) {
-        mergedOrder.tables = tableNames;
-        updates['activeOrders/' + groupId] = mergedOrder;
-        activeOrders[groupId] = mergedOrder;
-    }
-
-    window.__tableLinkBusy = true;
-    const linkButton = document.querySelector('#table-link-modal button[onclick="saveTableLink()"]');
-    if (linkButton) { linkButton.disabled = true; linkButton.textContent = 'Linking...'; }
-
-    db.ref().update(updates).then(() => {
-        window.__tableLinkBusy = false;
-        closeTableLinkModal();
-
-        if (typeof currentSelectedTable !== 'undefined' &&
-            tableNames.includes(String(currentSelectedTable))) {
-            currentSelectedTable = groupId;
-        }
-
-        if (typeof renderBigTableSelectionGrid === 'function') {
-            renderBigTableSelectionGrid();
-        }
-    }).catch(err => {
-        window.__tableLinkBusy = false;
-        const linkButton = document.querySelector('#table-link-modal button[onclick="saveTableLink()"]');
-        if (linkButton) { linkButton.disabled = false; linkButton.textContent = 'Link Selected'; }
-        console.error('Table linking error:', err);
-        alert('Unable to link tables: ' + (err && err.message ? err.message : err));
-    });
-}
-
-function unlinkTable(tableNo) {
-    db.ref('tableLinks/' + tableNo).once('value', snap => {
-        const link = snap.val();
-        if (!link || !Array.isArray(link.tables)) return;
-
-        const tables = link.tables.map(n => typeof n === 'number' ? `Table ${n}` : String(n));
-        const groupId = link.groupId;
-        const groupOrder = activeOrders[groupId];
-        const keepTable = tables[0];
-        const updates = {};
-
-        tables.forEach(t => updates['tableLinks/' + t] = null);
-        updates['linkedTables/' + groupId] = null;
-        updates['activeOrders/' + groupId] = null;
-
-        if (groupOrder && Array.isArray(groupOrder.items) && groupOrder.items.length) {
-            groupOrder.tables = [keepTable];
-            updates['activeOrders/' + keepTable] = groupOrder;
-        }
-
-        db.ref().update(updates).then(() => renderBigTableSelectionGrid());
-    });
-}
-</script>
-
 </body>
 </html>
