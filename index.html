@@ -963,9 +963,10 @@ body {
                 // Keep the existing menu untouched, but restore the original Bakso items
                 // if the category/items were accidentally removed from Firebase.
                 const baksoDefaults = defaultMenuData.filter(item => item.category === "Bakso");
-                const hasBaksoItems = menuData.some(item => item.category === "Bakso");
-                if (!hasBaksoItems && baksoDefaults.length) {
-                    menuData = [...menuData, ...baksoDefaults];
+                const missingBakso = baksoDefaults.filter(def => !menuData.some(item => String(item.code || '') === String(def.code)));
+                if (missingBakso.length) {
+                    // Restore only missing Bakso items; never overwrite an existing Bakso price.
+                    menuData = [...menuData, ...missingBakso];
                     db.ref('menuData').set(menuData);
                 }
             } else { menuData = defaultMenuData; db.ref('menuData').set(defaultMenuData); }
@@ -2205,7 +2206,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 rows[idx] = `<tr>
                     <td><input type="text" value="${safeName}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td>
                     <td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opts}</select></td>
-                    <td style="text-align:right;"><div style="display:flex; gap:5px; justify-content:flex-end; align-items:center;"><input type="number" value="${price.toFixed(2)}" step="0.01" min="0" data-price-id="${item.id}" onchange="updateMenuField(${item.id}, 'price', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:70px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"><button type="button" onclick="saveMenuPrice(${item.id}, this.previousElementSibling.value)" style="background:#16a34a;color:white;border:none;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:800;">Save</button></div></td>
+                    <td style="text-align:right;"><div style="display:flex; gap:5px; justify-content:flex-end; align-items:center;"><input type="number" value="${price.toFixed(2)}" step="0.01" min="0" data-price-id="${item.id}" data-price-code="${escapeHtml(item.code || '')}" onchange="updateMenuField(${item.id}, 'price', this.value, '${String(item.code || '').replace("'", "\\'")}')" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:70px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"><button type="button" onclick="saveMenuPrice(${item.id}, this.previousElementSibling.value, '${String(item.code || '').replace("'", "\\'")}')" style="background:#16a34a;color:white;border:none;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:800;">Save</button></div></td>
                     <td style="text-align:center;"><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:bold; color:${stockColor};" onchange="updateMenuStockStatus(${item.id}, this.value)"><option value="in"${inSelected}>In Stock</option><option value="out"${outSelected}>Out of Stock</option></select></td>
                     <td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;">Del</button></td>
                 </tr>`;
@@ -2226,32 +2227,70 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             }
         }
 
-        function updateMenuField(id, field, val) {
+        async function updateMenuField(id, field, val, code) {
             const source = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            const activeSource = source.map(m => ({...m}));
-            const item = activeSource.find(m => Number(m.id) === Number(id));
-            if (!item) return;
             if (field === 'price') {
                 const n = Number.parseFloat(val);
                 if (!Number.isFinite(n) || n < 0) { alert('Please enter a valid price.'); return; }
-                item.price = Math.round(n * 100) / 100;
-            } else if (field === 'category') {
-                item.category = val;
-            } else if (field === 'name') {
-                item.name = String(val || '').trim();
+                const newPrice = Math.round(n * 100) / 100;
+                try {
+                    // Always read the latest Firebase menu before changing the price.
+                    // This prevents the Bakso price from being overwritten by an older
+                    // local menuData copy or by the realtime listener.
+                    const snap = await db.ref('menuData').once('value');
+                    let arr = snap.val();
+                    arr = Array.isArray(arr) ? arr.map(m => ({...m})) : source.map(m => ({...m}));
+
+                    const wantedCode = String(code || '').trim();
+                    let idx = wantedCode ? arr.findIndex(m => String(m.code || '').trim() === wantedCode) : -1;
+                    if (idx < 0) idx = arr.findIndex(m => Number(m.id) === Number(id));
+
+                    // If a Bakso item is missing from Firebase, restore that exact item
+                    // with the newly requested price instead of restoring its old price.
+                    if (idx < 0 && wantedCode.startsWith('BK')) {
+                        const fallback = defaultMenuData.find(m => String(m.code || '') === wantedCode);
+                        if (fallback) {
+                            arr.push({...fallback, price: newPrice});
+                            idx = arr.length - 1;
+                        }
+                    }
+                    if (idx < 0) { alert('Menu item not found.'); return; }
+
+                    arr[idx] = {...arr[idx], price: newPrice};
+                    await db.ref('menuData').set(arr);
+                    menuData = arr;
+
+                    // Update the visible input immediately and keep the current menu screen.
+                    const inputs = document.querySelectorAll('[data-price-code]');
+                    let input = null;
+                    for (const el of inputs) {
+                        if (wantedCode && String(el.getAttribute('data-price-code') || '') === wantedCode) { input = el; break; }
+                    }
+                    if (!input) input = document.querySelector(`[data-price-id="${id}"]`);
+                    if (input) input.value = newPrice.toFixed(2);
+                    populateMenuManagerTable(getMenuManagerSource());
+                    renderMenu();
+                } catch (err) {
+                    alert('Could not save menu price: ' + err.message);
+                }
+                return;
             }
+
+            const activeSource = source.map(m => ({...m}));
+            const item = activeSource.find(m => (code && String(m.code || '') === String(code)) || Number(m.id) === Number(id));
+            if (!item) return;
+            if (field === 'category') item.category = val;
+            else if (field === 'name') item.name = String(val || '').trim();
             db.ref('menuData').set(activeSource).then(() => {
                 menuData = activeSource;
-                if (field === 'price') {
-                    const input = document.querySelector(`[data-price-id=\"${id}\"]`);
-                    if (input) input.value = item.price.toFixed(2);
-                }
+                renderMenu();
             }).catch(err => alert('Could not save menu change: ' + err.message));
         }
 
-        function saveMenuPrice(id, val) {
-            updateMenuField(id, 'price', val);
+        function saveMenuPrice(id, val, code) {
+            updateMenuField(id, 'price', val, code);
         }
+
         function deleteMenuItem(id) { 
             if(confirm("Delete item?")) { 
                 let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
