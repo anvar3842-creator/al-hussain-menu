@@ -818,7 +818,7 @@ body {
     <!-- Modals (QR, Staff, Menu Manager, etc.) -->
     <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Customer & Takeaway QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 14px; font-weight:bold; color: #64748b; margin-top: 0;">Scan table QR codes for dine-in, or the Takeaway QR code for parcel orders.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
-    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Stock Status</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
+    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Code</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Stock Status</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
     <div id="category-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Categories & Order</h3><button class="close-modal" onclick="closeCategoryManagerModal()">X</button></div><div class="modal-body"><p style="font-size: 13px; font-weight:bold; color: #64748b; margin-top: 0;">Use Up/Down buttons to prioritize categories.</p><table class="admin-table"><thead><tr><th>Category Name</th><th style="text-align:center;">Priority Order</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="category-manager-tbody"></tbody></table></div></div></div>
     <div id="stock-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manual Raw Material Stock</h3><div><button class="btn-small" onclick="addNewRawMaterial()">+ Add Material</button><button class="close-modal" onclick="closeStockModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead><tbody id="stock-tbody"></tbody></table></div></div></div>
     <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Add Daily Expense</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 15px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><div style="margin-bottom: 20px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><button class="btn-small" style="width: 100%; padding: 14px; font-size:15px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
@@ -960,51 +960,16 @@ body {
             const val = snapshot.val();
             if (val && Array.isArray(val) && val.length > 0) {
                 menuData = val;
-
-                // BACKFILL MISSING ITEM CODES (one-time safe repair).
-                // Older Firebase menu records may not have a `code`, while newer
-                // items do. Restore the known default code by matching the item id;
-                // for genuinely new/unknown records use a unique X+id style code.
-                // Never overwrite an existing code.
-                const usedCodes = new Set(menuData
-                    .map(item => normalizeItemCode(item && item.code))
-                    .filter(Boolean));
-                let codesChanged = false;
-
-                menuData = menuData.map(item => {
-                    if (item && String(item.code || '').trim()) return item;
-
-                    const def = defaultMenuData.find(d => String(d.id) === String(item && item.id));
-                    let candidate = def && def.code ? String(def.code) : `X${item && item.id != null ? item.id : Date.now()}`;
-                    candidate = String(candidate).trim();
-
-                    // Make absolutely sure the generated code is unique.
-                    let base = candidate;
-                    let n = 2;
-                    while (usedCodes.has(normalizeItemCode(candidate))) {
-                        candidate = `${base}-${n++}`;
-                    }
-                    usedCodes.add(normalizeItemCode(candidate));
-                    codesChanged = true;
-                    return {...item, code: candidate};
-                });
-
-                // Persist only the missing-code repair. Existing prices, names,
-                // categories, stock state and existing codes are left untouched.
-                if (codesChanged) db.ref('menuData').set(menuData);
-
-                // Keep the existing menu untouched, but restore missing Bakso items
-                // without overwriting an existing Bakso price.
+                // Keep the existing menu untouched, but restore the original Bakso items
+                // if the category/items were accidentally removed from Firebase.
                 const baksoDefaults = defaultMenuData.filter(item => item.category === "Bakso");
                 const missingBakso = baksoDefaults.filter(def => !menuData.some(item => String(item.code || '') === String(def.code)));
                 if (missingBakso.length) {
+                    // Restore only missing Bakso items; never overwrite an existing Bakso price.
                     menuData = [...menuData, ...missingBakso];
                     db.ref('menuData').set(menuData);
                 }
-            } else {
-                menuData = defaultMenuData.map(item => ({...item}));
-                db.ref('menuData').set(menuData);
-            }
+            } else { menuData = defaultMenuData; db.ref('menuData').set(defaultMenuData); }
             renderCategories(); populateCategoryDropdown(); renderMenu();
         });
 
@@ -2337,6 +2302,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
                 rows[idx] = `<tr>
                     <td><input type="text" value="${safeName}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td>
+                    <td><div style="display:flex; gap:5px; align-items:center;"><input type="text" value="${escapeHtml(item.code || '')}" data-code-id="${item.id}" onchange="updateMenuCode(${item.id}, this.value)" onkeydown="if(event.key==='Enter'){this.blur();}" placeholder="Enter code" style="width:90px; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:800; text-transform:uppercase;"><button type="button" onclick="saveMenuCode(${item.id}, this.previousElementSibling.value)" style="background:#2563eb;color:white;border:none;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:800;">Save</button></div></td>
                     <td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opts}</select></td>
                     <td style="text-align:right;"><div style="display:flex; gap:5px; justify-content:flex-end; align-items:center;"><input type="number" value="${price.toFixed(2)}" step="0.01" min="0" data-price-id="${item.id}" data-price-code="${escapeHtml(item.code || '')}" onchange="updateMenuField(${item.id}, 'price', this.value, '${String(item.code || '').replace("'", "\\'")}')" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:70px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"><button type="button" onclick="saveMenuPrice(${item.id}, this.previousElementSibling.value, '${String(item.code || '').replace("'", "\\'")}')" style="background:#16a34a;color:white;border:none;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:800;">Save</button></div></td>
                     <td style="text-align:center;"><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:bold; color:${stockColor};" onchange="updateMenuStockStatus(${item.id}, this.value)"><option value="in"${inSelected}>In Stock</option><option value="out"${outSelected}>Out of Stock</option></select></td>
@@ -2358,6 +2324,31 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 renderMenu();
             }
         }
+
+        async function updateMenuCode(id, val) {
+            const newCode = String(val || '').trim().toUpperCase().replace(/\s+/g, '');
+            if (!newCode) { alert('Please enter an item code.'); return; }
+            try {
+                const snap = await db.ref('menuData').once('value');
+                let arr = snap.val();
+                arr = Array.isArray(arr) ? arr.map(m => ({...m})) : ((menuData && menuData.length) ? menuData.map(m => ({...m})) : defaultMenuData.map(m => ({...m})));
+                const idx = arr.findIndex(m => Number(m.id) === Number(id));
+                if (idx < 0) { alert('Menu item not found.'); return; }
+                const duplicate = arr.find((m, i) => i !== idx && String(m.code || '').trim().toUpperCase().replace(/\s+/g, '') === newCode);
+                if (duplicate) { alert('This code is already used by another item.'); return; }
+                arr[idx] = {...arr[idx], code: newCode};
+                await db.ref('menuData').set(arr);
+                menuData = arr;
+                const input = document.querySelector(`[data-code-id="${id}"]`);
+                if (input) input.value = newCode;
+                populateMenuManagerTable(getMenuManagerSource());
+                renderMenu();
+            } catch (err) {
+                alert('Could not save item code: ' + err.message);
+            }
+        }
+
+        function saveMenuCode(id, val) { updateMenuCode(id, val); }
 
         async function updateMenuField(id, field, val, code) {
             const source = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
