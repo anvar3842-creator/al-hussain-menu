@@ -2205,7 +2205,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 rows[idx] = `<tr>
                     <td><input type="text" value="${safeName}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td>
                     <td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opts}</select></td>
-                    <td style="text-align:right;"><input type="number" value="${price.toFixed(2)}" step="0.50" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:60px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"></td>
+                    <td style="text-align:right;"><div style="display:flex; gap:5px; justify-content:flex-end; align-items:center;"><input type="number" value="${price.toFixed(2)}" step="0.01" min="0" data-price-id="${item.id}" onchange="updateMenuField(${item.id}, 'price', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:70px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"><button type="button" onclick="saveMenuPrice(${item.id}, this.previousElementSibling.value)" style="background:#16a34a;color:white;border:none;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:800;">Save</button></div></td>
                     <td style="text-align:center;"><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:bold; color:${stockColor};" onchange="updateMenuStockStatus(${item.id}, this.value)"><option value="in"${inSelected}>In Stock</option><option value="out"${outSelected}>Out of Stock</option></select></td>
                     <td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;">Del</button></td>
                 </tr>`;
@@ -2226,15 +2226,31 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             }
         }
 
-        function updateMenuField(id, field, val) { 
-            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            let item = activeSource.find(m => m.id === id); 
-            if(item) { 
-                if(field==='price') item.price=parseFloat(val)||0; 
-                else if(field==='category') item.category=val; 
-                else if(field==='name') item.name=val; 
-                db.ref('menuData').set(activeSource); 
-            } 
+        function updateMenuField(id, field, val) {
+            const source = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+            const activeSource = source.map(m => ({...m}));
+            const item = activeSource.find(m => Number(m.id) === Number(id));
+            if (!item) return;
+            if (field === 'price') {
+                const n = Number.parseFloat(val);
+                if (!Number.isFinite(n) || n < 0) { alert('Please enter a valid price.'); return; }
+                item.price = Math.round(n * 100) / 100;
+            } else if (field === 'category') {
+                item.category = val;
+            } else if (field === 'name') {
+                item.name = String(val || '').trim();
+            }
+            db.ref('menuData').set(activeSource).then(() => {
+                menuData = activeSource;
+                if (field === 'price') {
+                    const input = document.querySelector(`[data-price-id=\"${id}\"]`);
+                    if (input) input.value = item.price.toFixed(2);
+                }
+            }).catch(err => alert('Could not save menu change: ' + err.message));
+        }
+
+        function saveMenuPrice(id, val) {
+            updateMenuField(id, 'price', val);
         }
         function deleteMenuItem(id) { 
             if(confirm("Delete item?")) { 
