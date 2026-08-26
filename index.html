@@ -678,7 +678,7 @@ body {
                 <div class="left-panel" id="panel-menu">
                     <div class="controls-bar">
                         <div class="search-container">
-                            <input type="text" id="search-input" class="search-box" placeholder="Search item or code..." onkeyup="handleSearchInput(event)">
+                            <input type="text" id="search-input" class="search-box" placeholder="Search item or code..." oninput="handleSearchInput(event)" onkeydown="handleSearchInput(event)">
                             <button class="btn-menu-refresh btn-clear" onclick="clearSearch()" title="Clear Search">Clear</button>
                             <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">Refresh</button>
                         </div>
@@ -960,16 +960,51 @@ body {
             const val = snapshot.val();
             if (val && Array.isArray(val) && val.length > 0) {
                 menuData = val;
-                // Keep the existing menu untouched, but restore the original Bakso items
-                // if the category/items were accidentally removed from Firebase.
+
+                // BACKFILL MISSING ITEM CODES (one-time safe repair).
+                // Older Firebase menu records may not have a `code`, while newer
+                // items do. Restore the known default code by matching the item id;
+                // for genuinely new/unknown records use a unique X+id style code.
+                // Never overwrite an existing code.
+                const usedCodes = new Set(menuData
+                    .map(item => normalizeItemCode(item && item.code))
+                    .filter(Boolean));
+                let codesChanged = false;
+
+                menuData = menuData.map(item => {
+                    if (item && String(item.code || '').trim()) return item;
+
+                    const def = defaultMenuData.find(d => String(d.id) === String(item && item.id));
+                    let candidate = def && def.code ? String(def.code) : `X${item && item.id != null ? item.id : Date.now()}`;
+                    candidate = String(candidate).trim();
+
+                    // Make absolutely sure the generated code is unique.
+                    let base = candidate;
+                    let n = 2;
+                    while (usedCodes.has(normalizeItemCode(candidate))) {
+                        candidate = `${base}-${n++}`;
+                    }
+                    usedCodes.add(normalizeItemCode(candidate));
+                    codesChanged = true;
+                    return {...item, code: candidate};
+                });
+
+                // Persist only the missing-code repair. Existing prices, names,
+                // categories, stock state and existing codes are left untouched.
+                if (codesChanged) db.ref('menuData').set(menuData);
+
+                // Keep the existing menu untouched, but restore missing Bakso items
+                // without overwriting an existing Bakso price.
                 const baksoDefaults = defaultMenuData.filter(item => item.category === "Bakso");
                 const missingBakso = baksoDefaults.filter(def => !menuData.some(item => String(item.code || '') === String(def.code)));
                 if (missingBakso.length) {
-                    // Restore only missing Bakso items; never overwrite an existing Bakso price.
                     menuData = [...menuData, ...missingBakso];
                     db.ref('menuData').set(menuData);
                 }
-            } else { menuData = defaultMenuData; db.ref('menuData').set(defaultMenuData); }
+            } else {
+                menuData = defaultMenuData.map(item => ({...item}));
+                db.ref('menuData').set(menuData);
+            }
             renderCategories(); populateCategoryDropdown(); renderMenu();
         });
 
@@ -1713,30 +1748,127 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
         function clearSearch() { document.getElementById('search-input').value = ''; renderMenu(); }
         
-        function handleSearchInput(event) {
-            const rawSearch = document.getElementById('search-input').value;
-            const searchText = rawSearch.trim().toLowerCase();
-            const searchCode = searchText.replace(/\s+/g, '');
-            
-            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+        function normalizeItemCode(value) {
+            return String(value ?? '')
+                .replace(/[\u200B-\u200D\uFEFF]/g, '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '');
+        }
 
-            if (event.key === 'Enter' && searchCode !== '') {
-                let foundItem = activeSource.find(m => {
-                    let c = m.code ? String(m.code).toLowerCase().replace(/\s+/g, '') : "";
-                    return c === searchCode;
-                });
-                if (foundItem) { 
-                    if (foundItem.outOfStock) {
-                        alert(`"${foundItem.name}" is currently Out of Stock!`);
-                    } else {
-                        addToCart(foundItem.id); 
-                        document.getElementById('search-input').value = ''; 
-                        renderMenu(); 
+        function getItemCodeCandidates(item) {
+            return [item?.code, item?.itemCode, item?.barcode, item?.sku]
+                .filter(v => v !== undefined && v !== null && String(v).trim() !== '')
+                .map(normalizeItemCode);
+        }
+
+        let codeScanTimer = null;
+        let lastScanValue = '';
+        let lastScanAt = 0;
+        let codeScanBusy = false;
+
+        function isLikelyBarcodeScan(value) {
+            const now = Date.now();
+            const rapid = (now - lastScanAt) < 80;
+            lastScanAt = now;
+            lastScanValue = value;
+            return rapid || value.length >= 3;
+        }
+
+        async function lookupAndAddExactItemCode(rawValue) {
+            const searchCode = normalizeItemCode(rawValue);
+            if (!searchCode || codeScanBusy) return false;
+
+            codeScanBusy = true;
+            try {
+                let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+                let foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
+
+                // Always check Firebase when an exact code is requested. This prevents
+                // stale/partially-loaded menuData from hiding an existing item.
+                if (!foundItem) {
+                    const snap = await db.ref('menuData').once('value');
+                    const latest = snap.val();
+                    if (Array.isArray(latest)) {
+                        menuData = latest;
+                        activeSource = latest;
+                        foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
                     }
                 }
-            } else {
+
+                if (!foundItem) return false;
+
+                if (foundItem.outOfStock) {
+                    alert(`"${foundItem.name}" is currently Out of Stock!`);
+                    return true;
+                }
+
+                // Use the exact object from the current source, so id/code types stay intact.
+                const cartItem = cart.find(c => String(c.id) === String(foundItem.id));
+                if (cartItem) {
+                    cartItem.qty += 1;
+                } else {
+                    cart.push({
+                        ...foundItem,
+                        qty: 1,
+                        customPrice: Number(foundItem.price) || 0,
+                        selectedNotes: [],
+                        customComment: ""
+                    });
+                }
+
+                updateCart();
                 renderMenu();
+                saveOrderToTableSilent();
+                document.getElementById('search-input').value = '';
+                return true;
+            } catch (err) {
+                console.error('Exact item-code lookup failed:', err);
+                return false;
+            } finally {
+                codeScanBusy = false;
             }
+        }
+
+        function handleSearchInput(event) {
+            const input = document.getElementById('search-input');
+            if (!input) return;
+
+            const rawSearch = input.value;
+            const searchText = rawSearch.trim().toLowerCase();
+            const searchCode = normalizeItemCode(rawSearch);
+
+            // Barcode scanners normally finish with Enter. Handle that immediately.
+            if (event && event.type === 'keydown' && event.key === 'Enter') {
+                event.preventDefault();
+                clearTimeout(codeScanTimer);
+                lookupAndAddExactItemCode(rawSearch);
+                return;
+            }
+
+            // Some scanners do not send Enter. If the current input exactly matches
+            // an existing code, wait briefly for the last scanner character, then add it.
+            clearTimeout(codeScanTimer);
+            if (searchCode) {
+                codeScanTimer = setTimeout(async () => {
+                    const current = document.getElementById('search-input');
+                    if (!current || normalizeItemCode(current.value) !== searchCode) return;
+
+                    let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+                    const exact = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
+
+                    if (exact) {
+                        await lookupAndAddExactItemCode(current.value);
+                    } else {
+                        // Do one Firebase lookup for exact codes so existing items
+                        // work even when realtime menu data is stale.
+                        const added = await lookupAndAddExactItemCode(current.value);
+                        if (!added) renderMenu();
+                    }
+                }, 140);
+            }
+
+            renderMenu();
         }
 
         function addNewMenuItem() {
