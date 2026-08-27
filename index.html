@@ -678,7 +678,7 @@ body {
                 <div class="left-panel" id="panel-menu">
                     <div class="controls-bar">
                         <div class="search-container">
-                            <input type="text" id="search-input" class="search-box" placeholder="Search item or code..." oninput="handleSearchInput(event)" onkeydown="handleSearchInput(event)">
+                            <input type="text" id="search-input" class="search-box" placeholder="Search item or code..." onkeyup="handleSearchInput(event)">
                             <button class="btn-menu-refresh btn-clear" onclick="clearSearch()" title="Clear Search">Clear</button>
                             <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">Refresh</button>
                         </div>
@@ -818,7 +818,7 @@ body {
     <!-- Modals (QR, Staff, Menu Manager, etc.) -->
     <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Customer & Takeaway QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 14px; font-weight:bold; color: #64748b; margin-top: 0;">Scan table QR codes for dine-in, or the Takeaway QR code for parcel orders.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
-    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Code</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Stock Status</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
+    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Stock Status</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
     <div id="category-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Categories & Order</h3><button class="close-modal" onclick="closeCategoryManagerModal()">X</button></div><div class="modal-body"><p style="font-size: 13px; font-weight:bold; color: #64748b; margin-top: 0;">Use Up/Down buttons to prioritize categories.</p><table class="admin-table"><thead><tr><th>Category Name</th><th style="text-align:center;">Priority Order</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="category-manager-tbody"></tbody></table></div></div></div>
     <div id="stock-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manual Raw Material Stock</h3><div><button class="btn-small" onclick="addNewRawMaterial()">+ Add Material</button><button class="close-modal" onclick="closeStockModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead><tbody id="stock-tbody"></tbody></table></div></div></div>
     <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Add Daily Expense</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 15px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><div style="margin-bottom: 20px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><button class="btn-small" style="width: 100%; padding: 14px; font-size:15px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
@@ -1727,113 +1727,49 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 .map(normalizeItemCode);
         }
 
-        let codeScanTimer = null;
-        let lastScanValue = '';
-        let lastScanAt = 0;
-        let codeScanBusy = false;
-
-        function isLikelyBarcodeScan(value) {
-            const now = Date.now();
-            const rapid = (now - lastScanAt) < 80;
-            lastScanAt = now;
-            lastScanValue = value;
-            return rapid || value.length >= 3;
-        }
-
-        async function lookupAndAddExactItemCode(rawValue) {
-            const searchCode = normalizeItemCode(rawValue);
-            if (!searchCode || codeScanBusy) return false;
-
-            codeScanBusy = true;
-            try {
-                let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-                let foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
-
-                // Always check Firebase when an exact code is requested. This prevents
-                // stale/partially-loaded menuData from hiding an existing item.
-                if (!foundItem) {
-                    const snap = await db.ref('menuData').once('value');
-                    const latest = snap.val();
-                    if (Array.isArray(latest)) {
-                        menuData = latest;
-                        activeSource = latest;
-                        foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
-                    }
-                }
-
-                if (!foundItem) return false;
-
-                if (foundItem.outOfStock) {
-                    alert(`"${foundItem.name}" is currently Out of Stock!`);
-                    return true;
-                }
-
-                // Use the exact object from the current source, so id/code types stay intact.
-                const cartItem = cart.find(c => String(c.id) === String(foundItem.id));
-                if (cartItem) {
-                    cartItem.qty += 1;
-                } else {
-                    cart.push({
-                        ...foundItem,
-                        qty: 1,
-                        customPrice: Number(foundItem.price) || 0,
-                        selectedNotes: [],
-                        customComment: ""
-                    });
-                }
-
-                updateCart();
-                renderMenu();
-                saveOrderToTableSilent();
-                document.getElementById('search-input').value = '';
-                return true;
-            } catch (err) {
-                console.error('Exact item-code lookup failed:', err);
-                return false;
-            } finally {
-                codeScanBusy = false;
-            }
-        }
-
-        function handleSearchInput(event) {
-            const input = document.getElementById('search-input');
-            if (!input) return;
-
-            const rawSearch = input.value;
+        async function handleSearchInput(event) {
+            const rawSearch = document.getElementById('search-input').value;
             const searchText = rawSearch.trim().toLowerCase();
             const searchCode = normalizeItemCode(rawSearch);
 
-            // Barcode scanners normally finish with Enter. Handle that immediately.
-            if (event && event.type === 'keydown' && event.key === 'Enter') {
-                event.preventDefault();
-                clearTimeout(codeScanTimer);
-                lookupAndAddExactItemCode(rawSearch);
-                return;
-            }
+            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
 
-            // Some scanners do not send Enter. If the current input exactly matches
-            // an existing code, wait briefly for the last scanner character, then add it.
-            clearTimeout(codeScanTimer);
-            if (searchCode) {
-                codeScanTimer = setTimeout(async () => {
-                    const current = document.getElementById('search-input');
-                    if (!current || normalizeItemCode(current.value) !== searchCode) return;
+            if (event.key === 'Enter' && searchCode !== '') {
+                // First check the current menu immediately.
+                let foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
 
-                    let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-                    const exact = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
-
-                    if (exact) {
-                        await lookupAndAddExactItemCode(current.value);
-                    } else {
-                        // Do one Firebase lookup for exact codes so existing items
-                        // work even when realtime menu data is stale.
-                        const added = await lookupAndAddExactItemCode(current.value);
-                        if (!added) renderMenu();
+                // If the item exists in Firebase but the realtime menu has not loaded yet,
+                // fetch the latest menu once. This fixes scanned codes for existing items
+                // without changing the normal menu/search behaviour.
+                if (!foundItem) {
+                    try {
+                        const snap = await db.ref('menuData').once('value');
+                        const latest = snap.val();
+                        if (Array.isArray(latest)) {
+                            menuData = latest;
+                            activeSource = latest;
+                            foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
+                        }
+                    } catch (err) {
+                        console.error('Code lookup failed:', err);
                     }
-                }, 140);
-            }
+                }
 
-            renderMenu();
+                if (foundItem) {
+                    if (foundItem.outOfStock) {
+                        alert(`\"${foundItem.name}\" is currently Out of Stock!`);
+                    } else {
+                        addToCart(foundItem.id);
+                        document.getElementById('search-input').value = '';
+                        renderMenu();
+                    }
+                } else {
+                    // Keep the normal search visible if the exact scanned code was not found.
+                    renderMenu();
+                }
+            } else {
+                renderMenu();
+            }
         }
 
         function addNewMenuItem() {
@@ -2078,10 +2014,23 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             printKitchenKOTSilent();
         }
 
-        function printKitchenKOTSilent() {
+        // Kitchen printing is split into two tickets only when both groups exist:
+        // Drinks = Hot Drinks, Fresh Juice, Sejuk. All other categories stay together as Food.
+        let kitchenPrintQueue = [];
+        let kitchenPrintQueueIndex = 0;
+        let kitchenPrintAfterHandler = null;
+
+        function getKitchenPrintGroup(items) {
+            const drinkCategories = new Set(["Hot Drinks", "Fresh Juice", "Sejuk"]);
+            const drinks = items.filter(i => drinkCategories.has(String(i.category || '').trim()));
+            const food = items.filter(i => !drinkCategories.has(String(i.category || '').trim()));
+            return { food, drinks };
+        }
+
+        function renderKitchenTicket(items, title) {
             document.getElementById('k-order-type').innerText = currentOrderType; 
             document.getElementById('k-table').innerText = getOrderDisplayRef(currentSelectedTable);
-            
+
             let orderData = activeOrders[getLinkedOrderKey(currentSelectedTable)];
             if (orderData && orderData.custName) {
                 document.getElementById('k-cust-info').style.display = 'block';
@@ -2090,28 +2039,78 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 document.getElementById('k-cust-info').style.display = 'none';
             }
 
-            const kItems = document.getElementById('k-items'); kItems.innerHTML = '';
-            cart.forEach(i => {
+            const heading = document.querySelector('#print-kitchen h2');
+            if (heading) heading.innerText = title;
+
+            const kItems = document.getElementById('k-items');
+            kItems.innerHTML = '';
+            items.forEach(i => {
                 const noteStr = getFormattedItemNotes(i);
                 const safeName = escapeHtml(i.name || '');
                 const safeNote = escapeHtml(noteStr);
-
                 const noteHtml = noteStr
                     ? `<br><span style="display:block;font-size:16px;font-weight:900;margin-top:3px;white-space:pre-wrap;">NOTE: ${safeNote}</span>`
                     : '';
-
                 kItems.innerHTML += `
                     <tr>
                         <td style="padding:6px 0;border-bottom:1px dashed #000;">
-                            <b>${safeName}</b>
-                            ${noteHtml}
+                            <b>${safeName}</b>${noteHtml}
                         </td>
                         <td style="text-align:center;border-bottom:1px dashed #000;">
                             <b>${i.qty}</b>
                         </td>
                     </tr>`;
             });
-            safePrint("print-kitchen-mode");
+        }
+
+        function finishKitchenPrintQueue() {
+            if (kitchenPrintAfterHandler) {
+                window.removeEventListener('afterprint', kitchenPrintAfterHandler);
+                kitchenPrintAfterHandler = null;
+            }
+            kitchenPrintQueue = [];
+            kitchenPrintQueueIndex = 0;
+            document.body.className = '';
+            isPrinting = false;
+        }
+
+        function printNextKitchenTicket() {
+            if (kitchenPrintQueueIndex >= kitchenPrintQueue.length) {
+                finishKitchenPrintQueue();
+                return;
+            }
+
+            const ticket = kitchenPrintQueue[kitchenPrintQueueIndex];
+            renderKitchenTicket(ticket.items, ticket.title);
+            document.body.className = 'print-kitchen-mode';
+
+            kitchenPrintAfterHandler = function() {
+                window.removeEventListener('afterprint', kitchenPrintAfterHandler);
+                kitchenPrintAfterHandler = null;
+                kitchenPrintQueueIndex++;
+                setTimeout(printNextKitchenTicket, 150);
+            };
+            window.addEventListener('afterprint', kitchenPrintAfterHandler);
+            setTimeout(() => window.print(), 100);
+        }
+
+        function printKitchenKOTSilent() {
+            if (!Array.isArray(cart) || cart.length === 0) return alert("Cart is empty!");
+
+            const groups = getKitchenPrintGroup(cart);
+            kitchenPrintQueue = [];
+
+            if (groups.food.length > 0) {
+                kitchenPrintQueue.push({ items: groups.food, title: '*** KITCHEN ORDER (FOOD) ***' });
+            }
+            if (groups.drinks.length > 0) {
+                kitchenPrintQueue.push({ items: groups.drinks, title: '*** KITCHEN ORDER (DRINKS) ***' });
+            }
+
+            if (kitchenPrintQueue.length === 0) return;
+            kitchenPrintQueueIndex = 0;
+            isPrinting = true;
+            printNextKitchenTicket();
         }
 
         function openCashDrawerOnly() { safePrint("print-drawer-mode"); }
@@ -2302,7 +2301,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
                 rows[idx] = `<tr>
                     <td><input type="text" value="${safeName}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td>
-                    <td><div style="display:flex; gap:5px; align-items:center;"><input type="text" value="${escapeHtml(item.code || '')}" data-code-id="${item.id}" onchange="updateMenuCode(${item.id}, this.value)" onkeydown="if(event.key==='Enter'){this.blur();}" placeholder="Enter code" style="width:90px; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:800; text-transform:uppercase;"><button type="button" onclick="saveMenuCode(${item.id}, this.previousElementSibling.value)" style="background:#2563eb;color:white;border:none;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:800;">Save</button></div></td>
                     <td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opts}</select></td>
                     <td style="text-align:right;"><div style="display:flex; gap:5px; justify-content:flex-end; align-items:center;"><input type="number" value="${price.toFixed(2)}" step="0.01" min="0" data-price-id="${item.id}" data-price-code="${escapeHtml(item.code || '')}" onchange="updateMenuField(${item.id}, 'price', this.value, '${String(item.code || '').replace("'", "\\'")}')" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:70px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"><button type="button" onclick="saveMenuPrice(${item.id}, this.previousElementSibling.value, '${String(item.code || '').replace("'", "\\'")}')" style="background:#16a34a;color:white;border:none;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:800;">Save</button></div></td>
                     <td style="text-align:center;"><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:bold; color:${stockColor};" onchange="updateMenuStockStatus(${item.id}, this.value)"><option value="in"${inSelected}>In Stock</option><option value="out"${outSelected}>Out of Stock</option></select></td>
@@ -2324,31 +2322,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 renderMenu();
             }
         }
-
-        async function updateMenuCode(id, val) {
-            const newCode = String(val || '').trim().toUpperCase().replace(/\s+/g, '');
-            if (!newCode) { alert('Please enter an item code.'); return; }
-            try {
-                const snap = await db.ref('menuData').once('value');
-                let arr = snap.val();
-                arr = Array.isArray(arr) ? arr.map(m => ({...m})) : ((menuData && menuData.length) ? menuData.map(m => ({...m})) : defaultMenuData.map(m => ({...m})));
-                const idx = arr.findIndex(m => Number(m.id) === Number(id));
-                if (idx < 0) { alert('Menu item not found.'); return; }
-                const duplicate = arr.find((m, i) => i !== idx && String(m.code || '').trim().toUpperCase().replace(/\s+/g, '') === newCode);
-                if (duplicate) { alert('This code is already used by another item.'); return; }
-                arr[idx] = {...arr[idx], code: newCode};
-                await db.ref('menuData').set(arr);
-                menuData = arr;
-                const input = document.querySelector(`[data-code-id="${id}"]`);
-                if (input) input.value = newCode;
-                populateMenuManagerTable(getMenuManagerSource());
-                renderMenu();
-            } catch (err) {
-                alert('Could not save item code: ' + err.message);
-            }
-        }
-
-        function saveMenuCode(id, val) { updateMenuCode(id, val); }
 
         async function updateMenuField(id, field, val, code) {
             const source = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
