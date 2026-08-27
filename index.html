@@ -1269,8 +1269,15 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 return; 
             }
 
-            // FIXED: Enable online status for ANY authorized login (Admin or Staff)
-            db.ref('shopOnline').set(true);
+            // ONLINE/OFFLINE FIX: keep the shop online while ANY authorized user is online.
+            // Each role has its own presence entry, so one user's logout cannot close the shop
+            // while another user is still online. Firebase onDisconnect also handles dropped sessions.
+            const presenceRef = db.ref('onlineUsers/' + loggedInRole);
+            presenceRef.set({ online: true, timestamp: firebase.database.ServerValue.TIMESTAMP });
+            presenceRef.onDisconnect().remove();
+            db.ref('onlineUsers').on('value', (snap) => {
+                db.ref('shopOnline').set(snap.exists() && Object.keys(snap.val() || {}).length > 0);
+            });
 
             let todayDateKey = new Date().toISOString().split('T')[0];
             if (!staffShifts[todayDateKey]) staffShifts[todayDateKey] = {};
@@ -1303,9 +1310,16 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             updateStats();
         }
 
-        function logout() { 
-            db.ref('shopOnline').set(false);
-            location.href = liveBaseUrl; 
+        function logout() {
+            const role = loggedInRole;
+            if (role) {
+                db.ref('onlineUsers/' + role).remove().then(() => {
+                    db.ref('onlineUsers').once('value', (snap) => {
+                        db.ref('shopOnline').set(snap.exists() && Object.keys(snap.val() || {}).length > 0);
+                    });
+                });
+            }
+            location.href = liveBaseUrl;
         }
 
         function refreshMenuData() { renderMenu(); alert("Menu Refreshed!"); }
