@@ -658,7 +658,6 @@ body {
                     <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">Categories Priority</button>
                     <button class="admin-btn stock-btn" onclick="openStockModal()">Manual Stock</button>
                     <button class="admin-btn expense-btn" onclick="openExpenseModal()">Daily Expense</button>
-                    <button class="admin-btn" onclick="openExpenseHistoryModal()">View Expenses</button>
                     <button class="admin-btn staff-btn" onclick="openStaffPerformanceModal()">Staff Shift Tracking</button>
                     <button class="admin-btn report-btn" onclick="openItemReportModal()">Daily Items Report</button>
                     <button class="admin-btn monthly-btn" onclick="openMonthlyReportModal()">Monthly History</button>
@@ -822,7 +821,6 @@ body {
     <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Stock Status</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
     <div id="category-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Categories & Order</h3><button class="close-modal" onclick="closeCategoryManagerModal()">X</button></div><div class="modal-body"><p style="font-size: 13px; font-weight:bold; color: #64748b; margin-top: 0;">Use Up/Down buttons to prioritize categories.</p><table class="admin-table"><thead><tr><th>Category Name</th><th style="text-align:center;">Priority Order</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="category-manager-tbody"></tbody></table></div></div></div>
     <div id="stock-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manual Raw Material Stock</h3><div><button class="btn-small" onclick="addNewRawMaterial()">+ Add Material</button><button class="close-modal" onclick="closeStockModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead><tbody id="stock-tbody"></tbody></table></div></div></div>
-    <div id="expense-history-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Expense History</h3><div><button class="btn-small" onclick="printExpenseHistory()">Print</button><button class="close-modal" onclick="closeExpenseHistoryModal()">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody id="expense-history-tbody"></tbody><tfoot><tr><th colspan="2" style="text-align:right;">Total</th><th id="expense-history-total" style="text-align:right;">$0.00</th></tr></tfoot></table></div></div></div>
     <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Add Daily Expense</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 15px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><div style="margin-bottom: 20px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><button class="btn-small" style="width: 100%; padding: 14px; font-size:15px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
     <div id="monthly-report-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily & Monthly History</h3><button class="close-modal" onclick="closeMonthlyReportModal()">X</button></div><div class="modal-body"><div id="monthly-report-container"></div></div></div></div>
     <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
@@ -2017,7 +2015,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         }
 
         // Kitchen printing is split into two tickets only when both groups exist:
-        // Drinks = Hot Drinks, Fresh Juice, Sejuk. All other categories stay together as Food.
+        // Drinks = Hot Drinks, Fresh Juice, Sejuk, Minuman Tin. All other categories stay together as Food.
         let kitchenPrintQueue = [];
         let kitchenPrintQueueIndex = 0;
         let kitchenPrintAfterHandler = null;
@@ -2408,15 +2406,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         function updateRawMaterial(id) { let m = rawMaterials.find(x => x.id === id); let q = prompt(`Qty for ${m.name}:`, m.qty); if(q!==null) { m.qty=parseFloat(q)||0; db.ref('rawMaterials').set(rawMaterials); openStockModal(); } }
 
         function openExpenseModal() { document.getElementById('expense-desc').value=''; document.getElementById('expense-amount').value=''; document.getElementById('expense-modal').style.display='flex'; }
-        function openExpenseHistoryModal() {
-            const tbody=document.getElementById('expense-history-tbody'); if(!tbody) return;
-            tbody.innerHTML=''; let total=0;
-            (dailyExpenses||[]).forEach(e=>{ const a=Number(e.amount)||0; total+=a; tbody.innerHTML += `<tr><td>${escapeHtml(e.time||'')}</td><td><b>${escapeHtml(e.desc||'')}</b></td><td style="text-align:right;font-weight:900;">$${a.toFixed(2)}</td></tr>`; });
-            document.getElementById('expense-history-total').innerText='$'+total.toFixed(2);
-            document.getElementById('expense-history-modal').style.display='flex';
-        }
-        function closeExpenseHistoryModal(){ document.getElementById('expense-history-modal').style.display='none'; }
-        function printExpenseHistory(){ const b=document.getElementById('print-expense-history-body'); let t=0; b.innerHTML=''; (dailyExpenses||[]).forEach(e=>{const a=Number(e.amount)||0;t+=a;b.innerHTML+=`<tr><td style="padding:6px 0;">${escapeHtml(e.time||'')}<br><b>${escapeHtml(e.desc||'')}</b></td><td style="text-align:right;padding:6px 0;">$${a.toFixed(2)}</td></tr>`;});document.getElementById('print-expense-history-total').innerText='$'+t.toFixed(2);safePrint('print-expense-history-mode'); }
         function closeExpenseModal() { document.getElementById('expense-modal').style.display='none'; }
         function saveExpenseItem() { let desc=document.getElementById('expense-desc').value.trim(); let amt=parseFloat(document.getElementById('expense-amount').value); if(!desc||isNaN(amt)) return alert("Invalid details!"); dailyExpenses.push({ time: new Date().toLocaleTimeString(), desc: desc, amount: amt }); db.ref('dailyExpenses').set(dailyExpenses); closeExpenseModal(); updateStats(); alert("Expense saved!"); }
 
@@ -2810,6 +2799,5 @@ function unlinkTable(tableNo) {
 }
 </script>
 
-<div id="print-expense-history-mode" style="display:none;"><h2>EXPENSE HISTORY</h2><table style="width:100%;border-collapse:collapse;"><tbody id="print-expense-history-body"></tbody><tfoot><tr><td style="font-weight:900;">TOTAL</td><td id="print-expense-history-total" style="text-align:right;font-weight:900;"></td></tr></tfoot></table></div>
 </body>
 </html>
