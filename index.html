@@ -210,7 +210,6 @@
         .admin-dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #f1f5f9; padding-bottom: 12px; margin-bottom: 15px; }
         .admin-dashboard-header h3 { margin: 0; color: var(--text-main); font-size: 16px; font-weight: 900; }
         
-        
         .stat-toggle-box { cursor: pointer; border: 1px solid var(--border-light); user-select: none; transition: all .2s ease; }
         .stat-toggle-box:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
         .stat-eye { margin-left: 5px; font-size: 12px; opacity: .7; }
@@ -283,7 +282,7 @@
             body.print-kitchen-mode #print-kitchen, body.print-kitchen-mode #print-kitchen * { visibility: visible !important; }
             body.print-kitchen-mode #print-kitchen { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 20px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-drawer-mode #print-drawer, body.print-drawer-mode #print-drawer * { visibility: visible !important; }
-            body.print-drawer-mode #print-drawer { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 16px !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
+            body.print-drawer-mode #print-drawer { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-size: 16px !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-history-mode #print-sales-history, body.print-sales-history #print-sales-history * { visibility: visible !important; }
             body.print-sales-history { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-item-report-mode #print-item-report, body.print-item-report-mode #print-item-report * { visibility: visible !important; }
@@ -295,8 +294,7 @@
         }
     
 /* =========================================================
-   AL HUSSAIN POS — PREMIUM 2026 VISUAL REFRESH
-   Visual-only layer: keeps existing application logic intact.
+   AL HUSSAIN POS — VISUAL REFRESH
    ========================================================= */
 :root {
     --primary: #7c3aed;
@@ -583,6 +581,7 @@ body {
 .table-link-item.selected { border-color:#7c3aed; background:#ede9fe; color:#6d28d9; }
 
 </style>
+<style>.order-source-label{display:inline-block;padding:3px 7px;border-radius:6px;font-size:10px;font-weight:900;margin-left:5px}</style>
 </head>
 <body>
 
@@ -658,13 +657,11 @@ body {
                     <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">Categories Priority</button>
                     <button class="admin-btn stock-btn" onclick="openStockModal()">Manual Stock</button>
                     <button class="admin-btn expense-btn" onclick="openExpenseModal()">Daily Expense</button>
-                    <button class="admin-btn expense-btn" onclick="openExpenseViewModal()">View Expenses</button>
                     <button class="admin-btn staff-btn" onclick="openStaffPerformanceModal()">Staff Shift Tracking</button>
                     <button class="admin-btn report-btn" onclick="openItemReportModal()">Daily Items Report</button>
                     <button class="admin-btn monthly-btn" onclick="openMonthlyReportModal()">Monthly History</button>
                     <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">QR Codes</button>
                     <button class="admin-btn history-btn" onclick="openHistoryModal()">Sales History</button>
-                    <button class="admin-btn monthly-btn" onclick="openPaymentSummaryModal()">Payment Summary</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">Day Close</button>
                 </div>
             </div>
@@ -826,18 +823,12 @@ body {
     <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Add Daily Expense</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 15px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><div style="margin-bottom: 20px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><button class="btn-small" style="width: 100%; padding: 14px; font-size:15px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
     <div id="monthly-report-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily & Monthly History</h3><button class="close-modal" onclick="closeMonthlyReportModal()">X</button></div><div class="modal-body"><div id="monthly-report-container"></div></div></div></div>
     <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
-    <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Source</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
-    <div id="history-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sale Details</h3><div><button class="btn-small" id="history-view-print-btn" onclick="printViewedSale()">Print</button><button class="close-modal" onclick="closeHistoryViewModal()" style="margin-left:5px;">X</button></div></div><div class="modal-body" id="history-view-body"></div></div></div>
+    <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
 
-
-    <div id="expense-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">View Expenses</h3><button class="close-modal" onclick="closeExpenseViewModal()">X</button></div><div class="modal-body"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"><div class="stat-box">Total: $<span id="view-expenses-total">0.00</span></div><div class="stat-box">This Month: $<span id="view-expenses-month-total">0.00</span></div><div class="stat-box">Daily Average: $<span id="view-expenses-month-average">0.00</span></div></div><table class="admin-table"><thead><tr><th>Date / Time</th><th>Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody id="view-expenses-tbody"></tbody></table><div id="view-expenses-empty" style="display:none;text-align:center;padding:20px;color:#64748b;">No expenses recorded.</div><h4 style="margin:18px 0 8px;">Monthly Trend</h4><div id="view-expenses-trend"></div></div></div></div>
-
-    <div id="payment-summary-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">Daily Payment Summary</h3><button class="close-modal" onclick="closePaymentSummaryModal()">X</button></div><div class="modal-body"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;"><div class="stat-box">Cash: $<span id="pay-summary-cash">0.00</span></div><div class="stat-box">Card: $<span id="pay-summary-card">0.00</span></div><div class="stat-box">QR Pay: $<span id="pay-summary-qr">0.00</span></div><div class="stat-box">Total: $<span id="pay-summary-total">0.00</span></div></div></div></div></div>
-
-    <!-- Print Templates -->
-    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span><br><b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
+    <div id="sale-view-modal" class="modal-overlay" style="display:none;"><div class="modal-content" style="max-width:650px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">Sale Details</h3><div><button id="sale-view-print" class="btn-small">Print</button><button class="close-modal" onclick="closeSaleViewModal()" style="margin-left:5px;">X</button></div></div><div class="modal-body" id="sale-view-details"></div></div></div> <!-- Print Templates -->
+    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     
-    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
+    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
     
     <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>SALES HISTORY REPORT</b></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span>$<span id="print-history-grand-total">0.00</span></span></div></div>
@@ -957,8 +948,6 @@ body {
         let currentSelectedTable = "";
         let currentOrderType = "Dine-In";
         let tableLinks = {};
-        let onlinePresenceKey = null;
-        let onlinePresenceRole = null;
         
         let customerHadActiveOrder = false;
         let lastBellTime = Date.now(); 
@@ -968,9 +957,9 @@ body {
             if (val && Array.isArray(val) && val.length > 0) {
                 menuData = val;
                 const baksoDefaults = defaultMenuData.filter(item => item.category === "Bakso");
-                const missingBakso = baksoDefaults.filter(def => !menuData.some(item => String(item.code || '') === String(def.code)));
-                if (missingBakso.length) {
-                    menuData = [...menuData, ...missingBakso];
+                const hasBaksoItems = menuData.some(item => item.category === "Bakso");
+                if (!hasBaksoItems && baksoDefaults.length) {
+                    menuData = [...menuData, ...baksoDefaults];
                     db.ref('menuData').set(menuData);
                 }
             } else { menuData = defaultMenuData; db.ref('menuData').set(defaultMenuData); }
@@ -1094,6 +1083,42 @@ body {
                 }
             }
         });
+
+        /*
+           =========================================================
+           MULTI-USER / MULTI-STAFF ONLINE TRACKING LOGIC
+           =========================================================
+        */
+        let currentSessionId = null;
+
+        function registerStaffSession(roleName) {
+            currentSessionId = db.ref('onlineStaff').push().key;
+            const sessionRef = db.ref(`onlineStaff/${currentSessionId}`);
+            
+            sessionRef.set({
+                role: roleName,
+                loginTime: Date.now()
+            });
+
+            sessionRef.onDisconnect().remove();
+        }
+
+        db.ref('onlineStaff').on('value', (snapshot) => {
+            const staffData = snapshot.val() || {};
+            const onlineCount = Object.keys(staffData).length;
+            
+            db.ref('shopOnline').set(onlineCount > 0);
+        });
+
+        db.ref('shopOnline').on('value', (snapshot) => {
+            const isOnline = !!snapshot.val();
+            const closedScreen = document.getElementById('shop-closed-screen');
+            if (closedScreen) {
+                if (loggedInRole === "customer") {
+                    closedScreen.style.display = isOnline ? 'none' : 'flex';
+                }
+            }
+        });
         
         db.ref('sales').on('value', (snapshot) => { completedSales = snapshot.val() || []; updateStats(); });
         db.ref('rawMaterials').on('value', (snapshot) => { rawMaterials = snapshot.val() || []; });
@@ -1137,13 +1162,9 @@ body {
             const tableParam = urlParams.get('table');
             const orderParam = urlParams.get('order');
 
-            let customerTarget = "";
-            let isTakeawayQR = false;
-
             if (orderParam && orderParam === "takeaway") {
-                isTakeawayQR = true;
-                
-                checkShopOnlineForCustomer((isOnline) => {
+                db.ref('shopOnline').once('value', (snap) => {
+                    let isOnline = snap.val();
                     if (!isOnline) {
                         document.getElementById('shop-closed-screen').style.display = 'flex';
                         return;
@@ -1169,7 +1190,8 @@ body {
                     return;
                 }
 
-                checkShopOnlineForCustomer((isOnline) => {
+                db.ref('shopOnline').once('value', (snap) => {
+                    let isOnline = snap.val();
                     if (!isOnline) {
                         document.getElementById('shop-closed-screen').style.display = 'flex';
                         return;
@@ -1234,52 +1256,6 @@ body {
             switchMobileTab('menu');
         }
 
-        function checkShopOnlineForCustomer(callback) {
-            db.ref('onlineStaff').once('value').then((snap) => {
-                const presence = snap.val() || {};
-                const hasOnlineStaff = Object.keys(presence).some(k => presence[k] && presence[k].active !== false);
-                callback(hasOnlineStaff);
-            }).catch(() => {
-                db.ref('shopOnline').once('value', snap => callback(!!snap.val()));
-            });
-        }
-
-        function refreshShopOnlineFromPresence() {
-            db.ref('onlineStaff').once('value').then((snap) => {
-                const presence = snap.val() || {};
-                const hasOnlineStaff = Object.keys(presence).some(k => presence[k] && presence[k].active !== false);
-                return db.ref('shopOnline').set(hasOnlineStaff);
-            }).catch(() => {});
-        }
-
-        function setStaffOnlinePresence(roleKey) {
-            clearStaffOnlinePresence().finally(() => {
-                const ref = db.ref('onlineStaff').push();
-                onlinePresenceKey = ref.key;
-                onlinePresenceRole = roleKey;
-                const presenceData = { role: roleKey, active: true, timestamp: firebase.database.ServerValue.TIMESTAMP };
-                ref.onDisconnect().remove();
-                ref.set(presenceData).then(() => refreshShopOnlineFromPresence()).catch(() => {});
-            });
-        }
-
-        function clearStaffOnlinePresence() {
-            if (!onlinePresenceKey) {
-                refreshShopOnlineFromPresence();
-                return Promise.resolve();
-            }
-            const key = onlinePresenceKey;
-            onlinePresenceKey = null;
-            onlinePresenceRole = null;
-            return db.ref('onlineStaff/' + key).remove().then(() => refreshShopOnlineFromPresence()).catch(() => {});
-        }
-
-        db.ref('onlineStaff').on('value', (snap) => {
-            const presence = snap.val() || {};
-            const hasOnlineStaff = Object.keys(presence).some(k => presence[k] && presence[k].active !== false);
-            db.ref('shopOnline').set(hasOnlineStaff);
-        });
-
         function handleLogin(event) {
             event.preventDefault();
             const user = document.getElementById('login-user').value.trim().toLowerCase();
@@ -1320,7 +1296,7 @@ body {
                 return; 
             }
 
-            setStaffOnlinePresence(roleKey);
+            registerStaffSession(roleKey);
 
             let todayDateKey = new Date().toISOString().split('T')[0];
             if (!staffShifts[todayDateKey]) staffShifts[todayDateKey] = {};
@@ -1354,7 +1330,15 @@ body {
         }
 
         function logout() { 
-            clearStaffOnlinePresence().finally(() => { location.href = liveBaseUrl; });
+            if (currentSessionId) {
+                db.ref(`onlineStaff/${currentSessionId}`).remove().then(() => {
+                    location.href = liveBaseUrl;
+                }).catch(() => {
+                    location.href = liveBaseUrl;
+                });
+            } else {
+                location.href = liveBaseUrl;
+            }
         }
 
         function refreshMenuData() { renderMenu(); alert("Menu Refreshed!"); }
@@ -1430,12 +1414,15 @@ body {
                 let orderData = activeOrders[tkKey];
                 let count = orderData.items ? orderData.items.reduce((sum, i) => sum + i.qty, 0) : 0;
                 let custInfo = orderData.custName ? `<br>${orderData.custName}` : '';
+                let sourceInfo = String(orderData.orderSource || '').toUpperCase() === 'QR'
+                    ? '<span style="display:inline-block;margin-top:4px;padding:3px 7px;border-radius:6px;background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:900;">QR TAKEAWAY</span>'
+                    : '<span style="display:inline-block;margin-top:4px;padding:3px 7px;border-radius:6px;background:#dcfce7;color:#166534;font-size:10px;font-weight:900;">COUNTER TAKEAWAY</span>';
                 let cancelBtn = loggedInRole === "admin" ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tkKey}', event)" style="position:absolute; top:8px; right:8px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:bold; cursor:pointer; z-index:2;">X</button>` : '';
 
                 container.innerHTML += `<div class="big-table-card occupied" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;" onclick="selectTableForOrder('${tkKey}', 'Takeaway')">
                     ${cancelBtn}
                     <h3 style="color:#b45309;">${tkKey}</h3>
-                    <p style="color:#92400e;">${count} Items${custInfo}<br>${formatElapsedTime(orderData.time)}</p>
+                    <p style="color:#92400e;">${count} Items${custInfo}<br>${sourceInfo}<br>${formatElapsedTime(orderData.time)}</p>
                 </div>`;
             });
         }
@@ -1714,54 +1701,26 @@ body {
 
         function clearSearch() { document.getElementById('search-input').value = ''; renderMenu(); }
         
-        function normalizeItemCode(value) {
-            return String(value ?? '')
-                .replace(/[\u200B-\u200D\uFEFF]/g, '')
-                .trim()
-                .toLowerCase()
-                .replace(/\s+/g, '');
-        }
-
-        function getItemCodeCandidates(item) {
-            return [item?.code, item?.itemCode, item?.barcode, item?.sku]
-                .filter(v => v !== undefined && v !== null && String(v).trim() !== '')
-                .map(normalizeItemCode);
-        }
-
-        async function handleSearchInput(event) {
+        function handleSearchInput(event) {
             const rawSearch = document.getElementById('search-input').value;
             const searchText = rawSearch.trim().toLowerCase();
-            const searchCode = normalizeItemCode(rawSearch);
-
+            const searchCode = searchText.replace(/\s+/g, '');
+            
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
 
             if (event.key === 'Enter' && searchCode !== '') {
-                let foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
-
-                if (!foundItem) {
-                    try {
-                        const snap = await db.ref('menuData').once('value');
-                        const latest = snap.val();
-                        if (Array.isArray(latest)) {
-                            menuData = latest;
-                            activeSource = latest;
-                            foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
-                        }
-                    } catch (err) {
-                        console.error('Code lookup failed:', err);
-                    }
-                }
-
-                if (foundItem) {
+                let foundItem = activeSource.find(m => {
+                    let c = m.code ? String(m.code).toLowerCase().replace(/\s+/g, '') : "";
+                    return c === searchCode;
+                });
+                if (foundItem) { 
                     if (foundItem.outOfStock) {
-                        alert(`\"${foundItem.name}\" is currently Out of Stock!`);
+                        alert(`"${foundItem.name}" is currently Out of Stock!`);
                     } else {
-                        addToCart(foundItem.id);
-                        document.getElementById('search-input').value = '';
-                        renderMenu();
+                        addToCart(foundItem.id); 
+                        document.getElementById('search-input').value = ''; 
+                        renderMenu(); 
                     }
-                } else {
-                    renderMenu();
                 }
             } else {
                 renderMenu();
@@ -1934,7 +1893,7 @@ body {
             let cName = existing.custName || sessionStorage.getItem('myTkName') || "Walk-in";
             let cPhone = existing.custPhone || sessionStorage.getItem('myTkPhone') || "";
 
-            activeOrders[orderKey] = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, tables: getLinkedTableNames(currentSelectedTable), items: JSON.parse(JSON.stringify(cart)) };
+            activeOrders[orderKey] = { time: existingTime, type: currentOrderType, orderSource: 'COUNTER', custName: cName, custPhone: cPhone, tables: getLinkedTableNames(currentSelectedTable), items: JSON.parse(JSON.stringify(cart)) };
             db.ref('activeOrders').set(activeOrders);
         }
 
@@ -1956,10 +1915,12 @@ body {
                 existingOrder.time = Date.now(); 
                 existingOrder.custName = cName;
                 existingOrder.custPhone = cPhone;
+                existingOrder.orderSource = 'QR';
             } else {
                 existingOrder = {
                     time: Date.now(),
                     type: currentOrderType,
+                    orderSource: 'QR',
                     custName: cName,
                     custPhone: cPhone,
                     items: newItems
@@ -2010,109 +1971,40 @@ body {
             printKitchenKOTSilent();
         }
 
-        let kitchenPrintQueue = [];
-        let kitchenPrintQueueIndex = 0;
-        let kitchenPrintAfterHandler = null;
-
-        // Food & Drinks பிரிக்கப்படும் இடம்
-        function getKitchenPrintGroup(items) {
-            const drinkCategories = new Set(["Minuman Tin", "Sejuk", "Hot Drinks", "Fresh Juice"]);
-            
-            // 4 categories மட்டும் Drinks-ஆக பிரிக்கப்படும்
-            const drinks = items.filter(i => drinkCategories.has(String(i.category || '').trim()));
-            
-            // மற்ற அனைத்து பொருட்களும் Food-ஆக பிரிக்கப்படும்
-            const food = items.filter(i => !drinkCategories.has(String(i.category || '').trim()));
-            
-            return { food, drinks };
-        }
-
-        function renderKitchenTicket(items, title) {
+        function printKitchenKOTSilent() {
             document.getElementById('k-order-type').innerText = currentOrderType; 
             document.getElementById('k-table').innerText = getOrderDisplayRef(currentSelectedTable);
-
+            
             let orderData = activeOrders[getLinkedOrderKey(currentSelectedTable)];
             if (orderData && orderData.custName) {
                 document.getElementById('k-cust-info').style.display = 'block';
-                document.getElementById('k-cust-name-val').innerText = orderData.custName;
+                document.getElementById('k-cust-name-val').innerText = orderData.custName + (orderData.custPhone ? ' • ' + orderData.custPhone : '');
             } else {
                 document.getElementById('k-cust-info').style.display = 'none';
             }
 
-            const heading = document.querySelector('#print-kitchen h2');
-            if (heading) heading.innerText = title;
-
-            const kItems = document.getElementById('k-items');
-            kItems.innerHTML = '';
-            items.forEach(i => {
+            const kItems = document.getElementById('k-items'); kItems.innerHTML = '';
+            cart.forEach(i => {
                 const noteStr = getFormattedItemNotes(i);
                 const safeName = escapeHtml(i.name || '');
                 const safeNote = escapeHtml(noteStr);
+
                 const noteHtml = noteStr
                     ? `<br><span style="display:block;font-size:16px;font-weight:900;margin-top:3px;white-space:pre-wrap;">NOTE: ${safeNote}</span>`
                     : '';
+
                 kItems.innerHTML += `
                     <tr>
                         <td style="padding:6px 0;border-bottom:1px dashed #000;">
-                            <b>${safeName}</b>${noteHtml}
+                            <b>${safeName}</b>
+                            ${noteHtml}
                         </td>
                         <td style="text-align:center;border-bottom:1px dashed #000;">
                             <b>${i.qty}</b>
                         </td>
                     </tr>`;
             });
-        }
-
-        function finishKitchenPrintQueue() {
-            if (kitchenPrintAfterHandler) {
-                window.removeEventListener('afterprint', kitchenPrintAfterHandler);
-                kitchenPrintAfterHandler = null;
-            }
-            kitchenPrintQueue = [];
-            kitchenPrintQueueIndex = 0;
-            document.body.className = '';
-            isPrinting = false;
-        }
-
-        function printNextKitchenTicket() {
-            if (kitchenPrintQueueIndex >= kitchenPrintQueue.length) {
-                finishKitchenPrintQueue();
-                return;
-            }
-
-            const ticket = kitchenPrintQueue[kitchenPrintQueueIndex];
-            renderKitchenTicket(ticket.items, ticket.title);
-            document.body.className = 'print-kitchen-mode';
-
-            kitchenPrintAfterHandler = function() {
-                window.removeEventListener('afterprint', kitchenPrintAfterHandler);
-                kitchenPrintAfterHandler = null;
-                kitchenPrintQueueIndex++;
-                setTimeout(printNextKitchenTicket, 150);
-            };
-            window.addEventListener('afterprint', kitchenPrintAfterHandler);
-            setTimeout(() => window.print(), 100);
-        }
-
-        function printKitchenKOTSilent() {
-            if (!Array.isArray(cart) || cart.length === 0) return alert("Cart is empty!");
-
-            const groups = getKitchenPrintGroup(cart);
-            kitchenPrintQueue = [];
-
-            // Food பொருட்கள் இருந்தால் KITCHEN ORDER (FOOD) என்ற தலைப்பில் பிரிண்ட் ஆகும்
-            if (groups.food.length > 0) {
-                kitchenPrintQueue.push({ items: groups.food, title: '*** KITCHEN ORDER (FOOD) ***' });
-            }
-            // Drinks பொருட்கள் இருந்தால் DRINKS ORDER (DRINKS) என்ற தலைப்பில் பிரிண்ட் ஆகும்
-            if (groups.drinks.length > 0) {
-                kitchenPrintQueue.push({ items: groups.drinks, title: '*** DRINKS ORDER (DRINKS) ***' });
-            }
-
-            if (kitchenPrintQueue.length === 0) return;
-            kitchenPrintQueueIndex = 0;
-            isPrinting = true;
-            printNextKitchenTicket();
+            safePrint("print-kitchen-mode");
         }
 
         function openCashDrawerOnly() { safePrint("print-drawer-mode"); }
@@ -2174,11 +2066,7 @@ body {
 
             incrementItemPopularity(cart);
 
-            const paidOrderKeyForSale = getLinkedOrderKey(currentSelectedTable);
-            const paidOrderDataForSale = activeOrders[paidOrderKeyForSale] || {};
-            const saleCustName = paidOrderDataForSale.custName || sessionStorage.getItem('myTkName') || '';
-            const saleCustPhone = paidOrderDataForSale.custPhone || sessionStorage.getItem('myTkPhone') || '';
-            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${getOrderDisplayRef(currentSelectedTable)})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: getOrderDisplayRef(currentSelectedTable), subtotal: subtotal, discount: discount, paid: paid, change: change, custName: saleCustName, custPhone: saleCustPhone, items: JSON.parse(JSON.stringify(cart)) });
+            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${getOrderDisplayRef(currentSelectedTable)})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: getOrderDisplayRef(currentSelectedTable), subtotal: subtotal, discount: discount, paid: paid, change: change, items: JSON.parse(JSON.stringify(cart)) });
             db.ref('sales').set(completedSales);
 
             let todayKey = new Date().toISOString().split('T')[0];
@@ -2200,115 +2088,86 @@ body {
             alert("Payment Successful! Change: $" + change.toFixed(2));
         }
 
-        function fillReceiptDetails(orderType, ref, method, time, sub, disc, total, paid, change, items, customerNameOverride, customerPhoneOverride) {
-            document.getElementById('p-order-type').innerText = orderType;
+        function fillReceiptDetails(orderType, ref, method, time, sub, disc, total, paid, change, items) {
+            document.getElementById('p-order-type').innerText = orderType; 
             document.getElementById('p-table').innerText = ref;
-
-            const refKey = (typeof getLinkedOrderKey === 'function') ? getLinkedOrderKey(ref) : ref;
-            const orderData = activeOrders[ref] || activeOrders[refKey] || {};
-            const customerName = customerNameOverride || orderData.custName || sessionStorage.getItem('myTkName') || '';
-            const customerPhone = customerPhoneOverride || orderData.custPhone || sessionStorage.getItem('myTkPhone') || '';
-            const custInfo = document.getElementById('p-cust-info');
-            if (customerName || customerPhone) {
-                custInfo.style.display = 'block';
-                document.getElementById('p-cust-name-val').innerText = customerName || '-';
-                document.getElementById('p-cust-phone-val').innerText = customerPhone || '-';
+            
+            let orderData = activeOrders[ref];
+            if (orderData && orderData.custName) {
+                document.getElementById('p-cust-info').style.display = 'block';
+                document.getElementById('p-cust-name-val').innerText = orderData.custName + (orderData.custPhone ? ' • ' + orderData.custPhone : '');
             } else {
-                custInfo.style.display = 'none';
-                document.getElementById('p-cust-name-val').innerText = '';
-                document.getElementById('p-cust-phone-val').innerText = '';
+                document.getElementById('p-cust-info').style.display = 'none';
             }
 
-            document.getElementById('p-method').innerText = method; document.getElementById('p-time').innerText = time;
-            document.getElementById('p-subtotal').innerText = Number(sub).toFixed(2); document.getElementById('p-total').innerText = Number(total).toFixed(2);
-            document.getElementById('p-paid').innerText = Number(paid).toFixed(2); document.getElementById('p-change').innerText = Number(change).toFixed(2);
+            document.getElementById('p-method').innerText = method; 
+            document.getElementById('p-time').innerText = time;
+            document.getElementById('p-subtotal').innerText = Number(sub).toFixed(2); 
+            document.getElementById('p-total').innerText = Number(total).toFixed(2);
+            document.getElementById('p-paid').innerText = Number(paid).toFixed(2); 
+            document.getElementById('p-change').innerText = Number(change).toFixed(2);
+            
             const pItems = document.getElementById('p-items'); pItems.innerHTML = '';
             items.forEach(i => {
                 const noteStr = getFormattedItemNotes(i);
                 const safeName = escapeHtml(i.name || '');
                 const safeNote = escapeHtml(noteStr);
-                const noteHtml = noteStr ? `<br><span style="display:block;margin-top:3px;font-size:14px;font-weight:700;white-space:pre-wrap;">Note: ${safeNote}</span>` : '';
-                pItems.innerHTML += `<tr><td><b>${safeName}</b>${noteHtml}</td><td style="text-align:center;"><b>${i.qty}</b></td><td style="text-align:right;"><b>$${(Number(i.customPrice) * Number(i.qty)).toFixed(2)}</b></td></tr>`;
+
+                const noteHtml = noteStr
+                    ? `<br><span style="display:block;margin-top:3px;font-size:14px;font-weight:700;white-space:pre-wrap;">Note: ${safeNote}</span>`
+                    : '';
+
+                pItems.innerHTML += `
+                    <tr>
+                        <td>
+                            <b>${safeName}</b>
+                            ${noteHtml}
+                        </td>
+                        <td style="text-align:center;"><b>${i.qty}</b></td>
+                        <td style="text-align:right;"><b>$${(Number(i.customPrice) * Number(i.qty)).toFixed(2)}</b></td>
+                    </tr>`;
             });
         }
 
         function reprintBill(index) {
             let sale = completedSales[index]; if (!sale) return;
-            fillReceiptDetails(sale.orderType, sale.refName, sale.method, sale.time, sale.subtotal, sale.discount, sale.amount, sale.paid, sale.change, sale.items, sale.custName, sale.custPhone);
+            fillReceiptDetails(sale.orderType, sale.refName, sale.method, sale.time, sale.subtotal, sale.discount, sale.amount, sale.paid, sale.change, sale.items);
             safePrint("print-customer");
         }
 
-        let menuManagerFilterTimer = null;
-        let menuManagerCategoryOptions = null;
-
-        function getMenuManagerSource() {
-            return (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+        function openMenuManagerModal() { 
+            document.getElementById('menu-manager-search').value = ''; 
+            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+            populateMenuManagerTable(activeSource); 
+            document.getElementById('menu-manager-modal').style.display = 'flex'; 
         }
-
-        function getMenuManagerCategoryOptions() {
-            if (menuManagerCategoryOptions) return menuManagerCategoryOptions;
-            const cats = getAllCategories();
-            menuManagerCategoryOptions = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-            return menuManagerCategoryOptions;
+        function filterMenuManagerList() { 
+            const q = document.getElementById('menu-manager-search').value.toLowerCase(); 
+            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+            populateMenuManagerTable(activeSource.filter(i => {
+                let safeName = i.name ? String(i.name).toLowerCase() : "";
+                return safeName.includes(q);
+            })); 
         }
-
-        function openMenuManagerModal() {
-            const modal = document.getElementById('menu-manager-modal');
-            const search = document.getElementById('menu-manager-search');
-            if (search) search.value = '';
-            if (modal) modal.style.display = 'flex';
-
-            requestAnimationFrame(() => populateMenuManagerTable(getMenuManagerSource()));
-        }
-
-        function filterMenuManagerList() {
-            clearTimeout(menuManagerFilterTimer);
-            menuManagerFilterTimer = setTimeout(() => {
-                const input = document.getElementById('menu-manager-search');
-                const q = (input ? input.value : '').trim().toLowerCase();
-                const source = getMenuManagerSource();
-                if (!q) {
-                    populateMenuManagerTable(source);
-                    return;
-                }
-                populateMenuManagerTable(source.filter(i => String(i.name || '').toLowerCase().includes(q)));
-            }, 100);
-        }
-
         function populateMenuManagerTable(items) {
-            const tbody = document.getElementById('menu-manager-tbody');
-            if (!tbody) return;
+            const tbody = document.getElementById('menu-manager-tbody'); if(!tbody) return; tbody.innerHTML = '';
+            let cats = getAllCategories();
+            items.forEach(item => {
+                let opt = ''; cats.forEach(c => { opt += `<option value="${c}" ${c === item.category ? 'selected' : ''}>${c}</option>`; });
+                let stockStatusOpt = `<select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:bold; color:${item.outOfStock ? '#ef4444' : '#10b981'};" onchange="updateMenuStockStatus(${item.id}, this.value)">
+                    <option value="in" ${!item.outOfStock ? 'selected' : ''}>In Stock</option>
+                    <option value="out" ${item.outOfStock ? 'selected' : ''}>Out of Stock</option>
+                </select>`;
 
-            const categoryOptions = getMenuManagerCategoryOptions();
-            const rows = new Array(items.length);
-
-            for (let idx = 0; idx < items.length; idx++) {
-                const item = items[idx];
-                const safeName = escapeHtml(item.name || '');
-                const safeCategory = escapeHtml(item.category || '');
-                const price = Number(item.price) || 0;
-                const stockColor = item.outOfStock ? '#ef4444' : '#10b981';
-                const stockLabel = item.outOfStock ? 'Out of Stock' : 'In Stock';
-                const inSelected = item.outOfStock ? '' : ' selected';
-                const outSelected = item.outOfStock ? ' selected' : '';
-
-                const opts = categoryOptions.replace(
-                    `value="${safeCategory}"`,
-                    `value="${safeCategory}" selected`
-                );
-
-                rows[idx] = `<tr>
-                    <td><input type="text" value="${safeName}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td>
-                    <td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opts}</select></td>
-                    <td style="text-align:right;"><div style="display:flex; gap:5px; justify-content:flex-end; align-items:center;"><input type="number" value="${price.toFixed(2)}" step="0.01" min="0" data-price-id="${item.id}" data-price-code="${escapeHtml(item.code || '')}" onchange="updateMenuField(${item.id}, 'price', this.value, '${String(item.code || '').replace("'", "\\'")}')" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:70px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"><button type="button" onclick="saveMenuPrice(${item.id}, this.previousElementSibling.value, '${String(item.code || '').replace("'", "\\'")}')" style="background:#16a34a;color:white;border:none;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:800;">Save</button></div></td>
-                    <td style="text-align:center;"><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:bold; color:${stockColor};" onchange="updateMenuStockStatus(${item.id}, this.value)"><option value="in"${inSelected}>In Stock</option><option value="out"${outSelected}>Out of Stock</option></select></td>
+                tbody.innerHTML += `<tr>
+                    <td><input type="text" value="${escapeHtml(item.name)}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td>
+                    <td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opt}</select></td>
+                    <td style="text-align:right;"><input type="number" value="${item.price.toFixed(2)}" step="0.50" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:60px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"></td>
+                    <td style="text-align:center;">${stockStatusOpt}</td>
                     <td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;">Del</button></td>
                 </tr>`;
-            }
-
-            tbody.innerHTML = rows.join('');
+            });
         }
-
         function closeMenuManagerModal() { document.getElementById('menu-manager-modal').style.display = 'none'; }
         
         function updateMenuStockStatus(id, val) {
@@ -2321,64 +2180,16 @@ body {
             }
         }
 
-        async function updateMenuField(id, field, val, code) {
-            const source = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            if (field === 'price') {
-                const n = Number.parseFloat(val);
-                if (!Number.isFinite(n) || n < 0) { alert('Please enter a valid price.'); return; }
-                const newPrice = Math.round(n * 100) / 100;
-                try {
-                    const snap = await db.ref('menuData').once('value');
-                    let arr = snap.val();
-                    arr = Array.isArray(arr) ? arr.map(m => ({...m})) : source.map(m => ({...m}));
-
-                    const wantedCode = String(code || '').trim();
-                    let idx = wantedCode ? arr.findIndex(m => String(m.code || '').trim() === wantedCode) : -1;
-                    if (idx < 0) idx = arr.findIndex(m => Number(m.id) === Number(id));
-
-                    if (idx < 0 && wantedCode.startsWith('BK')) {
-                        const fallback = defaultMenuData.find(m => String(m.code || '') === wantedCode);
-                        if (fallback) {
-                            arr.push({...fallback, price: newPrice});
-                            idx = arr.length - 1;
-                        }
-                    }
-                    if (idx < 0) { alert('Menu item not found.'); return; }
-
-                    arr[idx] = {...arr[idx], price: newPrice};
-                    await db.ref('menuData').set(arr);
-                    menuData = arr;
-
-                    const inputs = document.querySelectorAll('[data-price-code]');
-                    let input = null;
-                    for (const el of inputs) {
-                        if (wantedCode && String(el.getAttribute('data-price-code') || '') === wantedCode) { input = el; break; }
-                    }
-                    if (!input) input = document.querySelector(`[data-price-id="${id}"]`);
-                    if (input) input.value = newPrice.toFixed(2);
-                    populateMenuManagerTable(getMenuManagerSource());
-                    renderMenu();
-                } catch (err) {
-                    alert('Could not save menu price: ' + err.message);
-                }
-                return;
-            }
-
-            const activeSource = source.map(m => ({...m}));
-            const item = activeSource.find(m => (code && String(m.code || '') === String(code)) || Number(m.id) === Number(id));
-            if (!item) return;
-            if (field === 'category') item.category = val;
-            else if (field === 'name') item.name = String(val || '').trim();
-            db.ref('menuData').set(activeSource).then(() => {
-                menuData = activeSource;
-                renderMenu();
-            }).catch(err => alert('Could not save menu change: ' + err.message));
+        function updateMenuField(id, field, val) { 
+            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+            let item = activeSource.find(m => m.id === id); 
+            if(item) { 
+                if(field==='price') item.price=parseFloat(val)||0; 
+                else if(field==='category') item.category=val; 
+                else if(field==='name') item.name=val; 
+                db.ref('menuData').set(activeSource); 
+            } 
         }
-
-        function saveMenuPrice(id, val, code) {
-            updateMenuField(id, 'price', val, code);
-        }
-
         function deleteMenuItem(id) { 
             if(confirm("Delete item?")) { 
                 let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
@@ -2467,30 +2278,53 @@ body {
         }
 
         function openHistoryModal() {
-            let tbody = document.getElementById('history-table-body');
+            let tbody = document.getElementById('history-table-body'); 
             let rowsHtml = '';
             let salesData = Array.isArray(completedSales) ? completedSales : [];
-            salesData.forEach((s, idx) => {
-                const phone = s.custPhone || '';
-                rowsHtml += `<tr><td><span style="font-size:12px; color:#64748b;">${s.time}</span></td><td><b>${s.ref}</b></td><td>${s.method}</td><td style="text-align:right; font-weight:900;">$${Number(s.amount).toFixed(2)}</td><td style="text-align:center; white-space:nowrap;"><button onclick="viewSale(${idx})" class="btn-small" style="padding:6px 10px; margin-right:4px;">View</button><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 10px;">Print</button></td></tr>`;
+            salesData.forEach((s, idx) => { 
+                rowsHtml += `<tr>
+                    <td><span style="font-size:12px; color:#64748b;">${s.time}</span></td>
+                    <td><b>${s.ref}</b></td>
+                    <td>${s.method}</td>
+                    <td style="text-align:right; font-weight:900;">$${s.amount.toFixed(2)}</td>
+                    <td style="text-align:center; white-space:nowrap;"><button onclick="viewSale(${idx})" class="btn-small" style="padding:6px 12px; margin-right:4px;">View</button><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button></td>
+                </tr>`; 
             });
-            tbody.innerHTML = rowsHtml;
+            tbody.innerHTML = rowsHtml; 
             document.getElementById('history-modal').style.display = 'flex';
         }
 
-        function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
-        let currentViewedSaleIndex = -1;
         function viewSale(index) {
             const sale = completedSales[index];
             if (!sale) return;
-            currentViewedSaleIndex = index;
-            const itemRows = (sale.items || []).map(i => `<tr><td style="padding:6px 0;"><b>${escapeHtml(i.name || '')}</b></td><td style="text-align:center;"><b>${i.qty}</b></td><td style="text-align:right;"><b>$${(Number(i.customPrice) * Number(i.qty)).toFixed(2)}</b></td></tr>`).join('');
-            document.getElementById('history-view-body').innerHTML = `<div style="font-size:16px;font-weight:800;line-height:1.65;"><div><b>Order:</b> ${escapeHtml(sale.ref || '')}</div><div><b>Time:</b> ${escapeHtml(sale.time || '')}</div><div><b>Payment:</b> ${escapeHtml(sale.method || '')}</div>${sale.custName || sale.custPhone ? `<div><b>Customer:</b> ${escapeHtml(sale.custName || '-')}</div><div><b>Phone:</b> ${escapeHtml(sale.custPhone || '-')}</div>` : ''}<hr style="border-top:2px solid #000;"><table style="width:100%;border-collapse:collapse;"><thead><tr><th style="text-align:left;">Item</th><th>Qty</th><th style="text-align:right;">Price</th></tr></thead><tbody>${itemRows}</tbody></table><hr style="border-top:2px solid #000;"><div style="display:flex;justify-content:space-between;"><span>Subtotal</span><b>$${Number(sale.subtotal || 0).toFixed(2)}</b></div><div style="display:flex;justify-content:space-between;"><span>Discount</span><b>$${Number(sale.discount || 0).toFixed(2)}</b></div><div style="display:flex;justify-content:space-between;font-size:20px;"><span>TOTAL</span><b>$${Number(sale.amount || 0).toFixed(2)}</b></div></div>`;
-            document.getElementById('history-view-modal').style.display='flex';
+            const items = (sale.items || []).map(i => `
+                <tr>
+                    <td style="padding:8px;border-bottom:1px solid #e2e8f0;"><b>${i.name || ''}</b></td>
+                    <td style="padding:8px;text-align:center;border-bottom:1px solid #e2e8f0;"><b>${i.qty || 0}</b></td>
+                    <td style="padding:8px;text-align:right;border-bottom:1px solid #e2e8f0;"><b>$${(Number(i.customPrice || i.price || 0) * Number(i.qty || 0)).toFixed(2)}</b></td>
+                </tr>`).join('');
+            const customer = sale.customerName || sale.customer || '';
+            const phone = sale.customerPhone || sale.phone || '';
+            const ref = sale.refName || sale.ref || sale.orderType || '';
+            const detail = document.getElementById('sale-view-details');
+            detail.innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;font-size:14px;">
+                    <div><b>Time:</b> ${sale.time || ''}</div><div><b>Reference:</b> ${ref}</div>
+                    <div><b>Payment:</b> ${sale.method || ''}</div><div><b>Total:</b> $${Number(sale.amount || 0).toFixed(2)}</div>
+                    ${customer ? `<div><b>Customer:</b> ${customer}</div>` : ''}
+                    ${phone ? `<div><b>Phone:</b> ${phone}</div>` : ''}
+                </div>
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                    <thead><tr style="background:#f1f5f9;"><th style="padding:8px;text-align:left;">Item</th><th style="padding:8px;">Qty</th><th style="padding:8px;text-align:right;">Amount</th></tr></thead>
+                    <tbody>${items}</tbody>
+                </table>`;
+            document.getElementById('sale-view-modal').style.display = 'flex';
+            document.getElementById('sale-view-print').onclick = () => reprintBill(index);
         }
-        function closeHistoryViewModal() { document.getElementById('history-view-modal').style.display='none'; currentViewedSaleIndex=-1; }
-        function printViewedSale() { if (currentViewedSaleIndex >= 0) reprintBill(currentViewedSaleIndex); }
 
+        function closeSaleViewModal() { document.getElementById('sale-view-modal').style.display = 'none'; }
+        function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
+        
         function printSalesHistory() {
             let total = completedSales.reduce((s, x)=>s+x.amount, 0);
             document.getElementById('print-history-grand-total').innerText = total.toFixed(2);
@@ -2511,7 +2345,8 @@ body {
                 dailyHistoryRecords[dateKey] = { sales: salesTotal, expenses: expTotal };
                 db.ref('dailyHistoryRecords').set(dailyHistoryRecords);
 
-                refreshShopOnlineFromPresence();
+                db.ref('onlineStaff').remove();
+                db.ref('shopOnline').set(false);
 
                 document.getElementById('dc-date').innerText = new Date().toLocaleString();
                 document.getElementById('dc-sales').innerText = salesTotal.toFixed(2);
@@ -2575,6 +2410,7 @@ body {
 </div>
 
 <script>
+/* === OPTIONAL TABLE LINKING: Tables 1-13 === */
 let selectedTablesForLink = [];
 
 function openTableLinkModal() {
@@ -2783,139 +2619,6 @@ function unlinkTable(tableNo) {
         db.ref().update(updates).then(() => renderBigTableSelectionGrid());
     });
 }
-</script>
-
-
-<script>
-(function(){
-  function sourceLabel(order){
-    const explicit = String(order && (order.orderSource || order.source || '')).toLowerCase();
-    if (explicit === 'qr' || explicit.includes('qr')) {
-      return String(order.orderType || '').toLowerCase().includes('takeaway') ? 'QR TAKEAWAY' : 'QR ORDER';
-    }
-    if (explicit === 'counter' || explicit.includes('counter')) {
-      return String(order.orderType || '').toLowerCase().includes('takeaway') ? 'COUNTER TAKEAWAY' : 'COUNTER ORDER';
-    }
-    const ref = String(order && (order.ref || order.refName || '')).toLowerCase();
-    if (ref.includes('takeaway')) return 'COUNTER TAKEAWAY';
-    return 'COUNTER ORDER';
-  }
-  window.getOrderSourceLabel = sourceLabel;
-
-  window.openExpenseViewModal = function(){
-    const modal=document.getElementById('expense-view-modal');
-    const tbody=document.getElementById('view-expenses-tbody');
-    if(!modal||!tbody) return;
-    const expenses=Array.isArray(dailyExpenses)?dailyExpenses:[];
-    tbody.innerHTML='';
-    let total=0, monthTotal=0, days=new Set();
-    const now=new Date(), key=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-    expenses.slice().reverse().forEach(e=>{
-      const a=Number(e.amount)||0; total+=a;
-      const date=e.date||'—';
-      if(date.startsWith(key)){monthTotal+=a;days.add(date);}
-      tbody.innerHTML += '<tr><td><b>'+date+'</b><br><small>'+(e.time||'')+'</small></td><td><b>'+escapeHtml(String(e.desc||''))+'</b></td><td style="text-align:right;font-weight:900;">$'+a.toFixed(2)+'</td></tr>';
-    });
-    document.getElementById('view-expenses-total').innerText=total.toFixed(2);
-    document.getElementById('view-expenses-month-total').innerText=monthTotal.toFixed(2);
-    document.getElementById('view-expenses-month-average').innerText=(days.size?monthTotal/days.size:0).toFixed(2);
-    const empty=document.getElementById('view-expenses-empty'); if(empty) empty.style.display=expenses.length?'none':'block';
-    const monthly={};
-    expenses.forEach(e=>{if(e.date){const k=e.date.slice(0,7);monthly[k]=(monthly[k]||0)+(Number(e.amount)||0);}});
-    const trend=document.getElementById('view-expenses-trend');
-    if(trend) trend.innerHTML=Object.keys(monthly).sort().reverse().map(k=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;"><b>'+k+'</b><b>$'+monthly[k].toFixed(2)+'</b></div>').join('')||'<div style="color:#64748b;">No dated expense records yet.</div>';
-    modal.style.display='flex';
-  };
-  window.closeExpenseViewModal=function(){const m=document.getElementById('expense-view-modal');if(m)m.style.display='none';};
-
-  window.openPaymentSummaryModal=function(){
-    const today=new Date().toISOString().split('T')[0];
-    const sales=Array.isArray(completedSales)?completedSales:[];
-    let cash=0,card=0,qr=0,total=0;
-    sales.forEach(s=>{
-      const t=String(s.time||'');
-      const isToday=t ? new Date(t).toISOString().split('T')[0]===today : true;
-      if(!isToday)return;
-      const a=Number(s.amount)||0; total+=a;
-      const m=String(s.method||'').toLowerCase();
-      if(m==='card')card+=a; else if(m.includes('qr'))qr+=a; else if(m==='cash')cash+=a;
-    });
-    document.getElementById('pay-summary-cash').innerText=cash.toFixed(2);
-    document.getElementById('pay-summary-card').innerText=card.toFixed(2);
-    document.getElementById('pay-summary-qr').innerText=qr.toFixed(2);
-    document.getElementById('pay-summary-total').innerText=total.toFixed(2);
-    document.getElementById('payment-summary-modal').style.display='flex';
-  };
-  window.closePaymentSummaryModal=function(){const m=document.getElementById('payment-summary-modal');if(m)m.style.display='none';};
-
-  // Patch sale source at payment time while preserving every existing field.
-  const originalConfirm = window.confirmPaymentProcess;
-  if(typeof originalConfirm==='function'){
-    window.confirmPaymentProcess=function(){
-      const before=completedSales.length;
-      const result=originalConfirm.apply(this,arguments);
-      if(completedSales.length>before){
-        const s=completedSales[completedSales.length-1];
-        if(!s.orderSource) s.orderSource = (loggedInRole==='customer') ? 'QR' : 'COUNTER';
-        db.ref('sales').set(completedSales);
-      }
-      return result;
-    };
-  }
-
-  // Patch Sales History rendering to show source while retaining View + Print.
-  const originalHistory = window.openHistoryModal;
-  if(typeof originalHistory==='function'){
-    window.openHistoryModal=function(){
-      originalHistory.apply(this,arguments);
-      const tbody=document.getElementById('history-table-body');
-      if(!tbody)return;
-      const sales=Array.isArray(completedSales)?completedSales:[];
-      tbody.innerHTML=sales.map((s,idx)=>{
-        const src=sourceLabel(s);
-        return '<tr><td><span style="font-size:12px;color:#64748b;">'+escapeHtml(String(s.time||''))+'</span></td><td><b>'+escapeHtml(String(s.ref||''))+'</b></td><td><b>'+escapeHtml(src)+'</b></td><td>'+escapeHtml(String(s.method||''))+'</td><td style="text-align:right;font-weight:900;">$'+Number(s.amount||0).toFixed(2)+'</td><td style="text-align:center;white-space:nowrap;"><button onclick="viewSale('+idx+')" class="btn-small" style="padding:6px 10px;margin-right:4px;">View</button><button onclick="reprintBill('+idx+')" class="btn-small" style="padding:6px 10px;">Print</button></td></tr>';
-      }).join('');
-    };
-  }
-})();
-</script>
-
-
-<script>
-(function(){
-  // Preserve the existing order functions, adding only an explicit source marker.
-  const _saveSilent = window.saveOrderToTableSilent;
-  if (typeof _saveSilent === 'function') {
-    window.saveOrderToTableSilent = function(){
-      const r = _saveSilent.apply(this, arguments);
-      try {
-        if (loggedInRole !== 'customer' && cart && cart.length && currentSelectedTable) {
-          const key = getLinkedOrderKey(currentSelectedTable);
-          if (activeOrders[key]) {
-            activeOrders[key].orderSource = 'COUNTER';
-            db.ref('activeOrders').set(activeOrders);
-          }
-        }
-      } catch(e){}
-      return r;
-    };
-  }
-
-  const _customerSend = window.customerSendOrder;
-  if (typeof _customerSend === 'function') {
-    window.customerSendOrder = function(){
-      const r = _customerSend.apply(this, arguments);
-      try {
-        const key = getLinkedOrderKey(currentSelectedTable);
-        if (activeOrders[key]) {
-          activeOrders[key].orderSource = 'QR';
-          db.ref('activeOrders').set(activeOrders);
-        }
-      } catch(e){}
-      return r;
-    };
-  }
-})();
 </script>
 
 </body>
