@@ -658,11 +658,13 @@ body {
                     <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">Categories Priority</button>
                     <button class="admin-btn stock-btn" onclick="openStockModal()">Manual Stock</button>
                     <button class="admin-btn expense-btn" onclick="openExpenseModal()">Daily Expense</button>
+                    <button class="admin-btn expense-btn" onclick="openExpenseViewModal()">View Expenses</button>
                     <button class="admin-btn staff-btn" onclick="openStaffPerformanceModal()">Staff Shift Tracking</button>
                     <button class="admin-btn report-btn" onclick="openItemReportModal()">Daily Items Report</button>
                     <button class="admin-btn monthly-btn" onclick="openMonthlyReportModal()">Monthly History</button>
                     <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">QR Codes</button>
                     <button class="admin-btn history-btn" onclick="openHistoryModal()">Sales History</button>
+                    <button class="admin-btn monthly-btn" onclick="openPaymentSummaryModal()">Payment Summary</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">Day Close</button>
                 </div>
             </div>
@@ -824,13 +826,18 @@ body {
     <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Add Daily Expense</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 15px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><div style="margin-bottom: 20px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><button class="btn-small" style="width: 100%; padding: 14px; font-size:15px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
     <div id="monthly-report-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily & Monthly History</h3><button class="close-modal" onclick="closeMonthlyReportModal()">X</button></div><div class="modal-body"><div id="monthly-report-container"></div></div></div></div>
     <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
-    <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
+    <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Source</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
     <div id="history-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sale Details</h3><div><button class="btn-small" id="history-view-print-btn" onclick="printViewedSale()">Print</button><button class="close-modal" onclick="closeHistoryViewModal()" style="margin-left:5px;">X</button></div></div><div class="modal-body" id="history-view-body"></div></div></div>
+
+
+    <div id="expense-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">View Expenses</h3><button class="close-modal" onclick="closeExpenseViewModal()">X</button></div><div class="modal-body"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"><div class="stat-box">Total: $<span id="view-expenses-total">0.00</span></div><div class="stat-box">This Month: $<span id="view-expenses-month-total">0.00</span></div><div class="stat-box">Daily Average: $<span id="view-expenses-month-average">0.00</span></div></div><table class="admin-table"><thead><tr><th>Date / Time</th><th>Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody id="view-expenses-tbody"></tbody></table><div id="view-expenses-empty" style="display:none;text-align:center;padding:20px;color:#64748b;">No expenses recorded.</div><h4 style="margin:18px 0 8px;">Monthly Trend</h4><div id="view-expenses-trend"></div></div></div></div>
+
+    <div id="payment-summary-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">Daily Payment Summary</h3><button class="close-modal" onclick="closePaymentSummaryModal()">X</button></div><div class="modal-body"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;"><div class="stat-box">Cash: $<span id="pay-summary-cash">0.00</span></div><div class="stat-box">Card: $<span id="pay-summary-card">0.00</span></div><div class="stat-box">QR Pay: $<span id="pay-summary-qr">0.00</span></div><div class="stat-box">Total: $<span id="pay-summary-total">0.00</span></div></div></div></div></div>
 
     <!-- Print Templates -->
     <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span><br><b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     
-    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
+    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
     
     <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>SALES HISTORY REPORT</b></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span>$<span id="print-history-grand-total">0.00</span></span></div></div>
@@ -960,12 +967,9 @@ body {
             const val = snapshot.val();
             if (val && Array.isArray(val) && val.length > 0) {
                 menuData = val;
-                // Keep the existing menu untouched, but restore the original Bakso items
-                // if the category/items were accidentally removed from Firebase.
                 const baksoDefaults = defaultMenuData.filter(item => item.category === "Bakso");
                 const missingBakso = baksoDefaults.filter(def => !menuData.some(item => String(item.code || '') === String(def.code)));
                 if (missingBakso.length) {
-                    // Restore only missing Bakso items; never overwrite an existing Bakso price.
                     menuData = [...menuData, ...missingBakso];
                     db.ref('menuData').set(menuData);
                 }
@@ -976,7 +980,6 @@ body {
         db.ref('categoryOrder').on('value', (snapshot) => {
             const val = snapshot.val();
             if (val && Array.isArray(val)) {
-                // Preserve the user's existing category order and add only missing default categories.
                 categoryOrder = [...val, ...defaultCategoryOrder.filter(c => !val.includes(c))];
                 if (categoryOrder.length !== val.length) db.ref('categoryOrder').set(categoryOrder);
             } else { categoryOrder = defaultCategoryOrder; db.ref('categoryOrder').set(defaultCategoryOrder); }
@@ -988,7 +991,7 @@ body {
             renderBigTableSelectionGrid();
         });
 
-db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
+        db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             const val = snapshot.val();
             if (val && typeof val === 'number') { takeawaySequenceCounter = val; } 
             else { takeawaySequenceCounter = 100; db.ref('takeawaySequenceCounter').set(100); }
@@ -1271,7 +1274,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             return db.ref('onlineStaff/' + key).remove().then(() => refreshShopOnlineFromPresence()).catch(() => {});
         }
 
-        // Keep the legacy shopOnline flag synchronized with the real multi-session presence.
         db.ref('onlineStaff').on('value', (snap) => {
             const presence = snap.val() || {};
             const hasOnlineStaff = Object.keys(presence).some(k => presence[k] && presence[k].active !== false);
@@ -1318,7 +1320,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 return; 
             }
 
-            // Presence-based online status: any authorized Admin/Staff/Order Taker keeps the shop online.
             setStaffOnlinePresence(roleKey);
 
             let todayDateKey = new Date().toISOString().split('T')[0];
@@ -1713,26 +1714,54 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
         function clearSearch() { document.getElementById('search-input').value = ''; renderMenu(); }
         
-        function handleSearchInput(event) {
+        function normalizeItemCode(value) {
+            return String(value ?? '')
+                .replace(/[\u200B-\u200D\uFEFF]/g, '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '');
+        }
+
+        function getItemCodeCandidates(item) {
+            return [item?.code, item?.itemCode, item?.barcode, item?.sku]
+                .filter(v => v !== undefined && v !== null && String(v).trim() !== '')
+                .map(normalizeItemCode);
+        }
+
+        async function handleSearchInput(event) {
             const rawSearch = document.getElementById('search-input').value;
             const searchText = rawSearch.trim().toLowerCase();
-            const searchCode = searchText.replace(/\s+/g, '');
-            
+            const searchCode = normalizeItemCode(rawSearch);
+
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
 
             if (event.key === 'Enter' && searchCode !== '') {
-                let foundItem = activeSource.find(m => {
-                    let c = m.code ? String(m.code).toLowerCase().replace(/\s+/g, '') : "";
-                    return c === searchCode;
-                });
-                if (foundItem) { 
-                    if (foundItem.outOfStock) {
-                        alert(`"${foundItem.name}" is currently Out of Stock!`);
-                    } else {
-                        addToCart(foundItem.id); 
-                        document.getElementById('search-input').value = ''; 
-                        renderMenu(); 
+                let foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
+
+                if (!foundItem) {
+                    try {
+                        const snap = await db.ref('menuData').once('value');
+                        const latest = snap.val();
+                        if (Array.isArray(latest)) {
+                            menuData = latest;
+                            activeSource = latest;
+                            foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
+                        }
+                    } catch (err) {
+                        console.error('Code lookup failed:', err);
                     }
+                }
+
+                if (foundItem) {
+                    if (foundItem.outOfStock) {
+                        alert(`\"${foundItem.name}\" is currently Out of Stock!`);
+                    } else {
+                        addToCart(foundItem.id);
+                        document.getElementById('search-input').value = '';
+                        renderMenu();
+                    }
+                } else {
+                    renderMenu();
                 }
             } else {
                 renderMenu();
@@ -1981,10 +2010,27 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             printKitchenKOTSilent();
         }
 
-        function printKitchenKOTSilent() {
+        let kitchenPrintQueue = [];
+        let kitchenPrintQueueIndex = 0;
+        let kitchenPrintAfterHandler = null;
+
+        // Food & Drinks பிரிக்கப்படும் இடம்
+        function getKitchenPrintGroup(items) {
+            const drinkCategories = new Set(["Minuman Tin", "Sejuk", "Hot Drinks", "Fresh Juice"]);
+            
+            // 4 categories மட்டும் Drinks-ஆக பிரிக்கப்படும்
+            const drinks = items.filter(i => drinkCategories.has(String(i.category || '').trim()));
+            
+            // மற்ற அனைத்து பொருட்களும் Food-ஆக பிரிக்கப்படும்
+            const food = items.filter(i => !drinkCategories.has(String(i.category || '').trim()));
+            
+            return { food, drinks };
+        }
+
+        function renderKitchenTicket(items, title) {
             document.getElementById('k-order-type').innerText = currentOrderType; 
             document.getElementById('k-table').innerText = getOrderDisplayRef(currentSelectedTable);
-            
+
             let orderData = activeOrders[getLinkedOrderKey(currentSelectedTable)];
             if (orderData && orderData.custName) {
                 document.getElementById('k-cust-info').style.display = 'block';
@@ -1993,28 +2039,80 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 document.getElementById('k-cust-info').style.display = 'none';
             }
 
-            const kItems = document.getElementById('k-items'); kItems.innerHTML = '';
-            cart.forEach(i => {
+            const heading = document.querySelector('#print-kitchen h2');
+            if (heading) heading.innerText = title;
+
+            const kItems = document.getElementById('k-items');
+            kItems.innerHTML = '';
+            items.forEach(i => {
                 const noteStr = getFormattedItemNotes(i);
                 const safeName = escapeHtml(i.name || '');
                 const safeNote = escapeHtml(noteStr);
-
                 const noteHtml = noteStr
                     ? `<br><span style="display:block;font-size:16px;font-weight:900;margin-top:3px;white-space:pre-wrap;">NOTE: ${safeNote}</span>`
                     : '';
-
                 kItems.innerHTML += `
                     <tr>
                         <td style="padding:6px 0;border-bottom:1px dashed #000;">
-                            <b>${safeName}</b>
-                            ${noteHtml}
+                            <b>${safeName}</b>${noteHtml}
                         </td>
                         <td style="text-align:center;border-bottom:1px dashed #000;">
                             <b>${i.qty}</b>
                         </td>
                     </tr>`;
             });
-            safePrint("print-kitchen-mode");
+        }
+
+        function finishKitchenPrintQueue() {
+            if (kitchenPrintAfterHandler) {
+                window.removeEventListener('afterprint', kitchenPrintAfterHandler);
+                kitchenPrintAfterHandler = null;
+            }
+            kitchenPrintQueue = [];
+            kitchenPrintQueueIndex = 0;
+            document.body.className = '';
+            isPrinting = false;
+        }
+
+        function printNextKitchenTicket() {
+            if (kitchenPrintQueueIndex >= kitchenPrintQueue.length) {
+                finishKitchenPrintQueue();
+                return;
+            }
+
+            const ticket = kitchenPrintQueue[kitchenPrintQueueIndex];
+            renderKitchenTicket(ticket.items, ticket.title);
+            document.body.className = 'print-kitchen-mode';
+
+            kitchenPrintAfterHandler = function() {
+                window.removeEventListener('afterprint', kitchenPrintAfterHandler);
+                kitchenPrintAfterHandler = null;
+                kitchenPrintQueueIndex++;
+                setTimeout(printNextKitchenTicket, 150);
+            };
+            window.addEventListener('afterprint', kitchenPrintAfterHandler);
+            setTimeout(() => window.print(), 100);
+        }
+
+        function printKitchenKOTSilent() {
+            if (!Array.isArray(cart) || cart.length === 0) return alert("Cart is empty!");
+
+            const groups = getKitchenPrintGroup(cart);
+            kitchenPrintQueue = [];
+
+            // Food பொருட்கள் இருந்தால் KITCHEN ORDER (FOOD) என்ற தலைப்பில் பிரிண்ட் ஆகும்
+            if (groups.food.length > 0) {
+                kitchenPrintQueue.push({ items: groups.food, title: '*** KITCHEN ORDER (FOOD) ***' });
+            }
+            // Drinks பொருட்கள் இருந்தால் DRINKS ORDER (DRINKS) என்ற தலைப்பில் பிரிண்ட் ஆகும்
+            if (groups.drinks.length > 0) {
+                kitchenPrintQueue.push({ items: groups.drinks, title: '*** DRINKS ORDER (DRINKS) ***' });
+            }
+
+            if (kitchenPrintQueue.length === 0) return;
+            kitchenPrintQueueIndex = 0;
+            isPrinting = true;
+            printNextKitchenTicket();
         }
 
         function openCashDrawerOnly() { safePrint("print-drawer-mode"); }
@@ -2140,8 +2238,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             safePrint("print-customer");
         }
 
-        // Fast Menu Manager rendering: build HTML once instead of repeated innerHTML +=.
-        // This keeps the same editing/stock/delete behavior while making large menu lists open much faster.
         let menuManagerFilterTimer = null;
         let menuManagerCategoryOptions = null;
 
@@ -2162,7 +2258,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             if (search) search.value = '';
             if (modal) modal.style.display = 'flex';
 
-            // Paint the modal first, then render the table so the click feels instant.
             requestAnimationFrame(() => populateMenuManagerTable(getMenuManagerSource()));
         }
 
@@ -2197,7 +2292,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 const inSelected = item.outOfStock ? '' : ' selected';
                 const outSelected = item.outOfStock ? ' selected' : '';
 
-                // Use a cached category option list and mark the current category once.
                 const opts = categoryOptions.replace(
                     `value="${safeCategory}"`,
                     `value="${safeCategory}" selected`
@@ -2234,9 +2328,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 if (!Number.isFinite(n) || n < 0) { alert('Please enter a valid price.'); return; }
                 const newPrice = Math.round(n * 100) / 100;
                 try {
-                    // Always read the latest Firebase menu before changing the price.
-                    // This prevents the Bakso price from being overwritten by an older
-                    // local menuData copy or by the realtime listener.
                     const snap = await db.ref('menuData').once('value');
                     let arr = snap.val();
                     arr = Array.isArray(arr) ? arr.map(m => ({...m})) : source.map(m => ({...m}));
@@ -2245,8 +2336,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                     let idx = wantedCode ? arr.findIndex(m => String(m.code || '').trim() === wantedCode) : -1;
                     if (idx < 0) idx = arr.findIndex(m => Number(m.id) === Number(id));
 
-                    // If a Bakso item is missing from Firebase, restore that exact item
-                    // with the newly requested price instead of restoring its old price.
                     if (idx < 0 && wantedCode.startsWith('BK')) {
                         const fallback = defaultMenuData.find(m => String(m.code || '') === wantedCode);
                         if (fallback) {
@@ -2260,7 +2349,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                     await db.ref('menuData').set(arr);
                     menuData = arr;
 
-                    // Update the visible input immediately and keep the current menu screen.
                     const inputs = document.querySelectorAll('[data-price-code]');
                     let input = null;
                     for (const el of inputs) {
@@ -2486,9 +2574,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
   </div>
 </div>
 
-
 <script>
-/* === OPTIONAL TABLE LINKING: Tables 1-13 === */
 let selectedTablesForLink = [];
 
 function openTableLinkModal() {
@@ -2539,8 +2625,6 @@ function unlinkSelectedTables() {
             return;
         }
 
-        // Only remove the link. The existing combined order/bill remains
-        // attached to the first table so no order is silently deleted.
         const linkedNames = link.tables.map(n => 'Table ' + Number(n));
         const updates = {};
 
@@ -2591,7 +2675,6 @@ function saveTableLink() {
     const tableNames = tableNums.map(n => 'Table ' + n);
     const groupId = 'TL_' + tableNums.join('_');
 
-    // Merge any existing orders from the selected tables into one order.
     const sourceKeys = new Set();
     tableNames.forEach(name => {
         if (typeof getLinkedOrderKey === 'function') {
@@ -2624,7 +2707,6 @@ function saveTableLink() {
         mergedOrder.custPhone = order.custPhone || mergedOrder.custPhone || '';
     });
 
-    // Remove the old individual order keys before creating the linked key.
     sourceKeys.forEach(key => {
         if (activeOrders) delete activeOrders[key];
     });
@@ -2704,22 +2786,137 @@ function unlinkTable(tableNo) {
 </script>
 
 
-<style>
-#payment-summary-panel{background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px;margin:16px 0}#payment-summary-panel .payrow{display:flex;justify-content:space-between;padding:8px 0;font-weight:700}#payment-summary-panel .payrow.total{border-top:2px solid #222;margin-top:6px;padding-top:12px;font-size:1.08em}.payment-summary-btn{margin-left:8px;padding:8px 12px;border-radius:8px;border:1px solid #999;background:#fff;font-weight:700;cursor:pointer}</style>
 <script>
-function showDailyPaymentSummary(){
- const date=document.getElementById('payment-summary-date')?.value || new Date().toISOString().slice(0,10);
- const rows=(typeof completedSales!=='undefined'?completedSales:[]).filter(s=>{
-   if(!s||!s.time)return false; const d=new Date(s.time); return !isNaN(d)&&d.toISOString().slice(0,10)===date;
- });
- let cash=0,card=0,qr=0; rows.forEach(s=>{const m=String(s.method||'').toLowerCase(), a=Number(s.amount)||0; if(m.includes('cash'))cash+=a; else if(m.includes('card'))card+=a; else if(m.includes('qr'))qr+=a;});
- const total=cash+card+qr;
- let box=document.getElementById('payment-summary-result'); if(!box)return;
- box.innerHTML='<div class="payrow"><span>💵 Cash Total</span><span>$'+cash.toFixed(2)+'</span></div><div class="payrow"><span>💳 Card Total</span><span>$'+card.toFixed(2)+'</span></div><div class="payrow"><span>📱 QR Pay Total</span><span>$'+qr.toFixed(2)+'</span></div><div class="payrow total"><span>Total Sales</span><span>$'+total.toFixed(2)+'</span></div>';
-}
-function openDailyPaymentSummary(){
- let p=document.getElementById('payment-summary-panel'); if(!p){p=document.createElement('div');p.id='payment-summary-panel';p.innerHTML='<h3>Daily Payment Summary</h3><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px"><label>Date</label><input id="payment-summary-date" type="date" value="'+new Date().toISOString().slice(0,10)+'"><button class="payment-summary-btn" onclick="showDailyPaymentSummary()">View</button></div><div id="payment-summary-result"></div>'; (document.querySelector('body')||document.documentElement).appendChild(p);} p.scrollIntoView({behavior:'smooth',block:'start'}); showDailyPaymentSummary();}
+(function(){
+  function sourceLabel(order){
+    const explicit = String(order && (order.orderSource || order.source || '')).toLowerCase();
+    if (explicit === 'qr' || explicit.includes('qr')) {
+      return String(order.orderType || '').toLowerCase().includes('takeaway') ? 'QR TAKEAWAY' : 'QR ORDER';
+    }
+    if (explicit === 'counter' || explicit.includes('counter')) {
+      return String(order.orderType || '').toLowerCase().includes('takeaway') ? 'COUNTER TAKEAWAY' : 'COUNTER ORDER';
+    }
+    const ref = String(order && (order.ref || order.refName || '')).toLowerCase();
+    if (ref.includes('takeaway')) return 'COUNTER TAKEAWAY';
+    return 'COUNTER ORDER';
+  }
+  window.getOrderSourceLabel = sourceLabel;
+
+  window.openExpenseViewModal = function(){
+    const modal=document.getElementById('expense-view-modal');
+    const tbody=document.getElementById('view-expenses-tbody');
+    if(!modal||!tbody) return;
+    const expenses=Array.isArray(dailyExpenses)?dailyExpenses:[];
+    tbody.innerHTML='';
+    let total=0, monthTotal=0, days=new Set();
+    const now=new Date(), key=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    expenses.slice().reverse().forEach(e=>{
+      const a=Number(e.amount)||0; total+=a;
+      const date=e.date||'—';
+      if(date.startsWith(key)){monthTotal+=a;days.add(date);}
+      tbody.innerHTML += '<tr><td><b>'+date+'</b><br><small>'+(e.time||'')+'</small></td><td><b>'+escapeHtml(String(e.desc||''))+'</b></td><td style="text-align:right;font-weight:900;">$'+a.toFixed(2)+'</td></tr>';
+    });
+    document.getElementById('view-expenses-total').innerText=total.toFixed(2);
+    document.getElementById('view-expenses-month-total').innerText=monthTotal.toFixed(2);
+    document.getElementById('view-expenses-month-average').innerText=(days.size?monthTotal/days.size:0).toFixed(2);
+    const empty=document.getElementById('view-expenses-empty'); if(empty) empty.style.display=expenses.length?'none':'block';
+    const monthly={};
+    expenses.forEach(e=>{if(e.date){const k=e.date.slice(0,7);monthly[k]=(monthly[k]||0)+(Number(e.amount)||0);}});
+    const trend=document.getElementById('view-expenses-trend');
+    if(trend) trend.innerHTML=Object.keys(monthly).sort().reverse().map(k=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;"><b>'+k+'</b><b>$'+monthly[k].toFixed(2)+'</b></div>').join('')||'<div style="color:#64748b;">No dated expense records yet.</div>';
+    modal.style.display='flex';
+  };
+  window.closeExpenseViewModal=function(){const m=document.getElementById('expense-view-modal');if(m)m.style.display='none';};
+
+  window.openPaymentSummaryModal=function(){
+    const today=new Date().toISOString().split('T')[0];
+    const sales=Array.isArray(completedSales)?completedSales:[];
+    let cash=0,card=0,qr=0,total=0;
+    sales.forEach(s=>{
+      const t=String(s.time||'');
+      const isToday=t ? new Date(t).toISOString().split('T')[0]===today : true;
+      if(!isToday)return;
+      const a=Number(s.amount)||0; total+=a;
+      const m=String(s.method||'').toLowerCase();
+      if(m==='card')card+=a; else if(m.includes('qr'))qr+=a; else if(m==='cash')cash+=a;
+    });
+    document.getElementById('pay-summary-cash').innerText=cash.toFixed(2);
+    document.getElementById('pay-summary-card').innerText=card.toFixed(2);
+    document.getElementById('pay-summary-qr').innerText=qr.toFixed(2);
+    document.getElementById('pay-summary-total').innerText=total.toFixed(2);
+    document.getElementById('payment-summary-modal').style.display='flex';
+  };
+  window.closePaymentSummaryModal=function(){const m=document.getElementById('payment-summary-modal');if(m)m.style.display='none';};
+
+  // Patch sale source at payment time while preserving every existing field.
+  const originalConfirm = window.confirmPaymentProcess;
+  if(typeof originalConfirm==='function'){
+    window.confirmPaymentProcess=function(){
+      const before=completedSales.length;
+      const result=originalConfirm.apply(this,arguments);
+      if(completedSales.length>before){
+        const s=completedSales[completedSales.length-1];
+        if(!s.orderSource) s.orderSource = (loggedInRole==='customer') ? 'QR' : 'COUNTER';
+        db.ref('sales').set(completedSales);
+      }
+      return result;
+    };
+  }
+
+  // Patch Sales History rendering to show source while retaining View + Print.
+  const originalHistory = window.openHistoryModal;
+  if(typeof originalHistory==='function'){
+    window.openHistoryModal=function(){
+      originalHistory.apply(this,arguments);
+      const tbody=document.getElementById('history-table-body');
+      if(!tbody)return;
+      const sales=Array.isArray(completedSales)?completedSales:[];
+      tbody.innerHTML=sales.map((s,idx)=>{
+        const src=sourceLabel(s);
+        return '<tr><td><span style="font-size:12px;color:#64748b;">'+escapeHtml(String(s.time||''))+'</span></td><td><b>'+escapeHtml(String(s.ref||''))+'</b></td><td><b>'+escapeHtml(src)+'</b></td><td>'+escapeHtml(String(s.method||''))+'</td><td style="text-align:right;font-weight:900;">$'+Number(s.amount||0).toFixed(2)+'</td><td style="text-align:center;white-space:nowrap;"><button onclick="viewSale('+idx+')" class="btn-small" style="padding:6px 10px;margin-right:4px;">View</button><button onclick="reprintBill('+idx+')" class="btn-small" style="padding:6px 10px;">Print</button></td></tr>';
+      }).join('');
+    };
+  }
+})();
 </script>
 
-<button class="payment-summary-btn" onclick="openDailyPaymentSummary()" title="Daily Cash / Card / QR Pay totals">Daily Payment Summary</button></body>
+
+<script>
+(function(){
+  // Preserve the existing order functions, adding only an explicit source marker.
+  const _saveSilent = window.saveOrderToTableSilent;
+  if (typeof _saveSilent === 'function') {
+    window.saveOrderToTableSilent = function(){
+      const r = _saveSilent.apply(this, arguments);
+      try {
+        if (loggedInRole !== 'customer' && cart && cart.length && currentSelectedTable) {
+          const key = getLinkedOrderKey(currentSelectedTable);
+          if (activeOrders[key]) {
+            activeOrders[key].orderSource = 'COUNTER';
+            db.ref('activeOrders').set(activeOrders);
+          }
+        }
+      } catch(e){}
+      return r;
+    };
+  }
+
+  const _customerSend = window.customerSendOrder;
+  if (typeof _customerSend === 'function') {
+    window.customerSendOrder = function(){
+      const r = _customerSend.apply(this, arguments);
+      try {
+        const key = getLinkedOrderKey(currentSelectedTable);
+        if (activeOrders[key]) {
+          activeOrders[key].orderSource = 'QR';
+          db.ref('activeOrders').set(activeOrders);
+        }
+      } catch(e){}
+      return r;
+    };
+  }
+})();
+</script>
+
+</body>
 </html>
