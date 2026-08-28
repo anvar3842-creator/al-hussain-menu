@@ -951,7 +951,8 @@ body {
         let completedSales = []; 
         let currentCategory = "All";
         let isPrinting = false;
-        let loggedInRole = ""; 
+        let loggedInRole = "";
+        let presenceSessionKey = null; 
         let currentSelectedTable = "";
         let currentOrderType = "Dine-In";
         let userCredentials = { admin: { user: "admin", pass: "admin123" }, user1: { user: "user1", pass: "1234" }, user2: { user: "user2", pass: "1234" } };
@@ -1272,11 +1273,17 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             // ONLINE/OFFLINE FIX: keep the shop online while ANY authorized user is online.
             // Each role has its own presence entry, so one user's logout cannot close the shop
             // while another user is still online. Firebase onDisconnect also handles dropped sessions.
-            const presenceRef = db.ref('onlineUsers/' + loggedInRole);
-            presenceRef.set({ online: true, timestamp: firebase.database.ServerValue.TIMESTAMP });
+            // ONLINE/OFFLINE FIX: every browser/device gets its own presence session.
+            // Any ONE authorized session online keeps the shop online.
+            const presenceRoot = db.ref('onlineUsers');
+            const presenceRef = presenceRoot.push();
+            presenceSessionKey = presenceRef.key;
+            presenceRef.set({ role: loggedInRole, online: true, timestamp: firebase.database.ServerValue.TIMESTAMP });
             presenceRef.onDisconnect().remove();
-            db.ref('onlineUsers').on('value', (snap) => {
-                db.ref('shopOnline').set(snap.exists() && Object.keys(snap.val() || {}).length > 0);
+            presenceRoot.on('value', (snap) => {
+                const users = snap.val() || {};
+                const hasOnlineSession = Object.keys(users).length > 0;
+                db.ref('shopOnline').set(hasOnlineSession);
             });
 
             let todayDateKey = new Date().toISOString().split('T')[0];
@@ -1312,11 +1319,12 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
         function logout() {
             const role = loggedInRole;
-            if (role) {
-                db.ref('onlineUsers/' + role).remove().then(() => {
-                    db.ref('onlineUsers').once('value', (snap) => {
-                        db.ref('shopOnline').set(snap.exists() && Object.keys(snap.val() || {}).length > 0);
-                    });
+            if (role && presenceSessionKey) {
+                db.ref('onlineUsers/' + presenceSessionKey).remove().then(() => {
+                    presenceSessionKey = null;
+                    return db.ref('onlineUsers').once('value');
+                }).then((snap) => {
+                    db.ref('shopOnline').set(snap.exists() && Object.keys(snap.val() || {}).length > 0);
                 });
             }
             location.href = liveBaseUrl;
@@ -2324,11 +2332,20 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                     <td><b>${s.ref}</b></td>
                     <td>${s.method}</td>
                     <td style="text-align:right; font-weight:900;">$${s.amount.toFixed(2)}</td>
-                    <td style="text-align:center;"><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button></td>
+                    <td style="text-align:center; white-space:nowrap;">
+                        <button onclick="viewSale(${idx})" class="btn-small" style="padding:6px 12px; margin-right:4px;">View</button>
+                        <button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 12px;">Print</button>
+                    </td>
                 </tr>`; 
             });
             tbody.innerHTML = rowsHtml; 
             document.getElementById('history-modal').style.display = 'flex';
+        }
+
+        function viewSale(idx) {
+            const s = completedSales[idx];
+            if (!s) return;
+            alert(`Sale Details\n\nTime: ${s.time || '-'}\nReference: ${s.ref || '-'}\nPayment: ${s.method || '-'}\nAmount: $${Number(s.amount || 0).toFixed(2)}`);
         }
 
         function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
