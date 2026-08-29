@@ -7,6 +7,8 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <!-- Firebase Auth Script Added -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -602,11 +604,12 @@ body {
         </div>
     </div>
 
+    <!-- Modifed Login Form using Email/Password for Auth -->
     <div id="login-screen" class="login-overlay">
         <div class="login-box">
             <h2>Welcome to POS</h2>
             <form onsubmit="handleLogin(event)">
-                <input type="text" id="login-user" placeholder="Username (admin/user1/user2)" required autocomplete="username">
+                <input type="email" id="login-user" placeholder="Email (e.g. admin@alhussain.com)" required autocomplete="username">
                 <input type="password" id="login-pass" placeholder="Password" required autocomplete="current-password">
                 <button type="submit" class="btn-login">Login Securely</button>
             </form>
@@ -847,7 +850,14 @@ body {
 
     <script>
         const firebaseConfig = {
-            databaseURL: "https://al-hussain-pos-default-rtdb.firebaseio.com/"
+            apiKey: "AIzaSyBE0YtYy09zV2HCI2DUfKfq8VQdXUb-ekE",
+            authDomain: "al-hussain-pos.firebaseapp.com",
+            databaseURL: "https://al-hussain-pos-default-rtdb.firebaseio.com",
+            projectId: "al-hussain-pos",
+            storageBucket: "al-hussain-pos.firebasestorage.app",
+            messagingSenderId: "936176326095",
+            appId: "1:936176326095:web:249b4b9f2d76f6189aaeba",
+            measurementId: "G-LVP94YF74C"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -1280,56 +1290,61 @@ body {
             db.ref('shopOnline').set(hasOnlineStaff);
         });
 
+        // Modified handleLogin for Firebase Auth
         function handleLogin(event) {
             event.preventDefault();
-            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const email = document.getElementById('login-user').value.trim().toLowerCase();
             const pass = document.getElementById('login-pass').value.trim();
-            
-            const billSummaryContainer = document.getElementById('bill-summary-container');
-            const btnPrintBill = document.getElementById('btn-print-bill-elem');
-            const btnPay = document.getElementById('btn-pay-elem');
-            const btnDrawer = document.getElementById('btn-drawer-elem');
-            const btnHold = document.getElementById('btn-hold-elem');
-            const btnKitchen = document.getElementById('btn-kitchen-elem');
-            const btnReadyOrder = document.getElementById('btn-ready-order-elem');
+            const errorMsg = document.getElementById('login-error');
+            errorMsg.style.display = "none";
 
-            let roleKey = "";
-            if (user === "admin" && pass === "admin123") {
-                loggedInRole = "admin";
-                billSummaryContainer.style.display = "block";
-                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
-                roleKey = "Admin";
-                grantAccess(roleKey);
-            } 
-            else if (user === "user1" && pass === "1234") {
-                loggedInRole = "user1";
-                billSummaryContainer.style.display = "block";
-                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
-                roleKey = "Staff";
-                grantAccess(roleKey);
-            }
-            else if (user === "user2" && pass === "1234") {
-                loggedInRole = "user2";
-                billSummaryContainer.style.display = "none";
-                btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
-                roleKey = "Order Taker";
-                grantAccess(roleKey);
-            } 
-            else { 
-                document.getElementById('login-error').style.display = "block"; 
-                return; 
-            }
+            firebase.auth().signInWithEmailAndPassword(email, pass)
+                .then((userCredential) => {
+                    const billSummaryContainer = document.getElementById('bill-summary-container');
+                    const btnPrintBill = document.getElementById('btn-print-bill-elem');
+                    const btnPay = document.getElementById('btn-pay-elem');
+                    const btnDrawer = document.getElementById('btn-drawer-elem');
+                    const btnHold = document.getElementById('btn-hold-elem');
+                    const btnKitchen = document.getElementById('btn-kitchen-elem');
+                    const btnReadyOrder = document.getElementById('btn-ready-order-elem');
 
-            setStaffOnlinePresence(roleKey);
+                    let roleKey = "";
+                    
+                    if (email.includes("admin")) {
+                        loggedInRole = "admin";
+                        billSummaryContainer.style.display = "block";
+                        btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                        roleKey = "Admin";
+                    } 
+                    else if (email.includes("user1")) {
+                        loggedInRole = "user1";
+                        billSummaryContainer.style.display = "block";
+                        btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                        roleKey = "Staff";
+                    }
+                    else if (email.includes("user2")) {
+                        loggedInRole = "user2";
+                        billSummaryContainer.style.display = "none";
+                        btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                        roleKey = "Order Taker";
+                    } 
+                    
+                    grantAccess(roleKey);
+                    setStaffOnlinePresence(roleKey);
 
-            let todayDateKey = new Date().toISOString().split('T')[0];
-            if (!staffShifts[todayDateKey]) staffShifts[todayDateKey] = {};
-            if (!staffShifts[todayDateKey][roleKey]) { 
-                staffShifts[todayDateKey][roleKey] = { loginTime: new Date().toLocaleTimeString(), billsCount: 0, totalCollected: 0 }; 
-            } else { 
-                staffShifts[todayDateKey][roleKey].loginTime = new Date().toLocaleTimeString(); 
-            }
-            db.ref('staffShifts').set(staffShifts);
+                    let todayDateKey = new Date().toISOString().split('T')[0];
+                    if (!staffShifts[todayDateKey]) staffShifts[todayDateKey] = {};
+                    if (!staffShifts[todayDateKey][roleKey]) { 
+                        staffShifts[todayDateKey][roleKey] = { loginTime: new Date().toLocaleTimeString(), billsCount: 0, totalCollected: 0 }; 
+                    } else { 
+                        staffShifts[todayDateKey][roleKey].loginTime = new Date().toLocaleTimeString(); 
+                    }
+                    db.ref('staffShifts').set(staffShifts);
+                })
+                .catch((error) => {
+                    errorMsg.innerText = "Invalid Email or Password!";
+                    errorMsg.style.display = "block";
+                });
         }
 
         function grantAccess(role) {
