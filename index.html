@@ -1953,18 +1953,20 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             saveOrderToTableSilent();
         }
 
-        function saveOrderToTableSilent() {
-            if (loggedInRole === "customer") return; 
-            if (cart.length === 0 || !currentSelectedTable) return;
-            const orderKey = getLinkedOrderKey(currentSelectedTable);
-            let existing = activeOrders[orderKey] || {};
-            let existingTime = existing.time || Date.now();
-            let cName = existing.custName || sessionStorage.getItem('myTkName') || "Walk-in";
-            let cPhone = existing.custPhone || sessionStorage.getItem('myTkPhone') || "";
+       function saveOrderToTableSilent() {
+    if (loggedInRole === "customer") return;
+    if (cart.length === 0 || !currentSelectedTable) return;
+    const orderKey = getLinkedOrderKey(currentSelectedTable);
+    let existing = activeOrders[orderKey] || {};
+    let existingTime = existing.time || Date.now();
+    let cName = existing.custName || sessionStorage.getItem('myTkName') || "Walk-in";
+    let cPhone = existing.custPhone || sessionStorage.getItem('myTkPhone') || "";
 
-            activeOrders[orderKey] = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, tables: getLinkedTableNames(currentSelectedTable), items: JSON.parse(JSON.stringify(cart)) };
-            db.ref('activeOrders').set(activeOrders);
-        }
+    const orderData = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, tables: getLinkedTableNames(currentSelectedTable), items: JSON.parse(JSON.stringify(cart)) };
+    
+    // மொத்தமாக overwrite செய்யாமல் குறிப்பிட்ட டேபிளை மட்டும் அப்டேட் செய்கிறோம்
+    db.ref(`activeOrders/${orderKey}`).set(orderData);
+}
 
         function customerSendOrder() {
             if(cart.length === 0) {
