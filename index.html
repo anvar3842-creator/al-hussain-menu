@@ -1513,8 +1513,17 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
         function getAllCategories() {
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            let menuCats = activeSource.map(i => i.category);
-            return [...new Set([...categoryOrder, ...menuCats])];
+            const menuCats = activeSource.map(i => String(i.category || '').trim()).filter(Boolean);
+            const ordered = Array.isArray(categoryOrder) ? categoryOrder : [];
+            const result = [];
+            ordered.forEach(cat => {
+                const name = String(cat || '').trim();
+                if (name && menuCats.includes(name) && !result.includes(name)) result.push(name);
+            });
+            menuCats.forEach(cat => {
+                if (!result.includes(cat)) result.push(cat);
+            });
+            return result;
         }
 
         function populateCategoryDropdown() {
@@ -1601,10 +1610,14 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             menuData = activeSource;
             if (currentCategory === catName) currentCategory = 'All';
 
-            Promise.all([
-                db.ref('categoryOrder').set(categoryOrder),
-                db.ref('menuData').set(activeSource)
-            ]).then(() => {
+            // Save both paths in one Firebase update so the category cannot
+            // briefly reappear from an out-of-sync menuData/categoryOrder event.
+            db.ref().update({
+                categoryOrder: categoryOrder,
+                menuData: activeSource
+            }).then(() => {
+                // Keep the local state authoritative after the atomic update.
+                menuData = activeSource;
                 populateCategoryDropdown();
                 renderCategories();
                 renderMenu();
