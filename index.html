@@ -2146,15 +2146,19 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 db.ref('staffShifts').set(staffShifts);
             }
 
-            const paymentOrderKey = getLinkedOrderKey(currentSelectedTable);
-            delete activeOrders[paymentOrderKey]; 
-            db.ref('activeOrders').set(activeOrders);
-            db.ref(`orderStatus/${paymentOrderKey}`).remove(); 
+           const paymentOrderKey = getLinkedOrderKey(currentSelectedTable);
+    
+    // பழைய ஆர்டரை டேட்டாபேஸில் இருந்து நேரடியாகவும் துல்லியமாகவும் டெலீட் செய்கிறோம்
+    db.ref(`activeOrders/${paymentOrderKey}`).remove();
+    db.ref(`orderStatus/${paymentOrderKey}`).remove();
 
-            cart = []; updateStats(); 
-            backToTableSelection();
-            
-            alert("Payment Successful! Change: $" + change.toFixed(2));
+    cart = []; 
+    currentSelectedTable = ""; // டேபிள் செலக்சனை க்ளியர் செய்கிறோம்
+    updateStats(); 
+    backToTableSelection();
+    
+    alert("Payment Successful! Change: $" + change.toFixed(2));
+}
         }
 
         function fillReceiptDetails(orderType, ref, method, time, sub, disc, total, paid, change, items) {
