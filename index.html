@@ -2001,8 +2001,29 @@ body {
             }
 
             const paymentOrderKey = getLinkedOrderKey(currentSelectedTable);
-            db.ref('activeOrders/' + paymentOrderKey).remove();
-            db.ref(`orderStatus/${paymentOrderKey}`).remove(); 
+
+            // Remove ONLY the order that was actually paid.
+            // A new customer/staff member can start a fresh order on the same table
+            // before the old remove request reaches Firebase. A plain .remove()
+            // could then delete that NEW order. Transaction protects the new order.
+            const paidOrderSnapshot = JSON.parse(JSON.stringify(paidOrderDataForSale));
+            db.ref('activeOrders/' + paymentOrderKey).transaction(currentOrder => {
+                if (currentOrder === null) return;
+
+                // If the order currently in Firebase is still the same order we
+                // just paid, remove it. Otherwise leave the newer/changed order alone.
+                if (JSON.stringify(currentOrder) === JSON.stringify(paidOrderSnapshot)) {
+                    return null;
+                }
+
+                // Safety fallback: match the original order timestamp when available.
+                if (paidOrderSnapshot.time && currentOrder.time === paidOrderSnapshot.time) {
+                    return null;
+                }
+
+                return;
+            });
+            db.ref(`orderStatus/${paymentOrderKey}`).remove();
             delete activeOrders[paymentOrderKey];
 
             cart = []; updateStats(); 
