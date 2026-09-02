@@ -484,6 +484,7 @@ body {
                     <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">QR Codes</button>
                     <button class="admin-btn history-btn" onclick="openHistoryModal()">Sales History</button>
                     <button class="admin-btn monthly-btn" onclick="openPaymentSummaryModal()">Payment Summary</button>
+                    <button class="admin-btn staff-btn" onclick="openCredentialsModal()">Change Credentials</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">Day Close</button>
                 </div>
             </div>
@@ -636,7 +637,35 @@ body {
         </div>
     </div>
 
-    <!-- Modals (QR, Staff, Menu Manager, etc.) -->
+    <!-- Modals (QR, Staff, Menu Manager, Credentials, etc.) -->
+    <div id="credentials-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="modal-header">
+                <h3 style="margin:0; font-size:18px;">Change User Credentials</h3>
+                <button class="close-modal" onclick="closeCredentialsModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 13px; font-weight: 800; color: #475569;">Select Role / User:</label>
+                    <select id="cred-role-select" onchange="loadCredentialValues()" style="width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #cbd5e1; border-radius: 10px; font-weight: bold; background: white; font-family: inherit;">
+                        <option value="admin">Admin</option>
+                        <option value="user1">Staff (User 1)</option>
+                        <option value="user2">Order Taker (User 2)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 13px; font-weight: 800; color: #475569;">Username:</label>
+                    <input type="text" id="cred-username" style="width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-family: inherit; font-weight: bold;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="font-size: 13px; font-weight: 800; color: #475569;">New Password:</label>
+                    <input type="text" id="cred-password" placeholder="Enter new password" style="width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-family: inherit; font-weight: bold;">
+                </div>
+                <button class="btn-small" style="width: 100%; padding: 12px; font-size: 14px; background: var(--success);" onclick="saveCredentials()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Customer & Takeaway QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 14px; font-weight:bold; color: #64748b; margin-top: 0;">Scan table QR codes for dine-in, or the Takeaway QR code for parcel orders.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
     <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Stock Status</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
@@ -766,6 +795,12 @@ body {
         let defaultCategoryOrder = ["Roti", "Dosai", "Bakso", "Nasi Goreng", "Mee Goreng", "Kueh Teow Goreng", "Bihun Goreng", "Indomie", "Mee Basah", "Kueh Teow Basah", "Bihun Basah", "Murtabak", "Burger", "Nasi Campur", "Hot Drinks", "Sejuk", "Fresh Juice", "Milk Shake"];
         let categoryOrder = [];
 
+        let credentials = {
+            admin: { user: "admin", pass: "admin123" },
+            user1: { user: "user1", pass: "1234" },
+            user2: { user: "user2", pass: "1234" }
+        };
+
         let cart = [];
         let activeOrders = {}; 
         let completedSales = []; 
@@ -802,6 +837,15 @@ body {
                 if (categoryOrder.length !== val.length) db.ref('categoryOrder').set(categoryOrder);
             } else { categoryOrder = defaultCategoryOrder; db.ref('categoryOrder').set(defaultCategoryOrder); }
             renderCategories(); populateCategoryDropdown();
+        });
+
+        db.ref('credentials').on('value', (snapshot) => {
+            const val = snapshot.val();
+            if (val) {
+                credentials = val;
+            } else {
+                db.ref('credentials').set(credentials);
+            }
         });
 
         db.ref('tableLinks').on('value', (snapshot) => {
@@ -1100,8 +1144,8 @@ body {
 
         function handleLogin(event) {
             event.preventDefault();
-            const user = document.getElementById('login-user').value.trim().toLowerCase();
-            const pass = document.getElementById('login-pass').value.trim();
+            const userInput = document.getElementById('login-user').value.trim().toLowerCase();
+            const passInput = document.getElementById('login-pass').value.trim();
             
             const billSummaryContainer = document.getElementById('bill-summary-container');
             const btnPrintBill = document.getElementById('btn-print-bill-elem');
@@ -1112,28 +1156,31 @@ body {
             const btnReadyOrder = document.getElementById('btn-ready-order-elem');
 
             let roleKey = "";
-            if (user === "admin" && pass === "admin123") {
+            let matched = false;
+
+            if (credentials.admin && userInput === credentials.admin.user.toLowerCase() && passInput === credentials.admin.pass) {
                 loggedInRole = "admin";
                 billSummaryContainer.style.display = "block";
                 btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
                 roleKey = "Admin";
-                grantAccess(roleKey);
+                matched = true;
             } 
-            else if (user === "user1" && pass === "1234") {
+            else if (credentials.user1 && userInput === credentials.user1.user.toLowerCase() && passInput === credentials.user1.pass) {
                 loggedInRole = "user1";
                 billSummaryContainer.style.display = "block";
                 btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
                 roleKey = "Staff";
-                grantAccess(roleKey);
+                matched = true;
             }
-            else if (user === "user2" && pass === "1234") {
+            else if (credentials.user2 && userInput === credentials.user2.user.toLowerCase() && passInput === credentials.user2.pass) {
                 loggedInRole = "user2";
                 billSummaryContainer.style.display = "none";
                 btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
                 roleKey = "Order Taker";
-                grantAccess(roleKey);
+                matched = true;
             } 
-            else { 
+
+            if (!matched) { 
                 document.getElementById('login-error').style.display = "block"; 
                 return; 
             }
@@ -1148,6 +1195,7 @@ body {
                 staffShifts[todayDateKey][roleKey].loginTime = new Date().toLocaleTimeString(); 
             }
             db.ref('staffShifts').set(staffShifts);
+            grantAccess(roleKey);
         }
 
         function grantAccess(role) {
@@ -1226,10 +1274,20 @@ body {
             
             for (let i = 1; i <= 13; i++) {
                 let tableName = `Table ${i}`;
-                let orderData = activeOrders[getLinkedOrderKey(tableName)];
+                let orderKey = getLinkedOrderKey(tableName);
+                let orderData = activeOrders[orderKey];
                 let isOccupied = orderData !== undefined;
                 let cardClass = isOccupied ? "big-table-card occupied" : "big-table-card free";
-                let statusText = isOccupied ? `Occupied<br>${formatElapsedTime(orderData.time)}` : "Free Table";
+                
+                let displayTotal = 0;
+                if (isOccupied && orderData.items) {
+                    displayTotal = orderData.items.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
+                }
+                
+                let statusText = isOccupied 
+                    ? `Occupied<br><span style="color:var(--primary); font-size:13px;">$${displayTotal.toFixed(2)}</span><br>${formatElapsedTime(orderData.time)}` 
+                    : "Free Table";
+                    
                 let cancelBtn = (isOccupied && loggedInRole === "admin") ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tableName}', event)" style="position:absolute; top:8px; right:8px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:bold; cursor:pointer; z-index:2;">X</button>` : '';
 
                 const linkedNames = getLinkedTableNames(tableName);
@@ -1247,13 +1305,14 @@ body {
             takeawayKeys.forEach(tkKey => {
                 let orderData = activeOrders[tkKey];
                 let count = orderData.items ? orderData.items.reduce((sum, i) => sum + i.qty, 0) : 0;
+                let tkTotal = orderData.items ? orderData.items.reduce((sum, item) => sum + (item.customPrice * item.qty), 0) : 0;
                 let custInfo = orderData.custName ? `<br>${orderData.custName}` : '';
                 let cancelBtn = loggedInRole === "admin" ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tkKey}', event)" style="position:absolute; top:8px; right:8px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:bold; cursor:pointer; z-index:2;">X</button>` : '';
 
                 container.innerHTML += `<div class="big-table-card occupied" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;" onclick="selectTableForOrder('${tkKey}', 'Takeaway')">
                     ${cancelBtn}
                     <h3 style="color:#b45309;">${tkKey}</h3>
-                    <p style="color:#92400e;">${count} Items${custInfo}<br>${formatElapsedTime(orderData.time)}</p>
+                    <p style="color:#92400e;">${count} Items - <b style="color:#b45309;">$${tkTotal.toFixed(2)}</b>${custInfo}<br>${formatElapsedTime(orderData.time)}</p>
                 </div>`;
             });
         }
@@ -1418,13 +1477,48 @@ body {
             db.ref('menuData').set(activeSource);
             openCategoryManagerModal(); alert("Renamed successfully!");
         }
+
         function deleteCategory(catName) {
-            if (confirm(`Delete category "${catName}"?`)) {
-                categoryOrder = categoryOrder.filter(c => c !== catName); db.ref('categoryOrder').set(categoryOrder);
+            if (confirm(`Delete category "${catName}" and all its items?`)) {
+                categoryOrder = categoryOrder.filter(c => c !== catName);
+                db.ref('categoryOrder').set(categoryOrder);
+                
                 let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-                activeSource = activeSource.filter(item => item.category !== catName); db.ref('menuData').set(activeSource);
+                activeSource = activeSource.filter(item => item.category !== catName);
+                db.ref('menuData').set(activeSource);
+                
                 openCategoryManagerModal();
+                renderCategories();
+                renderMenu();
             }
+        }
+
+        function openCredentialsModal() {
+            document.getElementById('credentials-modal').style.display = 'flex';
+            loadCredentialValues();
+        }
+        function closeCredentialsModal() {
+            document.getElementById('credentials-modal').style.display = 'none';
+        }
+        function loadCredentialValues() {
+            const role = document.getElementById('cred-role-select').value;
+            const cred = credentials[role] || { user: "", pass: "" };
+            document.getElementById('cred-username').value = cred.user;
+            document.getElementById('cred-password').value = cred.pass;
+        }
+        function saveCredentials() {
+            const role = document.getElementById('cred-role-select').value;
+            const u = document.getElementById('cred-username').value.trim();
+            const p = document.getElementById('cred-password').value.trim();
+            if (!u || !p) return alert("Username and Password cannot be empty!");
+            
+            credentials[role] = { user: u, pass: p };
+            db.ref('credentials').set(credentials).then(() => {
+                alert("Credentials updated successfully!");
+                closeCredentialsModal();
+            }).catch(err => {
+                alert("Error updating credentials: " + err.message);
+            });
         }
 
         function renderCategories() {
@@ -2002,21 +2096,14 @@ body {
 
             const paymentOrderKey = getLinkedOrderKey(currentSelectedTable);
 
-            // Remove ONLY the order that was actually paid.
-            // A new customer/staff member can start a fresh order on the same table
-            // before the old remove request reaches Firebase. A plain .remove()
-            // could then delete that NEW order. Transaction protects the new order.
             const paidOrderSnapshot = JSON.parse(JSON.stringify(paidOrderDataForSale));
             db.ref('activeOrders/' + paymentOrderKey).transaction(currentOrder => {
                 if (currentOrder === null) return;
 
-                // If the order currently in Firebase is still the same order we
-                // just paid, remove it. Otherwise leave the newer/changed order alone.
                 if (JSON.stringify(currentOrder) === JSON.stringify(paidOrderSnapshot)) {
                     return null;
                 }
 
-                // Safety fallback: match the original order timestamp when available.
                 if (paidOrderSnapshot.time && currentOrder.time === paidOrderSnapshot.time) {
                     return null;
                 }
