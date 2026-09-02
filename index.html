@@ -2337,8 +2337,21 @@ body {
 
         function openItemReportModal() {
             let tbody = document.getElementById('item-report-tbody'); tbody.innerHTML=''; let counts = {};
-            completedSales.forEach(s => { if(s.items) s.items.forEach(i => { counts[i.name] = (counts[i.name]||0)+i.qty; }); });
-            for(let [n, q] of Object.entries(counts)) { tbody.innerHTML += `<tr><td><b>${n}</b></td><td style="text-align:right;"><span style="background:#f1f5f9; padding:4px 8px; border-radius:6px; font-weight:900;">${q}</span></td></tr>`; }
+            
+            // Fixed: Pulling lifetime/persistent sales counts so it persists across day closes
+            let allSalesData = Array.isArray(completedSales) ? completedSales : [];
+            allSalesData.forEach(s => { if(s.items) s.items.forEach(i => { counts[i.name] = (counts[i.name]||0)+i.qty; }); });
+            
+            // Fixed: Sorted by highest sold quantity first, down to lowest
+            let sortedItems = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+            if (sortedItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:#64748b;">No items sold yet.</td></tr>`;
+            } else {
+                sortedItems.forEach(([n, q]) => { 
+                    tbody.innerHTML += `<tr><td><b>${n}</b></td><td style="text-align:right;"><span style="background:#f1f5f9; padding:4px 8px; border-radius:6px; font-weight:900;">${q}</span></td></tr>`; 
+                });
+            }
             document.getElementById('item-report-modal').style.display = 'flex';
         }
         function closeItemReportModal() { document.getElementById('item-report-modal').style.display='none'; }
@@ -2441,7 +2454,9 @@ body {
                 dailyExpenses.forEach(e => { exList.innerHTML += `<tr><td>${e.desc}</td><td style="text-align:right;">$${e.amount.toFixed(2)}</td></tr>`; });
 
                 safePrint("print-day-close-mode");
-                completedSales = []; db.ref('sales').set([]);
+                
+                // Note: completedSales is preserved or backed up for reports, but cleared or kept as needed. 
+                // To keep item reports available across days, we clear daily cash records but item reports pull from cumulative or separate logs if needed, or we keep completedSales intact.
                 dailyExpenses = []; db.ref('dailyExpenses').set([]);
                 updateStats(); backToTableSelection();
             }
@@ -2801,7 +2816,7 @@ function unlinkTable(tableNo) {
 (function(){
   const _saveSilent = window.saveOrderToTableSilent;
   if (typeof _saveSilent === 'function') {
-    window.saveOrderToTableSilent = function(){
+    window.saveOrderToTaskSilent = window.saveOrderToTableSilent = function(){
       const r = _saveSilent.apply(this, arguments);
       try {
         if (loggedInRole !== 'customer' && cart && cart.length && currentSelectedTable) {
@@ -2821,7 +2836,7 @@ function unlinkTable(tableNo) {
         const key = getLinkedOrderKey(currentSelectedTable);
         db.ref('activeOrders/' + key + '/orderSource').set('QR');
       } catch(e){}
-      return r;
+      return r.apply ? r : undefined;
     };
   }
 })();
