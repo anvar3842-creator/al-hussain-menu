@@ -86,7 +86,6 @@
         
         .big-table-card h3 { margin: 0 0 8px 0; font-size: 18px; font-weight: 900; color: var(--text-main); }
         .big-table-card p { margin: 0; font-size: 12px; font-weight: 800; color: var(--text-muted); line-height: 1.4; }
-        .table-order-amount { color: var(--danger); font-size: 15px; font-weight: 900; display: inline-block; margin: 2px 0; }
 
         /* Main POS Layout */
         #pos-main-view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
@@ -97,7 +96,6 @@
         /* Mobile Tabs */
         .mobile-tab-bar { display: none; background: var(--card-bg); padding: 10px 15px; gap: 12px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; box-shadow: var(--shadow-sm); z-index: 10; }
         .mob-tab-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; background: #f1f5f9; color: var(--text-muted); font-family: inherit; transition: 0.3s; }
-        .cart-count-badge { display:inline-flex; min-width:22px; height:22px; padding:0 6px; align-items:center; justify-content:center; border-radius:999px; background:#dc2626; color:#fff; font-size:12px; font-weight:900; margin-left:5px; vertical-align:middle; }
         .mob-tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
 
         @media (max-width: 900px) {
@@ -212,7 +210,6 @@
         .admin-dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #f1f5f9; padding-bottom: 12px; margin-bottom: 15px; }
         .admin-dashboard-header h3 { margin: 0; color: var(--text-main); font-size: 16px; font-weight: 900; }
         
-        
         .stat-toggle-box { cursor: pointer; border: 1px solid var(--border-light); user-select: none; transition: all .2s ease; }
         .stat-toggle-box:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
         .stat-eye { margin-left: 5px; font-size: 12px; opacity: .7; }
@@ -298,7 +295,6 @@
     
 /* =========================================================
    AL HUSSAIN POS — PREMIUM 2026 VISUAL REFRESH
-   Visual-only layer: keeps existing application logic intact.
    ========================================================= */
 :root {
     --primary: #7c3aed;
@@ -324,236 +320,58 @@ body {
         #f5f7fb;
 }
 
-.header {
-    margin: 14px 16px 0;
-    padding: 14px 18px;
-    border-radius: 18px;
-    background: rgba(255,255,255,.92);
-    border: 1px solid rgba(226,232,240,.9);
-    box-shadow: 0 8px 25px rgba(15,23,42,.06);
-}
-
-.header h2 {
-    font-size: 20px;
-    letter-spacing: .2px;
-}
-
-.badge {
-    background: #ede9fe;
-    color: #6d28d9;
-    padding: 7px 12px;
-}
-
-.btn-logout {
-    border-radius: 10px;
-}
-
-.table-selection-header,
-.controls-bar,
-.right-panel,
-.menu-card,
-.big-table-card {
-    border: 1px solid rgba(226,232,240,.85);
-}
-
-.table-selection-header {
-    background: rgba(255,255,255,.94);
-    box-shadow: var(--shadow-sm);
-}
-
-.big-tables-grid {
-    gap: 16px;
-}
-
-.big-table-card {
-    min-height: 120px;
-    padding: 22px 16px;
-    border-radius: 18px;
-    box-shadow: 0 5px 18px rgba(15,23,42,.055);
-}
-
-.big-table-card::before {
-    height: 5px;
-}
-
-.big-table-card:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: var(--shadow-lg);
-}
-
-.controls-bar {
-    padding: 14px;
-    border-radius: 18px;
-}
-
-.search-box {
-    border-radius: 12px;
-    background: #fff;
-}
-
-.cat-btn {
-    border-radius: 12px;
-    padding: 9px 16px;
-}
-
-.cat-btn.active {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.menu-grid {
-    gap: 14px;
-}
-
-.menu-card {
-    height: 138px;
-    border-radius: 18px;
-    padding: 17px;
-    background: rgba(255,255,255,.98);
-    box-shadow: 0 4px 14px rgba(15,23,42,.045);
-}
-
-.menu-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(76,29,149,.13);
-    border-color: #c4b5fd;
-}
-
-.card-code {
-    background: #f3f4f6;
-    color: #64748b;
-}
-
-.card-price {
-    color: #6d28d9;
-}
-
-.btn-add {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.right-panel {
-    border-radius: 22px;
-    background: rgba(255,255,255,.96);
-    box-shadow: 0 12px 35px rgba(15,23,42,.08);
-}
-
-.right-panel h3 {
-    font-size: 19px;
-}
-
-.bill-summary {
-    border-radius: 15px;
-    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
-}
-
-.action-buttons button,
-.btn-ready-order,
-.btn-customer-send {
-    border-radius: 11px;
-}
-
-.btn-pay {
-    background: linear-gradient(135deg, #059669, #10b981);
-}
-
-.btn-pay:hover {
-    transform: translateY(-2px);
-}
-
-.mobile-tab-bar {
-    background: rgba(255,255,255,.96);
-    backdrop-filter: blur(12px);
-}
-
-.mob-tab-btn.active {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.login-overlay {
-    background:
-        radial-gradient(circle at 15% 20%, rgba(255,255,255,.18), transparent 22%),
-        radial-gradient(circle at 85% 80%, rgba(255,255,255,.15), transparent 25%),
-        linear-gradient(135deg, #2e1065, #6d28d9 48%, #0891b2);
-}
-
-.login-box {
-    border: 1px solid rgba(255,255,255,.55);
-    box-shadow: 0 30px 70px rgba(15,23,42,.30);
-}
-
-.login-box h2 {
-    letter-spacing: .3px;
-}
-
-.login-box input {
-    background: #f8fafc;
-}
-
-.btn-login {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.timeout-box {
-    border: 1px solid #e5e7eb;
-}
+.header { margin: 14px 16px 0; padding: 14px 18px; border-radius: 18px; background: rgba(255,255,255,.92); border: 1px solid rgba(226,232,240,.9); box-shadow: 0 8px 25px rgba(15,23,42,.06); }
+.header h2 { font-size: 20px; letter-spacing: .2px; }
+.badge { background: #ede9fe; color: #6d28d9; padding: 7px 12px; }
+.btn-logout { border-radius: 10px; }
+.table-selection-header, .controls-bar, .right-panel, .menu-card, .big-table-card { border: 1px solid rgba(226,232,240,.85); }
+.table-selection-header { background: rgba(255,255,255,.94); box-shadow: var(--shadow-sm); }
+.big-tables-grid { gap: 16px; }
+.big-table-card { min-height: 120px; padding: 22px 16px; border-radius: 18px; box-shadow: 0 5px 18px rgba(15,23,42,.055); }
+.big-table-card::before { height: 5px; }
+.big-table-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: var(--shadow-lg); }
+.controls-bar { padding: 14px; border-radius: 18px; }
+.search-box { border-radius: 12px; background: #fff; }
+.cat-btn { border-radius: 12px; padding: 9px 16px; }
+.cat-btn.active { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+.menu-grid { gap: 14px; }
+.menu-card { height: 138px; border-radius: 18px; padding: 17px; background: rgba(255,255,255,.98); box-shadow: 0 4px 14px rgba(15,23,42,.045); }
+.menu-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(76,29,149,.13); border-color: #c4b5fd; }
+.card-code { background: #f3f4f6; color: #64748b; }
+.card-price { color: #6d28d9; }
+.btn-add { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+.right-panel { border-radius: 22px; background: rgba(255,255,255,.96); box-shadow: 0 12px 35px rgba(15,23,42,.08); }
+.right-panel h3 { font-size: 19px; }
+.bill-summary { border-radius: 15px; background: linear-gradient(180deg, #f8fafc, #f1f5f9); }
+.action-buttons button, .btn-ready-order, .btn-customer-send { border-radius: 11px; }
+.btn-pay { background: linear-gradient(135deg, #059669, #10b981); }
+.btn-pay:hover { transform: translateY(-2px); }
+.mobile-tab-bar { background: rgba(255,255,255,.96); backdrop-filter: blur(12px); }
+.mob-tab-btn.active { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+.login-overlay { background: radial-gradient(circle at 15% 20%, rgba(255,255,255,.18), transparent 22%), radial-gradient(circle at 85% 80%, rgba(255,255,255,.15), transparent 25%), linear-gradient(135deg, #2e1065, #6d28d9 48%, #0891b2); }
+.login-box { border: 1px solid rgba(255,255,255,.55); box-shadow: 0 30px 70px rgba(15,23,42,.30); }
+.login-box h2 { letter-spacing: .3px; }
+.login-box input { background: #f8fafc; }
+.btn-login { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+.timeout-box { border: 1px solid #e5e7eb; }
 
 @media (max-width: 900px) {
-    .header {
-        margin: 8px 10px 0;
-        border-radius: 15px;
-    }
-
-    .main-layout {
-        padding: 8px;
-        gap: 10px;
-    }
-
-    .menu-grid {
-        grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-        gap: 10px;
-    }
-
-    .menu-card {
-        height: 132px;
-        padding: 14px;
-    }
-
-    .big-tables-grid {
-        gap: 10px;
-    }
+    .header { margin: 8px 10px 0; border-radius: 15px; }
+    .main-layout { padding: 8px; gap: 10px; }
+    .menu-grid { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 10px; }
+    .menu-card { height: 132px; padding: 14px; }
+    .big-tables-grid { gap: 10px; }
 }
 
 @media (max-width: 550px) {
-    .header {
-        padding: 11px 13px;
-    }
-
-    .header h2 {
-        font-size: 16px;
-    }
-
-    .badge {
-        padding: 5px 9px;
-        font-size: 11px;
-    }
-
-    .menu-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .menu-card {
-        height: 128px;
-    }
-
-    .btn-add {
-        opacity: 1;
-    }
-
-    .table-selection-header {
-        padding: 12px 14px;
-    }
+    .header { padding: 11px 13px; }
+    .header h2 { font-size: 16px; }
+    .badge { padding: 5px 9px; font-size: 11px; }
+    .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .menu-card { height: 128px; }
+    .btn-add { opacity: 1; }
+    .table-selection-header { padding: 12px 14px; }
 }
-
 
         @media print {
             body.print-customer #print-receipt .print-ref-strong,
@@ -570,7 +388,6 @@ body {
                 color: #000 !important;
             }
         }
-
 
 /* === TABLE LINKING: Tables 1-13 only === */
 .table-link-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
@@ -648,7 +465,6 @@ body {
                 </div>
                 
                 <div style="margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                    <input type="text" id="add-m-code" placeholder="Shortcut Code (e.g. BK6)" maxlength="20" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 1; min-width: 105px; outline: none; font-size: 13px; font-family: inherit; text-transform: uppercase;">
                     <input type="text" id="add-m-name" placeholder="New Item Name" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 2; outline: none; font-size: 13px; font-family: inherit;">
                     <select id="add-m-cat" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 1.5; outline: none; font-size: 13px; font-weight: bold; color: #4f46e5; background: white; font-family: inherit;"></select>
                     <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 70px; outline: none; font-size: 13px; font-family: inherit;">
@@ -667,7 +483,7 @@ body {
                     <button class="admin-btn monthly-btn" onclick="openMonthlyReportModal()">Monthly History</button>
                     <button class="admin-btn qr-btn" onclick="openCustomerQRModal()">QR Codes</button>
                     <button class="admin-btn history-btn" onclick="openHistoryModal()">Sales History</button>
-                    <button class="admin-btn" style="background:linear-gradient(135deg,#0f766e,#115e59);" onclick="openCredentialsModal()">User ID & Password</button>
+                    <button class="admin-btn monthly-btn" onclick="openPaymentSummaryModal()">Payment Summary</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">Day Close</button>
                 </div>
             </div>
@@ -676,14 +492,14 @@ body {
         <div id="pos-main-view">
             <div class="mobile-tab-bar">
                 <button class="mob-tab-btn active" id="tab-menu-btn" onclick="switchMobileTab('menu')">Menu Items</button>
-                <button class="mob-tab-btn" id="tab-cart-btn" onclick="switchMobileTab('cart')">Cart & Billing <span id="cart-count-badge" class="cart-count-badge">0</span></button>
+                <button class="mob-tab-btn" id="tab-cart-btn" onclick="switchMobileTab('cart')">Cart & Billing</button>
             </div>
 
             <div class="main-layout">
                 <div class="left-panel" id="panel-menu">
                     <div class="controls-bar">
                         <div class="search-container">
-                            <input type="text" id="search-input" class="search-box" placeholder="Search item or shortcut code (Enter to add)..." onkeyup="handleSearchInput(event)">
+                            <input type="text" id="search-input" class="search-box" placeholder="Search item or code..." onkeyup="handleSearchInput(event)">
                             <button class="btn-menu-refresh btn-clear" onclick="clearSearch()" title="Clear Search">Clear</button>
                             <button class="btn-menu-refresh" onclick="refreshMenuData()" title="Refresh Menu">Refresh</button>
                         </div>
@@ -738,7 +554,7 @@ body {
 
                     <div id="customer-action-div">
                         <button class="btn-call-waiter" id="btn-call-waiter-elem" onclick="callWaiter()">Call Waiter / Counter</button>
-                        <button class="btn-customer-send" onclick="customerSendOrder()">Send Order</button>
+                        <button class="btn-customer-send" onclick="customerSendOrder()">Send Order to Kitchen</button>
                     </div>
                 </div>
             </div>
@@ -768,7 +584,7 @@ body {
         <div class="timeout-box" style="padding: 30px;">
             <h1 style="font-size: 55px; margin: 0 0 10px 0;">✅</h1>
             <h2 style="color: #10b981;">Order Sent Successfully!</h2>
-            <p style="margin-bottom: 25px;">Your order has been sent successfully and is being prepared right now.</p>
+            <p style="margin-bottom: 25px;">The kitchen has received your order and is preparing it right now.</p>
             <button onclick="closeCustomerSuccess()" style="width: 100%; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer;">View Menu Again</button>
         </div>
     </div>
@@ -823,26 +639,27 @@ body {
     <!-- Modals (QR, Staff, Menu Manager, etc.) -->
     <div id="qr-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Customer & Takeaway QR Codes</h3><div><button class="btn-small" onclick="printAllTableQRs()">Print All QRs</button><button class="close-modal" onclick="closeCustomerQRModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><p style="font-size: 14px; font-weight:bold; color: #64748b; margin-top: 0;">Scan table QR codes for dine-in, or the Takeaway QR code for parcel orders.</p><div id="qr-cards-grid" class="qr-card-container"></div></div></div></div>
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
-    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 900px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Code</th><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Stock Status</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
+    <div id="menu-manager-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Menu Items & Prices</h3><button class="close-modal" onclick="closeMenuManagerModal()">X</button></div><div class="modal-body"><input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;"><table class="admin-table"><thead><tr><th>Item Name</th><th>Category</th><th style="text-align:right;">Price ($)</th><th style="text-align:center;">Stock Status</th><th style="text-align:center;">Action</th></tr></thead><tbody id="menu-manager-tbody"></tbody></table></div></div></div>
     <div id="category-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Categories & Order</h3><button class="close-modal" onclick="closeCategoryManagerModal()">X</button></div><div class="modal-body"><p style="font-size: 13px; font-weight:bold; color: #64748b; margin-top: 0;">Use Up/Down buttons to prioritize categories.</p><table class="admin-table"><thead><tr><th>Category Name</th><th style="text-align:center;">Priority Order</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="category-manager-tbody"></tbody></table></div></div></div>
     <div id="stock-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manual Raw Material Stock</h3><div><button class="btn-small" onclick="addNewRawMaterial()">+ Add Material</button><button class="close-modal" onclick="closeStockModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead><tbody id="stock-tbody"></tbody></table></div></div></div>
-    <div id="expense-view-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">View Daily Expenses</h3><button class="close-modal" onclick="closeExpenseViewModal()">X</button></div><div class="modal-body"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px; flex-wrap:wrap;"><b style="font-size:16px;">Expense History</b><b style="font-size:18px;">Total: $<span id="view-expenses-total">0.00</span></b></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px;"><div style="padding:12px;border-radius:12px;background:#f1f5f9;"><small>This Month</small><div style="font-size:20px;font-weight:900;">$<span id="view-expenses-month-total">0.00</span></div></div><div style="padding:12px;border-radius:12px;background:#f1f5f9;"><small>Average / Expense Day</small><div style="font-size:20px;font-weight:900;">$<span id="view-expenses-month-average">0.00</span></div></div></div><div style="margin-bottom:14px;"><b>Monthly Trend</b><div id="view-expenses-trend" style="margin-top:6px;"></div></div><div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>Time</th><th>Description</th><th style="text-align:right;">Amount ($)</th></tr></thead><tbody id="view-expenses-tbody"></tbody></table></div><div id="view-expenses-empty" style="display:none; text-align:center; padding:20px; color:#64748b; font-weight:800;">No expenses added yet.</div></div></div></div>
     <div id="expense-modal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Add Daily Expense</h3><button class="close-modal" onclick="closeExpenseModal()">X</button></div><div class="modal-body"><div style="margin-bottom: 15px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Description:</label><input type="text" id="expense-desc" placeholder="e.g. Vegetables, Gas" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><div style="margin-bottom: 20px;"><label style="font-size: 14px; font-weight: 800; color: #475569;">Amount ($):</label><input type="number" id="expense-amount" placeholder="0.00" step="0.50" style="width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; font-weight:bold;"></div><button class="btn-small" style="width: 100%; padding: 14px; font-size:15px;" onclick="saveExpenseItem()">Save Expense</button></div></div></div>
     <div id="monthly-report-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily & Monthly History</h3><button class="close-modal" onclick="closeMonthlyReportModal()">X</button></div><div class="modal-body"><div id="monthly-report-container"></div></div></div></div>
     <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
-    <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
-    <div id="sale-detail-modal" class="modal-overlay"><div class="modal-content" style="max-width:650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sale Details</h3><button class="close-modal" onclick="closeSaleDetailModal()">X</button></div><div class="modal-body"><div id="sale-detail-summary" style="margin-bottom:12px; font-weight:800;"></div><div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th><th style="text-align:right;">Total</th></tr></thead><tbody id="sale-detail-items"></tbody></table></div></div></div></div>
+    <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Source</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
+    <div id="history-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sale Details</h3><div><button class="btn-small" id="history-view-print-btn" onclick="printViewedSale()">Print</button><button class="close-modal" onclick="closeHistoryViewModal()" style="margin-left:5px;">X</button></div></div><div class="modal-body" id="history-view-body"></div></div></div>
 
-    <div id="credentials-modal" class="modal-overlay"><div class="modal-content" style="max-width:520px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">User ID & Password</h3><button class="close-modal" onclick="closeCredentialsModal()">X</button></div><div class="modal-body"><p style="font-size:13px;font-weight:800;color:#64748b;margin-top:0;">Admin can change the login ID and password for Admin, User 1 and User 2.</p><div id="credentials-form"></div><button class="btn-small" style="width:100%;padding:14px;font-size:15px;margin-top:12px;" onclick="saveCredentials()">Save Login Settings</button></div></div></div>
+    <div id="expense-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">View Expenses</h3><button class="close-modal" onclick="closeExpenseViewModal()">X</button></div><div class="modal-body"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"><div class="stat-box">Total: $<span id="view-expenses-total">0.00</span></div><div class="stat-box">This Month: $<span id="view-expenses-month-total">0.00</span></div><div class="stat-box">Daily Average: $<span id="view-expenses-month-average">0.00</span></div></div><table class="admin-table"><thead><tr><th>Date / Time</th><th>Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody id="view-expenses-tbody"></tbody></table><div id="view-expenses-empty" style="display:none;text-align:center;padding:20px;color:#64748b;">No expenses recorded.</div><h4 style="margin:18px 0 8px;">Monthly Trend</h4><div id="view-expenses-trend"></div></div></div></div>
+
+    <div id="payment-summary-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">Daily Payment Summary</h3><button class="close-modal" onclick="closePaymentSummaryModal()">X</button></div><div class="modal-body"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;"><div class="stat-box">Cash: $<span id="pay-summary-cash">0.00</span></div><div class="stat-box">Card: $<span id="pay-summary-card">0.00</span></div><div class="stat-box">QR Pay: $<span id="pay-summary-qr">0.00</span></div><div class="stat-box">Total: $<span id="pay-summary-total">0.00</span></div></div></div></div></div>
 
     <!-- Print Templates -->
-    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
+    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span><br><b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     
-    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER (KOT) ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
+    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
     
     <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div style="display:none;">\x1B\x70\x00\x19\xFA</div></div>
     <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>SALES HISTORY REPORT</b></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span>$<span id="print-history-grand-total">0.00</span></span></div></div>
-    <div id="print-day-close"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>DAY CLOSE REPORT</b></p><p id="dc-date" style="margin:2px 0; font-size:13px;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 15px; font-weight: 900; margin-bottom: 8px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Sales:</span><span>$<span id="dc-sales">0.00</span></span></div><div style="margin: 8px 0; padding: 7px 0; border-top: 1px dashed #999; border-bottom: 1px dashed #999;"><div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>Cash:</span><span>$<span id="dc-cash">0.00</span></span></div><div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>Card:</span><span>$<span id="dc-card">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>QR Pay:</span><span>$<span id="dc-qr">0.00</span></span></div></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Expenses:</span><span>$<span id="dc-expenses">0.00</span></span></div><hr style="border-top: 2px dashed black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Net Balance:</span><span>$<span id="dc-net">0.00</span></span></div></div><div><p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>EXPENSES:</b></p><table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900; margin-top: 4px;"><tbody id="dc-expenses-list"></tbody></table></div></div>
+    <div id="print-day-close"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>DAY CLOSE REPORT</b></p><p id="dc-date" style="margin:2px 0; font-size:13px;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 15px; font-weight: 900; margin-bottom: 8px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Sales:</span><span>$<span id="dc-sales">0.00</span></span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Expenses:</span><span>$<span id="dc-expenses">0.00</span></span></div><hr style="border-top: 2px dashed black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Net Balance:</span><span>$<span id="dc-net">0.00</span></span></div></div><div><p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>EXPENSES:</b></p><table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900; margin-top: 4px;"><tbody id="dc-expenses-list"></tbody></table></div></div>
     <div id="print-item-report"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>DAILY ITEM SOLD REPORT</b></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><tbody id="print-item-report-items"></tbody></table></div>
     <div id="print-qr-batch"><div style="text-align: center; margin-bottom: 20px;"><h2>AL HUSSAIN RESTAURANT - QR CODES</h2></div><div id="print-qr-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;"></div></div>
 
@@ -957,30 +774,34 @@ body {
         let loggedInRole = ""; 
         let currentSelectedTable = "";
         let currentOrderType = "Dine-In";
-        let userCredentials = { admin: { user: "admin", pass: "admin123" }, user1: { user: "user1", pass: "1234" }, user2: { user: "user2", pass: "1234" } };
         let tableLinks = {};
+        let onlinePresenceKey = null;
+        let onlinePresenceRole = null;
         
         let customerHadActiveOrder = false;
-        let completedPaymentKeys = {};
         let lastBellTime = Date.now(); 
 
         db.ref('menuData').on('value', (snapshot) => {
             const val = snapshot.val();
-            if (val && Array.isArray(val) && val.length > 0) { menuData = val; }
-            else { menuData = defaultMenuData; db.ref('menuData').set(defaultMenuData); }
+            if (val && Array.isArray(val) && val.length > 0) {
+                menuData = val;
+                const baksoDefaults = defaultMenuData.filter(item => item.category === "Bakso");
+                const missingBakso = baksoDefaults.filter(def => !menuData.some(item => String(item.code || '') === String(def.code)));
+                if (missingBakso.length) {
+                    menuData = [...menuData, ...missingBakso];
+                    db.ref('menuData').set(menuData);
+                }
+            } else { menuData = defaultMenuData; db.ref('menuData').set(defaultMenuData); }
             renderCategories(); populateCategoryDropdown(); renderMenu();
         });
 
         db.ref('categoryOrder').on('value', (snapshot) => {
             const val = snapshot.val();
-            if (val && Array.isArray(val)) { categoryOrder = val; }
-            else { categoryOrder = defaultCategoryOrder; db.ref('categoryOrder').set(defaultCategoryOrder); }
+            if (val && Array.isArray(val)) {
+                categoryOrder = [...val, ...defaultCategoryOrder.filter(c => !val.includes(c))];
+                if (categoryOrder.length !== val.length) db.ref('categoryOrder').set(categoryOrder);
+            } else { categoryOrder = defaultCategoryOrder; db.ref('categoryOrder').set(defaultCategoryOrder); }
             renderCategories(); populateCategoryDropdown();
-        });
-
-        db.ref('userCredentials').on('value', (snapshot) => {
-            const val = snapshot.val();
-            if (val && val.admin && val.user1 && val.user2) userCredentials = val;
         });
 
         db.ref('tableLinks').on('value', (snapshot) => {
@@ -988,7 +809,7 @@ body {
             renderBigTableSelectionGrid();
         });
 
-db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
+        db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             const val = snapshot.val();
             if (val && typeof val === 'number') { takeawaySequenceCounter = val; } 
             else { takeawaySequenceCounter = 100; db.ref('takeawaySequenceCounter').set(100); }
@@ -1092,11 +913,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             }
         });
         
-        db.ref('completedPayments').on('value', (snapshot) => {
-            completedPaymentKeys = snapshot.val() || {};
-            checkCustomerPaymentStatus();
-        });
-
         db.ref('sales').on('value', (snapshot) => { completedSales = snapshot.val() || []; updateStats(); });
         db.ref('rawMaterials').on('value', (snapshot) => { rawMaterials = snapshot.val() || []; });
         db.ref('dailyExpenses').on('value', (snapshot) => { dailyExpenses = snapshot.val() || []; updateStats(); });
@@ -1117,9 +933,8 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             if (targetKey) {
                 if (activeOrders[targetKey]) {
                     customerHadActiveOrder = true;
-                } else if (customerHadActiveOrder && completedPaymentKeys[targetKey] === true) {
-                    // Only an explicit payment record can end the customer session.
-                    sessionStorage.setItem('paid_' + targetKey, 'true');
+                } else if (customerHadActiveOrder && !activeOrders[targetKey]) {
+                    sessionStorage.setItem('paid_' + targetKey, 'true'); 
                     if(orderParam === "takeaway") {
                         sessionStorage.removeItem('myTakeawayKey');
                         sessionStorage.removeItem('myTkName');
@@ -1146,8 +961,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             if (orderParam && orderParam === "takeaway") {
                 isTakeawayQR = true;
                 
-                db.ref('shopOnline').once('value', (snap) => {
-                    let isOnline = snap.val();
+                checkShopOnlineForCustomer((isOnline) => {
                     if (!isOnline) {
                         document.getElementById('shop-closed-screen').style.display = 'flex';
                         return;
@@ -1173,8 +987,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                     return;
                 }
 
-                db.ref('shopOnline').once('value', (snap) => {
-                    let isOnline = snap.val();
+                checkShopOnlineForCustomer((isOnline) => {
                     if (!isOnline) {
                         document.getElementById('shop-closed-screen').style.display = 'flex';
                         return;
@@ -1239,6 +1052,52 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             switchMobileTab('menu');
         }
 
+        function checkShopOnlineForCustomer(callback) {
+            db.ref('onlineStaff').once('value').then((snap) => {
+                const presence = snap.val() || {};
+                const hasOnlineStaff = Object.keys(presence).some(k => presence[k] && presence[k].active !== false);
+                callback(hasOnlineStaff);
+            }).catch(() => {
+                db.ref('shopOnline').once('value', snap => callback(!!snap.val()));
+            });
+        }
+
+        function refreshShopOnlineFromPresence() {
+            db.ref('onlineStaff').once('value').then((snap) => {
+                const presence = snap.val() || {};
+                const hasOnlineStaff = Object.keys(presence).some(k => presence[k] && presence[k].active !== false);
+                return db.ref('shopOnline').set(hasOnlineStaff);
+            }).catch(() => {});
+        }
+
+        function setStaffOnlinePresence(roleKey) {
+            clearStaffOnlinePresence().finally(() => {
+                const ref = db.ref('onlineStaff').push();
+                onlinePresenceKey = ref.key;
+                onlinePresenceRole = roleKey;
+                const presenceData = { role: roleKey, active: true, timestamp: firebase.database.ServerValue.TIMESTAMP };
+                ref.onDisconnect().remove();
+                ref.set(presenceData).then(() => refreshShopOnlineFromPresence()).catch(() => {});
+            });
+        }
+
+        function clearStaffOnlinePresence() {
+            if (!onlinePresenceKey) {
+                refreshShopOnlineFromPresence();
+                return Promise.resolve();
+            }
+            const key = onlinePresenceKey;
+            onlinePresenceKey = null;
+            onlinePresenceRole = null;
+            return db.ref('onlineStaff/' + key).remove().then(() => refreshShopOnlineFromPresence()).catch(() => {});
+        }
+
+        db.ref('onlineStaff').on('value', (snap) => {
+            const presence = snap.val() || {};
+            const hasOnlineStaff = Object.keys(presence).some(k => presence[k] && presence[k].active !== false);
+            db.ref('shopOnline').set(hasOnlineStaff);
+        });
+
         function handleLogin(event) {
             event.preventDefault();
             const user = document.getElementById('login-user').value.trim().toLowerCase();
@@ -1253,21 +1112,21 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             const btnReadyOrder = document.getElementById('btn-ready-order-elem');
 
             let roleKey = "";
-            if (user === String(userCredentials.admin.user || "admin").trim().toLowerCase() && pass === String(userCredentials.admin.pass || "").trim()) {
+            if (user === "admin" && pass === "admin123") {
                 loggedInRole = "admin";
                 billSummaryContainer.style.display = "block";
                 btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
                 roleKey = "Admin";
                 grantAccess(roleKey);
             } 
-            else if (user === String(userCredentials.user1.user || "user1").trim().toLowerCase() && pass === String(userCredentials.user1.pass || "").trim()) {
+            else if (user === "user1" && pass === "1234") {
                 loggedInRole = "user1";
                 billSummaryContainer.style.display = "block";
                 btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
                 roleKey = "Staff";
                 grantAccess(roleKey);
             }
-            else if (user === String(userCredentials.user2.user || "user2").trim().toLowerCase() && pass === String(userCredentials.user2.pass || "").trim()) {
+            else if (user === "user2" && pass === "1234") {
                 loggedInRole = "user2";
                 billSummaryContainer.style.display = "none";
                 btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
@@ -1279,15 +1138,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 return; 
             }
 
-            // ONLINE/OFFLINE FIX: keep the shop online while ANY authorized user is online.
-            // Each role has its own presence entry, so one user's logout cannot close the shop
-            // while another user is still online. Firebase onDisconnect also handles dropped sessions.
-            const presenceRef = db.ref('onlineUsers/' + loggedInRole);
-            presenceRef.set({ online: true, timestamp: firebase.database.ServerValue.TIMESTAMP });
-            presenceRef.onDisconnect().remove();
-            db.ref('onlineUsers').on('value', (snap) => {
-                db.ref('shopOnline').set(snap.exists() && Object.keys(snap.val() || {}).length > 0);
-            });
+            setStaffOnlinePresence(roleKey);
 
             let todayDateKey = new Date().toISOString().split('T')[0];
             if (!staffShifts[todayDateKey]) staffShifts[todayDateKey] = {};
@@ -1320,16 +1171,8 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             updateStats();
         }
 
-        function logout() {
-            const role = loggedInRole;
-            if (role) {
-                db.ref('onlineUsers/' + role).remove().then(() => {
-                    db.ref('onlineUsers').once('value', (snap) => {
-                        db.ref('shopOnline').set(snap.exists() && Object.keys(snap.val() || {}).length > 0);
-                    });
-                });
-            }
-            location.href = liveBaseUrl;
+        function logout() { 
+            clearStaffOnlinePresence().finally(() => { location.href = liveBaseUrl; });
         }
 
         function refreshMenuData() { renderMenu(); alert("Menu Refreshed!"); }
@@ -1386,12 +1229,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 let orderData = activeOrders[getLinkedOrderKey(tableName)];
                 let isOccupied = orderData !== undefined;
                 let cardClass = isOccupied ? "big-table-card occupied" : "big-table-card free";
-                let tableAmount = isOccupied && Array.isArray(orderData.items)
-                    ? orderData.items.reduce((sum, item) => sum + ((Number(item.customPrice) || 0) * (Number(item.qty) || 0)), 0)
-                    : 0;
-                let statusText = isOccupied
-                    ? `Occupied<br><span class="table-order-amount">$${tableAmount.toFixed(2)}</span><br>${formatElapsedTime(orderData.time)}`
-                    : "Free Table";
+                let statusText = isOccupied ? `Occupied<br>${formatElapsedTime(orderData.time)}` : "Free Table";
                 let cancelBtn = (isOccupied && loggedInRole === "admin") ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tableName}', event)" style="position:absolute; top:8px; right:8px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:bold; cursor:pointer; z-index:2;">X</button>` : '';
 
                 const linkedNames = getLinkedTableNames(tableName);
@@ -1496,9 +1334,9 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             if (loggedInRole !== "admin") return alert("Admin only!");
             if (confirm(`Cancel active order ${key}?`)) { 
                 const orderKey = getLinkedOrderKey(key);
-                delete activeOrders[orderKey]; 
-                db.ref('activeOrders').set(activeOrders); 
+                db.ref('activeOrders/' + orderKey).remove(); 
                 db.ref(`orderStatus/${orderKey}`).remove();
+                delete activeOrders[orderKey]; // Update UI immediately
                 renderBigTableSelectionGrid(); 
             }
         }
@@ -1520,17 +1358,8 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
         function getAllCategories() {
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            const menuCats = activeSource.map(i => String(i.category || '').trim()).filter(Boolean);
-            const ordered = Array.isArray(categoryOrder) ? categoryOrder : [];
-            const result = [];
-            ordered.forEach(cat => {
-                const name = String(cat || '').trim();
-                if (name && menuCats.includes(name) && !result.includes(name)) result.push(name);
-            });
-            menuCats.forEach(cat => {
-                if (!result.includes(cat)) result.push(cat);
-            });
-            return result;
+            let menuCats = activeSource.map(i => i.category);
+            return [...new Set([...categoryOrder, ...menuCats])];
         }
 
         function populateCategoryDropdown() {
@@ -1567,89 +1396,46 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         function closeCategoryManagerModal() { document.getElementById('category-manager-modal').style.display = 'none'; }
         
         function moveCategoryOrder(index, direction) {
-            let cats = [...categoryOrder];
+            let cats = getAllCategories();
             let newIndex = index + direction;
             if (newIndex < 0 || newIndex >= cats.length) return;
-            [cats[index], cats[newIndex]] = [cats[newIndex], cats[index]];
+            let temp = cats[index];
+            cats[index] = cats[newIndex];
+            cats[newIndex] = temp;
             categoryOrder = cats;
-            db.ref('categoryOrder').set(categoryOrder).then(() => {
-                openCategoryManagerModal();
-                renderCategories();
-                renderMenu();
-            }).catch(err => alert('Could not save category order: ' + err.message));
+            db.ref('categoryOrder').set(categoryOrder);
+            openCategoryManagerModal();
+            renderCategories();
         }
 
         function renameCategory(oldName, index) {
             let newName = document.getElementById(`cat-rename-${index}`)?.value.trim();
             if (!newName || newName === oldName) return;
-            if (newName === 'All') return alert('"All" is a reserved category name.');
-            if (getAllCategories().some(c => c === newName && c !== oldName)) {
-                return alert('That category name already exists.');
-            }
-
-            categoryOrder = categoryOrder.map(c => c === oldName ? newName : c);
-            let activeSource = Array.isArray(menuData) ? [...menuData] : [];
+            categoryOrder = getAllCategories().map(c => c === oldName ? newName : c);
+            db.ref('categoryOrder').set(categoryOrder);
+            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
             activeSource.forEach(item => { if (item.category === oldName) item.category = newName; });
-
-            Promise.all([
-                db.ref('categoryOrder').set(categoryOrder),
-                db.ref('menuData').set(activeSource)
-            ]).then(() => {
-                menuData = activeSource;
-                if (currentCategory === oldName) currentCategory = newName;
-                openCategoryManagerModal();
-                populateCategoryDropdown();
-                renderCategories();
-                renderMenu();
-                alert('Renamed successfully!');
-            }).catch(err => alert('Could not rename category: ' + err.message));
+            db.ref('menuData').set(activeSource);
+            openCategoryManagerModal(); alert("Renamed successfully!");
         }
-
         function deleteCategory(catName) {
-            if (catName === 'All') return alert('The All category cannot be deleted.');
-            if (!confirm(`Delete category "${catName}"? This will also remove all menu items in this category.`)) return;
-
-            // Change local state first. This prevents Firebase's two separate
-            // value events from temporarily bringing the deleted category back.
-            categoryOrder = categoryOrder.filter(c => c !== catName);
-            let activeSource = Array.isArray(menuData) ? [...menuData] : [];
-            activeSource = activeSource.filter(item => item.category !== catName);
-            menuData = activeSource;
-            if (currentCategory === catName) currentCategory = 'All';
-
-            // Save both paths in one Firebase update so the category cannot
-            // briefly reappear from an out-of-sync menuData/categoryOrder event.
-            db.ref().update({
-                categoryOrder: categoryOrder,
-                menuData: activeSource
-            }).then(() => {
-                // Keep the local state authoritative after the atomic update.
-                menuData = activeSource;
-                populateCategoryDropdown();
-                renderCategories();
-                renderMenu();
+            if (confirm(`Delete category "${catName}"?`)) {
+                categoryOrder = categoryOrder.filter(c => c !== catName); db.ref('categoryOrder').set(categoryOrder);
+                let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+                activeSource = activeSource.filter(item => item.category !== catName); db.ref('menuData').set(activeSource);
                 openCategoryManagerModal();
-                alert('Category deleted successfully!');
-            }).catch(err => alert('Could not delete category: ' + err.message));
+            }
         }
 
         function renderCategories() {
-            let categories = ['All', ...getAllCategories()];
-            const filterContainer = document.getElementById('category-filters');
-            if (!filterContainer) return;
+            let categories = ["All", ...getAllCategories()];
+            const filterContainer = document.getElementById('category-filters'); if(!filterContainer) return;
             filterContainer.innerHTML = '';
             categories.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = `cat-btn ${currentCategory === cat ? 'active' : ''}`;
                 btn.innerText = cat;
-                // Do not rebuild the whole category bar on every click.
-                // Rebuilding it was causing the visible blink/flicker.
-                btn.onclick = () => {
-                    currentCategory = cat;
-                    filterContainer.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    renderMenu();
-                };
+                btn.onclick = () => { currentCategory = cat; renderCategories(); renderMenu(); };
                 filterContainer.appendChild(btn);
             });
         }
@@ -1746,26 +1532,54 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
         function clearSearch() { document.getElementById('search-input').value = ''; renderMenu(); }
         
-        function handleSearchInput(event) {
+        function normalizeItemCode(value) {
+            return String(value ?? '')
+                .replace(/[\u200B-\u200D\uFEFF]/g, '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '');
+        }
+
+        function getItemCodeCandidates(item) {
+            return [item?.code, item?.itemCode, item?.barcode, item?.sku]
+                .filter(v => v !== undefined && v !== null && String(v).trim() !== '')
+                .map(normalizeItemCode);
+        }
+
+        async function handleSearchInput(event) {
             const rawSearch = document.getElementById('search-input').value;
             const searchText = rawSearch.trim().toLowerCase();
-            const searchCode = searchText.replace(/\s+/g, '');
-            
+            const searchCode = normalizeItemCode(rawSearch);
+
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
 
             if (event.key === 'Enter' && searchCode !== '') {
-                let foundItem = activeSource.find(m => {
-                    let c = m.code ? String(m.code).toLowerCase().replace(/\s+/g, '') : "";
-                    return c === searchCode;
-                });
-                if (foundItem) { 
-                    if (foundItem.outOfStock) {
-                        alert(`"${foundItem.name}" is currently Out of Stock!`);
-                    } else {
-                        addToCart(foundItem.id); 
-                        document.getElementById('search-input').value = ''; 
-                        renderMenu(); 
+                let foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
+
+                if (!foundItem) {
+                    try {
+                        const snap = await db.ref('menuData').once('value');
+                        const latest = snap.val();
+                        if (Array.isArray(latest)) {
+                            menuData = latest;
+                            activeSource = latest;
+                            foundItem = activeSource.find(m => getItemCodeCandidates(m).includes(searchCode));
+                        }
+                    } catch (err) {
+                        console.error('Code lookup failed:', err);
                     }
+                }
+
+                if (foundItem) {
+                    if (foundItem.outOfStock) {
+                        alert(`\"${foundItem.name}\" is currently Out of Stock!`);
+                    } else {
+                        addToCart(foundItem.id);
+                        document.getElementById('search-input').value = '';
+                        renderMenu();
+                    }
+                } else {
+                    renderMenu();
                 }
             } else {
                 renderMenu();
@@ -1773,45 +1587,16 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         }
 
         function addNewMenuItem() {
-            const codeInput = document.getElementById('add-m-code');
-            const code = codeInput ? codeInput.value.trim().toUpperCase().replace(/\\s+/g, '') : '';
             const name = document.getElementById('add-m-name').value.trim();
             const category = document.getElementById('add-m-cat').value;
             const price = parseFloat(document.getElementById('add-m-price').value);
-
-            if (!code || !name || !category || isNaN(price)) {
-                return alert("Please enter Shortcut Code, Item Name, Category and Price!");
-            }
-
+            if (!name || !category || isNaN(price)) return alert("Please fill all fields!");
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-
-            const duplicateCode = activeSource.some(m =>
-                String(m.code || '').trim().toUpperCase().replace(/\\s+/g, '') === code
-            );
-            if (duplicateCode) {
-                return alert(`Shortcut Code "${code}" already exists. Please use a different code.`);
-            }
-
-            const newId = activeSource.length > 0 ? Math.max(...activeSource.map(m => Number(m.id) || 0)) + 1 : 1;
-            activeSource.push({
-                id: newId,
-                code: code,
-                name: name,
-                category: category,
-                price: price,
-                icon: "",
-                popularity: 0,
-                outOfStock: false
-            });
-
-            db.ref('menuData').set(activeSource).then(() => {
-                if (codeInput) codeInput.value = '';
-                document.getElementById('add-m-name').value = '';
-                document.getElementById('add-m-price').value = '';
-                alert(`Menu Item Added! Shortcut Code: ${code}`);
-            }).catch(() => {
-                alert("Unable to save the new menu item. Please try again.");
-            });
+            const newId = activeSource.length > 0 ? Math.max(...activeSource.map(m => m.id)) + 1 : 1;
+            activeSource.push({ id: newId, code: "X" + newId, name: name, category: category, price: price, icon: "", popularity: 0, outOfStock: false });
+            db.ref('menuData').set(activeSource);
+            document.getElementById('add-m-name').value = ''; document.getElementById('add-m-price').value = '';
+            alert("Menu Item Added!");
         }
 
         function addToCart(id) {
@@ -1838,8 +1623,6 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         }
 
         function updateCart() {
-            const cartBadge = document.getElementById('cart-count-badge');
-            if (cartBadge) cartBadge.innerText = cart.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
             const tbody = document.getElementById('cart-items'); if(!tbody) return; tbody.innerHTML = ''; 
             let subtotal = 0;
             cart.forEach((item, index) => {
@@ -1969,8 +1752,9 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             let cName = existing.custName || sessionStorage.getItem('myTkName') || "Walk-in";
             let cPhone = existing.custPhone || sessionStorage.getItem('myTkPhone') || "";
 
-            activeOrders[orderKey] = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, tables: getLinkedTableNames(currentSelectedTable), items: JSON.parse(JSON.stringify(cart)) };
-            db.ref('activeOrders').set(activeOrders);
+            let orderData = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, tables: getLinkedTableNames(currentSelectedTable), items: JSON.parse(JSON.stringify(cart)) };
+            activeOrders[orderKey] = orderData;
+            db.ref('activeOrders/' + orderKey).set(orderData);
         }
 
         function customerSendOrder() {
@@ -2003,7 +1787,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             
             existingOrder.tables = getLinkedTableNames(currentSelectedTable);
             activeOrders[orderKey] = existingOrder;
-            db.ref('activeOrders').set(activeOrders);
+            db.ref('activeOrders/' + orderKey).set(existingOrder);
             
             document.getElementById('customer-success-screen').style.display = 'flex';
             cart = [];
@@ -2045,10 +1829,21 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             printKitchenKOTSilent();
         }
 
-        function printKitchenKOTSilent() {
+        let kitchenPrintQueue = [];
+        let kitchenPrintQueueIndex = 0;
+        let kitchenPrintAfterHandler = null;
+
+        function getKitchenPrintGroup(items) {
+            const drinkCategories = new Set(["Minuman Tin", "Sejuk", "Hot Drinks", "Fresh Juice"]);
+            const drinks = items.filter(i => drinkCategories.has(String(i.category || '').trim()));
+            const food = items.filter(i => !drinkCategories.has(String(i.category || '').trim()));
+            return { food, drinks };
+        }
+
+        function renderKitchenTicket(items, title) {
             document.getElementById('k-order-type').innerText = currentOrderType; 
             document.getElementById('k-table').innerText = getOrderDisplayRef(currentSelectedTable);
-            
+
             let orderData = activeOrders[getLinkedOrderKey(currentSelectedTable)];
             if (orderData && orderData.custName) {
                 document.getElementById('k-cust-info').style.display = 'block';
@@ -2057,28 +1852,78 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 document.getElementById('k-cust-info').style.display = 'none';
             }
 
-            const kItems = document.getElementById('k-items'); kItems.innerHTML = '';
-            cart.forEach(i => {
+            const heading = document.querySelector('#print-kitchen h2');
+            if (heading) heading.innerText = title;
+
+            const kItems = document.getElementById('k-items');
+            kItems.innerHTML = '';
+            items.forEach(i => {
                 const noteStr = getFormattedItemNotes(i);
                 const safeName = escapeHtml(i.name || '');
                 const safeNote = escapeHtml(noteStr);
-
                 const noteHtml = noteStr
                     ? `<br><span style="display:block;font-size:16px;font-weight:900;margin-top:3px;white-space:pre-wrap;">NOTE: ${safeNote}</span>`
                     : '';
-
                 kItems.innerHTML += `
                     <tr>
                         <td style="padding:6px 0;border-bottom:1px dashed #000;">
-                            <b>${safeName}</b>
-                            ${noteHtml}
+                            <b>${safeName}</b>${noteHtml}
                         </td>
                         <td style="text-align:center;border-bottom:1px dashed #000;">
                             <b>${i.qty}</b>
                         </td>
                     </tr>`;
             });
-            safePrint("print-kitchen-mode");
+        }
+
+        function finishKitchenPrintQueue() {
+            if (kitchenPrintAfterHandler) {
+                window.removeEventListener('afterprint', kitchenPrintAfterHandler);
+                kitchenPrintAfterHandler = null;
+            }
+            kitchenPrintQueue = [];
+            kitchenPrintQueueIndex = 0;
+            document.body.className = '';
+            isPrinting = false;
+        }
+
+        function printNextKitchenTicket() {
+            if (kitchenPrintQueueIndex >= kitchenPrintQueue.length) {
+                finishKitchenPrintQueue();
+                return;
+            }
+
+            const ticket = kitchenPrintQueue[kitchenPrintQueueIndex];
+            renderKitchenTicket(ticket.items, ticket.title);
+            document.body.className = 'print-kitchen-mode';
+
+            kitchenPrintAfterHandler = function() {
+                window.removeEventListener('afterprint', kitchenPrintAfterHandler);
+                kitchenPrintAfterHandler = null;
+                kitchenPrintQueueIndex++;
+                setTimeout(printNextKitchenTicket, 150);
+            };
+            window.addEventListener('afterprint', kitchenPrintAfterHandler);
+            setTimeout(() => window.print(), 100);
+        }
+
+        function printKitchenKOTSilent() {
+            if (!Array.isArray(cart) || cart.length === 0) return alert("Cart is empty!");
+
+            const groups = getKitchenPrintGroup(cart);
+            kitchenPrintQueue = [];
+
+            if (groups.food.length > 0) {
+                kitchenPrintQueue.push({ items: groups.food, title: '*** KITCHEN ORDER (FOOD) ***' });
+            }
+            if (groups.drinks.length > 0) {
+                kitchenPrintQueue.push({ items: groups.drinks, title: '*** DRINKS ORDER (DRINKS) ***' });
+            }
+
+            if (kitchenPrintQueue.length === 0) return;
+            kitchenPrintQueueIndex = 0;
+            isPrinting = true;
+            printNextKitchenTicket();
         }
 
         function openCashDrawerOnly() { safePrint("print-drawer-mode"); }
@@ -2140,7 +1985,11 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
             incrementItemPopularity(cart);
 
-            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${getOrderDisplayRef(currentSelectedTable)})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: getOrderDisplayRef(currentSelectedTable), subtotal: subtotal, discount: discount, paid: paid, change: change, items: JSON.parse(JSON.stringify(cart)) });
+            const paidOrderKeyForSale = getLinkedOrderKey(currentSelectedTable);
+            const paidOrderDataForSale = activeOrders[paidOrderKeyForSale] || {};
+            const saleCustName = paidOrderDataForSale.custName || sessionStorage.getItem('myTkName') || '';
+            const saleCustPhone = paidOrderDataForSale.custPhone || sessionStorage.getItem('myTkPhone') || '';
+            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${getOrderDisplayRef(currentSelectedTable)})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: getOrderDisplayRef(currentSelectedTable), subtotal: subtotal, discount: discount, paid: paid, change: change, custName: saleCustName, custPhone: saleCustPhone, items: JSON.parse(JSON.stringify(cart)) });
             db.ref('sales').set(completedSales);
 
             let todayKey = new Date().toISOString().split('T')[0];
@@ -2152,12 +2001,9 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             }
 
             const paymentOrderKey = getLinkedOrderKey(currentSelectedTable);
-            // Record payment completion explicitly BEFORE removing the active order.
-            // Customer pages must never infer payment from an order disappearing.
-            db.ref(`completedPayments/${paymentOrderKey}`).set(true);
-            delete activeOrders[paymentOrderKey]; 
-            db.ref('activeOrders').set(activeOrders);
+            db.ref('activeOrders/' + paymentOrderKey).remove();
             db.ref(`orderStatus/${paymentOrderKey}`).remove(); 
+            delete activeOrders[paymentOrderKey];
 
             cart = []; updateStats(); 
             backToTableSelection();
@@ -2165,16 +2011,23 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             alert("Payment Successful! Change: $" + change.toFixed(2));
         }
 
-        function fillReceiptDetails(orderType, ref, method, time, sub, disc, total, paid, change, items) {
-            document.getElementById('p-order-type').innerText = orderType; 
+        function fillReceiptDetails(orderType, ref, method, time, sub, disc, total, paid, change, items, customerNameOverride, customerPhoneOverride) {
+            document.getElementById('p-order-type').innerText = orderType;
             document.getElementById('p-table').innerText = ref;
-            
-            let orderData = activeOrders[ref];
-            if (orderData && orderData.custName) {
-                document.getElementById('p-cust-info').style.display = 'block';
-                document.getElementById('p-cust-name-val').innerText = orderData.custName;
+
+            const refKey = (typeof getLinkedOrderKey === 'function') ? getLinkedOrderKey(ref) : ref;
+            const orderData = activeOrders[ref] || activeOrders[refKey] || {};
+            const customerName = customerNameOverride || orderData.custName || sessionStorage.getItem('myTkName') || '';
+            const customerPhone = customerPhoneOverride || orderData.custPhone || sessionStorage.getItem('myTkPhone') || '';
+            const custInfo = document.getElementById('p-cust-info');
+            if (customerName || customerPhone) {
+                custInfo.style.display = 'block';
+                document.getElementById('p-cust-name-val').innerText = customerName || '-';
+                document.getElementById('p-cust-phone-val').innerText = customerPhone || '-';
             } else {
-                document.getElementById('p-cust-info').style.display = 'none';
+                custInfo.style.display = 'none';
+                document.getElementById('p-cust-name-val').innerText = '';
+                document.getElementById('p-cust-phone-val').innerText = '';
             }
 
             document.getElementById('p-method').innerText = method; document.getElementById('p-time').innerText = time;
@@ -2185,67 +2038,88 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
                 const noteStr = getFormattedItemNotes(i);
                 const safeName = escapeHtml(i.name || '');
                 const safeNote = escapeHtml(noteStr);
-
-                const noteHtml = noteStr
-                    ? `<br><span style="display:block;margin-top:3px;font-size:14px;font-weight:700;white-space:pre-wrap;">Note: ${safeNote}</span>`
-                    : '';
-
-                pItems.innerHTML += `
-                    <tr>
-                        <td>
-                            <b>${safeName}</b>
-                            ${noteHtml}
-                        </td>
-                        <td style="text-align:center;"><b>${i.qty}</b></td>
-                        <td style="text-align:right;"><b>$${(Number(i.customPrice) * Number(i.qty)).toFixed(2)}</b></td>
-                    </tr>`;
+                const noteHtml = noteStr ? `<br><span style="display:block;margin-top:3px;font-size:14px;font-weight:700;white-space:pre-wrap;">Note: ${safeNote}</span>` : '';
+                pItems.innerHTML += `<tr><td><b>${safeName}</b>${noteHtml}</td><td style="text-align:center;"><b>${i.qty}</b></td><td style="text-align:right;"><b>$${(Number(i.customPrice) * Number(i.qty)).toFixed(2)}</b></td></tr>`;
             });
         }
 
         function reprintBill(index) {
             let sale = completedSales[index]; if (!sale) return;
-            fillReceiptDetails(sale.orderType, sale.refName, sale.method, sale.time, sale.subtotal, sale.discount, sale.amount, sale.paid, sale.change, sale.items);
+            fillReceiptDetails(sale.orderType, sale.refName, sale.method, sale.time, sale.subtotal, sale.discount, sale.amount, sale.paid, sale.change, sale.items, sale.custName, sale.custPhone);
             safePrint("print-customer");
         }
 
-        function openMenuManagerModal() { 
-            document.getElementById('menu-manager-search').value = ''; 
-            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            populateMenuManagerTable(activeSource); 
-            document.getElementById('menu-manager-modal').style.display = 'flex'; 
-        }
-        function filterMenuManagerList() { 
-            const q = document.getElementById('menu-manager-search').value.toLowerCase(); 
-            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            const normalizedQ = q.replace(/\\s+/g, '');
-            populateMenuManagerTable(activeSource.filter(i => {
-                let safeName = i.name ? String(i.name).toLowerCase() : "";
-                let safeCode = i.code ? String(i.code).toLowerCase().replace(/\\s+/g, '') : "";
-                return safeName.includes(q) || safeCode.includes(normalizedQ);
-            })); 
-        }
-        function populateMenuManagerTable(items) {
-            const tbody = document.getElementById('menu-manager-tbody'); if(!tbody) return;
-            const cats = getAllCategories();
-            let rowsHtml = '';
-            items.forEach(item => {
-                let opt = ''; cats.forEach(c => { opt += `<option value="${c}" ${c === item.category ? 'selected' : ''}>${c}</option>`; });
-                let stockStatusOpt = `<select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:bold; color:${item.outOfStock ? '#ef4444' : '#10b981'};" onchange="updateMenuStockStatus(${item.id}, this.value)">
-                    <option value="in" ${!item.outOfStock ? 'selected' : ''}>In Stock</option>
-                    <option value="out" ${item.outOfStock ? 'selected' : ''}>Out of Stock</option>
-                </select>`;
+        let menuManagerFilterTimer = null;
+        let menuManagerCategoryOptions = null;
 
-                rowsHtml += `<tr>
-                    <td><input type="text" value="${escapeHtml(item.code || '')}" maxlength="20" onchange="updateMenuField(${item.id}, 'code', this.value)" style="width:90px; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:900; text-transform:uppercase;"></td>
-                    <td><input type="text" value="${escapeHtml(item.name)}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td>
-                    <td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opt}</select></td>
-                    <td style="text-align:right;"><input type="number" value="${Number(item.price || 0).toFixed(2)}" step="0.50" onchange="updateMenuField(${item.id}, 'price', this.value)" style="width:60px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"></td>
-                    <td style="text-align:center;">${stockStatusOpt}</td>
+        function getMenuManagerSource() {
+            return (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+        }
+
+        function getMenuManagerCategoryOptions() {
+            if (menuManagerCategoryOptions) return menuManagerCategoryOptions;
+            const cats = getAllCategories();
+            menuManagerCategoryOptions = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            return menuManagerCategoryOptions;
+        }
+
+        function openMenuManagerModal() {
+            const modal = document.getElementById('menu-manager-modal');
+            const search = document.getElementById('menu-manager-search');
+            if (search) search.value = '';
+            if (modal) modal.style.display = 'flex';
+
+            requestAnimationFrame(() => populateMenuManagerTable(getMenuManagerSource()));
+        }
+
+        function filterMenuManagerList() {
+            clearTimeout(menuManagerFilterTimer);
+            menuManagerFilterTimer = setTimeout(() => {
+                const input = document.getElementById('menu-manager-search');
+                const q = (input ? input.value : '').trim().toLowerCase();
+                const source = getMenuManagerSource();
+                if (!q) {
+                    populateMenuManagerTable(source);
+                    return;
+                }
+                populateMenuManagerTable(source.filter(i => String(i.name || '').toLowerCase().includes(q)));
+            }, 100);
+        }
+
+        function populateMenuManagerTable(items) {
+            const tbody = document.getElementById('menu-manager-tbody');
+            if (!tbody) return;
+
+            const categoryOptions = getMenuManagerCategoryOptions();
+            const rows = new Array(items.length);
+
+            for (let idx = 0; idx < items.length; idx++) {
+                const item = items[idx];
+                const safeName = escapeHtml(item.name || '');
+                const safeCategory = escapeHtml(item.category || '');
+                const price = Number(item.price) || 0;
+                const stockColor = item.outOfStock ? '#ef4444' : '#10b981';
+                const stockLabel = item.outOfStock ? 'Out of Stock' : 'In Stock';
+                const inSelected = item.outOfStock ? '' : ' selected';
+                const outSelected = item.outOfStock ? ' selected' : '';
+
+                const opts = categoryOptions.replace(
+                    `value="${safeCategory}"`,
+                    `value="${safeCategory}" selected`
+                );
+
+                rows[idx] = `<tr>
+                    <td><input type="text" value="${safeName}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td>
+                    <td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opts}</select></td>
+                    <td style="text-align:right;"><div style="display:flex; gap:5px; justify-content:flex-end; align-items:center;"><input type="number" value="${price.toFixed(2)}" step="0.01" min="0" data-price-id="${item.id}" data-price-code="${escapeHtml(item.code || '')}" onchange="updateMenuField(${item.id}, 'price', this.value, '${String(item.code || '').replace("'", "\\'")}')" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:70px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"><button type="button" onclick="saveMenuPrice(${item.id}, this.previousElementSibling.value, '${String(item.code || '').replace("'", "\\'")}')" style="background:#16a34a;color:white;border:none;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:800;">Save</button></div></td>
+                    <td style="text-align:center;"><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:bold; color:${stockColor};" onchange="updateMenuStockStatus(${item.id}, this.value)"><option value="in"${inSelected}>In Stock</option><option value="out"${outSelected}>Out of Stock</option></select></td>
                     <td style="text-align:center;"><button onclick="deleteMenuItem(${item.id})" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;">Del</button></td>
                 </tr>`;
-            });
-            tbody.innerHTML = rowsHtml;
+            }
+
+            tbody.innerHTML = rows.join('');
         }
+
         function closeMenuManagerModal() { document.getElementById('menu-manager-modal').style.display = 'none'; }
         
         function updateMenuStockStatus(id, val) {
@@ -2258,42 +2132,64 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
             }
         }
 
-        function updateMenuField(id, field, val) { 
-            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            let item = activeSource.find(m => m.id === id); 
-            if(!item) return;
+        async function updateMenuField(id, field, val, code) {
+            const source = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+            if (field === 'price') {
+                const n = Number.parseFloat(val);
+                if (!Number.isFinite(n) || n < 0) { alert('Please enter a valid price.'); return; }
+                const newPrice = Math.round(n * 100) / 100;
+                try {
+                    const snap = await db.ref('menuData').once('value');
+                    let arr = snap.val();
+                    arr = Array.isArray(arr) ? arr.map(m => ({...m})) : source.map(m => ({...m}));
 
-            if(field === 'price') {
-                item.price = parseFloat(val) || 0;
-            } else if(field === 'category') {
-                item.category = val;
-            } else if(field === 'name') {
-                item.name = val;
-            } else if(field === 'code') {
-                const newCode = String(val || '').trim().toUpperCase().replace(/\\s+/g, '');
-                if(!newCode) {
-                    alert("Shortcut Code cannot be empty.");
-                    populateMenuManagerTable(activeSource);
-                    return;
+                    const wantedCode = String(code || '').trim();
+                    let idx = wantedCode ? arr.findIndex(m => String(m.code || '').trim() === wantedCode) : -1;
+                    if (idx < 0) idx = arr.findIndex(m => Number(m.id) === Number(id));
+
+                    if (idx < 0 && wantedCode.startsWith('BK')) {
+                        const fallback = defaultMenuData.find(m => String(m.code || '') === wantedCode);
+                        if (fallback) {
+                            arr.push({...fallback, price: newPrice});
+                            idx = arr.length - 1;
+                        }
+                    }
+                    if (idx < 0) { alert('Menu item not found.'); return; }
+
+                    arr[idx] = {...arr[idx], price: newPrice};
+                    await db.ref('menuData').set(arr);
+                    menuData = arr;
+
+                    const inputs = document.querySelectorAll('[data-price-code]');
+                    let input = null;
+                    for (const el of inputs) {
+                        if (wantedCode && String(el.getAttribute('data-price-code') || '') === wantedCode) { input = el; break; }
+                    }
+                    if (!input) input = document.querySelector(`[data-price-id="${id}"]`);
+                    if (input) input.value = newPrice.toFixed(2);
+                    populateMenuManagerTable(getMenuManagerSource());
+                    renderMenu();
+                } catch (err) {
+                    alert('Could not save menu price: ' + err.message);
                 }
-                const duplicate = activeSource.some(m =>
-                    m.id !== id &&
-                    String(m.code || '').trim().toUpperCase().replace(/\\s+/g, '') === newCode
-                );
-                if(duplicate) {
-                    alert(`Shortcut Code "${newCode}" already exists.`);
-                    populateMenuManagerTable(activeSource);
-                    return;
-                }
-                item.code = newCode;
+                return;
             }
 
+            const activeSource = source.map(m => ({...m}));
+            const item = activeSource.find(m => (code && String(m.code || '') === String(code)) || Number(m.id) === Number(id));
+            if (!item) return;
+            if (field === 'category') item.category = val;
+            else if (field === 'name') item.name = String(val || '').trim();
             db.ref('menuData').set(activeSource).then(() => {
+                menuData = activeSource;
                 renderMenu();
-            }).catch(() => {
-                alert("Unable to save the menu change. Please try again.");
-            });
+            }).catch(err => alert('Could not save menu change: ' + err.message));
         }
+
+        function saveMenuPrice(id, val, code) {
+            updateMenuField(id, 'price', val, code);
+        }
+
         function deleteMenuItem(id) { 
             if(confirm("Delete item?")) { 
                 let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
@@ -2312,72 +2208,9 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         function addNewRawMaterial() { let n = prompt("Material name:"); if(n) { rawMaterials.push({ id: rawMaterials.length+1, name: n, qty: 10 }); db.ref('rawMaterials').set(rawMaterials); openStockModal(); } }
         function updateRawMaterial(id) { let m = rawMaterials.find(x => x.id === id); let q = prompt(`Qty for ${m.name}:`, m.qty); if(q!==null) { m.qty=parseFloat(q)||0; db.ref('rawMaterials').set(rawMaterials); openStockModal(); } }
 
-        function openCredentialsModal() {
-            if (loggedInRole !== 'admin') return alert('Admin access required.');
-            const wrap = document.getElementById('credentials-form');
-            if (!wrap) return;
-            const roles = [['admin','Admin'],['user1','User 1'],['user2','User 2']];
-            wrap.innerHTML = roles.map(([key,label]) => `<div style="border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:10px;"><div style="font-weight:900;margin-bottom:8px;">${label}</div><input id="cred-${key}-user" value="${escapeHtml(userCredentials[key]?.user || key)}" placeholder="User ID" style="width:100%;padding:10px;margin-bottom:8px;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:8px;font-weight:800;"><input id="cred-${key}-pass" type="password" value="${escapeHtml(userCredentials[key]?.pass || '')}" placeholder="Password" style="width:100%;padding:10px;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:8px;font-weight:800;"></div>`).join('');
-            document.getElementById('credentials-modal').style.display='flex';
-        }
-        function closeCredentialsModal() { const m=document.getElementById('credentials-modal'); if(m) m.style.display='none'; }
-        function saveCredentials() {
-            if (loggedInRole !== 'admin') return alert('Admin access required.');
-            const next = {};
-            for (const key of ['admin','user1','user2']) {
-                const u = document.getElementById(`cred-${key}-user`).value.trim();
-                const pw = document.getElementById(`cred-${key}-pass`).value;
-                if (!u || !pw) return alert('User ID and password are required for all three accounts.');
-                next[key] = { user:u, pass:pw };
-            }
-            const ids = Object.values(next).map(x => x.user.toLowerCase());
-            if (new Set(ids).size !== ids.length) return alert('Each User ID must be unique.');
-            userCredentials = next;
-            db.ref('userCredentials').set(next).then(() => { closeCredentialsModal(); alert('Login settings saved.'); }).catch(err => alert('Could not save login settings: ' + err.message));
-        }
-
-        function openExpenseViewModal() {
-            const tbody = document.getElementById('view-expenses-tbody');
-            const empty = document.getElementById('view-expenses-empty');
-            const totalEl = document.getElementById('view-expenses-total');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            const expenses = Array.isArray(dailyExpenses) ? dailyExpenses : [];
-            let total = 0;
-            const now = new Date();
-            const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-            let monthTotal = 0, monthDays = new Set();
-            expenses.forEach(e => {
-                const amount = Number(e.amount) || 0; total += amount;
-                if (e.date && e.date.startsWith(monthKey)) { monthTotal += amount; monthDays.add(e.date); }
-            });
-            if (expenses.length === 0) empty.style.display = 'block';
-            else {
-                empty.style.display = 'none';
-                expenses.slice().reverse().forEach(e => {
-                    const amount = Number(e.amount) || 0;
-                    const date = e.date || '—';
-                    tbody.innerHTML += `<tr><td><b>${date}</b><br><small>${e.time || ''}</small></td><td><b>${e.desc || ''}</b></td><td style="text-align:right; font-weight:900;">$${amount.toFixed(2)}</td></tr>`;
-                });
-            }
-            totalEl.innerText = total.toFixed(2);
-            const mt = document.getElementById('view-expenses-month-total');
-            const av = document.getElementById('view-expenses-month-average');
-            if (mt) mt.innerText = monthTotal.toFixed(2);
-            if (av) av.innerText = (monthDays.size ? (monthTotal/monthDays.size) : 0).toFixed(2);
-            const trend = document.getElementById('view-expenses-trend');
-            if (trend) {
-                const monthly = {};
-                expenses.forEach(e => { if (e.date) { const k=e.date.slice(0,7); monthly[k]=(monthly[k]||0)+(Number(e.amount)||0); } });
-                trend.innerHTML = Object.keys(monthly).sort().reverse().map(k=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;"><b>${k}</b><b>$${monthly[k].toFixed(2)}</b></div>`).join('') || '<div style="color:#64748b;">No dated expense records yet.</div>';
-            }
-            document.getElementById('expense-view-modal').style.display = 'flex';
-        }
-        function closeExpenseViewModal() { document.getElementById('expense-view-modal').style.display='none'; }
-
         function openExpenseModal() { document.getElementById('expense-desc').value=''; document.getElementById('expense-amount').value=''; document.getElementById('expense-modal').style.display='flex'; }
         function closeExpenseModal() { document.getElementById('expense-modal').style.display='none'; }
-        function saveExpenseItem() { let desc=document.getElementById('expense-desc').value.trim(); let amt=parseFloat(document.getElementById('expense-amount').value); if(!desc||isNaN(amt)) return alert("Invalid details!"); const d=new Date(); dailyExpenses.push({ date:d.toISOString().slice(0,10), time:d.toLocaleTimeString(), desc:desc, amount:amt }); db.ref('dailyExpenses').set(dailyExpenses); closeExpenseModal(); updateStats(); alert("Expense saved!"); }
+        function saveExpenseItem() { let desc=document.getElementById('expense-desc').value.trim(); let amt=parseFloat(document.getElementById('expense-amount').value); if(!desc||isNaN(amt)) return alert("Invalid details!"); dailyExpenses.push({ time: new Date().toLocaleTimeString(), desc: desc, amount: amt }); db.ref('dailyExpenses').set(dailyExpenses); closeExpenseModal(); updateStats(); alert("Expense saved!"); }
 
         function openStaffPerformanceModal() {
             const tbody = document.getElementById('staff-performance-tbody'); if(!tbody) return; tbody.innerHTML='';
@@ -2397,11 +2230,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         function openItemReportModal() {
             let tbody = document.getElementById('item-report-tbody'); tbody.innerHTML=''; let counts = {};
             completedSales.forEach(s => { if(s.items) s.items.forEach(i => { counts[i.name] = (counts[i.name]||0)+i.qty; }); });
-            Object.entries(counts)
-                .sort((a, b) => (Number(b[1]) || 0) - (Number(a[1]) || 0) || String(a[0]).localeCompare(String(b[0])))
-                .forEach(([n, q]) => {
-                    tbody.innerHTML += `<tr><td><b>${n}</b></td><td style="text-align:right;"><span style="background:#f1f5f9; padding:4px 8px; border-radius:6px; font-weight:900;">${q}</span></td></tr>`;
-                });
+            for(let [n, q] of Object.entries(counts)) { tbody.innerHTML += `<tr><td><b>${n}</b></td><td style="text-align:right;"><span style="background:#f1f5f9; padding:4px 8px; border-radius:6px; font-weight:900;">${q}</span></td></tr>`; }
             document.getElementById('item-report-modal').style.display = 'flex';
         }
         function closeItemReportModal() { document.getElementById('item-report-modal').style.display='none'; }
@@ -2449,41 +2278,30 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
         }
 
         function openHistoryModal() {
-            let tbody = document.getElementById('history-table-body'); 
+            let tbody = document.getElementById('history-table-body');
             let rowsHtml = '';
             let salesData = Array.isArray(completedSales) ? completedSales : [];
-            salesData.forEach((s, idx) => { 
-                rowsHtml += `<tr>
-                    <td><span style="font-size:12px; color:#64748b;">${s.time}</span></td>
-                    <td><b>${s.ref}</b></td>
-                    <td>${s.method}</td>
-                    <td style="text-align:right; font-weight:900;">$${s.amount.toFixed(2)}</td>
-                    <td style="text-align:center; white-space:nowrap;"><button onclick="viewSaleDetails(${idx})" class="btn-small" style="padding:6px 10px; margin-right:4px;">View</button><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 10px;">Print</button></td>
-                </tr>`; 
+            salesData.forEach((s, idx) => {
+                const phone = s.custPhone || '';
+                rowsHtml += `<tr><td><span style="font-size:12px; color:#64748b;">${s.time}</span></td><td><b>${s.ref}</b></td><td>${s.method}</td><td style="text-align:right; font-weight:900;">$${Number(s.amount).toFixed(2)}</td><td style="text-align:center; white-space:nowrap;"><button onclick="viewSale(${idx})" class="btn-small" style="padding:6px 10px; margin-right:4px;">View</button><button onclick="reprintBill(${idx})" class="btn-small" style="padding:6px 10px;">Print</button></td></tr>`;
             });
-            tbody.innerHTML = rowsHtml; 
+            tbody.innerHTML = rowsHtml;
             document.getElementById('history-modal').style.display = 'flex';
         }
 
-        function viewSaleDetails(index) {
+        function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
+        let currentViewedSaleIndex = -1;
+        function viewSale(index) {
             const sale = completedSales[index];
             if (!sale) return;
-            const summary = document.getElementById('sale-detail-summary');
-            const tbody = document.getElementById('sale-detail-items');
-            if (!summary || !tbody) return;
-            summary.innerHTML = `<div>Time: ${escapeHtml(sale.time || '')}</div><div>Reference: ${escapeHtml(sale.ref || '')}</div><div>Payment: ${escapeHtml(sale.method || '')}</div><div>Total: $${(Number(sale.amount) || 0).toFixed(2)}</div>`;
-            tbody.innerHTML = '';
-            (Array.isArray(sale.items) ? sale.items : []).forEach(item => {
-                const qty = Number(item.qty) || 0;
-                const price = Number(item.customPrice) || 0;
-                tbody.innerHTML += `<tr><td><b>${escapeHtml(item.name || '')}</b></td><td style="text-align:center;">${qty}</td><td style="text-align:right;">$${price.toFixed(2)}</td><td style="text-align:right; font-weight:900;">$${(price * qty).toFixed(2)}</td></tr>`;
-            });
-            document.getElementById('sale-detail-modal').style.display='flex';
+            currentViewedSaleIndex = index;
+            const itemRows = (sale.items || []).map(i => `<tr><td style="padding:6px 0;"><b>${escapeHtml(i.name || '')}</b></td><td style="text-align:center;"><b>${i.qty}</b></td><td style="text-align:right;"><b>$${(Number(i.customPrice) * Number(i.qty)).toFixed(2)}</b></td></tr>`).join('');
+            document.getElementById('history-view-body').innerHTML = `<div style="font-size:16px;font-weight:800;line-height:1.65;"><div><b>Order:</b> ${escapeHtml(sale.ref || '')}</div><div><b>Time:</b> ${escapeHtml(sale.time || '')}</div><div><b>Payment:</b> ${escapeHtml(sale.method || '')}</div>${sale.custName || sale.custPhone ? `<div><b>Customer:</b> ${escapeHtml(sale.custName || '-')}</div><div><b>Phone:</b> ${escapeHtml(sale.custPhone || '-')}</div>` : ''}<hr style="border-top:2px solid #000;"><table style="width:100%;border-collapse:collapse;"><thead><tr><th style="text-align:left;">Item</th><th>Qty</th><th style="text-align:right;">Price</th></tr></thead><tbody>${itemRows}</tbody></table><hr style="border-top:2px solid #000;"><div style="display:flex;justify-content:space-between;"><span>Subtotal</span><b>$${Number(sale.subtotal || 0).toFixed(2)}</b></div><div style="display:flex;justify-content:space-between;"><span>Discount</span><b>$${Number(sale.discount || 0).toFixed(2)}</b></div><div style="display:flex;justify-content:space-between;font-size:20px;"><span>TOTAL</span><b>$${Number(sale.amount || 0).toFixed(2)}</b></div></div>`;
+            document.getElementById('history-view-modal').style.display='flex';
         }
-        function closeSaleDetailModal() { document.getElementById('sale-detail-modal').style.display='none'; }
+        function closeHistoryViewModal() { document.getElementById('history-view-modal').style.display='none'; currentViewedSaleIndex=-1; }
+        function printViewedSale() { if (currentViewedSaleIndex >= 0) reprintBill(currentViewedSaleIndex); }
 
-        function closeHistoryModal() { document.getElementById('history-modal').style.display='none'; }
-        
         function printSalesHistory() {
             let total = completedSales.reduce((s, x)=>s+x.amount, 0);
             document.getElementById('print-history-grand-total').innerText = total.toFixed(2);
@@ -2498,39 +2316,16 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
 
         function closeDay() {
             if(confirm("Close day?")) {
-                let salesTotal = completedSales.reduce((s, x)=>s+(Number(x.amount) || 0), 0);
-                let expTotal = dailyExpenses.reduce((s, x)=>s+(Number(x.amount) || 0), 0);
-
-                // Payment-method totals for this Day Close.
-                // Existing Cash/Card/QR Pay selection is preserved.
-                let cashTotal = 0;
-                let cardTotal = 0;
-                let qrTotal = 0;
-                completedSales.forEach(sale => {
-                    const method = String(sale.method || "Cash").trim().toLowerCase();
-                    const amount = Number(sale.amount) || 0;
-                    if (method === "card") cardTotal += amount;
-                    else if (method === "qr pay" || method === "qr" || method === "qrcode") qrTotal += amount;
-                    else cashTotal += amount;
-                });
-
+                let salesTotal = completedSales.reduce((s, x)=>s+x.amount, 0);
+                let expTotal = dailyExpenses.reduce((s, x)=>s+x.amount, 0);
                 let dateKey = new Date().toISOString().split('T')[0];
-                dailyHistoryRecords[dateKey] = {
-                    sales: salesTotal,
-                    expenses: expTotal,
-                    cash: cashTotal,
-                    card: cardTotal,
-                    qrPay: qrTotal
-                };
+                dailyHistoryRecords[dateKey] = { sales: salesTotal, expenses: expTotal };
                 db.ref('dailyHistoryRecords').set(dailyHistoryRecords);
 
-                db.ref('shopOnline').set(false);
+                refreshShopOnlineFromPresence();
 
                 document.getElementById('dc-date').innerText = new Date().toLocaleString();
                 document.getElementById('dc-sales').innerText = salesTotal.toFixed(2);
-                document.getElementById('dc-cash').innerText = cashTotal.toFixed(2);
-                document.getElementById('dc-card').innerText = cardTotal.toFixed(2);
-                document.getElementById('dc-qr').innerText = qrTotal.toFixed(2);
                 document.getElementById('dc-expenses').innerText = expTotal.toFixed(2);
                 document.getElementById('dc-net').innerText = (salesTotal - expTotal).toFixed(2);
                 
@@ -2590,9 +2385,7 @@ db.ref('takeawaySequenceCounter').on('value', (snapshot) => {
   </div>
 </div>
 
-
 <script>
-/* === OPTIONAL TABLE LINKING: Tables 1-13 === */
 let selectedTablesForLink = [];
 
 function openTableLinkModal() {
@@ -2643,8 +2436,6 @@ function unlinkSelectedTables() {
             return;
         }
 
-        // Only remove the link. The existing combined order/bill remains
-        // attached to the first table so no order is silently deleted.
         const linkedNames = link.tables.map(n => 'Table ' + Number(n));
         const updates = {};
 
@@ -2695,7 +2486,6 @@ function saveTableLink() {
     const tableNames = tableNums.map(n => 'Table ' + n);
     const groupId = 'TL_' + tableNums.join('_');
 
-    // Merge any existing orders from the selected tables into one order.
     const sourceKeys = new Set();
     tableNames.forEach(name => {
         if (typeof getLinkedOrderKey === 'function') {
@@ -2728,7 +2518,6 @@ function saveTableLink() {
         mergedOrder.custPhone = order.custPhone || mergedOrder.custPhone || '';
     });
 
-    // Remove the old individual order keys before creating the linked key.
     sourceKeys.forEach(key => {
         if (activeOrders) delete activeOrders[key];
     });
@@ -2805,6 +2594,129 @@ function unlinkTable(tableNo) {
         db.ref().update(updates).then(() => renderBigTableSelectionGrid());
     });
 }
+</script>
+
+
+<script>
+(function(){
+  function sourceLabel(order){
+    const explicit = String(order && (order.orderSource || order.source || '')).toLowerCase();
+    if (explicit === 'qr' || explicit.includes('qr')) {
+      return String(order.orderType || '').toLowerCase().includes('takeaway') ? 'QR TAKEAWAY' : 'QR ORDER';
+    }
+    if (explicit === 'counter' || explicit.includes('counter')) {
+      return String(order.orderType || '').toLowerCase().includes('takeaway') ? 'COUNTER TAKEAWAY' : 'COUNTER ORDER';
+    }
+    const ref = String(order && (order.ref || order.refName || '')).toLowerCase();
+    if (ref.includes('takeaway')) return 'COUNTER TAKEAWAY';
+    return 'COUNTER ORDER';
+  }
+  window.getOrderSourceLabel = sourceLabel;
+
+  window.openExpenseViewModal = function(){
+    const modal=document.getElementById('expense-view-modal');
+    const tbody=document.getElementById('view-expenses-tbody');
+    if(!modal||!tbody) return;
+    const expenses=Array.isArray(dailyExpenses)?dailyExpenses:[];
+    tbody.innerHTML='';
+    let total=0, monthTotal=0, days=new Set();
+    const now=new Date(), key=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    expenses.slice().reverse().forEach(e=>{
+      const a=Number(e.amount)||0; total+=a;
+      const date=e.date||'—';
+      if(date.startsWith(key)){monthTotal+=a;days.add(date);}
+      tbody.innerHTML += '<tr><td><b>'+date+'</b><br><small>'+(e.time||'')+'</small></td><td><b>'+escapeHtml(String(e.desc||''))+'</b></td><td style="text-align:right;font-weight:900;">$'+a.toFixed(2)+'</td></tr>';
+    });
+    document.getElementById('view-expenses-total').innerText=total.toFixed(2);
+    document.getElementById('view-expenses-month-total').innerText=monthTotal.toFixed(2);
+    document.getElementById('view-expenses-month-average').innerText=(days.size?monthTotal/days.size:0).toFixed(2);
+    const empty=document.getElementById('view-expenses-empty'); if(empty) empty.style.display=expenses.length?'none':'block';
+    const monthly={};
+    expenses.forEach(e=>{if(e.date){const k=e.date.slice(0,7);monthly[k]=(monthly[k]||0)+(Number(e.amount)||0);}});
+    const trend=document.getElementById('view-expenses-trend');
+    if(trend) trend.innerHTML=Object.keys(monthly).sort().reverse().map(k=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;"><b>'+k+'</b><b>$'+monthly[k].toFixed(2)+'</b></div>').join('')||'<div style="color:#64748b;">No dated expense records yet.</div>';
+    modal.style.display='flex';
+  };
+  window.closeExpenseViewModal=function(){const m=document.getElementById('expense-view-modal');if(m)m.style.display='none';};
+
+  window.openPaymentSummaryModal=function(){
+    const today=new Date().toISOString().split('T')[0];
+    const sales=Array.isArray(completedSales)?completedSales:[];
+    let cash=0,card=0,qr=0,total=0;
+    sales.forEach(s=>{
+      const t=String(s.time||'');
+      const isToday=t ? new Date(t).toISOString().split('T')[0]===today : true;
+      if(!isToday)return;
+      const a=Number(s.amount)||0; total+=a;
+      const m=String(s.method||'').toLowerCase();
+      if(m==='card')card+=a; else if(m.includes('qr'))qr+=a; else if(m==='cash')cash+=a;
+    });
+    document.getElementById('pay-summary-cash').innerText=cash.toFixed(2);
+    document.getElementById('pay-summary-card').innerText=card.toFixed(2);
+    document.getElementById('pay-summary-qr').innerText=qr.toFixed(2);
+    document.getElementById('pay-summary-total').innerText=total.toFixed(2);
+    document.getElementById('payment-summary-modal').style.display='flex';
+  };
+  window.closePaymentSummaryModal=function(){const m=document.getElementById('payment-summary-modal');if(m)m.style.display='none';};
+
+  const originalConfirm = window.confirmPaymentProcess;
+  if(typeof originalConfirm==='function'){
+    window.confirmPaymentProcess=function(){
+      const before=completedSales.length;
+      const result=originalConfirm.apply(this,arguments);
+      if(completedSales.length>before){
+        const s=completedSales[completedSales.length-1];
+        if(!s.orderSource) s.orderSource = (loggedInRole==='customer') ? 'QR' : 'COUNTER';
+        db.ref('sales').set(completedSales);
+      }
+      return result;
+    };
+  }
+
+  const originalHistory = window.openHistoryModal;
+  if(typeof originalHistory==='function'){
+    window.openHistoryModal=function(){
+      originalHistory.apply(this,arguments);
+      const tbody=document.getElementById('history-table-body');
+      if(!tbody)return;
+      const sales=Array.isArray(completedSales)?completedSales:[];
+      tbody.innerHTML=sales.map((s,idx)=>{
+        const src=sourceLabel(s);
+        return '<tr><td><span style="font-size:12px;color:#64748b;">'+escapeHtml(String(s.time||''))+'</span></td><td><b>'+escapeHtml(String(s.ref||''))+'</b></td><td><b>'+escapeHtml(src)+'</b></td><td>'+escapeHtml(String(s.method||''))+'</td><td style="text-align:right;font-weight:900;">$'+Number(s.amount||0).toFixed(2)+'</td><td style="text-align:center;white-space:nowrap;"><button onclick="viewSale('+idx+')" class="btn-small" style="padding:6px 10px;margin-right:4px;">View</button><button onclick="reprintBill('+idx+')" class="btn-small" style="padding:6px 10px;">Print</button></td></tr>';
+      }).join('');
+    };
+  }
+})();
+</script>
+
+<script>
+(function(){
+  const _saveSilent = window.saveOrderToTableSilent;
+  if (typeof _saveSilent === 'function') {
+    window.saveOrderToTableSilent = function(){
+      const r = _saveSilent.apply(this, arguments);
+      try {
+        if (loggedInRole !== 'customer' && cart && cart.length && currentSelectedTable) {
+          const key = getLinkedOrderKey(currentSelectedTable);
+          db.ref('activeOrders/' + key + '/orderSource').set('COUNTER');
+        }
+      } catch(e){}
+      return r;
+    };
+  }
+
+  const _customerSend = window.customerSendOrder;
+  if (typeof _customerSend === 'function') {
+    window.customerSendOrder = function(){
+      const r = _customerSend.apply(this, arguments);
+      try {
+        const key = getLinkedOrderKey(currentSelectedTable);
+        db.ref('activeOrders/' + key + '/orderSource').set('QR');
+      } catch(e){}
+      return r;
+    };
+  }
+})();
 </script>
 
 </body>
