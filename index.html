@@ -128,9 +128,6 @@
 
         .card-code { position: absolute; top: 12px; left: 12px; background: #f1f5f9; color: var(--text-muted); font-size: 11px; font-weight: 900; padding: 4px 8px; border-radius: 8px; letter-spacing: 0.5px; }
         
-        /* HIDDEN ON MENU CARD AS REQUESTED */
-        .card-stock-badge { display: none !important; }
-        
         .card-title { font-weight: 800; font-size: 14px; margin-top: 30px; color: var(--text-main); line-height: 1.3; }
         .card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
         .card-price { font-weight: 900; font-size: 17px; color: var(--primary); }
@@ -684,11 +681,11 @@
 
     <div id="payment-summary-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">Daily Payment Summary</h3><button class="close-modal" onclick="closePaymentSummaryModal()">X</button></div><div class="modal-body"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;"><div class="stat-box">Cash: $<span id="pay-summary-cash">0.00</span></div><div class="stat-box">Card: $<span id="pay-summary-card">0.00</span></div><div class="stat-box">QR Pay: $<span id="pay-summary-qr">0.00</span></div><div class="stat-box">Total: $<span id="pay-summary-total">0.00</span></div></div></div></div></div>
 
-    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span><br><b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;">p ú</div></div>
+    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span><br><b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;"> p  ú</div></div>
     
     <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
     
-    <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div style="display:none;">p ú</div></div>
+    <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div style="display:none;"> p  ú</div></div>
     <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>SALES HISTORY REPORT</b></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span>$<span id="print-history-grand-total">0.00</span></span></div></div>
     <div id="print-day-close"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>DAY CLOSE REPORT</b></p><p id="dc-date" style="margin:2px 0; font-size:13px;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 15px; font-weight: 900; margin-bottom: 8px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Sales:</span><span>$<span id="dc-sales">0.00</span></span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Expenses:</span><span>$<span id="dc-expenses">0.00</span></span></div><hr style="border-top: 2px dashed black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Net Balance:</span><span>$<span id="dc-net">0.00</span></span></div></div><div><p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>EXPENSES:</b></p><table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900; margin-top: 4px;"><tbody id="dc-expenses-list"></tbody></table></div></div>
     <div id="print-item-report"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>DAILY ITEM SOLD REPORT</b></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><tbody id="print-item-report-items"></tbody></table></div>
@@ -806,6 +803,7 @@
 
         let cart = [];
         let activeOrders = {}; 
+        let orderStatuses = {}; 
         let completedSales = []; 
         let currentCategory = "All";
         let isPrinting = false;
@@ -909,6 +907,22 @@
             checkCustomerPaymentStatus();
         });
 
+        db.ref('orderStatus').on('value', (snapshot) => {
+            orderStatuses = snapshot.val() || {};
+            renderBigTableSelectionGrid();
+
+            const statuses = snapshot.val() || {};
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderParam = urlParams.get('order');
+            
+            if (orderParam && orderParam === "takeaway") {
+                let storedTkKey = sessionStorage.getItem('myTakeawayKey');
+                if (storedTkKey && statuses[storedTkKey] === "Ready") {
+                    document.getElementById('customer-ready-screen').style.display = 'flex';
+                }
+            }
+        });
+
         function playOrderVoice(text) {
             try {
                 let msg = new SpeechSynthesisUtterance();
@@ -940,19 +954,6 @@
                 if (loggedInRole === "admin" || loggedInRole === "user1") {
                     playOrderVoice("Waiter Called");
                     showCustomNotification(`Alert: ${data.table} needs your attention!`);
-                }
-            }
-        });
-
-        db.ref('orderStatus').on('value', (snapshot) => {
-            const statuses = snapshot.val() || {};
-            const urlParams = new URLSearchParams(window.location.search);
-            const orderParam = urlParams.get('order');
-            
-            if (orderParam && orderParam === "takeaway") {
-                let storedTkKey = sessionStorage.getItem('myTakeawayKey');
-                if (storedTkKey && statuses[storedTkKey] === "Ready") {
-                    document.getElementById('customer-ready-screen').style.display = 'flex';
                 }
             }
         });
@@ -1000,7 +1001,6 @@
             const tableParam = urlParams.get('table');
             const orderParam = urlParams.get('order');
 
-            let customerTarget = "";
             let isTakeawayQR = false;
 
             if (orderParam && orderParam === "takeaway") {
@@ -1310,10 +1310,17 @@
                 let custInfo = orderData.custName ? `<br>${orderData.custName}` : '';
                 let cancelBtn = loggedInRole === "admin" ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tkKey}', event)" style="position:absolute; top:8px; right:8px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:bold; cursor:pointer; z-index:2;">X</button>` : '';
 
-                container.innerHTML += `<div class="big-table-card occupied" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;" onclick="selectTableForOrder('${tkKey}', 'Takeaway')">
+                let isReady = orderStatuses[tkKey] === "Ready";
+                let tkCardStyle = isReady 
+                    ? "background: linear-gradient(135deg, #d1fae5, #a7f3d0); border-color: #059669;" 
+                    : "background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;";
+                let tkTitleColor = isReady ? "#065f46" : "#b45309";
+                let tkBadgeText = isReady ? `<br><span style="color:#047857; font-weight:900;">🟢 READY TO SERVE</span>` : '';
+
+                container.innerHTML += `<div class="big-table-card occupied" style="${tkCardStyle}" onclick="selectTableForOrder('${tkKey}', 'Takeaway')">
                     ${cancelBtn}
-                    <h3 style="color:#b45309;">${tkKey}</h3>
-                    <p style="color:#92400e;">${count} Items - <b style="color:#b45309;">$${tkTotal.toFixed(2)}</b>${custInfo}<br>${formatElapsedTime(orderData.time)}</p>
+                    <h3 style="color:${tkTitleColor};">${tkKey}</h3>
+                    <p style="color:#92400e;">${count} Items - <b style="color:${tkTitleColor};">$${tkTotal.toFixed(2)}</b>${custInfo}${tkBadgeText}<br>${formatElapsedTime(orderData.time)}</p>
                 </div>`;
             });
         }
@@ -1411,7 +1418,7 @@
                     alert("Order marked as Preparing.");
                 } else {
                     currentStatusRef.set("Ready");
-                    alert("Order marked as READY! Notification sent to customer.");
+                    alert("Order marked as READY! Card color changed to green.");
                 }
             });
         }
@@ -2134,10 +2141,11 @@
 
             deductStockAndSaveDailyReport(cart);
 
-            const paidOrderKeyForSale = getLinkedOrderKey(currentSelectedTable);
-            const paidOrderDataForSale = activeOrders[paidOrderKeyForSale] || {};
+            const paymentOrderKey = getLinkedOrderKey(currentSelectedTable);
+            const paidOrderDataForSale = activeOrders[paymentOrderKey] || {};
             const saleCustName = paidOrderDataForSale.custName || sessionStorage.getItem('myTkName') || '';
             const saleCustPhone = paidOrderDataForSale.custPhone || sessionStorage.getItem('myTkPhone') || '';
+            
             completedSales.push({ time: timeStr, ref: `${currentOrderType} (${getOrderDisplayRef(currentSelectedTable)})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: getOrderDisplayRef(currentSelectedTable), subtotal: subtotal, discount: discount, paid: paid, change: change, custName: saleCustName, custPhone: saleCustPhone, items: JSON.parse(JSON.stringify(cart)) });
             db.ref('sales').set(completedSales);
 
@@ -2149,26 +2157,14 @@
                 db.ref('staffShifts').set(staffShifts);
             }
 
-            const paymentOrderKey = getLinkedOrderKey(currentSelectedTable);
-
-            const paidOrderSnapshot = JSON.parse(JSON.stringify(paidOrderDataForSale));
-            db.ref('activeOrders/' + paymentOrderKey).transaction(currentOrder => {
-                if (currentOrder === null) return;
-
-                if (JSON.stringify(currentOrder) === JSON.stringify(paidOrderSnapshot)) {
-                    return null;
-                }
-
-                if (paidOrderSnapshot.time && currentOrder.time === paidOrderSnapshot.time) {
-                    return null;
-                }
-
-                return;
-            });
+            // [BUG FIX] Completely wipe out database record and clear active orders & states to prevent overriding bugs on table reuse
+            db.ref('activeOrders/' + paymentOrderKey).remove();
             db.ref(`orderStatus/${paymentOrderKey}`).remove();
             delete activeOrders[paymentOrderKey];
+            delete orderStatuses[paymentOrderKey];
 
-            cart = []; updateStats(); 
+            cart = []; 
+            updateStats(); 
             backToTableSelection();
             
             alert("Payment Successful! Change: $" + change.toFixed(2));
