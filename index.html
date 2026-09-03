@@ -750,12 +750,6 @@
             { id: 225, code: "D6", name: "Tosai Masala", price: 2.50, category: "Dosai", icon: "", stock: 100, outOfStock: false },
             { id: 226, code: "D7", name: "Tosai Sardin", price: 3.00, category: "Dosai", icon: "", stock: 100, outOfStock: false },
 
-            { id: 231, code: "BK1", name: "Bakso Biasa", price: 3.00, category: "Bakso", icon: "", stock: 100, outOfStock: false },
-            { id: 232, code: "BK2", name: "Bakso Urat", price: 4.00, category: "Bakso", icon: "", stock: 100, outOfStock: false },
-            { id: 233, code: "BK3", name: "Bakso Ayam", price: 3.50, category: "Bakso", icon: "", stock: 100, outOfStock: false },
-            { id: 234, code: "BK4", name: "Bakso Daging", price: 3.50, category: "Bakso", icon: "", stock: 100, outOfStock: false },
-            { id: 235, code: "BK5", name: "Bakso Special", price: 5.00, category: "Bakso", icon: "", stock: 100, outOfStock: false },
-
             { id: 26, code: "N1", name: "Nasi Goreng Biasa", price: 3.00, category: "Nasi Goreng", icon: "", stock: 100, outOfStock: false },
             { id: 261, code: "N2", name: "Nasi Goreng Ayam", price: 4.50, category: "Nasi Goreng", icon: "", stock: 100, outOfStock: false },
             { id: 27, code: "N3", name: "Nasi Goreng Daging", price: 4.50, category: "Nasi Goreng", icon: "", stock: 100, outOfStock: false },
@@ -777,12 +771,6 @@
             { id: 331, code: "KG4", name: "Kueh Teow Goreng Corned Beef", price: 5.00, category: "Kueh Teow Goreng", icon: "", stock: 100, outOfStock: false },
             { id: 332, code: "KG5", name: "Kueh Teow Goreng Seafood", price: 5.50, category: "Kueh Teow Goreng", icon: "", stock: 100, outOfStock: false },
 
-            { id: 341, code: "BG1", name: "Bihun Goreng Biasa", price: 3.00, category: "Bihun Goreng", icon: "", stock: 100, outOfStock: false },
-            { id: 34, code: "BG2", name: "Bihun Goreng Ayam", price: 4.50, category: "Bihun Goreng", icon: "", stock: 100, outOfStock: false },
-            { id: 35, code: "BG3", name: "Bihun Goreng Daging", price: 4.50, category: "Bihun Goreng", icon: "", stock: 100, outOfStock: false },
-            { id: 351, code: "BG4", name: "Bihun Goreng Corned Beef", price: 5.00, category: "Bihun Goreng", icon: "", stock: 100, outOfStock: false },
-            { id: 352, code: "BG5", name: "Bihun Goreng Seafood", price: 5.50, category: "Bihun Goreng", icon: "", stock: 100, outOfStock: false },
-
             { id: 391, code: "I1", name: "Indomie Goreng Biasa", price: 2.00, category: "Indomie", icon: "", stock: 100, outOfStock: false },
             { id: 39, code: "I2", name: "Indomie Goreng Special", price: 4.00, category: "Indomie", icon: "", stock: 100, outOfStock: false },
             { id: 392, code: "I3", name: "Indomie Goreng Ayam", price: 4.00, category: "Indomie", icon: "", stock: 100, outOfStock: false },
@@ -799,7 +787,6 @@
 
             { id: 36, code: "MB1", name: "Mee Basah Ayam", price: 4.50, category: "Mee Basah", icon: "", stock: 100, outOfStock: false },
             { id: 37, code: "KB1", name: "Kueh Teow Basah Ayam", price: 4.50, category: "Kueh Teow Basah", icon: "", stock: 100, outOfStock: false },
-            { id: 38, code: "BB1", name: "Bihun Basah Ayam", price: 4.50, category: "Bihun Basah", icon: "", stock: 100, outOfStock: false },
 
             { id: 163, code: "T1", name: "Tea", price: 1.00, category: "Hot Drinks", icon: "", stock: 100, outOfStock: false },
             { id: 164, code: "T2", name: "Tea Tarik", price: 1.00, category: "Hot Drinks", icon: "", stock: 100, outOfStock: false },
@@ -816,7 +803,7 @@
         let staffShifts = {};
         let takeawaySequenceCounter = 100;
         
-        let defaultCategoryOrder = ["Roti", "Dosai", "Bakso", "Nasi Goreng", "Mee Goreng", "Kueh Teow Goreng", "Bihun Goreng", "Indomie", "Mee Basah", "Kueh Teow Basah", "Bihun Basah", "Murtabak", "Burger", "Nasi Campur", "Hot Drinks", "Sejuk", "Fresh Juice", "Milk Shake"];
+        let defaultCategoryOrder = ["Roti", "Dosai", "Nasi Goreng", "Mee Goreng", "Kueh Teow Goreng", "Indomie", "Mee Basah", "Kueh Teow Basah", "Murtabak", "Burger", "Nasi Campur", "Hot Drinks", "Sejuk", "Fresh Juice", "Milk Shake"];
         let categoryOrder = [];
 
         let credentials = {
@@ -2211,13 +2198,6 @@
                         menuItem.outOfStock = true;
                     }
                     menuChanged = true;
-                }
-
-                // Also check and deduct from manual raw materials / stock items if names match
-                let mat = rawMaterials.find(rm => rm.name.toLowerCase() === cartItem.name.toLowerCase());
-                if (mat) {
-                    mat.qty = Math.max(0, (Number(mat.qty) || 0) - cartItem.qty);
-                    db.ref('rawMaterials').set(rawMaterials);
                 }
             });
 
