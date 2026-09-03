@@ -88,8 +88,10 @@
         .right-panel { flex: 3.5; background: var(--card-bg); border-radius: 24px; box-shadow: var(--shadow-md); display: flex; flex-direction: column; overflow-y: auto; padding: 18px; box-sizing: border-box; height: 100%; }
         
         .mobile-tab-bar { display: none; background: var(--card-bg); padding: 10px 15px; gap: 12px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; box-shadow: var(--shadow-sm); z-index: 10; }
-        .mob-tab-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; background: #f1f5f9; color: var(--text-muted); font-family: inherit; transition: 0.3s; }
+        .mob-tab-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; background: #f1f5f9; color: var(--text-muted); font-family: inherit; transition: 0.3s; position: relative; }
         .mob-tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+
+        .cart-tab-badge { position: absolute; top: -6px; right: -6px; background: var(--danger); color: white; font-size: 11px; font-weight: 900; width: 22px; height: 22px; display: flex; justify-content: center; align-items: center; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); }
 
         @media (max-width: 900px) {
             .mobile-tab-bar { display: flex; }
@@ -472,7 +474,7 @@
         <div id="pos-main-view">
             <div class="mobile-tab-bar">
                 <button class="mob-tab-btn active" id="tab-menu-btn" onclick="switchMobileTab('menu')">Menu Items</button>
-                <button class="mob-tab-btn" id="tab-cart-btn" onclick="switchMobileTab('cart')">Cart & Billing</button>
+                <button class="mob-tab-btn" id="tab-cart-btn" onclick="switchMobileTab('cart')">Cart & Billing <span id="mob-cart-badge" class="cart-tab-badge" style="display:none;">0</span></button>
             </div>
 
             <div class="main-layout">
@@ -489,7 +491,10 @@
                 </div>
 
                 <div class="right-panel mobile-hidden" id="panel-cart">
-                    <h3 id="cart-panel-title">Order: Table 1</h3>
+                    <h3 id="cart-panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>Order: Table 1</span>
+                        <span id="desktop-cart-badge" class="badge" style="display:none; background:#fee2e2; color:#ef4444;">0 Items</span>
+                    </h3>
                     
                     <div class="cart-table-wrapper">
                         <table>
@@ -1109,7 +1114,7 @@
 
             currentSelectedTable = customerTarget;
             currentOrderType = isTakeawayQR ? "Takeaway" : "Dine-In";
-            document.getElementById('cart-panel-title').innerText = `My Order: ${customerTarget}`;
+            document.getElementById('cart-panel-title').innerHTML = `<span>My Order: ${customerTarget}</span><span id="desktop-cart-badge" class="badge" style="display:none; background:#fee2e2; color:#ef4444;">0 Items</span>`;
 
             cart = []; 
             updateCart();
@@ -1350,7 +1355,7 @@
             currentOrderType = orderType;
             const orderKey = getLinkedOrderKey(tableName);
             const displayRef = getOrderDisplayRef(tableName);
-            document.getElementById('cart-panel-title').innerText = `Order: ${displayRef}`;
+            document.getElementById('cart-panel-title').innerHTML = `<span>Order: ${displayRef}</span><span id="desktop-cart-badge" class="badge" style="display:none; background:#fee2e2; color:#ef4444;">0 Items</span>`;
             
             if (activeOrders[orderKey] && activeOrders[orderKey].items) {
                 cart = JSON.parse(JSON.stringify(activeOrders[orderKey].items));
@@ -1427,7 +1432,7 @@
                     delete orderStatuses[oldKey];
                 }
                 currentSelectedTable = selectedTargetTableForMove;
-                document.getElementById('cart-panel-title').innerText = `Order: ${getOrderDisplayRef(currentSelectedTable)}`;
+                document.getElementById('cart-panel-title').innerHTML = `<span>Order: ${getOrderDisplayRef(currentSelectedTable)}</span><span id="desktop-cart-badge" class="badge" style="display:none; background:#fee2e2; color:#ef4444;">0 Items</span>`;
                 closeMoveTableModal();
                 alert(`Successfully moved order to ${selectedTargetTableForMove}!`);
                 renderBigTableSelectionGrid();
@@ -1826,8 +1831,12 @@
         function updateCart() {
             const tbody = document.getElementById('cart-items'); if(!tbody) return; tbody.innerHTML = ''; 
             let subtotal = 0;
+            let totalCartQty = 0;
+
             cart.forEach((item, index) => {
                 subtotal += item.customPrice * item.qty;
+                totalCartQty += item.qty;
+
                 let catLower = (item.category || "").toLowerCase();
                 let nameLower = (item.name || "").toLowerCase();
                 
@@ -1897,6 +1906,17 @@
                     <td style="text-align:right;">${priceInputHtml}</td>
                 </tr>`;
             });
+
+            const mobBadge = document.getElementById('mob-cart-badge');
+            const deskBadge = document.getElementById('desktop-cart-badge');
+            if (totalCartQty > 0) {
+                if (mobBadge) { mobBadge.innerText = totalCartQty; mobBadge.style.display = 'flex'; }
+                if (deskBadge) { deskBadge.innerText = `${totalCartQty} Items`; deskBadge.style.display = 'inline-block'; }
+            } else {
+                if (mobBadge) mobBadge.style.display = 'none';
+                if (deskBadge) deskBadge.style.display = 'none';
+            }
+
             let discount = parseFloat(document.getElementById('discount-input')?.value || 0);
             if(document.getElementById('sub-total')) document.getElementById('sub-total').innerText = subtotal.toFixed(2);
             if(document.getElementById('total-amount')) document.getElementById('total-amount').innerText = Math.max(0, subtotal - discount).toFixed(2);
