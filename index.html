@@ -58,7 +58,7 @@
         .btn-logout:hover { background: var(--danger); color: white; transform: scale(1.05); }
 
         #table-selection-view { display: flex; flex-direction: column; flex: 1; padding: 15px; box-sizing: border-box; overflow-y: auto; gap: 15px; }
-        .table-selection-header { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px 20px; border-radius: 20px; box-shadow: var(--shadow-sm); flex-shrink: 0; }
+        .table-selection-header { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 15px 20px; border-radius: 20px; box-shadow: var(--shadow-sm); flex-shrink: 0; flex-wrap: wrap; gap: 10px; }
         .table-selection-header h2 { margin: 0; color: var(--text-main); font-size: 19px; font-weight: 900; }
         
         .big-tables-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; padding-bottom: 20px; }
@@ -187,6 +187,9 @@
 
         .btn-ready-order { grid-column: span 2; background: linear-gradient(135deg, var(--warning), #d97706); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 14px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); transition: 0.3s; }
         .btn-ready-order:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); }
+
+        .btn-move-table { grid-column: span 2; background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 14px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3); transition: 0.3s; }
+        .btn-move-table:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4); }
 
         #customer-action-div { display: none; margin-top: 10px; flex-shrink: 0; flex-direction: column; gap: 8px; }
         .btn-customer-send { width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); transition: 0.3s; }
@@ -381,6 +384,21 @@
         </div>
     </div>
 
+    <!-- Move Table Modal -->
+    <div id="move-table-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="modal-header">
+                <h3 style="margin:0; font-size:18px;">Move Order to Another Table</h3>
+                <button class="close-modal" onclick="closeMoveTableModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; font-weight: bold; color: #64748b; margin-top: 0;">Select destination table for this order:</p>
+                <div id="move-table-list" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;"></div>
+                <button class="btn-small" style="width: 100%; padding: 12px; font-size: 14px; background: var(--success);" onclick="confirmMoveTable()">Confirm Move</button>
+            </div>
+        </div>
+    </div>
+
     <div id="login-screen" class="login-overlay">
         <div class="login-box">
             <h2>Welcome to POS</h2>
@@ -508,6 +526,7 @@
                         <button class="btn-hold" id="btn-hold-elem" onclick="saveOrderToTableAndPrintKOT()">Hold & KOT</button>
                         <button class="btn-kitchen" id="btn-kitchen-elem" onclick="printKitchenKOT()">Kitchen</button>
                         <button class="btn-ready-order" id="btn-ready-order-elem" onclick="toggleOrderReadyStatus()">Mark Order Ready</button>
+                        <button class="btn-move-table" id="btn-move-table-elem" onclick="openMoveTableModal()">Move to Another Table</button>
                         <button id="btn-print-bill-elem" class="btn-print-bill" onclick="printCustomerBillOnly()">Print Bill</button>
                         <button id="btn-pay-elem" class="btn-pay" onclick="openPaymentModal()">Pay Now</button>
                         <button id="btn-drawer-elem" class="btn-drawer" onclick="openCashDrawerOnly()">Open Drawer</button>
@@ -1155,6 +1174,7 @@
             const btnHold = document.getElementById('btn-hold-elem');
             const btnKitchen = document.getElementById('btn-kitchen-elem');
             const btnReadyOrder = document.getElementById('btn-ready-order-elem');
+            const btnMoveTable = document.getElementById('btn-move-table-elem');
 
             let roleKey = "";
             let matched = false;
@@ -1162,21 +1182,21 @@
             if (credentials.admin && userInput === credentials.admin.user.toLowerCase() && passInput === credentials.admin.pass) {
                 loggedInRole = "admin";
                 billSummaryContainer.style.display = "block";
-                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block"; btnMoveTable.style.display = "block";
                 roleKey = "Admin";
                 matched = true;
             } 
             else if (credentials.user1 && userInput === credentials.user1.user.toLowerCase() && passInput === credentials.user1.pass) {
                 loggedInRole = "user1";
                 billSummaryContainer.style.display = "block";
-                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                btnPrintBill.style.display = "block"; btnPay.style.display = "block"; btnDrawer.style.display = "block"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block"; btnMoveTable.style.display = "block";
                 roleKey = "Staff";
                 matched = true;
             }
             else if (credentials.user2 && userInput === credentials.user2.user.toLowerCase() && passInput === credentials.user2.pass) {
                 loggedInRole = "user2";
                 billSummaryContainer.style.display = "none";
-                btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block";
+                btnPrintBill.style.display = "none"; btnPay.style.display = "none"; btnDrawer.style.display = "none"; btnHold.style.display = "block"; btnKitchen.style.display = "block"; btnReadyOrder.style.display = "block"; btnMoveTable.style.display = "block";
                 roleKey = "Order Taker";
                 matched = true;
             } 
@@ -1344,6 +1364,76 @@
             document.getElementById('table-selection-view').style.display = 'none';
             document.getElementById('pos-main-view').style.display = 'flex';
             switchMobileTab('menu');
+        }
+
+        let selectedTargetTableForMove = null;
+        function openMoveTableModal() {
+            if (!currentSelectedTable || currentOrderType === "Takeaway") {
+                return alert("Only dine-in table orders can be moved.");
+            }
+            selectedTargetTableForMove = null;
+            const listContainer = document.getElementById('move-table-list');
+            listContainer.innerHTML = "";
+            for (let i = 1; i <= 13; i++) {
+                let tName = `Table ${i}`;
+                if (tName === currentSelectedTable) continue;
+                let isOcc = activeOrders[getLinkedOrderKey(tName)] !== undefined;
+                let btnStyle = isOcc ? "background: #fee2e2; color: #b91c1c; border: 2px solid #f87171;" : "background: #f0fdf4; color: #166534; border: 2px solid #bbf7d0;";
+                listContainer.innerHTML += `<button type="button" id="move-dest-${i}" onclick="selectMoveDestination('${tName}')" style="padding: 10px; border-radius: 10px; font-weight: 900; cursor: pointer; ${btnStyle}">${tName}${isOcc ? ' (Occ)' : ''}</button>`;
+            }
+            document.getElementById('move-table-modal').style.display = 'flex';
+        }
+        function closeMoveTableModal() {
+            document.getElementById('move-table-modal').style.display = 'none';
+        }
+        function selectMoveDestination(tName) {
+            selectedTargetTableForMove = tName;
+            const buttons = document.querySelectorAll('#move-table-list button');
+            buttons.forEach(b => {
+                if (b.innerText.includes(tName)) {
+                    b.style.borderColor = '#4f46e5';
+                    b.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.2)';
+                } else {
+                    b.style.boxShadow = 'none';
+                }
+            });
+        }
+        function confirmMoveTable() {
+            if (!selectedTargetTableForMove) return alert("Please select a destination table!");
+            const oldKey = getLinkedOrderKey(currentSelectedTable);
+            const newKey = getLinkedOrderKey(selectedTargetTableForMove);
+
+            if (activeOrders[newKey]) {
+                if (!confirm(`Destination ${selectedTargetTableForMove} is already occupied! Do you want to merge/overwrite orders?`)) return;
+            }
+
+            let orderData = activeOrders[oldKey] || { time: Date.now(), type: currentOrderType, items: cart };
+            orderData.tables = [selectedTargetTableForMove];
+
+            const updates = {};
+            updates[`activeOrders/${oldKey}`] = null;
+            updates[`orderStatus/${oldKey}`] = null;
+            updates[`activeOrders/${selectedTargetTableForMove}`] = orderData;
+
+            if (orderStatuses[oldKey]) {
+                updates[`orderStatus/${selectedTargetTableForMove}`] = orderStatuses[oldKey];
+                updates[`orderStatus/${oldKey}`] = null;
+            }
+
+            db.ref().update(updates).then(() => {
+                delete activeOrders[oldKey];
+                if (orderStatuses[oldKey]) {
+                    orderStatuses[selectedTargetTableForMove] = orderStatuses[oldKey];
+                    delete orderStatuses[oldKey];
+                }
+                currentSelectedTable = selectedTargetTableForMove;
+                document.getElementById('cart-panel-title').innerText = `Order: ${getOrderDisplayRef(currentSelectedTable)}`;
+                closeMoveTableModal();
+                alert(`Successfully moved order to ${selectedTargetTableForMove}!`);
+                renderBigTableSelectionGrid();
+            }).catch(err => {
+                alert("Failed to move table: " + err.message);
+            });
         }
 
         function startTakeawayOrder() {
@@ -2157,7 +2247,6 @@
                 db.ref('staffShifts').set(staffShifts);
             }
 
-            // [BUG FIX] Completely wipe out database record and clear active orders & states to prevent overriding bugs on table reuse
             db.ref('activeOrders/' + paymentOrderKey).remove();
             db.ref(`orderStatus/${paymentOrderKey}`).remove();
             delete activeOrders[paymentOrderKey];
@@ -2916,15 +3005,16 @@ function unlinkTable(tableNo) {
     };
   }
 
-  const _customerSend = window.customerSendOrder;
-  if (typeof _customerSend === 'function') {
+  const _customerSend = window.orderSendOrder || window.customerSendOrder;
+  if (typeof window.customerSendOrder === 'function') {
+    const origCustSend = window.customerSendOrder;
     window.customerSendOrder = function(){
-      const r = _customerSend.apply(this, arguments);
+      const r = origCustSend.apply(this, arguments);
       try {
         const key = getLinkedOrderKey(currentSelectedTable);
         db.ref('activeOrders/' + key + '/orderSource').set('QR');
       } catch(e){}
-      return r.apply ? r : undefined;
+      return r;
     };
   }
 })();
