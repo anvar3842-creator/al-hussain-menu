@@ -2212,6 +2212,13 @@
                     }
                     menuChanged = true;
                 }
+
+                // Also check and deduct from manual raw materials / stock items if names match
+                let mat = rawMaterials.find(rm => rm.name.toLowerCase() === cartItem.name.toLowerCase());
+                if (mat) {
+                    mat.qty = Math.max(0, (Number(mat.qty) || 0) - cartItem.qty);
+                    db.ref('rawMaterials').set(rawMaterials);
+                }
             });
 
             if (menuChanged) {
@@ -2467,9 +2474,12 @@
         function deleteMenuItem(id) { 
             if(confirm("Delete item?")) { 
                 let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-                activeSource = activeSource.filter(m => m.id !== id); 
-                db.ref('menuData').set(activeSource); 
-                filterMenuManagerList(); 
+                activeSource = activeSource.filter(m => Number(m.id) !== Number(id)); 
+                db.ref('menuData').set(activeSource).then(() => {
+                    menuData = activeSource;
+                    filterMenuManagerList();
+                    renderMenu();
+                });
             } 
         }
 
