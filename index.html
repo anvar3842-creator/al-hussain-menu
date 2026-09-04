@@ -1551,13 +1551,30 @@
             getAllCategories().forEach(c => { select.innerHTML += `<option value="${c}">${c}</option>`; });
         }
 
-        function addNewCategoryPrompt() {
+        async function addNewCategoryPrompt() {
             let newCat = prompt("Enter New Category Name:");
-            if (newCat && newCat.trim() !== "") {
-                let formattedCat = newCat.trim();
-                if (!categoryOrder.includes(formattedCat)) { categoryOrder.push(formattedCat); db.ref('categoryOrder').set(categoryOrder); }
-                populateCategoryDropdown(); renderCategories(); document.getElementById('add-m-cat').value = formattedCat;
+            if (!newCat || newCat.trim() === "") return;
+
+            let formattedCat = newCat.trim();
+            if (categoryOrder.includes(formattedCat)) {
+                populateCategoryDropdown();
+                renderCategories();
+                document.getElementById('add-m-cat').value = formattedCat;
+                alert("This category already exists.");
+                return;
+            }
+
+            const nextOrder = [...categoryOrder, formattedCat];
+            try {
+                await db.ref('categoryOrder').set(nextOrder);
+                categoryOrder = nextOrder;
+                populateCategoryDropdown();
+                renderCategories();
+                document.getElementById('add-m-cat').value = formattedCat;
                 alert("Category Added!");
+            } catch (err) {
+                console.error('Category save error:', err);
+                alert("Category could not be saved: " + (err.message || err));
             }
         }
 
@@ -1809,31 +1826,64 @@
             }
         }
 
-        function addNewMenuItem() {
+        async function addNewMenuItem() {
             const name = document.getElementById('add-m-name').value.trim();
             const category = document.getElementById('add-m-cat').value;
             const price = parseFloat(document.getElementById('add-m-price').value);
             const stockInput = parseInt(document.getElementById('add-m-stock').value);
-            if (!name || !category || isNaN(price)) return alert("Please fill all fields!");
-            
-            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            const newId = activeSource.length > 0 ? Math.max(...activeSource.map(m => m.id)) + 1 : 1;
-            
-            let catLower = category.toLowerCase();
-            let newItem = { id: newId, code: "X" + newId, name: name, category: category, price: price, icon: "", popularity: 0, outOfStock: false };
-            if (catLower.includes('minuman tin')) {
-                newItem.stock = !isNaN(stockInput) ? stockInput : 0;
+            if (!name || !category || !Number.isFinite(price) || price < 0) {
+                return alert("Please enter a valid item name, category and price.");
             }
 
-            activeSource.push(newItem);
-            db.ref('menuData').set(activeSource);
-            document.getElementById('add-m-name').value = ''; document.getElementById('add-m-price').value = ''; document.getElementById('add-m-stock').value = '';
-            alert("Menu Item Added!");
+            try {
+                // Read the latest database value first so another admin/device cannot be overwritten by stale menuData.
+                const snap = await db.ref('menuData').once('value');
+                let activeSource = Array.isArray(snap.val()) ? snap.val().map(m => ({...m})) :
+                    ((menuData && menuData.length > 0) ? menuData.map(m => ({...m})) : defaultMenuData.map(m => ({...m})));
+
+                const numericIds = activeSource.map(m => Number(m.id)).filter(Number.isFinite);
+                const newId = numericIds.length ? Math.max(...numericIds) + 1 : 1;
+                const catLower = category.toLowerCase();
+                const newItem = {
+                    id: newId,
+                    code: "X" + newId,
+                    name,
+                    category,
+                    price: Math.round(price * 100) / 100,
+                    icon: "",
+                    popularity: 0,
+                    outOfStock: false
+                };
+                if (catLower.includes('minuman tin')) {
+                    newItem.stock = Number.isFinite(stockInput) && stockInput >= 0 ? stockInput : 0;
+                    newItem.outOfStock = newItem.stock <= 0;
+                }
+
+                activeSource.push(newItem);
+                await db.ref('menuData').set(activeSource);
+                menuData = activeSource;
+                renderCategories();
+                populateCategoryDropdown();
+                renderMenu();
+                populateMenuManagerTable(getMenuManagerSource());
+
+                document.getElementById('add-m-name').value = '';
+                document.getElementById('add-m-price').value = '';
+                document.getElementById('add-m-stock').value = '';
+                alert("Menu Item Added Successfully!");
+            } catch (err) {
+                console.error('Menu item save error:', err);
+                alert("Menu item could not be saved: " + (err.message || err));
+            }
         }
 
         function addToCart(id) {
             let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            const item = activeSource.find(m => m.id === id);
+            const item = activeSource.find(m => Number(m.id) === Number(id));
+            if (!item) {
+                alert("Menu item is no longer available. Please refresh the menu.");
+                return;
+            }
             let catLower = (item.category || "").toLowerCase();
             let isTinItem = catLower.includes('minuman tin');
             let curStock = item.stock !== undefined ? Number(item.stock) : 0;
@@ -2277,52 +2327,119 @@
             db.ref('dailyItemReports').set(dailyItemReports);
         }
 
-        function confirmPaymentProcess() {
-            let paid = parseFloat(document.getElementById('modal-paid-input').value) || 0;
-            if (paid < currentGrandTotalForPay) return alert("Insufficient amount!");
-            let change = paid - currentGrandTotalForPay;
-            let shouldPrint = document.getElementById('modal-print-checkbox').checked;
-            
-            closePaymentModal();
+        async function confirmPaymentProcess() {
+            if (window.__paymentBusy) return;
+            if (!currentSelectedTable || !Array.isArray(cart) || cart.length === 0) {
+                return alert("Cart is empty!");
+            }
+
             const payMethod = document.getElementById('payment-method').value;
+            const paid = parseFloat(document.getElementById('modal-paid-input').value);
+            const total = Number(currentGrandTotalForPay);
+            if (!Number.isFinite(total) || total < 0) return alert("Invalid total amount.");
+            if (!Number.isFinite(paid) || paid < total) return alert("Insufficient amount!");
+
+            const change = Math.max(0, paid - total);
+            const shouldPrint = document.getElementById('modal-print-checkbox').checked;
             const timeStr = new Date().toLocaleString();
-            let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
-            let discount = parseFloat(document.getElementById('discount-input').value) || 0;
-
-            fillReceiptDetails(currentOrderType, getOrderDisplayRef(currentSelectedTable), payMethod, timeStr, subtotal, discount, currentGrandTotalForPay, paid, change, cart);
-            
-            if (shouldPrint) {
-                safePrint("print-customer");
-            }
-
-            deductStockAndSaveDailyReport(cart);
-
+            const itemsForSale = JSON.parse(JSON.stringify(cart));
             const paymentOrderKey = getLinkedOrderKey(currentSelectedTable);
-            const paidOrderDataForSale = activeOrders[paymentOrderKey] || {};
-            const saleCustName = paidOrderDataForSale.custName || sessionStorage.getItem('myTkName') || '';
-            const saleCustPhone = paidOrderDataForSale.custPhone || sessionStorage.getItem('myTkPhone') || '';
-            
-            completedSales.push({ time: timeStr, ref: `${currentOrderType} (${getOrderDisplayRef(currentSelectedTable)})`, method: payMethod, amount: currentGrandTotalForPay, orderType: currentOrderType, refName: getOrderDisplayRef(currentSelectedTable), subtotal: subtotal, discount: discount, paid: paid, change: change, custName: saleCustName, custPhone: saleCustPhone, items: JSON.parse(JSON.stringify(cart)) });
-            db.ref('sales').set(completedSales);
+            const paidOrderData = activeOrders[paymentOrderKey] || {};
+            const saleCustName = paidOrderData.custName || sessionStorage.getItem('myTkName') || '';
+            const saleCustPhone = paidOrderData.custPhone || sessionStorage.getItem('myTkPhone') || '';
+            const subtotal = itemsForSale.reduce((sum, item) => sum + (Number(item.customPrice) * Number(item.qty)), 0);
+            const discount = parseFloat(document.getElementById('discount-input').value) || 0;
+            const sale = {
+                time: timeStr,
+                ref: `${currentOrderType} (${getOrderDisplayRef(currentSelectedTable)})`,
+                method: payMethod,
+                amount: total,
+                orderType: currentOrderType,
+                refName: getOrderDisplayRef(currentSelectedTable),
+                subtotal, discount, paid, change,
+                custName: saleCustName,
+                custPhone: saleCustPhone,
+                orderSource: loggedInRole === 'customer' ? 'QR' : 'COUNTER',
+                items: itemsForSale
+            };
 
-            let todayKey = new Date().toISOString().split('T')[0];
-            let roleKey = loggedInRole === "user1" ? "Staff" : "Admin";
-            if (staffShifts[todayKey] && staffShifts[todayKey][roleKey]) {
-                staffShifts[todayKey][roleKey].billsCount += 1;
-                staffShifts[todayKey][roleKey].totalCollected += currentGrandTotalForPay;
-                db.ref('staffShifts').set(staffShifts);
+            const confirmButton = document.querySelector('#payment-modal .pay-btn-confirm');
+            window.__paymentBusy = true;
+            if (confirmButton) { confirmButton.disabled = true; confirmButton.textContent = 'Saving...'; }
+
+            try {
+                // Save all payment records first. If Firebase rejects any write, the order is NOT removed.
+                let salesLatestSnap = await db.ref('sales').once('value');
+                let latestSales = Array.isArray(salesLatestSnap.val()) ? salesLatestSnap.val() : [];
+                latestSales.push(sale);
+
+                const updates = {
+                    sales: latestSales,
+                    [`activeOrders/${paymentOrderKey}`]: null,
+                    [`orderStatus/${paymentOrderKey}`]: null
+                };
+
+                // Update stock/report data locally and include the latest values in the same Firebase write.
+                let latestMenuSnap = await db.ref('menuData').once('value');
+                let latestMenu = Array.isArray(latestMenuSnap.val()) ? latestMenuSnap.val().map(m => ({...m})) :
+                    ((menuData && menuData.length) ? menuData.map(m => ({...m})) : defaultMenuData.map(m => ({...m})));
+                itemsForSale.forEach(cartItem => {
+                    const menuItem = latestMenu.find(m => Number(m.id) === Number(cartItem.id));
+                    if (!menuItem) return;
+                    const catLower = String(menuItem.category || '').toLowerCase();
+                    if (catLower.includes('minuman tin') && menuItem.stock !== undefined) {
+                        menuItem.stock = Math.max(0, Number(menuItem.stock) - Number(cartItem.qty));
+                        if (menuItem.stock <= 0) menuItem.outOfStock = true;
+                    }
+                    menuItem.popularity = (Number(menuItem.popularity) || 0) + Number(cartItem.qty);
+                });
+                updates.menuData = latestMenu;
+
+                const todayKey = new Date().toISOString().split('T')[0];
+                const latestReportsSnap = await db.ref('dailyItemReports').once('value');
+                const reports = latestReportsSnap.val() || {};
+                if (!reports[todayKey]) reports[todayKey] = {};
+                itemsForSale.forEach(item => {
+                    reports[todayKey][item.name] = (Number(reports[todayKey][item.name]) || 0) + Number(item.qty);
+                });
+                updates.dailyItemReports = reports;
+
+                const latestShiftsSnap = await db.ref('staffShifts').once('value');
+                const shifts = latestShiftsSnap.val() || {};
+                const roleKey = loggedInRole === 'user1' ? 'Staff' : 'Admin';
+                if (shifts[todayKey] && shifts[todayKey][roleKey]) {
+                    shifts[todayKey][roleKey].billsCount = (Number(shifts[todayKey][roleKey].billsCount) || 0) + 1;
+                    shifts[todayKey][roleKey].totalCollected = (Number(shifts[todayKey][roleKey].totalCollected) || 0) + total;
+                    updates.staffShifts = shifts;
+                }
+
+                await db.ref().update(updates);
+
+                // Only update UI after Firebase confirms every write.
+                completedSales = latestSales;
+                menuData = latestMenu;
+                dailyItemReports = reports;
+                if (updates.staffShifts) staffShifts = shifts;
+                delete activeOrders[paymentOrderKey];
+                delete orderStatuses[paymentOrderKey];
+
+                fillReceiptDetails(currentOrderType, getOrderDisplayRef(currentSelectedTable), payMethod, timeStr, subtotal, discount, total, paid, change, itemsForSale, saleCustName, saleCustPhone);
+                closePaymentModal();
+                cart = [];
+                updateCart();
+                renderMenu();
+                updateStats();
+                backToTableSelection();
+
+                if (shouldPrint) safePrint("print-customer");
+                alert("Payment Successful! Change: $" + change.toFixed(2));
+            } catch (err) {
+                console.error('Payment save error:', err);
+                alert("Payment could not be completed. Nothing was removed from the order. Please try again.\n\nError: " + (err.message || err));
+            } finally {
+                window.__paymentBusy = false;
+                if (confirmButton) { confirmButton.disabled = false; confirmButton.textContent = 'Confirm & Pay'; }
             }
-
-            db.ref('activeOrders/' + paymentOrderKey).remove();
-            db.ref(`orderStatus/${paymentOrderKey}`).remove();
-            delete activeOrders[paymentOrderKey];
-            delete orderStatuses[paymentOrderKey];
-
-            cart = []; 
-            updateStats(); 
-            backToTableSelection();
-            
-            alert("Payment Successful! Change: $" + change.toFixed(2));
         }
 
         function fillReceiptDetails(orderType, ref, method, time, sub, disc, total, paid, change, items, customerNameOverride, customerPhoneOverride) {
