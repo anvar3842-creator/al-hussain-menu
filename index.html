@@ -840,6 +840,9 @@
         };
 
         let cart = [];
+        // Per-table edit baseline + serialized saves prevent same-table multi-user lost updates.
+        let tableEditBase = {};
+        let orderSaveQueues = {};
         let activeOrders = {}; 
         let orderStatuses = {}; 
         let completedSales = []; 
@@ -1383,6 +1386,9 @@
             } else {
                 cart = [];
             }
+            // Snapshot the state this staff member started editing. Later saves apply only the
+            // local delta to Firebase, so another staff member's new items are preserved.
+            tableEditBase[orderKey] = JSON.parse(JSON.stringify(cart));
             
             document.getElementById('discount-input').value = "0.00";
             updateCart();
@@ -2080,18 +2086,121 @@
             saveOrderToTableSilent();
         }
 
+        function getOrderItemWithoutQty(item) {
+            const copy = JSON.parse(JSON.stringify(item || {}));
+            delete copy.qty;
+            return copy;
+        }
+
+        function mergeLocalCartDelta(serverItems, baseItems, localItems) {
+            const server = Array.isArray(serverItems) ? JSON.parse(JSON.stringify(serverItems)) : [];
+            const base = Array.isArray(baseItems) ? baseItems : [];
+            const local = Array.isArray(localItems) ? localItems : [];
+            const byId = new Map();
+            const baseById = new Map();
+            const localById = new Map();
+
+            server.forEach(item => byId.set(String(item.id), item));
+            base.forEach(item => baseById.set(String(item.id), item));
+            local.forEach(item => localById.set(String(item.id), item));
+
+            // Apply the local quantity delta to the latest Firebase state.
+            const ids = new Set([...baseById.keys(), ...localById.keys()]);
+            ids.forEach(id => {
+                const baseItem = baseById.get(id);
+                const localItem = localById.get(id);
+                const baseQty = baseItem ? Number(baseItem.qty || 0) : 0;
+                const localQty = localItem ? Number(localItem.qty || 0) : 0;
+                const delta = localQty - baseQty;
+                let serverItem = byId.get(id);
+
+                if (delta !== 0) {
+                    if (serverItem) {
+                        const nextQty = Number(serverItem.qty || 0) + delta;
+                        if (nextQty <= 0) {
+                            const index = server.indexOf(serverItem);
+                            if (index >= 0) server.splice(index, 1);
+                            byId.delete(id);
+                            serverItem = null;
+                        } else {
+                            serverItem.qty = nextQty;
+                        }
+                    } else if (localQty > 0) {
+                        serverItem = JSON.parse(JSON.stringify(localItem));
+                        serverItem.qty = localQty;
+                        server.push(serverItem);
+                        byId.set(id, serverItem);
+                    }
+                }
+
+                // Preserve local edits to notes/custom price/comment without replacing
+                // another user's unrelated items or quantity changes.
+                if (localItem && serverItem) {
+                    const baseMeta = baseItem ? JSON.stringify(getOrderItemWithoutQty(baseItem)) : null;
+                    const localMeta = JSON.stringify(getOrderItemWithoutQty(localItem));
+                    if (baseMeta === null || baseMeta !== localMeta) {
+                        const mergedQty = serverItem.qty;
+                        Object.assign(serverItem, JSON.parse(JSON.stringify(localItem)));
+                        serverItem.qty = mergedQty;
+                    }
+                }
+            });
+
+            return server;
+        }
+
         function saveOrderToTableSilent() {
             if (loggedInRole === "customer") return; 
             if (cart.length === 0 || !currentSelectedTable) return;
-            const orderKey = getLinkedOrderKey(currentSelectedTable);
-            let existing = activeOrders[orderKey] || {};
-            let existingTime = existing.time || Date.now();
-            let cName = existing.custName || sessionStorage.getItem('myTkName') || "Walk-in";
-            let cPhone = existing.custPhone || sessionStorage.getItem('myTkPhone') || "";
 
-            let orderData = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, tables: getLinkedTableNames(currentSelectedTable), items: JSON.parse(JSON.stringify(cart)) };
-            activeOrders[orderKey] = orderData;
-            db.ref('activeOrders/' + orderKey).set(orderData);
+            const tableName = currentSelectedTable;
+            const orderType = currentOrderType;
+            const orderKey = getLinkedOrderKey(tableName);
+            const localCartSnapshot = JSON.parse(JSON.stringify(cart));
+            const saveTask = async () => {
+                const baseItems = JSON.parse(JSON.stringify(tableEditBase[orderKey] || []));
+                const ref = db.ref('activeOrders/' + orderKey);
+
+                await new Promise((resolve, reject) => {
+                    ref.transaction((current) => {
+                        const existing = current || {};
+                        const mergedItems = mergeLocalCartDelta(existing.items, baseItems, localCartSnapshot);
+                        const existingTime = existing.time || Date.now();
+                        const cName = existing.custName || sessionStorage.getItem('myTkName') || "Walk-in";
+                        const cPhone = existing.custPhone || sessionStorage.getItem('myTkPhone') || "";
+
+                        return {
+                            time: existingTime,
+                            type: existing.type || orderType,
+                            custName: cName,
+                            custPhone: cPhone,
+                            tables: getLinkedTableNames(tableName),
+                            items: mergedItems
+                        };
+                    }, (error, committed, snapshot) => {
+                        if (error) return reject(error);
+                        if (!committed || !snapshot.exists()) return reject(new Error("Order save was not committed."));
+
+                        const savedOrder = snapshot.val() || {};
+                        activeOrders[orderKey] = savedOrder;
+                        tableEditBase[orderKey] = JSON.parse(JSON.stringify(savedOrder.items || []));
+                        resolve(savedOrder);
+                    });
+                });
+            };
+
+            // Serialize saves from the same browser too. This avoids two rapid local edits
+            // both calculating their delta from the same old baseline.
+            const previous = orderSaveQueues[orderKey] || Promise.resolve();
+            const next = previous.catch(() => {}).then(saveTask);
+            orderSaveQueues[orderKey] = next.finally(() => {
+                if (orderSaveQueues[orderKey] === next) delete orderSaveQueues[orderKey];
+            });
+
+            next.catch((error) => {
+                console.error("Failed to save table order safely:", error);
+            });
+            return next;
         }
 
         function customerSendOrder() {
