@@ -225,7 +225,7 @@
         .close-day-btn { background: linear-gradient(135deg, #dc2626, #b91c1c); text-align: center; justify-content: center; font-size: 14px; padding: 14px; margin-top: 5px; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 750px; max-height: 85vh; border-radius: 24px; padding: 30px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 850px; max-height: 85vh; border-radius: 24px; padding: 30px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #f1f5f9; padding-bottom: 15px; }
         .modal-body { overflow-y: auto; margin-top: 20px; max-height: 60vh; padding-right: 5px; }
         .close-modal { background: #fef2f2; color: var(--danger); border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 900; transition: 0.2s; }
@@ -445,6 +445,7 @@
                 </div>
                 
                 <div style="margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <input type="text" id="add-m-code" placeholder="Code (e.g. R1)" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 85px; outline: none; font-size: 13px; font-family: inherit; font-weight: bold;">
                     <input type="text" id="add-m-name" placeholder="New Item Name" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 2; outline: none; font-size: 13px; font-family: inherit;">
                     <select id="add-m-cat" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 1.5; outline: none; font-size: 13px; font-weight: bold; color: #4f46e5; background: white; font-family: inherit;"></select>
                     <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 70px; outline: none; font-size: 13px; font-family: inherit;">
@@ -652,16 +653,17 @@
     <div id="staff-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Staff Shift & Performance Tracking</h3><button class="close-modal" onclick="closeStaffPerformanceModal()">X</button></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Staff Role</th><th>Login Time</th><th style="text-align:center;">Bills</th><th style="text-align:right;">Collected ($)</th></tr></thead><tbody id="staff-performance-tbody"></tbody></table></div></div></div>
     
     <div id="menu-manager-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 850px;">
+        <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
-                <h3 style="margin:0; font-size:18px;">Manage Menu Items, Prices & Stock</h3>
+                <h3 style="margin:0; font-size:18px;">Manage Menu Items, Codes, Prices & Stock</h3>
                 <button class="close-modal" onclick="closeMenuManagerModal()">X</button>
             </div>
             <div class="modal-body">
-                <input type="text" id="menu-manager-search" placeholder="Search item to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 250px; margin-bottom: 15px; outline: none;">
+                <input type="text" id="menu-manager-search" placeholder="Search item or code to edit..." onkeyup="filterMenuManagerList()" style="padding: 10px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 14px; font-weight:bold; width: 280px; margin-bottom: 15px; outline: none;">
                 <table class="admin-table">
                     <thead>
                         <tr>
+                            <th style="width: 85px;">Code</th>
                             <th>Item Name</th>
                             <th>Category</th>
                             <th style="text-align:right;">Price ($)</th>
@@ -840,7 +842,6 @@
         };
 
         let cart = [];
-        // Per-table edit baseline + serialized saves prevent same-table multi-user lost updates.
         let tableEditBase = {};
         let orderSaveQueues = {};
         let activeOrders = {}; 
@@ -1386,8 +1387,6 @@
             } else {
                 cart = [];
             }
-            // Snapshot the state this staff member started editing. Later saves apply only the
-            // local delta to Firebase, so another staff member's new items are preserved.
             tableEditBase[orderKey] = JSON.parse(JSON.stringify(cart));
             
             document.getElementById('discount-input').value = "0.00";
@@ -1833,16 +1832,16 @@
         }
 
         async function addNewMenuItem() {
+            const customCode = document.getElementById('add-m-code').value.trim();
             const name = document.getElementById('add-m-name').value.trim();
             const category = document.getElementById('add-m-cat').value;
             const price = parseFloat(document.getElementById('add-m-price').value);
             const stockInput = parseInt(document.getElementById('add-m-stock').value);
-            if (!name || !category || !Number.isFinite(price) || price < 0) {
-                return alert("Please enter a valid item name, category and price.");
+            if (!customCode || !name || !category || !Number.isFinite(price) || price < 0) {
+                return alert("Please enter a valid Code, item name, category and price.");
             }
 
             try {
-                // Read the latest database value first so another admin/device cannot be overwritten by stale menuData.
                 const snap = await db.ref('menuData').once('value');
                 let activeSource = Array.isArray(snap.val()) ? snap.val().map(m => ({...m})) :
                     ((menuData && menuData.length > 0) ? menuData.map(m => ({...m})) : defaultMenuData.map(m => ({...m})));
@@ -1852,7 +1851,7 @@
                 const catLower = category.toLowerCase();
                 const newItem = {
                     id: newId,
-                    code: "X" + newId,
+                    code: customCode,
                     name,
                     category,
                     price: Math.round(price * 100) / 100,
@@ -1873,6 +1872,7 @@
                 renderMenu();
                 populateMenuManagerTable(getMenuManagerSource());
 
+                document.getElementById('add-m-code').value = '';
                 document.getElementById('add-m-name').value = '';
                 document.getElementById('add-m-price').value = '';
                 document.getElementById('add-m-stock').value = '';
@@ -1915,8 +1915,22 @@
             const cartItem = cart.find(c => c.id === id);
             if (cartItem) {
                 if (!cartItem.selectedNotes) cartItem.selectedNotes = [];
-                if (checkboxElem.checked) { if (!cartItem.selectedNotes.includes(noteName)) cartItem.selectedNotes.push(noteName); } 
-                else { cartItem.selectedNotes = cartItem.selectedNotes.filter(n => n !== noteName); }
+                
+                if (checkboxElem.checked) { 
+                    if (!cartItem.selectedNotes.includes(noteName)) {
+                        cartItem.selectedNotes.push(noteName); 
+                        if (noteName === 'Susu Manis') {
+                            cartItem.customPrice = Math.round((cartItem.customPrice + 0.20) * 100) / 100;
+                        }
+                    }
+                } else { 
+                    if (cartItem.selectedNotes.includes(noteName)) {
+                        cartItem.selectedNotes = cartItem.selectedNotes.filter(n => n !== noteName); 
+                        if (noteName === 'Susu Manis') {
+                            cartItem.customPrice = Math.max(0, Math.round((cartItem.customPrice - 0.20) * 100) / 100);
+                        }
+                    }
+                }
                 updateCart();
                 saveOrderToTableSilent();
             }
@@ -1946,6 +1960,7 @@
                         <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Ayam Kari') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Ayam Kari', this)"> Ayam Kari</label>
                         <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Ikan Kari') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Ikan Kari', this)"> Ikan Kari</label>
                         <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Dhal') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Dhal', this)"> Dhal</label>
+                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Susu Manis') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Susu Manis', this)"> Susu Manis (+ $0.20)</label>
                     </div>`;
                 }
 
@@ -1985,7 +2000,7 @@
                 if (loggedInRole === "user2" || loggedInRole === "customer" || currentOrderType === "Takeaway") {
                     priceInputHtml = `<input type="text" class="price-input" value="${item.customPrice.toFixed(2)}" readonly style="background:#f1f5f9; border:none; text-align:right; font-weight:900; font-size:13px; outline:none; color:var(--primary);">`;
                 } else {
-                    priceInputHtml = `<input type="number" class="price-input" value="${item.customPrice.toFixed(2)}" step="0.50" oninput="updateItemPrice(${item.id}, this.value)">`;
+                    priceInputHtml = `<input type="number" class="price-input" value="${item.customPrice.toFixed(2)}" step="0.05" oninput="updateItemPrice(${item.id}, this.value)">`;
                 }
 
                 tbody.innerHTML += `<tr>
@@ -2104,7 +2119,6 @@
             base.forEach(item => baseById.set(String(item.id), item));
             local.forEach(item => localById.set(String(item.id), item));
 
-            // Apply the local quantity delta to the latest Firebase state.
             const ids = new Set([...baseById.keys(), ...localById.keys()]);
             ids.forEach(id => {
                 const baseItem = baseById.get(id);
@@ -2133,8 +2147,6 @@
                     }
                 }
 
-                // Preserve local edits to notes/custom price/comment without replacing
-                // another user's unrelated items or quantity changes.
                 if (localItem && serverItem) {
                     const baseMeta = baseItem ? JSON.stringify(getOrderItemWithoutQty(baseItem)) : null;
                     const localMeta = JSON.stringify(getOrderItemWithoutQty(localItem));
@@ -2189,8 +2201,6 @@
                 });
             };
 
-            // Serialize saves from the same browser too. This avoids two rapid local edits
-            // both calculating their delta from the same old baseline.
             const previous = orderSaveQueues[orderKey] || Promise.resolve();
             const next = previous.catch(() => {}).then(saveTask);
             orderSaveQueues[orderKey] = next.finally(() => {
@@ -2396,46 +2406,6 @@
         function setQuickCash(val) { document.getElementById('modal-paid-input').value = (val === 'exact' ? currentGrandTotalForPay : parseFloat(val)).toFixed(2); calculateChangePreview(); }
         function calculateChangePreview() { let change = (parseFloat(document.getElementById('modal-paid-input').value) || 0) - currentGrandTotalForPay; document.getElementById('modal-change-amount').innerText = Math.max(0, change).toFixed(2); }
 
-        function deductStockAndSaveDailyReport(cartItems) {
-            let activeSource = (menuData && menuData.length > 0) ? menuData : defaultMenuData;
-            let menuChanged = false;
-
-            cartItems.forEach(cartItem => {
-                let menuItem = activeSource.find(m => m.id === cartItem.id);
-                if (menuItem) {
-                    let catLower = (menuItem.category || "").toLowerCase();
-                    let isTinItem = catLower.includes('minuman tin');
-                    
-                    if (isTinItem && menuItem.stock !== undefined) {
-                        let currentStock = Number(menuItem.stock);
-                        currentStock = Math.max(0, currentStock - cartItem.qty);
-                        menuItem.stock = currentStock;
-                        if (currentStock <= 0) {
-                            menuItem.outOfStock = true;
-                        }
-                        menuChanged = true;
-                    }
-                    menuItem.popularity = (menuItem.popularity || 0) + cartItem.qty;
-                }
-            });
-
-            if (menuChanged) {
-                db.ref('menuData').set(activeSource);
-            }
-
-            let todayDateKey = new Date().toISOString().split('T')[0];
-            if (!dailyItemReports[todayDateKey]) {
-                dailyItemReports[todayDateKey] = {};
-            }
-
-            cartItems.forEach(cartItem => {
-                let name = cartItem.name;
-                dailyItemReports[todayDateKey][name] = (dailyItemReports[todayDateKey][name] || 0) + cartItem.qty;
-            });
-
-            db.ref('dailyItemReports').set(dailyItemReports);
-        }
-
         async function confirmPaymentProcess() {
             if (window.__paymentBusy) return;
             if (!currentSelectedTable || !Array.isArray(cart) || cart.length === 0) {
@@ -2477,7 +2447,6 @@
             if (confirmButton) { confirmButton.disabled = true; confirmButton.textContent = 'Saving...'; }
 
             try {
-                // Save all payment records first. If Firebase rejects any write, the order is NOT removed.
                 let salesLatestSnap = await db.ref('sales').once('value');
                 let latestSales = Array.isArray(salesLatestSnap.val()) ? salesLatestSnap.val() : [];
                 latestSales.push(sale);
@@ -2488,7 +2457,6 @@
                     [`orderStatus/${paymentOrderKey}`]: null
                 };
 
-                // Update stock/report data locally and include the latest values in the same Firebase write.
                 let latestMenuSnap = await db.ref('menuData').once('value');
                 let latestMenu = Array.isArray(latestMenuSnap.val()) ? latestMenuSnap.val().map(m => ({...m})) :
                     ((menuData && menuData.length) ? menuData.map(m => ({...m})) : defaultMenuData.map(m => ({...m})));
@@ -2524,7 +2492,6 @@
 
                 await db.ref().update(updates);
 
-                // Only update UI after Firebase confirms every write.
                 completedSales = latestSales;
                 menuData = latestMenu;
                 dailyItemReports = reports;
@@ -2622,7 +2589,7 @@
                     populateMenuManagerTable(source);
                     return;
                 }
-                populateMenuManagerTable(source.filter(i => String(i.name || '').toLowerCase().includes(q)));
+                populateMenuManagerTable(source.filter(i => String(i.name || '').toLowerCase().includes(q) || String(i.code || '').toLowerCase().includes(q)));
             }, 100);
         }
 
@@ -2635,6 +2602,7 @@
 
             for (let idx = 0; idx < items.length; idx++) {
                 const item = items[idx];
+                const safeCode = escapeHtml(item.code || '');
                 const safeName = escapeHtml(item.name || '');
                 const safeCategory = escapeHtml(item.category || '');
                 const price = Number(item.price) || 0;
@@ -2657,6 +2625,7 @@
                 );
 
                 rows[idx] = `<tr>
+                    <td><input type="text" value="${safeCode}" onchange="updateMenuField(${item.id}, 'code', this.value)" style="width:75px; padding:6px 8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit; font-weight:bold; text-align:center;"></td>
                     <td><input type="text" value="${safeName}" onchange="updateMenuField(${item.id}, 'name', this.value)" style="width:90%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;"></td>
                     <td><select style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-family:inherit;" onchange="updateMenuField(${item.id}, 'category', this.value)">${opts}</select></td>
                     <td style="text-align:right;"><div style="display:flex; gap:5px; justify-content:flex-end; align-items:center;"><input type="number" value="${price.toFixed(2)}" step="0.01" min="0" data-price-id="${item.id}" data-price-code="${escapeHtml(item.code || '')}" onchange="updateMenuField(${item.id}, 'price', this.value, '${String(item.code || '').replace("'", "\'")}')" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:70px; padding:6px; border-radius:8px; border:1px solid #cbd5e1; text-align:right; font-weight:bold;"><button type="button" onclick="saveMenuPrice(${item.id}, this.previousElementSibling.value, '${String(item.code || '').replace("'", "\'")}')" style="background:#16a34a;color:white;border:none;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:800;">Save</button></div></td>
@@ -2696,13 +2665,6 @@
                     let idx = wantedCode ? arr.findIndex(m => String(m.code || '').trim() === wantedCode) : -1;
                     if (idx < 0) idx = arr.findIndex(m => Number(m.id) === Number(id));
 
-                    if (idx < 0 && wantedCode.startsWith('BK')) {
-                        const fallback = defaultMenuData.find(m => String(m.code || '') === wantedCode);
-                        if (fallback) {
-                            arr.push({...fallback, price: newPrice});
-                            idx = arr.length - 1;
-                        }
-                    }
                     if (idx < 0) { alert('Menu item not found.'); return; }
 
                     arr[idx] = {...arr[idx], price: newPrice};
@@ -2728,7 +2690,9 @@
             const item = activeSource.find(m => (code && String(m.code || '') === String(code)) || Number(m.id) === Number(id));
             if (!item) return;
             
-            if (field === 'category') {
+            if (field === 'code') {
+                item.code = String(val || '').trim();
+            } else if (field === 'category') {
                 item.category = val;
                 let catLower = String(val).toLowerCase();
                 if (catLower.includes('minuman tin')) {
@@ -3329,9 +3293,9 @@ function unlinkTable(tableNo) {
     };
   }
 
-  const _customerSend = window.orderSendOrder || window.customerSendOrder;
+  const _customer_send = window.orderSendOrder || window.customerSendOrder;
   if (typeof window.customerSendOrder === 'function') {
-    const origCustSend = window.customerSendOrder;
+    const origCustSend = window.systemCustomerSendOrder || window.customerSendOrder;
     window.customerSendOrder = function(){
       const r = origCustSend.apply(this, arguments);
       try {
