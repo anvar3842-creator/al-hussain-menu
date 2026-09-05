@@ -2481,8 +2481,10 @@
                 const reports = latestReportsSnap.val() || {};
                 if (!reports[todayKey]) reports[todayKey] = {};
                 itemsForSale.forEach(item => {
-                    const safeKey = sanitizeFirebaseKey(item.name);
-                    reports[todayKey][safeKey] = (Number(reports[todayKey][safeKey]) || 0) + Number(item.qty);
+                    const cleanItemName = String(item.name || '').trim();
+                    const safeKey = sanitizeFirebaseKey(cleanItemName);
+                    const currentQty = Number(reports[todayKey][safeKey]) || 0;
+                    reports[todayKey][safeKey] = currentQty + Number(item.qty);
                 });
                 updates.dailyItemReports = reports;
 
@@ -3233,22 +3235,22 @@ function unlinkTable(tableNo) {
   window.closeExpenseViewModal=function(){const m=document.getElementById('expense-view-modal');if(m)m.style.display='none';};
 
   window.openPaymentSummaryModal=function(){
-    const today=new Date().toISOString().split('T')[0];
-    const sales=Array.isArray(completedSales)?completedSales:[];
-    let cash=0,card=0,qr=0,total=0;
-    sales.forEach(s=>{
-      const t=String(s.time||'');
-      const isToday=t ? new Date(t).toISOString().split('T')[0]===today : true;
-      if(!isToday)return;
-      const a=Number(s.amount)||0; total+=a;
-      const m=String(s.method||'').toLowerCase();
-      if(m==='card')card+=a; else if(m.includes('qr'))qr+=a; else if(m==='cash')cash+=a;
+    const todayStr = new Date().toLocaleDateString();
+    const sales = Array.isArray(completedSales) ? completedSales : [];
+    let cash = 0, card = 0, qr = 0, total = 0;
+    sales.forEach(s => {
+      const saleTime = String(s.time || '');
+      const isToday = saleTime.includes(todayStr) || saleTime.startsWith(new Date().toISOString().split('T')[0]);
+      if (!isToday) return;
+      const a = Number(s.amount) || 0; total += a;
+      const m = String(s.method || '').toLowerCase();
+      if (m === 'card') card += a; else if (m.includes('qr')) qr += a; else if (m === 'cash') cash += a;
     });
-    document.getElementById('pay-summary-cash').innerText=cash.toFixed(2);
-    document.getElementById('pay-summary-card').innerText=card.toFixed(2);
-    document.getElementById('pay-summary-qr').innerText=qr.toFixed(2);
-    document.getElementById('pay-summary-total').innerText=total.toFixed(2);
-    document.getElementById('payment-summary-modal').style.display='flex';
+    document.getElementById('pay-summary-cash').innerText = cash.toFixed(2);
+    document.getElementById('pay-summary-card').innerText = card.toFixed(2);
+    document.getElementById('pay-summary-qr').innerText = qr.toFixed(2);
+    document.getElementById('pay-summary-total').innerText = total.toFixed(2);
+    document.getElementById('payment-summary-modal').style.display = 'flex';
   };
   window.closePaymentSummaryModal=function(){const m=document.getElementById('payment-summary-modal');if(m)m.style.display='none';};
 
