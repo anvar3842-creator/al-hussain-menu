@@ -750,6 +750,10 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        function sanitizeFirebaseKey(str) {
+            return String(str || '').replace(/[\.\#\$\/\[\]]/g, '_');
+        }
+
         const liveBaseUrl = "https://anvar3842-creator.github.io/al-hussain-menu/";
 
         const defaultMenuData = [
@@ -2477,7 +2481,8 @@
                 const reports = latestReportsSnap.val() || {};
                 if (!reports[todayKey]) reports[todayKey] = {};
                 itemsForSale.forEach(item => {
-                    reports[todayKey][item.name] = (Number(reports[todayKey][item.name]) || 0) + Number(item.qty);
+                    const safeKey = sanitizeFirebaseKey(item.name);
+                    reports[todayKey][safeKey] = (Number(reports[todayKey][safeKey]) || 0) + Number(item.qty);
                 });
                 updates.dailyItemReports = reports;
 
