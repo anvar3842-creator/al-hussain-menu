@@ -457,6 +457,7 @@
                 <div class="admin-buttons-grid">
                     <button class="admin-btn manage-menu-btn" onclick="openMenuManagerModal()">Manage Menu & Prices</button>
                     <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">Categories Priority</button>
+                    <button class="admin-btn manage-cat-btn" onclick="openCheckboxManagerModal()">Manage Item Checkboxes</button>
                     <button class="admin-btn stock-btn" onclick="openStockModal()">Manual Stock</button>
                     <button class="admin-btn expense-btn" onclick="openExpenseModal()">Daily Expense</button>
                     <button class="admin-btn expense-btn" onclick="openExpenseViewModal()">View Expenses</button>
@@ -679,6 +680,25 @@
     </div>
 
     <div id="category-manager-modal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manage Categories & Order</h3><button class="close-modal" onclick="closeCategoryManagerModal()">X</button></div><div class="modal-body"><p style="font-size: 13px; font-weight:bold; color: #64748b; margin-top: 0;">Use Up/Down buttons to prioritize categories.</p><table class="admin-table"><thead><tr><th>Category Name</th><th style="text-align:center;">Priority Order</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="category-manager-tbody"></tbody></table></div></div></div>
+    <div id="checkbox-manager-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 style="margin:0; font-size:18px;">Manage Item Checkboxes</h3>
+                <button class="close-modal" onclick="closeCheckboxManagerModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px;font-weight:800;color:#64748b;margin-top:0;">Add checkbox options once per category. Every item in that category will use the same options.</p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:15px;">
+                    <select id="checkbox-manager-category" style="flex:1;min-width:150px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-weight:800;font-family:inherit;"></select>
+                    <input type="text" id="checkbox-manager-name" placeholder="Checkbox name" style="flex:2;min-width:150px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-family:inherit;">
+                    <input type="number" id="checkbox-manager-price" placeholder="Extra price" min="0" step="0.01" value="0.00" style="width:105px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-family:inherit;">
+                    <button class="btn-small" style="background:var(--success);padding:9px 14px;" onclick="addCategoryCheckboxOption()">+ Add</button>
+                </div>
+                <div id="checkbox-manager-list"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="stock-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Manual Raw Material Stock</h3><div><button class="btn-small" onclick="addNewRawMaterial()">+ Add Material</button><button class="close-modal" onclick="closeStockModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Material Name</th><th>Quantity</th><th>Update</th></tr></thead><tbody id="stock-tbody"></tbody></table></div></div></div>
     
     <!-- Expanded Expense Modal -->
@@ -838,6 +858,7 @@
         
         let defaultCategoryOrder = ["Roti", "Dosai", "Nasi Goreng", "Mee Goreng", "Kueh Teow Goreng", "Indomie", "Mee Basah", "Kueh Teow Basah", "Murtabak", "Burger", "Nasi Campur", "Hot Drinks", "Minuman Tin", "Sejuk", "Fresh Juice", "Milk Shake"];
         let categoryOrder = [];
+        let categoryCheckboxOptions = {};
 
         let credentials = {
             admin: { user: "admin", pass: "admin123" },
@@ -888,6 +909,13 @@
                 if (categoryOrder.length !== val.length) db.ref('categoryOrder').set(categoryOrder);
             } else { categoryOrder = defaultCategoryOrder; db.ref('categoryOrder').set(defaultCategoryOrder); }
             renderCategories(); populateCategoryDropdown();
+        });
+
+        db.ref('categoryOptions').on('value', (snapshot) => {
+            const val = snapshot.val();
+            categoryCheckboxOptions = (val && typeof val === 'object' && !Array.isArray(val)) ? val : {};
+            menuManagerCategoryOptions = null;
+            updateCart();
         });
 
         db.ref('credentials').on('value', (snapshot) => {
@@ -1030,21 +1058,26 @@
             if (tableParam) targetKey = getLinkedOrderKey(tableParam);
             
             if (targetKey) {
-                if (activeOrders[targetKey]) {
+                const targetOrder = activeOrders[targetKey];
+                if (targetOrder) {
+                    if (orderParam === 'takeaway' && targetOrder.paymentStatus === 'PAID') {
+                        sessionStorage.setItem('paid_' + targetKey, 'true');
+                        document.getElementById('main-app').style.display = 'none';
+                        document.getElementById('timeout-screen').style.display = 'flex';
+                        setTimeout(() => window.location.replace("https://www.google.com"), 2000);
+                        return;
+                    }
                     customerHadActiveOrder = true;
-                } else if (customerHadActiveOrder && !activeOrders[targetKey]) {
-                    sessionStorage.setItem('paid_' + targetKey, 'true'); 
+                } else if (customerHadActiveOrder) {
+                    sessionStorage.setItem('paid_' + targetKey, 'true');
                     if(orderParam === "takeaway") {
                         sessionStorage.removeItem('myTakeawayKey');
                         sessionStorage.removeItem('myTkName');
                         sessionStorage.removeItem('myTkPhone');
                     }
-                    
                     document.getElementById('main-app').style.display = 'none';
                     document.getElementById('timeout-screen').style.display = 'flex';
-                    setTimeout(() => {
-                        window.location.replace("https://www.google.com");
-                    }, 2000); 
+                    setTimeout(() => window.location.replace("https://www.google.com"), 2000);
                 }
             }
         }
@@ -1336,7 +1369,7 @@
                 
                 let displayTotal = 0;
                 if (isOccupied && orderData.items) {
-                    displayTotal = orderData.items.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
+                    displayTotal = orderData.items.reduce((sum, item) => sum + getItemLineTotal(item), 0);
                 }
                 
                 let statusText = isOccupied 
@@ -1360,21 +1393,23 @@
             takeawayKeys.forEach(tkKey => {
                 let orderData = activeOrders[tkKey];
                 let count = orderData.items ? orderData.items.reduce((sum, i) => sum + i.qty, 0) : 0;
-                let tkTotal = orderData.items ? orderData.items.reduce((sum, item) => sum + (item.customPrice * item.qty), 0) : 0;
+                let tkTotal = orderData.items ? orderData.items.reduce((sum, item) => sum + getItemLineTotal(item), 0) : 0;
                 let custInfo = orderData.custName ? `<br>${orderData.custName}` : '';
                 let cancelBtn = loggedInRole === "admin" ? `<button class="v-cancel-btn" onclick="cancelActiveOrder('${tkKey}', event)" style="position:absolute; top:8px; right:8px; background:#0f172a; color:#fff; border:none; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:bold; cursor:pointer; z-index:2;">X</button>` : '';
 
                 let isReady = orderStatuses[tkKey] === "Ready";
+                let isPaid = orderData.paymentStatus === 'PAID';
                 let tkCardStyle = isReady 
                     ? "background: linear-gradient(135deg, #d1fae5, #a7f3d0); border-color: #059669;" 
                     : "background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;";
                 let tkTitleColor = isReady ? "#065f46" : "#b45309";
                 let tkBadgeText = isReady ? `<br><span style="color:#047857; font-weight:900;">🟢 READY TO SERVE</span>` : '';
+                let paymentBadge = isPaid ? `<br><span style="color:#047857; font-weight:900;">💳 PAID</span>` : `<br><span style="color:#b45309; font-weight:900;">💰 UNPAID</span>`;
 
                 container.innerHTML += `<div class="big-table-card occupied" style="${tkCardStyle}" onclick="selectTableForOrder('${tkKey}', 'Takeaway')">
                     ${cancelBtn}
                     <h3 style="color:${tkTitleColor};">${tkKey}</h3>
-                    <p style="color:#92400e;">${count} Items - <b style="color:${tkTitleColor};">$${tkTotal.toFixed(2)}</b>${custInfo}${tkBadgeText}<br>${formatElapsedTime(orderData.time)}</p>
+                    <p style="color:#92400e;">${count} Items - <b style="color:${tkTitleColor};">$${tkTotal.toFixed(2)}</b>${custInfo}${tkBadgeText}${paymentBadge}<br>${formatElapsedTime(orderData.time)}</p>
                 </div>`;
             });
         }
@@ -1395,6 +1430,15 @@
             
             document.getElementById('discount-input').value = "0.00";
             updateCart();
+            const payBtn = document.getElementById('btn-pay-elem');
+            const selectedOrderData = activeOrders[orderKey];
+            if (payBtn) {
+                const alreadyPaidTakeaway = orderType === 'Takeaway' && selectedOrderData && selectedOrderData.paymentStatus === 'PAID';
+                payBtn.disabled = alreadyPaidTakeaway;
+                payBtn.textContent = alreadyPaidTakeaway ? 'Already Paid' : 'Pay Now';
+                payBtn.style.opacity = alreadyPaidTakeaway ? '0.55' : '1';
+                payBtn.style.cursor = alreadyPaidTakeaway ? 'not-allowed' : 'pointer';
+            }
 
             document.getElementById('table-selection-view').style.display = 'none';
             document.getElementById('pos-main-view').style.display = 'flex';
@@ -1509,6 +1553,8 @@
 
         function backToTableSelection() {
             saveOrderToTableSilent();
+            const payBtn = document.getElementById('btn-pay-elem');
+            if (payBtn) { payBtn.disabled = false; payBtn.textContent = 'Pay Now'; payBtn.style.opacity = '1'; payBtn.style.cursor = 'pointer'; }
             document.getElementById('pos-main-view').style.display = 'none';
             document.getElementById('table-selection-view').style.display = 'flex';
             
@@ -1861,7 +1907,8 @@
                     price: Math.round(price * 100) / 100,
                     icon: "",
                     popularity: 0,
-                    outOfStock: false
+                    outOfStock: false,
+                    options: []
                 };
                 if (catLower.includes('minuman tin')) {
                     newItem.stock = Number.isFinite(stockInput) && stockInput >= 0 ? stockInput : 0;
@@ -1915,29 +1962,61 @@
             saveOrderToTableSilent();
         }
 
-        function toggleItemNoteCheckbox(id, noteName, checkboxElem) {
-            const cartItem = cart.find(c => c.id === id);
-            if (cartItem) {
-                if (!cartItem.selectedNotes) cartItem.selectedNotes = [];
-                
-                if (checkboxElem.checked) { 
-                    if (!cartItem.selectedNotes.includes(noteName)) {
-                        cartItem.selectedNotes.push(noteName); 
-                        if (noteName === 'Susu Manis') {
-                            cartItem.customPrice = Math.round((cartItem.customPrice + 0.20) * 100) / 100;
-                        }
-                    }
-                } else { 
-                    if (cartItem.selectedNotes.includes(noteName)) {
-                        cartItem.selectedNotes = cartItem.selectedNotes.filter(n => n !== noteName); 
-                        if (noteName === 'Susu Manis') {
-                            cartItem.customPrice = Math.max(0, Math.round((cartItem.customPrice - 0.20) * 100) / 100);
-                        }
-                    }
-                }
-                updateCart();
-                saveOrderToTableSilent();
+        function getCategoryOptionsKey(category) {
+            const raw = String(category || '').trim();
+            if (Object.prototype.hasOwnProperty.call(categoryCheckboxOptions, raw)) return raw;
+            const safe = sanitizeFirebaseKey(raw);
+            if (Object.prototype.hasOwnProperty.call(categoryCheckboxOptions, safe)) return safe;
+            return raw;
+        }
+
+        function getOptionsForItem(item) {
+            const category = String(item && item.category || '').trim();
+            const categoryOptions = categoryCheckboxOptions[getCategoryOptionsKey(category)];
+            if (Array.isArray(categoryOptions)) return categoryOptions;
+            if (categoryOptions && typeof categoryOptions === 'object') {
+                return Object.values(categoryOptions);
             }
+            return Array.isArray(item && item.options) ? item.options : [];
+        }
+
+        function getOptionName(option) {
+            if (typeof option === 'string') return option;
+            return String(option && (option.name || option.label || '') || '').trim();
+        }
+
+        function getOptionPrice(option) {
+            if (typeof option === 'string') return option === 'Susu Manis' ? 0.20 : 0;
+            return Math.max(0, Number(option && (option.extraPrice ?? option.price ?? 0)) || 0);
+        }
+
+        function getItemOptionTotal(item) {
+            if (!item || !Array.isArray(item.selectedNotes)) return 0;
+            const options = getOptionsForItem(item);
+            return item.selectedNotes.reduce((sum, selectedName) => {
+                const opt = options.find(o => getOptionName(o) === String(selectedName));
+                return sum + (opt ? getOptionPrice(opt) : (String(selectedName) === 'Susu Manis' ? 0.20 : 0));
+            }, 0);
+        }
+
+        function getItemLineTotal(item) {
+            const qty = Math.max(0, Number(item && item.qty) || 0);
+            const base = Math.max(0, Number(item && item.customPrice) || 0);
+            return (base * qty) + getItemOptionTotal(item);
+        }
+
+        function toggleItemNoteCheckbox(id, noteName, checkboxElem) {
+            const cartItem = cart.find(c => Number(c.id) === Number(id));
+            if (!cartItem) return;
+            if (!Array.isArray(cartItem.selectedNotes)) cartItem.selectedNotes = [];
+            const name = String(noteName);
+            if (checkboxElem.checked) {
+                if (!cartItem.selectedNotes.includes(name)) cartItem.selectedNotes.push(name);
+            } else {
+                cartItem.selectedNotes = cartItem.selectedNotes.filter(n => n !== name);
+            }
+            updateCart();
+            saveOrderToTableSilent();
         }
 
         function updateCart() {
@@ -1946,7 +2025,7 @@
             let totalCartQty = 0;
 
             cart.forEach((item, index) => {
-                subtotal += item.customPrice * item.qty;
+                subtotal += getItemLineTotal(item);
                 totalCartQty += item.qty;
 
                 let catLower = (item.category || "").toLowerCase();
@@ -1958,44 +2037,19 @@
                 let isChizCategory = !/sejuk/i.test(catLower) && (isRoti || isGorengOrBasah);
                 let noteHtml = '';
 
-                if (isChizCategory && (isRoti || /dosa/i.test(catLower))) {
-                    if (!item.selectedNotes) item.selectedNotes = [];
-                    noteHtml = `<div class="note-checkboxes">
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Ayam Kari') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Ayam Kari', this)"> Ayam Kari</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Ikan Kari') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Ikan Kari', this)"> Ikan Kari</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Dhal') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Dhal', this)"> Dhal</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Susu Manis') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Susu Manis', this)"> Susu Manis (+ $0.20)</label>
-                    </div>`;
-                }
-
-                const isMeeGoreng = /mee\s*goreng/i.test(catLower);
-                const isIndomie = /indomie/i.test(catLower);
-                const isMeeBasah = /mee\s*basah/i.test(catLower);
-                const isNasiGoreng = /nasi\s*goreng/i.test(catLower);
-
-                if (isChizCategory && (isMeeGoreng || isIndomie || isMeeBasah || isNasiGoreng)) {
-                    if (!item.selectedNotes) item.selectedNotes = [];
-                    noteHtml = `<div class="note-checkboxes">
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('No Sayur') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'No Sayur', this)"> No Sayur</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('No Padas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'No Padas', this)"> No Padas</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Extra Padas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Extra Padas', this)"> Extra Padas</label>
-                    </div>`;
-                }
-
-                const isSoto = /soto/i.test(catLower);
-                const isSoup = /soup/i.test(catLower);
-                const isTomYum = /tom\s*yum/i.test(catLower);
-                const isMeeSoup = /mee\s*soup/i.test(catLower);
-                const isKuehteowSoup = /kueh?teow\s*soup/i.test(catLower);
-                const isKoloMee = /kolo\s*mee/i.test(catLower);
-
-                if (isChizCategory && (isSoto || isSoup || isTomYum || isMeeSoup || isKuehteowSoup || isKoloMee)) {
-                    if (!item.selectedNotes) item.selectedNotes = [];
-                    noteHtml = `<div class="note-checkboxes">
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('No Sayur') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'No Sayur', this)"> No Sayur</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('No Padas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'No Padas', this)"> No Padas</label>
-                        <label class="note-label"><input type="checkbox" ${item.selectedNotes.includes('Extra Padas') ? 'checked' : ''} onchange="toggleItemNoteCheckbox(${item.id}, 'Extra Padas', this)"> Extra Padas</label>
-                    </div>`;
+                const itemOptions = getOptionsForItem(item);
+                if (itemOptions.length > 0) {
+                    if (!Array.isArray(item.selectedNotes)) item.selectedNotes = [];
+                    noteHtml = `<div class="note-checkboxes">`;
+                    itemOptions.forEach((opt, optIndex) => {
+                        const optName = getOptionName(opt);
+                        if (!optName) return;
+                        const extra = getOptionPrice(opt);
+                        const checked = item.selectedNotes.includes(optName) ? 'checked' : '';
+                        const label = extra > 0 ? `${escapeHtml(optName)} (+ $${extra.toFixed(2)})` : escapeHtml(optName);
+                        noteHtml += `<label class="note-label"><input type="checkbox" ${checked} onchange="toggleItemNoteCheckbox(${item.id}, ${escapeHtml(JSON.stringify(optName))}, this)"> ${label}</label>`;
+                    });
+                    noteHtml += `</div>`;
                 }
 
                 noteHtml += `<input type="text" class="comment-input" placeholder="Custom note..." value="${escapeHtml(item.customComment || '')}" oninput="updateCustomComment(${item.id}, this.value);">`;
@@ -2190,6 +2244,7 @@
                             type: existing.type || orderType,
                             custName: cName,
                             custPhone: cPhone,
+                            paymentStatus: orderType === 'Takeaway' ? (existing.paymentStatus || 'UNPAID') : existing.paymentStatus,
                             tables: getLinkedTableNames(tableName),
                             items: mergedItems
                         };
@@ -2235,12 +2290,14 @@
                 existingOrder.time = Date.now(); 
                 existingOrder.custName = cName;
                 existingOrder.custPhone = cPhone;
+                if (currentOrderType === 'Takeaway') existingOrder.paymentStatus = existingOrder.paymentStatus || 'UNPAID';
             } else {
                 existingOrder = {
                     time: Date.now(),
                     type: currentOrderType,
                     custName: cName,
                     custPhone: cPhone,
+                    paymentStatus: currentOrderType === 'Takeaway' ? 'UNPAID' : undefined,
                     items: newItems
                 };
             }
@@ -2389,7 +2446,7 @@
         function openCashDrawerOnly() { safePrint("print-drawer-mode"); }
         function printCustomerBillOnly() {
             if (cart.length === 0) return alert("Cart is empty!");
-            let subtotal = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
+            let subtotal = cart.reduce((sum, item) => sum + getItemLineTotal(item), 0);
             let discount = parseFloat(document.getElementById('discount-input').value) || 0;
             fillReceiptDetails(currentOrderType, getOrderDisplayRef(currentSelectedTable), document.getElementById('payment-method').value, new Date().toLocaleString(), subtotal, discount, Math.max(0, subtotal - discount), 0, 0, cart);
             safePrint("print-customer");
@@ -2398,7 +2455,12 @@
         let currentGrandTotalForPay = 0;
         function openPaymentModal() {
             if (cart.length === 0) return alert("Cart is empty!");
-            let sub = cart.reduce((sum, item) => sum + (item.customPrice * item.qty), 0);
+            const paymentKey = getLinkedOrderKey(currentSelectedTable);
+            const existingForPayment = activeOrders[paymentKey];
+            if (currentOrderType === 'Takeaway' && existingForPayment && existingForPayment.paymentStatus === 'PAID') {
+                return alert('This takeaway order is already PAID.');
+            }
+            let sub = cart.reduce((sum, item) => sum + getItemLineTotal(item), 0);
             currentGrandTotalForPay = Math.max(0, sub - (parseFloat(document.getElementById('discount-input').value) || 0));
             document.getElementById('modal-grand-total').innerText = currentGrandTotalForPay.toFixed(2);
             document.getElementById('modal-paid-input').value = currentGrandTotalForPay.toFixed(2);
@@ -2430,7 +2492,7 @@
             const paidOrderData = activeOrders[paymentOrderKey] || {};
             const saleCustName = paidOrderData.custName || sessionStorage.getItem('myTkName') || '';
             const saleCustPhone = paidOrderData.custPhone || sessionStorage.getItem('myTkPhone') || '';
-            const subtotal = itemsForSale.reduce((sum, item) => sum + (Number(item.customPrice) * Number(item.qty)), 0);
+            const subtotal = itemsForSale.reduce((sum, item) => sum + getItemLineTotal(item), 0);
             const discount = parseFloat(document.getElementById('discount-input').value) || 0;
             const sale = {
                 time: timeStr,
@@ -2455,9 +2517,22 @@
                 let latestSales = Array.isArray(salesLatestSnap.val()) ? salesLatestSnap.val() : [];
                 latestSales.push(sale);
 
+                const isTakeawayPayment = currentOrderType === 'Takeaway';
+                const paidOrderUpdate = isTakeawayPayment ? {
+                    ...paidOrderData,
+                    paymentStatus: 'PAID',
+                    paymentMethod: payMethod,
+                    paidAmount: paid,
+                    paidTime: timeStr,
+                    paymentChange: change,
+                    total: total,
+                    discount: discount,
+                    subtotal: subtotal,
+                    items: itemsForSale
+                } : null;
                 const updates = {
                     sales: latestSales,
-                    [`activeOrders/${paymentOrderKey}`]: null,
+                    [`activeOrders/${paymentOrderKey}`]: isTakeawayPayment ? paidOrderUpdate : null,
                     [`orderStatus/${paymentOrderKey}`]: null
                 };
 
@@ -2503,7 +2578,11 @@
                 menuData = latestMenu;
                 dailyItemReports = reports;
                 if (updates.staffShifts) staffShifts = shifts;
-                delete activeOrders[paymentOrderKey];
+                if (isTakeawayPayment) {
+                    activeOrders[paymentOrderKey] = paidOrderUpdate;
+                } else {
+                    delete activeOrders[paymentOrderKey];
+                }
                 delete orderStatuses[paymentOrderKey];
 
                 fillReceiptDetails(currentOrderType, getOrderDisplayRef(currentSelectedTable), payMethod, timeStr, subtotal, discount, total, paid, change, itemsForSale, saleCustName, saleCustPhone);
@@ -2553,7 +2632,7 @@
                 const safeName = escapeHtml(i.name || '');
                 const safeNote = escapeHtml(noteStr);
                 const noteHtml = noteStr ? `<br><span style="display:block;margin-top:3px;font-size:14px;font-weight:700;white-space:pre-wrap;">Note: ${safeNote}</span>` : '';
-                pItems.innerHTML += `<tr><td><b>${safeName}</b>${noteHtml}</td><td style="text-align:center;"><b>${i.qty}</b></td><td style="text-align:right;"><b>$${(Number(i.customPrice) * Number(i.qty)).toFixed(2)}</b></td></tr>`;
+                pItems.innerHTML += `<tr><td><b>${safeName}</b>${noteHtml}</td><td style="text-align:center;"><b>${i.qty}</b></td><td style="text-align:right;"><b>$${getItemLineTotal(i).toFixed(2)}</b></td></tr>`;
             });
         }
 
@@ -2568,6 +2647,107 @@
 
         function getMenuManagerSource() {
             return (menuData && menuData.length > 0) ? menuData : defaultMenuData;
+        }
+
+        function populateCheckboxManagerCategories() {
+            const select = document.getElementById('checkbox-manager-category');
+            if (!select) return;
+            const current = select.value;
+            select.innerHTML = getAllCategories().map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            if (getAllCategories().includes(current)) select.value = current;
+        }
+
+        function renderCheckboxManagerList() {
+            const container = document.getElementById('checkbox-manager-list');
+            const select = document.getElementById('checkbox-manager-category');
+            if (!container || !select) return;
+            const category = select.value;
+            const optionKey = getCategoryOptionsKey(category);
+            const options = Array.isArray(categoryCheckboxOptions[optionKey]) ? categoryCheckboxOptions[optionKey] : [];
+            if (!options.length) {
+                container.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b;font-weight:800;">No checkbox options for this category.</div>`;
+                return;
+            }
+            container.innerHTML = options.map((opt, index) => {
+                const name = getOptionName(opt);
+                const price = getOptionPrice(opt);
+                return `<div style="display:flex;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #e2e8f0;">
+                    <div style="flex:1;font-weight:900;">${escapeHtml(name)}</div>
+                    <div style="width:90px;text-align:right;font-weight:900;">+$${price.toFixed(2)}</div>
+                    <button class="btn-small" onclick="editCategoryCheckboxOption(${index})">Edit</button>
+                    <button class="btn-small" style="background:#ef4444;" onclick="deleteCategoryCheckboxOption(${index})">Del</button>
+                </div>`;
+            }).join('');
+        }
+
+        function openCheckboxManagerModal() {
+            const modal = document.getElementById('checkbox-manager-modal');
+            if (!modal) return;
+            populateCheckboxManagerCategories();
+            const select = document.getElementById('checkbox-manager-category');
+            if (select) select.onchange = renderCheckboxManagerList;
+            modal.style.display = 'flex';
+            renderCheckboxManagerList();
+        }
+
+        function closeCheckboxManagerModal() {
+            const modal = document.getElementById('checkbox-manager-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function addCategoryCheckboxOption() {
+            const category = document.getElementById('checkbox-manager-category')?.value;
+            const nameInput = document.getElementById('checkbox-manager-name');
+            const priceInput = document.getElementById('checkbox-manager-price');
+            const name = (nameInput?.value || '').trim();
+            const extraPrice = Math.max(0, Number(priceInput?.value) || 0);
+            if (!category || !name) return alert('Please enter a checkbox name.');
+            const optionKey = getCategoryOptionsKey(category);
+            const options = Array.isArray(categoryCheckboxOptions[optionKey]) ? [...categoryCheckboxOptions[optionKey]] : [];
+            if (options.some(o => getOptionName(o).toLowerCase() === name.toLowerCase())) return alert('This checkbox already exists in this category.');
+            options.push({ name, extraPrice: Math.round(extraPrice * 100) / 100 });
+            try {
+                await db.ref('categoryOptions/' + sanitizeFirebaseKey(category)).set(options);
+                categoryCheckboxOptions[getCategoryOptionsKey(category)] = options;
+                nameInput.value = ''; priceInput.value = '0.00';
+                renderCheckboxManagerList(); updateCart();
+            } catch (err) { alert('Unable to save checkbox: ' + (err.message || err)); }
+        }
+
+        async function editCategoryCheckboxOption(index) {
+            const select = document.getElementById('checkbox-manager-category');
+            const category = select?.value;
+            if (!category) return;
+            const optionKey = getCategoryOptionsKey(category);
+            const options = Array.isArray(categoryCheckboxOptions[optionKey]) ? [...categoryCheckboxOptions[optionKey]] : [];
+            const current = options[index];
+            if (!current) return;
+            const newName = prompt('Checkbox name:', getOptionName(current));
+            if (newName === null) return;
+            const name = newName.trim();
+            if (!name) return alert('Checkbox name cannot be empty.');
+            const newPriceRaw = prompt('Extra price:', getOptionPrice(current).toFixed(2));
+            if (newPriceRaw === null) return;
+            const extraPrice = Math.max(0, Number(newPriceRaw) || 0);
+            if (options.some((o,i) => i !== index && getOptionName(o).toLowerCase() === name.toLowerCase())) return alert('This checkbox already exists in this category.');
+            options[index] = { name, extraPrice: Math.round(extraPrice * 100) / 100 };
+            try { await db.ref('categoryOptions/' + sanitizeFirebaseKey(category)).set(options); categoryCheckboxOptions[getCategoryOptionsKey(category)] = options; renderCheckboxManagerList(); updateCart(); }
+            catch (err) { alert('Unable to update checkbox: ' + (err.message || err)); }
+        }
+
+        async function deleteCategoryCheckboxOption(index) {
+            const category = document.getElementById('checkbox-manager-category')?.value;
+            if (!category) return;
+            const options = Array.isArray(categoryCheckboxOptions[category]) ? [...categoryCheckboxOptions[category]] : [];
+            const current = options[index];
+            if (!current || !confirm(`Delete checkbox "${getOptionName(current)}" from ${category}?`)) return;
+            options.splice(index, 1);
+            try {
+                const ref = db.ref('categoryOptions/' + sanitizeFirebaseKey(category));
+                if (options.length) await ref.set(options); else await ref.remove();
+                if (options.length) categoryCheckboxOptions[getCategoryOptionsKey(category)] = options; else delete categoryCheckboxOptions[getCategoryOptionsKey(category)];
+                renderCheckboxManagerList(); updateCart();
+            } catch (err) { alert('Unable to delete checkbox: ' + (err.message || err)); }
         }
 
         function getMenuManagerCategoryOptions() {
@@ -2885,7 +3065,7 @@
             const sale = completedSales[index];
             if (!sale) return;
             currentViewedSaleIndex = index;
-            const itemRows = (sale.items || []).map(i => `<tr><td style="padding:6px 0;"><b>${escapeHtml(i.name || '')}</b></td><td style="text-align:center;"><b>${i.qty}</b></td><td style="text-align:right;"><b>$${(Number(i.customPrice) * Number(i.qty)).toFixed(2)}</b></td></tr>`).join('');
+            const itemRows = (sale.items || []).map(i => `<tr><td style="padding:6px 0;"><b>${escapeHtml(i.name || '')}</b></td><td style="text-align:center;"><b>${i.qty}</b></td><td style="text-align:right;"><b>$${getItemLineTotal(i).toFixed(2)}</b></td></tr>`).join('');
             document.getElementById('history-view-body').innerHTML = `<div style="font-size:16px;font-weight:800;line-height:1.65;"><div><b>Order:</b> ${escapeHtml(sale.ref || '')}</div><div><b>Time:</b> ${escapeHtml(sale.time || '')}</div><div><b>Payment:</b> ${escapeHtml(sale.method || '')}</div>${sale.custName || sale.custPhone ? `<div><b>Customer:</b> ${escapeHtml(sale.custName || '-')}</div><div><b>Phone:</b> ${escapeHtml(sale.custPhone || '-')}</div>` : ''}<hr style="border-top:2px solid #000;"><table style="width:100%;border-collapse:collapse;"><thead><tr><th style="text-align:left;">Item</th><th>Qty</th><th style="text-align:right;">Price</th></tr></thead><tbody>${itemRows}</tbody></table><hr style="border-top:2px solid #000;"><div style="display:flex;justify-content:space-between;"><span>Subtotal</span><b>$${Number(sale.subtotal || 0).toFixed(2)}</b></div><div style="display:flex;justify-content:space-between;"><span>Discount</span><b>$${Number(sale.discount || 0).toFixed(2)}</b></div><div style="display:flex;justify-content:space-between;font-size:20px;"><span>TOTAL</span><b>$${Number(sale.amount || 0).toFixed(2)}</b></div></div>`;
             document.getElementById('history-view-modal').style.display='flex';
         }
