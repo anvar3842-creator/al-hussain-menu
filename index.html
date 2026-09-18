@@ -210,7 +210,6 @@
         .admin-dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #f1f5f9; padding-bottom: 12px; margin-bottom: 15px; }
         .admin-dashboard-header h3 { margin: 0; color: var(--text-main); font-size: 16px; font-weight: 900; }
         
-        
         .stat-toggle-box { cursor: pointer; border: 1px solid var(--border-light); user-select: none; transition: all .2s ease; }
         .stat-toggle-box:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
         .stat-eye { margin-left: 5px; font-size: 12px; opacity: .7; }
@@ -296,7 +295,6 @@
     
 /* =========================================================
    AL HUSSAIN POS — PREMIUM 2026 VISUAL REFRESH
-   Visual-only layer: keeps existing application logic intact.
    ========================================================= */
 :root {
     --primary: #7c3aed;
@@ -322,236 +320,58 @@ body {
         #f5f7fb;
 }
 
-.header {
-    margin: 14px 16px 0;
-    padding: 14px 18px;
-    border-radius: 18px;
-    background: rgba(255,255,255,.92);
-    border: 1px solid rgba(226,232,240,.9);
-    box-shadow: 0 8px 25px rgba(15,23,42,.06);
-}
-
-.header h2 {
-    font-size: 20px;
-    letter-spacing: .2px;
-}
-
-.badge {
-    background: #ede9fe;
-    color: #6d28d9;
-    padding: 7px 12px;
-}
-
-.btn-logout {
-    border-radius: 10px;
-}
-
-.table-selection-header,
-.controls-bar,
-.right-panel,
-.menu-card,
-.big-table-card {
-    border: 1px solid rgba(226,232,240,.85);
-}
-
-.table-selection-header {
-    background: rgba(255,255,255,.94);
-    box-shadow: var(--shadow-sm);
-}
-
-.big-tables-grid {
-    gap: 16px;
-}
-
-.big-table-card {
-    min-height: 120px;
-    padding: 22px 16px;
-    border-radius: 18px;
-    box-shadow: 0 5px 18px rgba(15,23,42,.055);
-}
-
-.big-table-card::before {
-    height: 5px;
-}
-
-.big-table-card:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: var(--shadow-lg);
-}
-
-.controls-bar {
-    padding: 14px;
-    border-radius: 18px;
-}
-
-.search-box {
-    border-radius: 12px;
-    background: #fff;
-}
-
-.cat-btn {
-    border-radius: 12px;
-    padding: 9px 16px;
-}
-
-.cat-btn.active {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.menu-grid {
-    gap: 14px;
-}
-
-.menu-card {
-    height: 138px;
-    border-radius: 18px;
-    padding: 17px;
-    background: rgba(255,255,255,.98);
-    box-shadow: 0 4px 14px rgba(15,23,42,.045);
-}
-
-.menu-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(76,29,149,.13);
-    border-color: #c4b5fd;
-}
-
-.card-code {
-    background: #f3f4f6;
-    color: #64748b;
-}
-
-.card-price {
-    color: #6d28d9;
-}
-
-.btn-add {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.right-panel {
-    border-radius: 22px;
-    background: rgba(255,255,255,.96);
-    box-shadow: 0 12px 35px rgba(15,23,42,.08);
-}
-
-.right-panel h3 {
-    font-size: 19px;
-}
-
-.bill-summary {
-    border-radius: 15px;
-    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
-}
-
-.action-buttons button,
-.btn-ready-order,
-.btn-customer-send {
-    border-radius: 11px;
-}
-
-.btn-pay {
-    background: linear-gradient(135deg, #059669, #10b981);
-}
-
-.btn-pay:hover {
-    transform: translateY(-2px);
-}
-
-.mobile-tab-bar {
-    background: rgba(255,255,255,.96);
-    backdrop-filter: blur(12px);
-}
-
-.mob-tab-btn.active {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.login-overlay {
-    background:
-        radial-gradient(circle at 15% 20%, rgba(255,255,255,.18), transparent 22%),
-        radial-gradient(circle at 85% 80%, rgba(255,255,255,.15), transparent 25%),
-        linear-gradient(135deg, #2e1065, #6d28d9 48%, #0891b2);
-}
-
-.login-box {
-    border: 1px solid rgba(255,255,255,.55);
-    box-shadow: 0 30px 70px rgba(15,23,42,.30);
-}
-
-.login-box h2 {
-    letter-spacing: .3px;
-}
-
-.login-box input {
-    background: #f8fafc;
-}
-
-.btn-login {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.timeout-box {
-    border: 1px solid #e5e7eb;
-}
+.header { margin: 14px 16px 0; padding: 14px 18px; border-radius: 18px; background: rgba(255,255,255,.92); border: 1px solid rgba(226,232,240,.9); box-shadow: 0 8px 25px rgba(15,23,42,.06); }
+.header h2 { font-size: 20px; letter-spacing: .2px; }
+.badge { background: #ede9fe; color: #6d28d9; padding: 7px 12px; }
+.btn-logout { border-radius: 10px; }
+.table-selection-header, .controls-bar, .right-panel, .menu-card, .big-table-card { border: 1px solid rgba(226,232,240,.85); }
+.table-selection-header { background: rgba(255,255,255,.94); box-shadow: var(--shadow-sm); }
+.big-tables-grid { gap: 16px; }
+.big-table-card { min-height: 120px; padding: 22px 16px; border-radius: 18px; box-shadow: 0 5px 18px rgba(15,23,42,.055); }
+.big-table-card::before { height: 5px; }
+.big-table-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: var(--shadow-lg); }
+.controls-bar { padding: 14px; border-radius: 18px; }
+.search-box { border-radius: 12px; background: #fff; }
+.cat-btn { border-radius: 12px; padding: 9px 16px; }
+.cat-btn.active { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+.menu-grid { gap: 14px; }
+.menu-card { height: 138px; border-radius: 18px; padding: 17px; background: rgba(255,255,255,.98); box-shadow: 0 4px 14px rgba(15,23,42,.045); }
+.menu-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(76,29,149,.13); border-color: #c4b5fd; }
+.card-code { background: #f3f4f6; color: #64748b; }
+.card-price { color: #6d28d9; }
+.btn-add { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+.right-panel { border-radius: 22px; background: rgba(255,255,255,.96); box-shadow: 0 12px 35px rgba(15,23,42,.08); }
+.right-panel h3 { font-size: 19px; }
+.bill-summary { border-radius: 15px; background: linear-gradient(180deg, #f8fafc, #f1f5f9); }
+.action-buttons button, .btn-ready-order, .btn-customer-send { border-radius: 11px; }
+.btn-pay { background: linear-gradient(135deg, #059669, #10b981); }
+.btn-pay:hover { transform: translateY(-2px); }
+.mobile-tab-bar { background: rgba(255,255,255,.96); backdrop-filter: blur(12px); }
+.mob-tab-btn.active { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+.login-overlay { background: radial-gradient(circle at 15% 20%, rgba(255,255,255,.18), transparent 22%), radial-gradient(circle at 85% 80%, rgba(255,255,255,.15), transparent 25%), linear-gradient(135deg, #2e1065, #6d28d9 48%, #0891b2); }
+.login-box { border: 1px solid rgba(255,255,255,.55); box-shadow: 0 30px 70px rgba(15,23,42,.30); }
+.login-box h2 { letter-spacing: .3px; }
+.login-box input { background: #f8fafc; }
+.btn-login { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+.timeout-box { border: 1px solid #e5e7eb; }
 
 @media (max-width: 900px) {
-    .header {
-        margin: 8px 10px 0;
-        border-radius: 15px;
-    }
-
-    .main-layout {
-        padding: 8px;
-        gap: 10px;
-    }
-
-    .menu-grid {
-        grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-        gap: 10px;
-    }
-
-    .menu-card {
-        height: 132px;
-        padding: 14px;
-    }
-
-    .big-tables-grid {
-        gap: 10px;
-    }
+    .header { margin: 8px 10px 0; border-radius: 15px; }
+    .main-layout { padding: 8px; gap: 10px; }
+    .menu-grid { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 10px; }
+    .menu-card { height: 132px; padding: 14px; }
+    .big-tables-grid { gap: 10px; }
 }
 
 @media (max-width: 550px) {
-    .header {
-        padding: 11px 13px;
-    }
-
-    .header h2 {
-        font-size: 16px;
-    }
-
-    .badge {
-        padding: 5px 9px;
-        font-size: 11px;
-    }
-
-    .menu-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .menu-card {
-        height: 128px;
-    }
-
-    .btn-add {
-        opacity: 1;
-    }
-
-    .table-selection-header {
-        padding: 12px 14px;
-    }
+    .header { padding: 11px 13px; }
+    .header h2 { font-size: 16px; }
+    .badge { padding: 5px 9px; font-size: 11px; }
+    .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .menu-card { height: 128px; }
+    .btn-add { opacity: 1; }
+    .table-selection-header { padding: 12px 14px; }
 }
-
 
         @media print {
             body.print-customer #print-receipt .print-ref-strong,
@@ -568,7 +388,6 @@ body {
                 color: #000 !important;
             }
         }
-
 
 /* === TABLE LINKING: Tables 1-13 only === */
 .table-link-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
@@ -828,7 +647,6 @@ body {
     <div id="item-report-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily Item Sold Report</h3><div><button class="btn-small" onclick="printItemReport()">Print</button><button class="close-modal" onclick="closeItemReportModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Item Name</th><th style="text-align:right;">Qty Sold</th></tr></thead><tbody id="item-report-tbody"></tbody></table></div></div></div>
     <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Source</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
     <div id="history-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sale Details</h3><div><button class="btn-small" id="history-view-print-btn" onclick="printViewedSale()">Print</button><button class="close-modal" onclick="closeHistoryViewModal()" style="margin-left:5px;">X</button></div></div><div class="modal-body" id="history-view-body"></div></div></div>
-
 
     <div id="expense-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">View Expenses</h3><button class="close-modal" onclick="closeExpenseViewModal()">X</button></div><div class="modal-body"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"><div class="stat-box">Total: $<span id="view-expenses-total">0.00</span></div><div class="stat-box">This Month: $<span id="view-expenses-month-total">0.00</span></div><div class="stat-box">Daily Average: $<span id="view-expenses-month-average">0.00</span></div></div><table class="admin-table"><thead><tr><th>Date / Time</th><th>Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody id="view-expenses-tbody"></tbody></table><div id="view-expenses-empty" style="display:none;text-align:center;padding:20px;color:#64748b;">No expenses recorded.</div><h4 style="margin:18px 0 8px;">Monthly Trend</h4><div id="view-expenses-trend"></div></div></div></div>
 
@@ -1516,9 +1334,9 @@ body {
             if (loggedInRole !== "admin") return alert("Admin only!");
             if (confirm(`Cancel active order ${key}?`)) { 
                 const orderKey = getLinkedOrderKey(key);
-                delete activeOrders[orderKey]; 
-                db.ref('activeOrders').set(activeOrders); 
+                db.ref('activeOrders/' + orderKey).remove(); 
                 db.ref(`orderStatus/${orderKey}`).remove();
+                delete activeOrders[orderKey]; // Update UI immediately
                 renderBigTableSelectionGrid(); 
             }
         }
@@ -1934,8 +1752,9 @@ body {
             let cName = existing.custName || sessionStorage.getItem('myTkName') || "Walk-in";
             let cPhone = existing.custPhone || sessionStorage.getItem('myTkPhone') || "";
 
-            activeOrders[orderKey] = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, tables: getLinkedTableNames(currentSelectedTable), items: JSON.parse(JSON.stringify(cart)) };
-            db.ref('activeOrders').set(activeOrders);
+            let orderData = { time: existingTime, type: currentOrderType, custName: cName, custPhone: cPhone, tables: getLinkedTableNames(currentSelectedTable), items: JSON.parse(JSON.stringify(cart)) };
+            activeOrders[orderKey] = orderData;
+            db.ref('activeOrders/' + orderKey).set(orderData);
         }
 
         function customerSendOrder() {
@@ -1968,7 +1787,7 @@ body {
             
             existingOrder.tables = getLinkedTableNames(currentSelectedTable);
             activeOrders[orderKey] = existingOrder;
-            db.ref('activeOrders').set(activeOrders);
+            db.ref('activeOrders/' + orderKey).set(existingOrder);
             
             document.getElementById('customer-success-screen').style.display = 'flex';
             cart = [];
@@ -2014,16 +1833,10 @@ body {
         let kitchenPrintQueueIndex = 0;
         let kitchenPrintAfterHandler = null;
 
-        // Food & Drinks பிரிக்கப்படும் இடம்
         function getKitchenPrintGroup(items) {
             const drinkCategories = new Set(["Minuman Tin", "Sejuk", "Hot Drinks", "Fresh Juice"]);
-            
-            // 4 categories மட்டும் Drinks-ஆக பிரிக்கப்படும்
             const drinks = items.filter(i => drinkCategories.has(String(i.category || '').trim()));
-            
-            // மற்ற அனைத்து பொருட்களும் Food-ஆக பிரிக்கப்படும்
             const food = items.filter(i => !drinkCategories.has(String(i.category || '').trim()));
-            
             return { food, drinks };
         }
 
@@ -2100,11 +1913,9 @@ body {
             const groups = getKitchenPrintGroup(cart);
             kitchenPrintQueue = [];
 
-            // Food பொருட்கள் இருந்தால் KITCHEN ORDER (FOOD) என்ற தலைப்பில் பிரிண்ட் ஆகும்
             if (groups.food.length > 0) {
                 kitchenPrintQueue.push({ items: groups.food, title: '*** KITCHEN ORDER (FOOD) ***' });
             }
-            // Drinks பொருட்கள் இருந்தால் DRINKS ORDER (DRINKS) என்ற தலைப்பில் பிரிண்ட் ஆகும்
             if (groups.drinks.length > 0) {
                 kitchenPrintQueue.push({ items: groups.drinks, title: '*** DRINKS ORDER (DRINKS) ***' });
             }
@@ -2190,9 +2001,9 @@ body {
             }
 
             const paymentOrderKey = getLinkedOrderKey(currentSelectedTable);
-            delete activeOrders[paymentOrderKey]; 
-            db.ref('activeOrders').set(activeOrders);
+            db.ref('activeOrders/' + paymentOrderKey).remove();
             db.ref(`orderStatus/${paymentOrderKey}`).remove(); 
+            delete activeOrders[paymentOrderKey];
 
             cart = []; updateStats(); 
             backToTableSelection();
@@ -2848,7 +2659,6 @@ function unlinkTable(tableNo) {
   };
   window.closePaymentSummaryModal=function(){const m=document.getElementById('payment-summary-modal');if(m)m.style.display='none';};
 
-  // Patch sale source at payment time while preserving every existing field.
   const originalConfirm = window.confirmPaymentProcess;
   if(typeof originalConfirm==='function'){
     window.confirmPaymentProcess=function(){
@@ -2863,7 +2673,6 @@ function unlinkTable(tableNo) {
     };
   }
 
-  // Patch Sales History rendering to show source while retaining View + Print.
   const originalHistory = window.openHistoryModal;
   if(typeof originalHistory==='function'){
     window.openHistoryModal=function(){
@@ -2880,10 +2689,8 @@ function unlinkTable(tableNo) {
 })();
 </script>
 
-
 <script>
 (function(){
-  // Preserve the existing order functions, adding only an explicit source marker.
   const _saveSilent = window.saveOrderToTableSilent;
   if (typeof _saveSilent === 'function') {
     window.saveOrderToTableSilent = function(){
@@ -2891,10 +2698,7 @@ function unlinkTable(tableNo) {
       try {
         if (loggedInRole !== 'customer' && cart && cart.length && currentSelectedTable) {
           const key = getLinkedOrderKey(currentSelectedTable);
-          if (activeOrders[key]) {
-            activeOrders[key].orderSource = 'COUNTER';
-            db.ref('activeOrders').set(activeOrders);
-          }
+          db.ref('activeOrders/' + key + '/orderSource').set('COUNTER');
         }
       } catch(e){}
       return r;
@@ -2907,10 +2711,7 @@ function unlinkTable(tableNo) {
       const r = _customerSend.apply(this, arguments);
       try {
         const key = getLinkedOrderKey(currentSelectedTable);
-        if (activeOrders[key]) {
-          activeOrders[key].orderSource = 'QR';
-          db.ref('activeOrders').set(activeOrders);
-        }
+        db.ref('activeOrders/' + key + '/orderSource').set('QR');
       } catch(e){}
       return r;
     };
