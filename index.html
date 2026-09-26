@@ -655,20 +655,20 @@
         <div class="timeout-box" style="text-align: left; max-width: 420px; width: 92%; padding: 26px 22px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15);">
             <div style="text-align: center; margin-bottom: 18px;">
                 <div style="font-size: 38px; margin-bottom: 6px;">🥡</div>
-                <h2 style="color: #4f46e5; margin: 0; font-size: 21px; font-weight: 900;">Takeaway Order (பார்சல் ஆர்டர்)</h2>
+                <h2 style="color: #4f46e5; margin: 0; font-size: 21px; font-weight: 900;">Takeaway Order</h2>
                 <p style="margin: 4px 0 0; color: #64748b; font-size: 13px; font-weight: 700;">Please enter your name & mobile number to start ordering</p>
             </div>
             <form onsubmit="saveTakeawayCustomerDetails(event)">
                 <div style="margin-bottom: 14px;">
-                    <label style="font-size: 13px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Customer Name (பெயர்):</label>
+                    <label style="font-size: 13px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Customer Name:</label>
                     <input type="text" id="tk-cust-name" placeholder="e.g. Mohamed / Anvar" required style="width: 100%; padding: 12px 14px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; font-size: 15px; font-weight: 700; font-family: inherit; outline: none;">
                 </div>
                 <div style="margin-bottom: 20px;">
-                    <label style="font-size: 13px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Phone Number (மொபைல் எண்):</label>
+                    <label style="font-size: 13px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Phone Number:</label>
                     <input type="tel" id="tk-cust-phone" placeholder="e.g. 81234567" required style="width: 100%; padding: 12px 14px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; font-size: 15px; font-weight: 700; font-family: inherit; outline: none;">
                 </div>
                 <button type="submit" class="btn-login" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 900; border-radius: 12px; background: linear-gradient(135deg, #7c3aed, #4f46e5); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);">
-                    🍽️ Start Ordering / மெனுவிற்குச் செல்க
+                    🍽️ Start Ordering
                 </button>
             </form>
         </div>
@@ -890,12 +890,21 @@
         </div>
     </div>
 
-    <div id="customer-success-screen" class="timeout-overlay" style="z-index: 4000;">
-        <div class="timeout-box" style="padding: 30px;">
-            <h1 style="font-size: 55px; margin: 0 0 10px 0;">✅</h1>
-            <h2 style="color: #10b981;">Order Sent Successfully!</h2>
-            <p style="margin-bottom: 25px;">The kitchen has received your order and is preparing it right now.</p>
-            <button onclick="closeCustomerSuccess()" style="width: 100%; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer;">View Menu Again</button>
+    <div id="customer-success-screen" class="timeout-overlay" style="display: none; z-index: 9999; background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(8px);">
+        <div class="timeout-box" style="padding: 32px 24px; max-width: 420px; width: 92%; border-radius: 24px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15);">
+            <div style="font-size: 56px; margin-bottom: 10px;">🙏</div>
+            <h2 style="color: #10b981; font-size: 24px; font-weight: 900; margin: 0 0 10px 0;">Thank You for Your Order!</h2>
+            <div id="customer-success-desc" style="margin-bottom: 18px; color: #475569; font-size: 14.5px; line-height: 1.5; font-weight: 600;">
+                The kitchen has received your order and is preparing it right now.
+            </div>
+            <div style="margin: 0 auto 20px; padding: 12px 18px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 800; color: #334155;">
+                <span>Redirecting to Google in</span>
+                <span id="google-redirect-sec" style="color: #4f46e5; font-size: 20px; font-weight: 900; min-width: 20px;">3</span>
+                <span>seconds...</span>
+            </div>
+            <button id="btn-goto-google" onclick="navigateToGooglePage()" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; border: none; border-radius: 14px; font-weight: 900; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(79, 70, 229, 0.4); outline: none;">
+                🌐 Go to Google Page Now
+            </button>
         </div>
     </div>
 
@@ -2660,7 +2669,7 @@
             event.preventDefault();
             const name = document.getElementById('tk-cust-name').value.trim();
             const phone = document.getElementById('tk-cust-phone').value.trim();
-            if (!name || !phone) return alert("Please fill name and phone number! (பெயர் மற்றும் போன் நம்பர் உள்ளிடவும்)");
+            if (!name || !phone) return alert("Please fill customer name and phone number!");
 
             const submitBtn = event.target ? event.target.querySelector('button[type="submit"]') : null;
             if (submitBtn) {
@@ -2682,7 +2691,7 @@
                 if (error || !committed || assignedNum === null) {
                     if (submitBtn) {
                         submitBtn.disabled = false;
-                        submitBtn.textContent = "🍽️ Start Ordering / மெனுவிற்குச் செல்க";
+                        submitBtn.textContent = "🍽️ Start Ordering";
                     }
                     alert("Error generating order number. Please try again.");
                     return;
@@ -2710,7 +2719,7 @@
                 document.getElementById('takeaway-details-modal').style.display = 'none';
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = "🍽️ Start Ordering / மெனுவிற்குச் செல்க";
+                    submitBtn.textContent = "🍽️ Start Ordering";
                 }
                 initializeCustomerSession(storedTkKey, true);
             });
@@ -4905,22 +4914,62 @@
             }
         }
 
+        let googleCountdownInterval = null;
+        function startGoogleRedirectCountdown(seconds) {
+            if (seconds === undefined) seconds = 3;
+            if (googleCountdownInterval) {
+                clearInterval(googleCountdownInterval);
+                googleCountdownInterval = null;
+            }
+            let timeLeft = seconds;
+            const secSpan = document.getElementById("google-redirect-sec");
+            if (secSpan) secSpan.textContent = timeLeft;
+
+            googleCountdownInterval = setInterval(() => {
+                timeLeft--;
+                const elem = document.getElementById("google-redirect-sec");
+                if (elem) elem.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(googleCountdownInterval);
+                    googleCountdownInterval = null;
+                    navigateToGooglePage();
+                }
+            }, 1000);
+        }
+
+        function navigateToGooglePage() {
+            if (googleCountdownInterval) {
+                clearInterval(googleCountdownInterval);
+                googleCountdownInterval = null;
+            }
+            const googleUrl = "https://www.google.com";
+            try {
+                if (window.top && window.top !== window) {
+                    window.top.location.href = googleUrl;
+                } else {
+                    window.location.href = googleUrl;
+                }
+            } catch (e) {
+                window.location.href = googleUrl;
+            }
+        }
+
         function customerSendOrder() {
             syncCartInputsToMemory();
             let order = activeOrders[currentTableKey];
             if (!order || !order.items || order.items.length === 0) {
-                return alert("Cart is empty! Please add items first. (கார்ட் காலியாக உள்ளது, உணவுகளைச் சேர்க்கவும்)");
+                return alert("Cart is empty! Please add items first.");
             }
 
             if (isTakeawayCustomer) {
-                order.customerName = sessionStorage.getItem('myTkName') || order.customerName || "Takeaway Customer";
-                order.customerPhone = sessionStorage.getItem('myTkPhone') || order.customerPhone || "";
+                order.customerName = sessionStorage.getItem("myTkName") || order.customerName || "Takeaway Customer";
+                order.customerPhone = sessionStorage.getItem("myTkPhone") || order.customerPhone || "";
             }
 
             const isUpdate = !!(order.customerSent && order.customerSentAt);
             order.customerSent = true;
             order.customerSentAt = Date.now();
-            order.customerSentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            order.customerSentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
             order.takenBy = "Customer QR";
             order.lastDeviceId = posDeviceId;
             order.lastUpdatedAt = Date.now();
@@ -4931,29 +4980,47 @@
                 order.seatedTime = order.customerSentTime;
             }
 
-            db.ref('activeOrders/' + currentTableKey).set(order).then(() => {
-                broadcastLiveOrderEvent(currentTableKey, isUpdate ? 'update' : 'order', order);
+            const sendBtn = document.querySelector(".btn-customer-send");
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.innerText = "Sending to Kitchen...";
+            }
 
-                const modalTitle = document.querySelector('#customer-success-screen h2');
-                const modalDesc = document.querySelector('#customer-success-screen p');
-                if (modalTitle) modalTitle.innerText = isUpdate ? "Order Updated Successfully!" : "Order Sent Successfully!";
+            db.ref("activeOrders/" + currentTableKey).set(order).then(() => {
+                broadcastLiveOrderEvent(currentTableKey, isUpdate ? "update" : "order", order);
+
+                const modalTitle = document.querySelector("#customer-success-screen h2");
+                const modalDesc = document.getElementById("customer-success-desc") || document.querySelector("#customer-success-screen p");
+                if (modalTitle) modalTitle.innerText = "Thank You for Your Order!";
                 if (modalDesc) {
                     if (isTakeawayCustomer) {
-                        modalDesc.innerHTML = `Your takeaway order <b>${currentTableKey}</b> has been received by the kitchen.<br>Customer: <b>${order.customerName}</b> (${order.customerPhone})<br>Please proceed to the counter when ready.`;
+                        modalDesc.innerHTML = `Your takeaway order <b>${currentTableKey}</b> has been received by the kitchen.<br>Customer: <b>${order.customerName || ""}</b> ${order.customerPhone ? "(" + order.customerPhone + ")" : ""}<br>Please proceed to the counter when ready.`;
                     } else {
-                        modalDesc.innerText = isUpdate ? "Your additional items have been sent to the kitchen." : `Your order for ${currentTableKey} has been sent to the kitchen and is being prepared!`;
+                        modalDesc.innerHTML = `Your order for <b>${currentTableKey}</b> has been sent to the kitchen and is being prepared! 🍳`;
                     }
                 }
-
-                document.getElementById('customer-success-screen').style.display = 'flex';
+                const successModal = document.getElementById("customer-success-screen");
+                if (successModal) successModal.style.display = "flex";
                 renderCart();
+
+                // Start 3-second countdown to redirect directly to Google page
+                startGoogleRedirectCountdown(3);
             }).catch(err => {
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerText = "Send Order to Kitchen";
+                }
                 alert("Failed to send order: " + err.message);
             });
         }
 
         function closeCustomerSuccess() {
-            document.getElementById('customer-success-screen').style.display = 'none';
+            if (googleCountdownInterval) {
+                clearInterval(googleCountdownInterval);
+                googleCountdownInterval = null;
+            }
+            const modal = document.getElementById("customer-success-screen");
+            if (modal) modal.style.display = "none";
         }
 
         function callWaiter() {
@@ -5579,7 +5646,7 @@
             tkCard.innerHTML = `
                 <h4 style="color: #7c3aed;">🥡 Takeaway Order</h4>
                 <div id="qr-canvas-takeaway" style="display: flex; justify-content: center; margin: 10px 0;"></div>
-                <small style="color: #64748b; font-weight: bold;">Scan for Takeaway (பார்சல்)</small>
+                <small style="color: #64748b; font-weight: bold;">Scan for Takeaway</small>
                 <div style="font-size: 10px; color: #94a3b8; word-break: break-all; margin-top: 4px;">${tkQrUrl}</div>
             `;
             grid.appendChild(tkCard);
