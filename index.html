@@ -39,7 +39,8 @@
       html.is-customer-qr #staff-action-buttons,
       html.is-customer-qr #payment-method-row,
       html.is-customer-qr #discount-row-elem,
-      html.is-customer-qr .price-input {
+      html.is-customer-qr .price-input,
+      html.is-customer-qr #customer-paid-screen {
         display: none !important;
       }
       html.is-customer-qr .mobile-tab-bar {
@@ -908,7 +909,7 @@
         </div>
     </div>
 
-    <div id="customer-paid-screen" class="timeout-overlay" style="z-index: 4600; display: none;">
+    <div id="customer-paid-screen" class="timeout-overlay" style="z-index: 4600; display: none !important;">
         <div class="timeout-box" style="padding: 28px 24px; max-width: 420px; width: 92%;">
             <div style="font-size: 52px; margin-bottom: 8px;">🧾</div>
             <h2 style="color: #059669; font-size: 22px; font-weight: 900; margin: 0 0 6px 0;">Payment Complete!</h2>
@@ -2470,24 +2471,10 @@
             renderLiveStaffAlerts();
         });
 
-        db.ref('tableSessions').on('value', (snapshot) => {
-            tableSessions = snapshot.val() || {};
-            if (isCustomerMode && currentTableKey && tableSessions[currentTableKey]) {
-                const sess = tableSessions[currentTableKey];
-                if (sess.status === 'paid') {
-                    const elTable = document.getElementById('cust-paid-table-val');
-                    const elRef = document.getElementById('cust-paid-ref-val');
-                    const elMethod = document.getElementById('cust-paid-method-val');
-                    const elTotal = document.getElementById('cust-paid-total-val');
-                    if (elTable) elTable.innerText = currentTableKey;
-                    if (elRef) elRef.innerText = sess.invoiceRef || '-';
-                    if (elMethod) elMethod.innerText = sess.paymentMethod || 'Cash';
-                    if (elTotal) elTotal.innerText = Number(sess.total || 0).toFixed(2);
-                    const paidScreen = document.getElementById('customer-paid-screen');
-                    if (paidScreen) paidScreen.style.display = 'flex';
-                }
-            }
-        });
+        // TableSessions listener removed - customers scanning QR will NEVER see "Payment Complete"
+        try {
+            db.ref('tableSessions').remove().catch(() => {});
+        } catch(e) {}
 
         function renderLiveStaffAlerts() {
             const container = document.getElementById('staff-live-alerts-container');
@@ -2622,7 +2609,7 @@
                 let storedPhone = sessionStorage.getItem('myTkPhone');
 
                 // If already paid or no existing active session name, prompt for details
-                if (!storedTkKey || !storedName || !storedPhone || sessionStorage.getItem('paid_' + storedTkKey) === 'true') {
+                if (!storedTkKey || !storedName || !storedPhone) {
                     // Reset old session
                     sessionStorage.removeItem('myTakeawayKey');
                     const nameInput = document.getElementById('tk-cust-name');
@@ -2752,7 +2739,9 @@
                 'btn-sound-test',
                 'staff-action-buttons',
                 'payment-method-row',
-                'discount-row-elem'
+                'discount-row-elem',
+                'customer-paid-screen',
+                'timeout-screen'
             ];
             navElementsToHide.forEach(id => {
                 const el = document.getElementById(id);
@@ -5413,15 +5402,8 @@
                 db.ref('activeShift').set(activeShift);
             }
 
-            // Broadcast payment completion to customer device screen in real-time
-            db.ref('tableSessions/' + currentTableKey).set({
-                status: 'paid',
-                invoiceRef: invRef,
-                total: grand,
-                change: change,
-                paymentMethod: chosenPaymentMethod,
-                timestamp: Date.now()
-            });
+            // Clean up any session record so customers scanning QR never see Payment Complete
+            db.ref('tableSessions/' + currentTableKey).remove().catch(() => {});
 
             // Clear any alerts for this table
             db.ref('newCustomerOrderAlerts/' + currentTableKey).remove();
@@ -5444,7 +5426,7 @@
             }
 
             // Mark paid in sessionStorage
-            sessionStorage.setItem('paid_' + currentTableKey, 'true');
+            // paid flag removed to prevent Payment Complete screen
 
             // Remove order
             db.ref('activeOrders/' + currentTableKey).remove();
