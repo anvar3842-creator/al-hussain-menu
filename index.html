@@ -2009,11 +2009,44 @@
 
         db.ref('activeOrders').on('value', (snapshot) => {
             const raw = snapshot.val() || {};
+            const now = Date.now();
+            let missingSeatedUpdates = {};
+
             Object.keys(raw).forEach(k => {
-                if (raw[k]) {
-                    getOrderItemsArray(raw[k]);
+                const ord = raw[k];
+                if (!ord) return;
+                getOrderItemsArray(ord);
+
+                // Auto-repair missing or corrupt seatedAt for any table with active items
+                const hasItems = ord.items && ord.items.length > 0;
+                if (hasItems) {
+                    let parsed = parseSeatedTimestamp(ord.seatedAt) ||
+                                 parseSeatedTimestamp(ord.seatedTime) ||
+                                 parseSeatedTimestamp(ord.createdAt) ||
+                                 parseSeatedTimestamp(ord.customerSentAt) ||
+                                 parseSeatedTimestamp(ord.sentToKitchenAt) ||
+                                 parseSeatedTimestamp(ord.lastUpdatedAt);
+
+                    if (parsed) {
+                        ord.seatedAt = parsed;
+                        if (!ord.seatedTime) {
+                            ord.seatedTime = new Date(parsed).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                    } else {
+                        // Truly missing seated time: initialize once and persist to Firebase
+                        ord.seatedAt = now;
+                        ord.seatedTime = new Date(now).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        missingSeatedUpdates[k + '/seatedAt'] = now;
+                        missingSeatedUpdates[k + '/seatedTime'] = ord.seatedTime;
+                    }
                 }
             });
+
+            // Persist any auto-repaired seatedAt timestamps to Firebase so they never get reset to 0 again!
+            if (Object.keys(missingSeatedUpdates).length > 0) {
+                db.ref('activeOrders').update(missingSeatedUpdates).catch(() => {});
+            }
+
             activeOrders = raw;
             if (isCustomerMode && isTakeawayCustomer && activeOrders[currentTableKey]) {
                 if (activeOrders[currentTableKey].isReady) {
@@ -2476,6 +2509,40 @@
             db.ref('tableSessions').remove().catch(() => {});
         } catch(e) {}
 
+        const ALERT_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes auto-expiration
+
+        function cleanExpiredStaffAlerts() {
+            if (isCustomerMode) return;
+            const now = Date.now();
+            let changed = false;
+
+            Object.keys(newCustomerOrderAlerts || {}).forEach(tKey => {
+                const al = newCustomerOrderAlerts[tKey];
+                if (al && al.timestamp && (now - al.timestamp > ALERT_TIMEOUT_MS)) {
+                    delete newCustomerOrderAlerts[tKey];
+                    db.ref('newCustomerOrderAlerts/' + tKey).remove().catch(() => {});
+                    changed = true;
+                }
+            });
+
+            Object.keys(staffAlerts || {}).forEach(tKey => {
+                const al = staffAlerts[tKey];
+                if (al && al.timestamp && (now - al.timestamp > ALERT_TIMEOUT_MS)) {
+                    delete staffAlerts[tKey];
+                    db.ref('staffAlerts/' + tKey).remove().catch(() => {});
+                    changed = true;
+                }
+            });
+
+            if (changed) {
+                renderLiveStaffAlerts();
+                requestRenderBigTablesGrid();
+            }
+        }
+
+        // Periodically remove alerts older than 5 minutes so screen never gets cluttered
+        setInterval(cleanExpiredStaffAlerts, 15000);
+
         function renderLiveStaffAlerts() {
             const container = document.getElementById('staff-live-alerts-container');
             if (!container) return;
@@ -2484,21 +2551,30 @@
                 return;
             }
 
+            const now = Date.now();
             const orderKeys = Object.keys(newCustomerOrderAlerts);
             const waiterKeys = Object.keys(staffAlerts);
 
-            if (orderKeys.length === 0 && waiterKeys.length === 0) {
-                container.style.display = 'none';
-                container.innerHTML = "";
-                return;
-            }
+            let visibleOrderCount = 0;
+            let visibleWaiterCount = 0;
 
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column';
             container.innerHTML = "";
 
             orderKeys.forEach(tKey => {
                 const al = newCustomerOrderAlerts[tKey];
+                if (!al) return;
+                const alertTime = al.timestamp || now;
+                const ageMs = now - alertTime;
+                if (ageMs > ALERT_TIMEOUT_MS) {
+                    delete newCustomerOrderAlerts[tKey];
+                    db.ref('newCustomerOrderAlerts/' + tKey).remove().catch(() => {});
+                    return;
+                }
+                visibleOrderCount++;
+
+                const remainingSecs = Math.max(0, Math.round((ALERT_TIMEOUT_MS - ageMs) / 1000));
+                const remainingMins = Math.ceil(remainingSecs / 60);
+
                 const isUp = !!al.isUpdate;
                 const sourceLabel = al.by ? al.by : (al.source || 'Customer');
                 const banner = document.createElement('div');
@@ -2511,7 +2587,7 @@
                                 <strong>${tKey}</strong>: ${isUp ? 'Order Updated (' + sourceLabel + ')' : 'New Order (' + sourceLabel + ')'}
                             </div>
                             <div style="font-size:12px; color:${isUp ? '#c2410c' : '#3b82f6'}; font-weight:700;">
-                                ${al.itemsCount || 1} items • $${Number(al.total || 0).toFixed(2)} • at ${al.timeStr || 'just now'}
+                                ${al.itemsCount || 1} items • $${Number(al.total || 0).toFixed(2)} • at ${al.timeStr || 'just now'} <span style="opacity:0.85; font-size:11px;">(⏱️ auto-clears in ${remainingMins}m)</span>
                             </div>
                         </div>
                     </div>
@@ -2525,6 +2601,19 @@
 
             waiterKeys.forEach(tKey => {
                 const al = staffAlerts[tKey];
+                if (!al) return;
+                const alertTime = al.timestamp || now;
+                const ageMs = now - alertTime;
+                if (ageMs > ALERT_TIMEOUT_MS) {
+                    delete staffAlerts[tKey];
+                    db.ref('staffAlerts/' + tKey).remove().catch(() => {});
+                    return;
+                }
+                visibleWaiterCount++;
+
+                const remainingSecs = Math.max(0, Math.round((ALERT_TIMEOUT_MS - ageMs) / 1000));
+                const remainingMins = Math.ceil(remainingSecs / 60);
+
                 const banner = document.createElement('div');
                 banner.className = 'staff-alert-banner waiter-type';
                 banner.innerHTML = `
@@ -2535,7 +2624,7 @@
                                 <strong>${tKey}</strong>: Customer Calling Waiter / Service!
                             </div>
                             <div style="font-size:12px; color:#b45309; font-weight:700;">
-                                Requested assistance at ${al.timeStr || 'just now'}
+                                Requested assistance at ${al.timeStr || 'just now'} <span style="opacity:0.85; font-size:11px;">(⏱️ auto-clears in ${remainingMins}m)</span>
                             </div>
                         </div>
                     </div>
@@ -2546,6 +2635,14 @@
                 `;
                 container.appendChild(banner);
             });
+
+            if (visibleOrderCount === 0 && visibleWaiterCount === 0) {
+                container.style.display = 'none';
+                container.innerHTML = "";
+            } else {
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+            }
         }
 
         function staffOpenAlertTable(tKey) {
@@ -3213,12 +3310,52 @@
             applyRolePermissionsUI();
         }
 
+        // Robust parsing of any seated timestamp format (number, numeric string, ISO date, or locale time string)
+        function parseSeatedTimestamp(val) {
+            if (!val) return null;
+            if (typeof val === 'number' && !isNaN(val) && val > 0) return val;
+            if (typeof val === 'string') {
+                val = val.trim();
+                if (/^\d{11,14}$/.test(val)) {
+                    const n = Number(val);
+                    if (!isNaN(n) && n > 0) return n;
+                }
+                const parsedDate = new Date(val);
+                if (!isNaN(parsedDate.getTime()) && parsedDate.getTime() > 100000000000) {
+                    return parsedDate.getTime();
+                }
+                // Match time string e.g. "04:15 PM" or "16:20" or "4:15 pm"
+                const timeMatch = val.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)?$/i);
+                if (timeMatch) {
+                    let h = parseInt(timeMatch[1], 10);
+                    const m = parseInt(timeMatch[2], 10);
+                    const ampm = timeMatch[3] ? timeMatch[3].toLowerCase() : null;
+                    if (ampm === 'pm' && h < 12) h += 12;
+                    if (ampm === 'am' && h === 12) h = 0;
+                    const now = new Date();
+                    const guess = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+                    let resultMs = guess.getTime();
+                    // If calculated time is slightly in the future (within 2 mins), cap to now
+                    if (resultMs > now.getTime() && (resultMs - now.getTime() < 120000)) {
+                        resultMs = now.getTime();
+                    }
+                    return resultMs;
+                }
+            }
+            return null;
+        }
+
         // Seated duration calculation and timing helpers
-        function getSeatedDurationInfo(seatedAt) {
-            if (!seatedAt) return { totalMinutes: 0, hours: 0, mins: 0, durationText: "0m", tier: "fresh" };
-            let ms = typeof seatedAt === 'number' ? seatedAt : new Date(seatedAt).getTime();
-            if (isNaN(ms) || ms <= 0) return { totalMinutes: 0, hours: 0, mins: 0, durationText: "0m", tier: "fresh" };
-            let diffMs = Math.max(0, Date.now() - ms);
+        function getSeatedDurationInfo(seatedAt, fallbackTimeStr) {
+            let ms = parseSeatedTimestamp(seatedAt);
+            if (!ms && fallbackTimeStr) {
+                ms = parseSeatedTimestamp(fallbackTimeStr);
+            }
+            if (!ms || ms <= 0) {
+                return { totalMinutes: 0, hours: 0, mins: 0, durationText: "0m", tier: "fresh" };
+            }
+            const now = Date.now();
+            let diffMs = Math.max(0, now - ms);
             let totalMinutes = Math.floor(diffMs / 60000);
             let hours = Math.floor(totalMinutes / 60);
             let mins = totalMinutes % 60;
@@ -3248,9 +3385,10 @@
                 return;
             }
             const order = activeOrders[currentTableKey];
-            if (order && order.seatedAt) {
-                const dur = getSeatedDurationInfo(order.seatedAt);
-                const startTimeStr = order.seatedTime || new Date(order.seatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const orderSeatedMs = order ? (parseSeatedTimestamp(order.seatedAt) || parseSeatedTimestamp(order.seatedTime)) : null;
+            if (order && (orderSeatedMs || order.seatedAt || order.seatedTime)) {
+                const dur = getSeatedDurationInfo(order.seatedAt, order.seatedTime);
+                const startTimeStr = order.seatedTime || (orderSeatedMs ? new Date(orderSeatedMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'just now');
                 bar.style.display = 'flex';
                 bar.className = 'cart-seated-bar ' + (dur.tier === 'long' ? 'timer-long' : (dur.tier === 'medium' ? 'timer-medium' : 'timer-fresh'));
                 bar.innerHTML = `
@@ -3402,10 +3540,25 @@
                 if (currentTableFilter === 'occupied' && !isOccupied) continue;
                 if (currentTableFilter === 'available' && isOccupied) continue;
 
-                // Auto-set seatedAt in memory if missing (does not trigger Firebase loop during render)
-                if (isOccupied && orderData && !orderData.seatedAt) {
-                    orderData.seatedAt = Date.now();
-                    orderData.seatedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                if (isOccupied && orderData) {
+                    let parsed = parseSeatedTimestamp(orderData.seatedAt) ||
+                                 parseSeatedTimestamp(orderData.seatedTime) ||
+                                 parseSeatedTimestamp(orderData.createdAt) ||
+                                 parseSeatedTimestamp(orderData.customerSentAt) ||
+                                 parseSeatedTimestamp(orderData.sentToKitchenAt) ||
+                                 parseSeatedTimestamp(orderData.lastUpdatedAt);
+                    if (parsed) {
+                        orderData.seatedAt = parsed;
+                        if (!orderData.seatedTime) {
+                            orderData.seatedTime = new Date(parsed).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                    } else {
+                        const now = Date.now();
+                        orderData.seatedAt = now;
+                        orderData.seatedTime = new Date(now).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        db.ref('activeOrders/' + effectiveKey + '/seatedAt').set(now).catch(() => {});
+                        db.ref('activeOrders/' + effectiveKey + '/seatedTime').set(orderData.seatedTime).catch(() => {});
+                    }
                 }
 
                 let itemCount = hasItems ? orderData.items.reduce((s, x) => s + x.qty, 0) : 0;
@@ -3413,10 +3566,11 @@
 
                 // Seated duration indicator banner
                 let seatedBannerHtml = "";
-                if (isOccupied && orderData && orderData.seatedAt) {
-                    let dur = getSeatedDurationInfo(orderData.seatedAt);
+                if (isOccupied && orderData && (orderData.seatedAt || orderData.seatedTime)) {
+                    let dur = getSeatedDurationInfo(orderData.seatedAt, orderData.seatedTime);
                     let bannerClass = dur.tier === 'long' ? 'timer-long' : (dur.tier === 'medium' ? 'timer-medium' : 'timer-fresh');
-                    let startStr = orderData.seatedTime || new Date(orderData.seatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const sMs = parseSeatedTimestamp(orderData.seatedAt) || parseSeatedTimestamp(orderData.seatedTime);
+                    let startStr = orderData.seatedTime || (sMs ? new Date(sMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'just now');
                     seatedBannerHtml = `
                     <div class="table-seated-banner ${bannerClass}" title="Customer seated at ${startStr}">
                         <div class="seated-timer-row">
@@ -3431,8 +3585,12 @@
                 card.className = `big-table-card ${isOccupied ? 'occupied' : 'free'} ${isLinked ? 'linked-table-card' : ''}`;
                 card.onclick = () => openTable(tableKey);
 
-                let orderAlert = newCustomerOrderAlerts[tableKey] || (orderData && orderData.customerSent && !orderData.staffAcknowledged);
-                let waiterAlert = staffAlerts[tableKey];
+                let orderAlertData = newCustomerOrderAlerts[tableKey];
+                let isOrderAlertActive = orderAlertData && (!orderAlertData.timestamp || (Date.now() - orderAlertData.timestamp <= ALERT_TIMEOUT_MS));
+                let orderAlert = isOrderAlertActive || (orderData && orderData.customerSent && !orderData.staffAcknowledged && (!orderData.customerSentAt || (Date.now() - orderData.customerSentAt <= ALERT_TIMEOUT_MS)));
+
+                let waiterAlertData = staffAlerts[tableKey];
+                let waiterAlert = waiterAlertData && (!waiterAlertData.timestamp || (Date.now() - waiterAlertData.timestamp <= ALERT_TIMEOUT_MS));
 
                 if (orderAlert) {
                     card.style.borderColor = "#2563eb";
@@ -3517,18 +3675,32 @@
                         if (currentTableFilter === 'available') return;
                         renderedTableKeys.add(norm);
 
-                        if (!orderData.seatedAt) {
-                            orderData.seatedAt = Date.now();
-                            orderData.seatedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        let parsedTk = parseSeatedTimestamp(orderData.seatedAt) ||
+                                       parseSeatedTimestamp(orderData.seatedTime) ||
+                                       parseSeatedTimestamp(orderData.createdAt) ||
+                                       parseSeatedTimestamp(orderData.customerSentAt) ||
+                                       parseSeatedTimestamp(orderData.lastUpdatedAt);
+                        if (parsedTk) {
+                            orderData.seatedAt = parsedTk;
+                            if (!orderData.seatedTime) {
+                                orderData.seatedTime = new Date(parsedTk).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            }
+                        } else {
+                            const now = Date.now();
+                            orderData.seatedAt = now;
+                            orderData.seatedTime = new Date(now).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            db.ref('activeOrders/' + key + '/seatedAt').set(now).catch(() => {});
+                            db.ref('activeOrders/' + key + '/seatedTime').set(orderData.seatedTime).catch(() => {});
                         }
 
                         let itemCount = orderData.items.reduce((s, x) => s + x.qty, 0);
                         let orderTotal = getOrderGrandTotal(orderData);
                         let isReady = orderData.isReady;
 
-                        let dur = getSeatedDurationInfo(orderData.seatedAt);
+                        let dur = getSeatedDurationInfo(orderData.seatedAt, orderData.seatedTime);
                         let bannerClass = isReady ? 'timer-fresh' : (dur.tier === 'long' ? 'timer-long' : 'timer-medium');
-                        let startStr = orderData.seatedTime || new Date(orderData.seatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const sTkMs = parseSeatedTimestamp(orderData.seatedAt) || parseSeatedTimestamp(orderData.seatedTime);
+                        let startStr = orderData.seatedTime || (sTkMs ? new Date(sTkMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'just now');
                         let waitBannerHtml = `
                         <div class="table-seated-banner ${bannerClass}" title="Ordered at ${startStr}">
                             <div class="seated-timer-row">
@@ -3585,7 +3757,7 @@
             if (posView && posView.style.display !== 'none' && currentTableKey) {
                 updateCartSeatedDisplay();
             }
-        }, 30000);
+        }, 15000);
 
         function getItemOptionsMap(item) {
             if (!item) return {};
@@ -4712,8 +4884,18 @@
                 return;
             }
 
+            const isDedicatedTakeaway = Boolean(
+                isTakeawayCustomer || 
+                (currentTableKey && currentTableKey.startsWith("Order-"))
+            );
+
             items.forEach(item => {
                 const totalQty = Math.max(1, Number(item.qty) || 1);
+                if (isDedicatedTakeaway) {
+                    item.takeawayQty = totalQty;
+                    if (!item.notes || typeof item.notes !== 'object') item.notes = {};
+                    item.notes.takeaway = true;
+                }
                 const tkQty = Math.max(0, Math.min(totalQty, Number(item.takeawayQty) || 0));
                 const tr = document.createElement('tr');
                 const lineTotal = getItemLineTotal(item);
@@ -4774,6 +4956,10 @@
                     <td>
                         <div class="cart-item-name">${item.name}</div>
                         ${customOptsHtml}
+                        ${isDedicatedTakeaway ? `
+                        <div style="margin-top: 5px; margin-bottom: 5px; display: inline-flex; align-items: center; gap: 6px; background: #fffbeb; border: 1.5px solid #fde68a; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 800; color: #b45309;">
+                            <span>🥡</span> <span>Takeaway (Parcel) • All ${totalQty}</span>
+                        </div>` : `
                         <div style="margin-top: 6px; margin-bottom: 6px; background: ${tkQty > 0 ? '#fffbeb' : '#f8fafc'}; border: 1.5px solid ${tkQty > 0 ? '#f59e0b' : '#e2e8f0'}; padding: 6px 10px; border-radius: 10px;">
                             <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
                                 <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800;">
@@ -4805,11 +4991,12 @@
                                     🍽️ All ${totalQty} Dine-In
                                 </button>
                             </div>` : ''}
-                        </div>
+                        </div>`
+                        }
                         <div style="margin-top: 4px;">
                             <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px; align-items: center;">
                                 <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Quick Notes:</span>
-                                ${(tkQty > 0 && tkQty < totalQty) ? `
+                                ${(!isDedicatedTakeaway && tkQty > 0 && tkQty < totalQty) ? `
                                 <button type="button" style="font-size: 10.5px; font-weight: 800; padding: 2px 7px; border-radius: 6px; border: 1px dashed #f59e0b; background: #fffbeb; color: #b45309; cursor: pointer;" onclick="quickAppendItemNote('${item.id}', '${totalQty - tkQty} Dine, ${tkQty} Pack')">
                                     ➕ ${totalQty - tkQty} Dine, ${tkQty} Pack
                                 </button>` : ''}
