@@ -1635,6 +1635,8 @@
                 if (storedPass === inputPass) return true;
                 const hashedInput = await sha256Hash(inputPass);
                 if (storedPass === hashedInput) return true;
+                // A custom password exists — hardcoded defaults must never unlock this account.
+                return false;
             }
             if (Array.isArray(defaultValidPasses)) {
                 for (const validPass of defaultValidPasses) {
@@ -1865,6 +1867,7 @@
         let currentViewingSale = null;
         let tableLinks = {};
         let pendingLinkSelection = [];
+        let isProcessingPayment = false;
         let privateStatsState = { sales: false, expenses: false };
 
         function isLinkedSlaveTable(tableKey) {
@@ -1951,21 +1954,6 @@
             }
         });
 
-        db.ref('menuData').on('value', (snapshot) => {
-            const val = snapshot.val();
-            if (val && Array.isArray(val) && val.length > 0) {
-                menu = val.map(m => ({
-                    id: m.id || Date.now(),
-                    code: m.code || "",
-                    name: m.name || "",
-                    cat: m.cat || m.category || "Mee",
-                    price: Number(m.price) || 0,
-                    stock: 999999
-                }));
-                renderMenuGrid();
-            }
-        });
-
         db.ref('menu').on('value', (snapshot) => {
             const val = snapshot.val();
             let rawList = [];
@@ -1983,12 +1971,12 @@
             }
             if (rawList.length > 0) {
                 menu = rawList.map(m => ({
+                    ...m,
                     id: m.id || Date.now(),
                     code: m.code || "",
                     name: m.name || "",
                     cat: (m.cat || m.category || "Special").trim(),
-                    price: Number(m.price) || 0,
-                    stock: 999999
+                    price: Number(m.price) || 0
                 }));
                 // Auto sync categories from items if needed
                 const itemCats = Array.from(new Set(menu.map(m => (m.cat || '').trim()).filter(Boolean)));
@@ -5587,6 +5575,7 @@
         }
 
         function confirmPaymentProcess() {
+            if (isProcessingPayment) return;
             syncCartInputsToMemory();
             let order = activeOrders[currentTableKey];
             if (!order) return;
@@ -5596,6 +5585,7 @@
             if (paid < (grand - 0.001)) {
                 return alert("Paid amount is less than total due!");
             }
+            isProcessingPayment = true;
 
             let change = Math.max(0, Math.round((paid - grand) * 100) / 100);
             let shouldPrint = document.getElementById('modal-print-checkbox').checked;
@@ -5664,29 +5654,29 @@
             db.ref('newCustomerOrderAlerts/' + currentTableKey).remove();
             db.ref('staffAlerts/' + currentTableKey).remove();
 
-            // Clear table links if this was a master or slave table
-            if (typeof tableLinks !== 'undefined' && tableLinks && tableLinks[currentTableKey]) {
-                delete tableLinks[currentTableKey];
-                db.ref('tableLinks').set(tableLinks);
-            } else if (typeof tableLinks !== 'undefined' && tableLinks) {
-                let linkFound = false;
-                Object.keys(tableLinks).forEach(m => {
-                    if (tableLinks[m] && tableLinks[m].includes(currentTableKey)) {
-                        tableLinks[m] = tableLinks[m].filter(t => t !== currentTableKey);
-                        if (tableLinks[m].length <= 1) delete tableLinks[m];
-                        linkFound = true;
+            // Clear table links — values are master-table-name strings, so dissolve the whole group by strict match
+            if (typeof tableLinks !== 'undefined' && tableLinks) {
+                const groupMaster = tableLinks[currentTableKey] || currentTableKey;
+                let linkChanged = false;
+                Object.keys(tableLinks).forEach(k => {
+                    if (k === groupMaster || tableLinks[k] === groupMaster) {
+                        delete tableLinks[k];
+                        linkChanged = true;
                     }
                 });
-                if (linkFound) db.ref('tableLinks').set(tableLinks);
+                if (linkChanged) db.ref('tableLinks').set(tableLinks);
             }
 
             // Mark paid in sessionStorage
             // paid flag removed to prevent Payment Complete screen
 
+            order.paymentMethod = chosenPaymentMethod;
+
             // Remove order
             db.ref('activeOrders/' + currentTableKey).remove();
 
             closePaymentModal();
+            isProcessingPayment = false;
 
             if (shouldPrint) {
                 populateCustomerReceipt(order, paid, change);
