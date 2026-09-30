@@ -1966,20 +1966,6 @@
             }
         });
 
-        db.ref('categoryOrder').on('value', (snapshot) => {
-            const val = snapshot.val();
-            if (val && Array.isArray(val) && val.length > 0) {
-                categories = val;
-                renderCategories();
-                populateCategoryDropdowns();
-                renderCategoryManagerTable();
-                renderCheckboxManagerCategorySelect();
-                if (typeof populateItemReportCategoryFilter === 'function') {
-                    populateItemReportCategoryFilter();
-                }
-            }
-        });
-
         db.ref('menu').on('value', (snapshot) => {
             const val = snapshot.val();
             let rawList = [];
