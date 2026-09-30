@@ -1951,40 +1951,6 @@
             }
         });
 
-        db.ref('categoryOptions').on('value', (snapshot) => {
-            const val = snapshot.val();
-            if (val && typeof val === "object") {
-                for (const [cat, opts] of Object.entries(val)) {
-                    if (Array.isArray(opts)) {
-                        if (!categoryCheckboxes[cat]) categoryCheckboxes[cat] = [];
-                        opts.forEach(o => {
-                            const optName = o.name || "";
-                            const optPrice = Number(o.price !== undefined ? o.price : (o.extraPrice !== undefined ? o.extraPrice : 0));
-                            if (!categoryCheckboxes[cat].some(x => x.name.toLowerCase() === optName.toLowerCase())) {
-                                categoryCheckboxes[cat].push({ name: optName, price: optPrice });
-                            }
-                        });
-                    }
-                }
-                refreshUnifiedCheckboxes();
-            }
-        });
-
-        db.ref('checkboxRules').on('value', (snapshot) => {
-            const val = snapshot.val();
-            if (val && Array.isArray(val)) {
-                val.forEach(r => {
-                    const target = r.target || "General";
-                    if (!categoryCheckboxes[target]) categoryCheckboxes[target] = [];
-                    const optPrice = Number(r.extraPrice !== undefined ? r.extraPrice : (r.price || 0));
-                    if (!categoryCheckboxes[target].some(x => x.name.toLowerCase() === r.name.toLowerCase())) {
-                        categoryCheckboxes[target].push({ name: r.name, price: optPrice });
-                    }
-                });
-                refreshUnifiedCheckboxes();
-            }
-        });
-
         db.ref('menuData').on('value', (snapshot) => {
             const val = snapshot.val();
             if (val && Array.isArray(val) && val.length > 0) {
