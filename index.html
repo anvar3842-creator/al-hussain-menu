@@ -2132,17 +2132,27 @@
             renderViewExpensesModal();
         });
 
+        // After every payment this listener re-fires with the FULL salesHistory (1MB+ and growing).
+        // Rendering all reports + the whole menu grid synchronously here freezes the POS right after
+        // each payment, so heavy renders are visibility-guarded and the menu grid is debounced.
+        let salesHistoryRenderTimer = null;
         db.ref('salesHistory').on('value', (snapshot) => {
             salesHistory = snapshot.val() || [];
             calculateTotalSales();
-            renderSalesHistoryTable();
-            renderMonthlyReport();
-            renderStaffPerformance();
-            renderViewExpensesModal();
-            renderMenuGrid();
-            if (document.getElementById('item-report-modal') && document.getElementById('item-report-modal').style.display === 'flex') {
-                renderItemReportTable();
-            }
+            const modalIsOpen = (id) => {
+                const el = document.getElementById(id);
+                return el && el.style.display === 'flex';
+            };
+            if (modalIsOpen('history-modal')) renderSalesHistoryTable();
+            if (modalIsOpen('monthly-report-modal')) renderMonthlyReport();
+            if (modalIsOpen('staff-modal')) renderStaffPerformance();
+            if (modalIsOpen('expense-view-modal')) renderViewExpensesModal();
+            if (modalIsOpen('item-report-modal')) renderItemReportTable();
+            clearTimeout(salesHistoryRenderTimer);
+            salesHistoryRenderTimer = setTimeout(() => {
+                const posView = document.getElementById('pos-main-view');
+                if (posView && posView.style.display === 'flex') renderMenuGrid();
+            }, 600);
         });
 
         db.ref('lastDayClose').on('value', (snapshot) => {
