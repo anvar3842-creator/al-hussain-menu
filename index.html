@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Al Hussain Restaurant point-of-sale system: table management, ordering, kitchen KOT, billing, payments, stock, expenses and daily reports.">
     <title>Al Hussain Restaurant - POS System</title>
     
     <!-- Instant Customer QR Detection to prevent any login or table selection screen flash -->
@@ -745,6 +746,614 @@
             *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
         }
     </style>
+
+    <!-- ================================================================
+         UI v2 DESIGN SYSTEM — refined purple/cyan
+         Token-driven. Consistent radius / spacing / type scale,
+         touch-sized targets, unified brand gradients.
+         Purely presentational: markup + logic untouched.
+         ================================================================ -->
+    <style>
+    /* ---------- 1. TOKENS ---------- */
+    :root {
+        --brand-50:  #f5f3ff;  --brand-100: #ede9fe;  --brand-200: #ddd6fe;
+        --brand-300: #c4b5fd;  --brand-400: #a78bfa;  --brand-500: #8b5cf6;
+        --brand-600: #7c3aed;  --brand-700: #6d28d9;  --brand-800: #5b21b6;
+        --brand-900: #4c1d95;
+
+        --cyan-50:  #ecfeff;  --cyan-100: #cffafe;  --cyan-400: #22d3ee;
+        --cyan-500: #06b6d4;  --cyan-600: #0891b2;  --cyan-700: #0e7490;
+
+        /* one gradient, used everywhere the old code drifted to #4f46e5 */
+        --grad-brand: linear-gradient(135deg, var(--brand-600) 0%, var(--brand-500) 48%, var(--cyan-500) 100%);
+        --grad-brand-deep: linear-gradient(135deg, var(--brand-800) 0%, var(--brand-600) 55%, var(--cyan-600) 100%);
+
+        --ok: #059669;  --ok-2: #10b981;  --warn: #d97706;
+
+        --r-xs: 8px;  --r-sm: 10px;  --r-md: 14px;  --r-lg: 18px;
+        --r-xl: 22px;  --r-2xl: 28px;  --r-full: 999px;
+
+        --e-0: 0 1px 2px rgba(15,23,42,.05);
+        --e-1: 0 2px 6px rgba(15,23,42,.06);
+        --e-2: 0 6px 18px rgba(15,23,42,.08);
+        --e-3: 0 14px 34px rgba(15,23,42,.10);
+        --e-brand: 0 8px 22px rgba(109,40,217,.26);
+        --e-brand-lg: 0 16px 36px rgba(109,40,217,.32);
+        --ring: 0 0 0 3px rgba(124,58,237,.18);
+
+        --lift: cubic-bezier(.34,1.36,.64,1);
+    }
+
+    /* ---------- 2. BASE ---------- */
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background:
+            radial-gradient(circle at 0% 0%,   rgba(124,58,237,.10), transparent 30%),
+            radial-gradient(circle at 100% 0%, rgba(6,182,212,.09),  transparent 26%),
+            radial-gradient(circle at 50% 100%, rgba(139,92,246,.06), transparent 34%),
+            #f6f7fc;
+    }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: #eef1f7; border-radius: 8px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; border: 2px solid #eef1f7; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--brand-400); }
+
+    /* money + counts line up in columns */
+    .card-price, .total-row, .summary-row, .pay-row, .stat-box,
+    td, th, .seated-time-val, .table-items-summary { font-variant-numeric: tabular-nums; }
+
+    /* consistent focus ring everywhere */
+    :is(button, a, input, select, textarea):focus-visible {
+        outline: 2px solid var(--brand-500);
+        outline-offset: 2px;
+        border-radius: var(--r-xs);
+    }
+    :is(button, input, select, textarea) { transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease; }
+
+    /* ---------- 3. UNIFY STRAY INDIGO ACTIVES ---------- */
+    .table-filter-btn.active,
+    .item-rep-filter-btn.active {
+        background: var(--grad-brand) !important;
+        border-color: transparent !important;
+        box-shadow: var(--e-brand) !important;
+        color: #fff;
+    }
+    .table-filter-btn { border-radius: var(--r-full); padding: 7px 15px; border-width: 1.5px; }
+    .table-filter-btn:hover { border-color: var(--brand-400); color: var(--brand-700); }
+    /* Inactive pill was #64748b on #f1f5f9 = 4.34:1, just under AA */
+    .table-filter-btn { color: #475569; }
+
+    /* Small status pills: darken the text so they clear WCAG AA on their
+       own tinted backgrounds. */
+    .live-sync-badge { color: #047857; }
+    #live-sync-indicator { color: #047857; }
+    .btn-logout { color: #b91c1c; }
+    #desktop-cart-badge { color: #b91c1c; }
+    .cart-live-pill { color: #047857; }
+    .btn-menu-refresh { color: #0369a1; }
+    .cart-seated-bar.timer-fresh span { color: #047857; }
+    .big-table-card p,
+    .table-items-summary { color: #475569; }
+    .card-code, .cart-item-tag { color: #475569; }
+    .quick-note-btn, .cart-quick-note { color: #0369a1; }
+
+    /* ---------- 4. LOGIN ---------- */
+    .login-box {
+        border-radius: var(--r-2xl);
+        padding: 42px 34px;
+        border: 1px solid rgba(255,255,255,.6);
+        box-shadow: 0 34px 90px rgba(2,6,23,.45), 0 0 0 1px rgba(255,255,255,.35) inset;
+    }
+    .login-box h2 { letter-spacing: -.4px; }
+    .login-box input {
+        border-radius: var(--r-md);
+        border-width: 1.5px;
+        background: var(--brand-50);
+    }
+    .login-box input:focus { border-color: var(--brand-500); background: #fff; box-shadow: var(--ring); }
+    .btn-login { background: var(--grad-brand); border-radius: var(--r-md); }
+    .btn-login:hover { box-shadow: var(--e-brand-lg); }
+    /* the QR/takeaway modal has a second login button locked by inline styles — align it */
+    #takeaway-details-modal .btn-login {
+        background: var(--grad-brand) !important;
+        border-radius: var(--r-md) !important;
+        padding: 14px !important;
+        box-shadow: var(--e-brand) !important;
+    }
+    #takeaway-details-modal .btn-login:hover { box-shadow: var(--e-brand-lg) !important; }
+    /* staff chips */
+    #login-accounts-preview button {
+        border-radius: var(--r-full) !important;
+        border-width: 1.5px !important;
+        transition: transform .16s var(--lift), box-shadow .16s ease;
+    }
+    #login-accounts-preview button:hover { transform: translateY(-2px); box-shadow: var(--e-2); }
+    /* chips are built with inline cssText — unify the stray #3b82f6 hover and
+       restore contrast on the username (was opacity .7 -> failed WCAG AA) */
+    #login-accounts-chips button:hover { border-color: var(--brand-400) !important; background: var(--brand-50) !important; }
+    #login-accounts-chips button span:last-child {
+        opacity: 1 !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: inherit !important;
+    }
+    #login-accounts-preview > div > span { color: var(--text-muted) !important; }
+
+    /* ---------- 5. HEADER ---------- */
+    .header { border-radius: var(--r-xl); box-shadow: var(--e-2); border-color: var(--brand-100); }
+    .header h2 { letter-spacing: -.3px; }
+    .header-home-btn { border-radius: var(--r-full); background: var(--brand-100); color: var(--brand-700); border-color: var(--brand-200); min-height: 38px; }
+    .header-home-btn:hover { background: var(--brand-700); box-shadow: var(--e-brand); }
+    .btn-logout { border-radius: var(--r-full); min-height: 38px; }
+    .badge { border-radius: var(--r-full); background: var(--brand-100); color: var(--brand-700); border-color: var(--brand-200); }
+
+    /* ---------- 6. TABLE SELECTION ---------- */
+    #table-selection-view { gap: 18px; }
+    .table-selection-header {
+        border-radius: var(--r-xl);
+        padding: 16px 22px;
+        box-shadow: var(--e-1);
+        border-color: var(--brand-100);
+    }
+    .table-selection-header h2 { letter-spacing: -.3px; }
+    .table-selection-header .btn-small {
+        background: linear-gradient(135deg, var(--ok-2), var(--ok)) !important;
+        border-radius: var(--r-full) !important;
+        padding: 9px 16px !important;
+        min-height: 40px;
+        box-shadow: 0 6px 16px rgba(5,150,105,.3);
+    }
+    .btn-link-tables { border-radius: var(--r-full); border-width: 1.5px; font-size: 12.5px; padding: 8px 14px; }
+
+    .big-tables-grid { gap: 18px; }
+    .big-table-card {
+        border-radius: var(--r-xl);
+        min-height: 134px;
+        padding: 20px 18px;
+        border-width: 1.5px;
+        box-shadow: var(--e-1);
+        transition: transform .22s var(--lift), box-shadow .22s ease, border-color .22s ease;
+    }
+    .big-table-card::before { height: 4px; }
+    .big-table-card.occupied::before,
+    .big-table-card.free::before { height: 5px; }
+    .big-table-card:hover { transform: translateY(-5px); box-shadow: var(--e-3); }
+    .big-table-card h3 { font-size: 19px; letter-spacing: -.3px; }
+    .table-items-summary { border-radius: var(--r-full); background: #fff; border-color: var(--brand-100); }
+    .linked-table-card { outline: 3px solid var(--brand-500) !important; outline-offset: 2px; }
+    .table-link-badge { border-radius: var(--r-full); background: var(--brand-700); }
+
+    /* ---------- 7. ADMIN DASHBOARD ---------- */
+    .admin-dashboard-container {
+        border-radius: var(--r-2xl);
+        padding: 22px 24px;
+        box-shadow: var(--e-2);
+        border-color: var(--brand-100);
+    }
+    .admin-dashboard-header { border-bottom-color: var(--brand-100); padding-bottom: 16px; margin-bottom: 18px; }
+    .admin-dashboard-header h3 { letter-spacing: -.2px; }
+
+    .stat-box {
+        background: #fff;
+        border: 1px solid var(--brand-100);
+        border-radius: var(--r-md);
+        padding: 9px 15px;
+        box-shadow: var(--e-0);
+        color: var(--brand-700);
+        letter-spacing: -.1px;
+    }
+
+    /* quick-add toolbar (had heavy inline styles) */
+    #admin-quick-add-row {
+        background: linear-gradient(180deg, #fbfaff, #f6f5fe);
+        border: 1px solid var(--brand-100);
+        border-radius: var(--r-lg);
+        padding: 13px 14px;
+        gap: 9px;
+    }
+    #admin-quick-add-row input,
+    #admin-quick-add-row select {
+        padding: 10px 12px !important;
+        border: 1.5px solid var(--brand-200) !important;
+        border-radius: var(--r-sm) !important;
+        background: #fff !important;
+        font-size: 13px !important;
+        font-family: inherit !important;
+        color: var(--text-main);
+        outline: none;
+    }
+    #admin-quick-add-row input:focus,
+    #admin-quick-add-row select:focus { border-color: var(--brand-500) !important; box-shadow: var(--ring); }
+    #add-m-code  { width: 94px !important; font-weight: 800 !important; }
+    #add-m-name  { flex: 2 1 200px !important; }
+    #add-m-cat   { flex: 1.4 1 150px !important; font-weight: 800 !important; color: var(--brand-700) !important; }
+    #add-m-price { width: 96px !important; }
+    #admin-quick-add-row .btn-small,
+    #admin-quick-add-row .btn-cat-add { border-radius: var(--r-full) !important; padding: 10px 16px !important; min-height: 42px; }
+    /* --success green (#059669) is only 3.76:1 against white text; darken it here */
+    #admin-quick-add-row .btn-small { background: var(--grad-brand) !important; }
+    #admin-quick-add-row .btn-cat-add { background: linear-gradient(135deg, #047857, #065f46) !important; }
+
+    /* 14 stacked full-width buttons -> responsive multi-column grid */
+    .admin-buttons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+        gap: 10px;
+        margin-top: 16px;
+    }
+    .admin-btn { border-radius: var(--r-md); min-height: 48px; padding: 12px 16px; }
+    .admin-btn:hover { transform: translateY(-3px); box-shadow: var(--e-2); }
+    .admin-btn:active { transform: translateY(-1px) scale(.985); }
+    .close-day-btn { grid-column: 1 / -1; margin-top: 6px; }
+
+    /* These two never had a background in the original markup, so they
+       rendered as white text on a white card - effectively invisible. */
+    .payment-summary-btn { background: var(--grad-brand); }
+    .manage-suppliers-btn { background: linear-gradient(135deg, var(--brand-700), var(--brand-900)); }
+
+    /* ---------- 8b. TABLE COUNT PANEL (admin) ---------- */
+    #table-count-panel {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin: 4px 0 16px;
+        padding: 16px 18px;
+        border-radius: var(--r-lg);
+        border: 1.5px solid var(--brand-200);
+        background: linear-gradient(180deg, #fbfaff, #f5f4fe);
+        box-shadow: var(--e-0);
+    }
+    .tcp-left { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .tcp-icon {
+        font-size: 24px; width: 46px; height: 46px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: var(--r-md); background: #fff;
+        border: 1.5px solid var(--brand-200); box-shadow: var(--e-0);
+    }
+    .tcp-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .tcp-copy strong { font-size: 14.5px; font-weight: 900; color: var(--brand-900); letter-spacing: -.2px; }
+    .tcp-copy small { font-size: 11.5px; font-weight: 700; color: var(--text-muted); line-height: 1.45; }
+
+    .tcp-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .tcp-stepper {
+        display: flex; align-items: center; gap: 4px;
+        background: #fff; border: 1.5px solid var(--brand-200);
+        border-radius: var(--r-full); padding: 4px;
+        box-shadow: var(--e-0);
+    }
+    .tcp-stepper button {
+        width: 42px; height: 42px; border: none; border-radius: 50%;
+        background: var(--brand-100); color: var(--brand-700);
+        font-size: 21px; font-weight: 900; cursor: pointer; font-family: inherit;
+        display: flex; align-items: center; justify-content: center;
+        transition: all .16s var(--lift);
+    }
+    .tcp-stepper button:hover { background: var(--brand-600); color: #fff; box-shadow: var(--e-brand); }
+    .tcp-stepper button:active { transform: scale(.9); }
+    .tcp-input {
+        width: 62px; height: 42px; text-align: center;
+        border: none; background: transparent; outline: none;
+        font-size: 17px; font-weight: 900; color: var(--brand-700);
+        font-family: inherit; font-variant-numeric: tabular-nums;
+        -moz-appearance: textfield;
+    }
+    .tcp-input::-webkit-outer-spin-button,
+    .tcp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .tcp-reset {
+        padding: 11px 16px; min-height: 44px;
+        border: 1.5px solid var(--brand-200); border-radius: var(--r-full);
+        background: #fff; color: var(--brand-700);
+        font-size: 12.5px; font-weight: 900; cursor: pointer; font-family: inherit;
+        transition: all .18s ease;
+    }
+    .tcp-reset:hover { background: var(--brand-100); border-color: var(--brand-300); transform: translateY(-1px); }
+    .tcp-foot {
+        flex-basis: 100%; font-size: 12px; font-weight: 800;
+        color: var(--brand-700); letter-spacing: -.1px;
+    }
+    #table-count-warn { color: var(--warn); font-weight: 900; }
+    @media (max-width: 620px) {
+        #table-count-panel { padding: 14px; align-items: stretch; flex-direction: column; }
+        .tcp-right { justify-content: space-between; }
+        .tcp-stepper { flex: 1; }
+        .tcp-input { flex: 1; width: auto; }
+    }
+
+    /* ---------- 8c. POS: CONTROLS + MENU ---------- */
+    .controls-bar { border-radius: var(--r-xl); padding: 14px 16px; box-shadow: var(--e-1); border-color: var(--brand-100); }
+    .search-box { border-width: 1.5px; border-radius: var(--r-md); padding: 11px 16px; }
+    .search-box:focus { border-color: var(--brand-500); box-shadow: var(--ring); }
+    .btn-menu-home { background: var(--grad-brand-deep); border-radius: var(--r-md); min-height: 42px; }
+    .btn-menu-home:hover { box-shadow: var(--e-brand-lg); }
+    .btn-menu-refresh { border-radius: var(--r-md); min-height: 42px; }
+
+    .cat-btn {
+        border-radius: var(--r-full);
+        border-width: 1.5px;
+        padding: 10px 19px;
+        font-size: 14px;
+        min-height: 46px;
+        box-shadow: var(--e-0);
+    }
+    .cat-btn:hover:not(.active) { border-color: var(--brand-400); color: var(--brand-700); }
+    .cat-btn.active { background: var(--grad-brand); box-shadow: var(--e-brand-lg); }
+    .cat-nav-btn { border-radius: var(--r-md); border-width: 1.5px; }
+    .cat-nav-btn:hover { border-color: var(--brand-400); color: var(--brand-700); box-shadow: var(--e-2); }
+    .cat-wrap-toggle-btn { border-radius: var(--r-full); border-width: 1.5px; height: 46px; }
+    .cat-wrap-toggle-btn.active { background: var(--brand-100); color: var(--brand-700); border-color: var(--brand-300); }
+
+    .menu-grid { gap: 16px; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); }
+    .menu-card {
+        min-height: 158px;
+        padding: 15px;
+        border-radius: var(--r-xl);
+        border-width: 1.5px;
+        box-shadow: var(--e-1);
+        transition: transform .2s var(--lift), box-shadow .2s ease, border-color .2s ease;
+    }
+    .menu-card:hover { transform: translateY(-5px); border-color: var(--brand-300); box-shadow: var(--e-3); }
+    .card-code { top: 13px; left: 13px; border-radius: var(--r-full); }
+    .card-title { margin-top: 32px; letter-spacing: -.1px; }
+    .card-price { font-size: 18px; letter-spacing: -.2px; }
+    .btn-add { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--grad-brand); }
+    /* keep the "in cart" badge and the bestseller tag from colliding */
+    .card-pop-tag { top: 12px; right: 13px; border-radius: var(--r-full); max-width: calc(100% - 78px); }
+    .card-qty-badge { top: 12px; right: 13px; width: 26px; height: 26px; }
+    .card-qty-badge + .card-pop-tag { top: 44px; }
+    .card-pop-tag ~ .card-title { margin-top: 34px; }
+    .card-qty-badge + .card-pop-tag ~ .card-title { margin-top: 62px; }
+    .category-section-header { color: var(--brand-900); border-bottom-color: var(--brand-200); letter-spacing: -.3px; }
+
+    /* ---------- 9. POS: CART PANEL ---------- */
+    .right-panel {
+        border-radius: var(--r-2xl);
+        padding: 20px;
+        box-shadow: var(--e-3);
+        border-color: var(--brand-100);
+    }
+    .right-panel h3 { font-size: 17px; letter-spacing: -.3px; border-bottom-color: var(--brand-100); padding-bottom: 14px; }
+    .cart-table-wrapper { margin-bottom: 16px; }
+    td { padding: 13px 11px; border-top-color: #ede9fe; border-bottom-color: #ede9fe; background: #fbfaff; }
+    td:first-child { border-left-color: #ede9fe; }
+    td:last-child  { border-right-color: #ede9fe; }
+    tr:hover td { background: var(--brand-50); }
+
+    .qty-controls { border-radius: var(--r-full); border-color: var(--brand-200); }
+    .qty-btn { background: var(--brand-100); color: var(--brand-700); }
+    .qty-btn:hover { background: var(--brand-600); }
+    .note-label { border-radius: var(--r-full); }
+    .note-label:hover { border-color: var(--brand-500); background: var(--brand-50); }
+    .comment-input, .price-input { border-radius: var(--r-sm); border-color: var(--brand-200); }
+
+    .bill-summary {
+        background: linear-gradient(180deg, #fbfaff, #f5f4fd);
+        border-color: var(--brand-100);
+        border-radius: var(--r-lg);
+        padding: 16px;
+    }
+    .total-row { font-size: 21px; letter-spacing: -.4px; border-top-color: var(--brand-200); }
+    #payment-method { border-radius: var(--r-md); border-width: 1.5px; border-color: var(--brand-200); min-height: 40px; }
+    #payment-method:focus { border-color: var(--brand-500); box-shadow: var(--ring); }
+
+    .action-buttons { gap: 10px; }
+    .action-buttons button { min-height: 50px; border-radius: var(--r-md); font-size: 13.5px; }
+    #btn-send-kitchen-direct { border-radius: var(--r-md) !important; min-height: 50px; }
+    .btn-ready-order, .btn-move-table, .btn-drawer, .btn-back-tables { border-radius: var(--r-md); }
+    .btn-customer-send, .btn-call-waiter { border-radius: var(--r-md); min-height: 52px; }
+
+    .cart-seated-bar { border-radius: var(--r-md); }
+    .live-toast { border-radius: var(--r-md); }
+
+    /* ---------- 10. MOBILE TAB BAR ---------- */
+    .mobile-tab-bar { padding: 9px 13px; border-bottom-color: var(--brand-100); }
+    .mob-tab-btn { border-radius: var(--r-md); min-height: 48px; }
+    .mob-tab-btn.active { background: var(--grad-brand); box-shadow: var(--e-brand); }
+    .mob-home-btn { background: var(--brand-100) !important; color: var(--brand-700) !important; border-color: var(--brand-200) !important; }
+
+    /* ---------- 11. MODALS ---------- */
+    .modal-content {
+        border-radius: var(--r-2xl);
+        padding: 26px;
+        border: 1px solid var(--brand-100);
+        box-shadow: 0 32px 74px rgba(2,6,23,.32);
+    }
+    .modal-header { border-bottom-color: var(--brand-100); padding-bottom: 16px; }
+    .modal-body { margin-top: 18px; max-height: 62vh; }
+    .close-modal { border-radius: var(--r-sm); min-width: 44px; min-height: 40px; }
+    table.admin-table th { background: var(--brand-50); color: var(--brand-800); border-bottom-color: var(--brand-200); letter-spacing: .3px; }
+    table.admin-table tbody tr:hover td { background: #fbfaff; }
+    .pay-modal-box { border-radius: var(--r-2xl); padding: 34px 26px; border: 1px solid var(--brand-100); }
+    .pay-row { border-radius: var(--r-lg); background: var(--brand-50); border-color: var(--brand-100); }
+    .pay-input-box { border-radius: var(--r-md); border-width: 1.5px; background: var(--brand-50); }
+    .pay-input-box:focus { border-color: var(--brand-500); box-shadow: var(--ring); }
+    .quick-cash-btn { border-radius: var(--r-md); min-height: 48px; }
+    .quick-cash-btn:hover { background: var(--brand-50); border-color: var(--brand-300); color: var(--brand-700); }
+    .pay-btn-confirm, .pay-btn-cancel { border-radius: var(--r-md); min-height: 54px; }
+    .pay-btn-confirm { background: linear-gradient(135deg, var(--ok-2), var(--ok)); }
+    .pay-method-tab-btn { border-radius: var(--r-md); min-height: 46px; border-width: 1.5px; }
+    .pay-method-tab-btn.active { background: var(--brand-100); color: var(--brand-700); border-color: var(--brand-400); }
+    .timeout-box { border-radius: var(--r-2xl); padding: 38px 32px; border-color: var(--brand-100); }
+    .btn-small, .btn-cat-add { border-radius: var(--r-full); }
+    .qr-card { border-radius: var(--r-lg); background: var(--brand-50); border-color: var(--brand-200); }
+    .staff-alert-banner { border-radius: var(--r-lg); }
+    .item-rep-filter-btn { border-radius: var(--r-full); border-width: 1.5px; padding: 7px 15px; }
+
+    /* ---------- 12. CUSTOMER QR MODE ---------- */
+    html.is-customer-qr .right-panel { box-shadow: var(--e-2); }
+    html.is-customer-qr .action-buttons button,
+    html.is-customer-qr #customer-action-div button { min-height: 54px; }
+    html.is-customer-qr .cart-table-wrapper { max-height: 46vh; overflow-y: auto; }
+    html.is-customer-qr .menu-card { min-height: 132px; }
+    html.is-customer-qr .card-pop-tag { display: none !important; }
+    html.is-customer-qr .cart-seated-bar { font-size: 13.5px; padding: 10px 14px; }
+
+    /* ---------- 12b. SUPPLIER / STAFF MOBILE TUNING ----------
+       Supplier login on a phone should be a fast, one-handed job:
+       fewer taps, bigger targets, less scrolling. These rules are
+       opt-in: the body gets .is-staff-role from JS on staff logins. */
+
+    /* Admin-only panels should not leave dead space for staff */
+    body.is-staff-role .admin-dashboard-container:empty,
+    body.is-staff-role .table-selection-view > .admin-dashboard-container[style*="display: none"] { display: none !important; }
+
+    /* Supplier sees: Tables -> Menu -> Cart. Make the tab bar a real bottom nav
+       with large thumb-friendly targets. */
+    @media (max-width: 900px) {
+        body.is-staff-role .mobile-tab-bar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            padding: 10px 12px;
+            box-shadow: 0 4px 18px rgba(15,23,42,.10);
+        }
+        body.is-staff-role .mob-tab-btn { min-height: 52px; font-size: 13px; }
+        body.is-staff-role .mob-home-btn { flex: 1 !important; }
+
+        /* Table grid: 3 columns on phones reads better than 5 and keeps
+           each card tappable without pinch-zoom. */
+        body.is-staff-role .big-tables-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px; }
+        body.is-staff-role .big-table-card { min-height: 96px; padding: 14px 8px; border-radius: var(--r-lg); }
+        body.is-staff-role .big-table-card h3 { font-size: 16px; margin-bottom: 4px; }
+        body.is-staff-role .big-table-card p { font-size: 11.5px; }
+        body.is-staff-role .big-table-card .table-items-summary { font-size: 10px; }
+
+        /* Seated timer must stay legible — it drives table turnover */
+        body.is-staff-role .table-seated-banner { padding: 5px 7px; font-size: 10.5px; border-radius: 8px; }
+        body.is-staff-role .seated-time-val { font-size: 11.5px; }
+
+        /* Menu: 2 columns so item names are readable, not truncated */
+        body.is-staff-role .menu-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+        body.is-staff-role .menu-card { min-height: 132px; padding: 12px; border-radius: var(--r-lg); }
+        body.is-staff-role .card-title { font-size: 13px; margin-top: 28px; }
+        body.is-staff-role .card-price { font-size: 15.5px; }
+        body.is-staff-role .btn-add { width: 34px; height: 34px; border-radius: var(--r-sm); }
+        body.is-staff-role .card-code { font-size: 10px; padding: 3px 7px; }
+
+        /* Category chips: supplier/staff phones need big, readable one-tap targets.
+           The older mobile rule made every category only ~42px tall, so names felt tiny. */
+        body.is-staff-role .category-bar-wrapper { gap: 10px; margin-top: 10px; }
+        body.is-staff-role .category-filters {
+            gap: 12px;
+            padding: 6px 2px 13px 2px;
+            scroll-snap-type: x proximity;
+        }
+        body.is-staff-role .category-filters::-webkit-scrollbar { height: 12px; }
+        body.is-staff-role .cat-btn {
+            min-height: 56px;
+            padding: 13px 20px;
+            font-size: 15.5px;
+            line-height: 1.15;
+            border-radius: 16px;
+            font-weight: 900;
+            min-width: 112px;
+            max-width: 190px;
+            white-space: normal;
+            text-align: center;
+            scroll-snap-align: start;
+        }
+        body.is-staff-role .cat-btn.active { transform: translateY(-1px) scale(1.02); }
+        body.is-staff-role .cat-nav-btn { width: 48px; height: 56px; font-size: 18px; border-radius: 16px; }
+        body.is-staff-role .cat-wrap-toggle-btn { height: 56px; min-width: 52px; padding: 10px 14px; font-size: 14px; border-radius: 16px; }
+
+        /* Controls bar: search becomes the dominant control */
+        body.is-staff-role .controls-bar { padding: 12px; border-radius: var(--r-lg); }
+        body.is-staff-role .search-box { padding: 13px 15px; font-size: 15px; }
+        body.is-staff-role .btn-menu-refresh { padding: 12px 15px; min-height: 46px; }
+
+        /* Cart panel: full-height sheet, primary action pinned at the bottom */
+        body.is-staff-role .right-panel { padding: 16px 14px; border-radius: var(--r-xl); }
+        body.is-staff-role .right-panel h3 { font-size: 15.5px; }
+        body.is-staff-role .cart-item-name { font-size: 13.5px; }
+        body.is-staff-role .qty-btn { width: 44px; height: 44px; font-size: 21px; }
+        body.is-staff-role .qty-controls { padding: 5px 8px; gap: 8px; }
+        body.is-staff-role .bill-summary { padding: 14px; border-radius: var(--r-md); }
+        body.is-staff-role .total-row { font-size: 19px; }
+
+        /* The 3-column cart table needs ~422px and a phone has ~358px, so it
+           used to overflow sideways. Turn each row into a stacked card:
+           item name on top, then qty stepper and price side by side. */
+        body.is-staff-role .cart-table-wrapper table,
+        body.is-staff-role .cart-table-wrapper tbody { display: block; width: 100%; }
+        body.is-staff-role .cart-table-wrapper thead { display: none; }
+        body.is-staff-role #cart-items tr {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 2px;
+        }
+        body.is-staff-role #cart-items tr td { display: block; padding: 0 !important; border: none !important; }
+        /* name + note tags span the full width */
+        body.is-staff-role #cart-items tr td:nth-child(1) { grid-column: 1 / -1; }
+        body.is-staff-role #cart-items tr td:nth-child(2) { grid-column: 1; }
+        body.is-staff-role #cart-items tr td:nth-child(3) { grid-column: 2; text-align: right !important; }
+        body.is-staff-role .price-input { width: 78px; height: 40px; font-size: 15px; text-align: right; box-sizing: border-box; }
+        body.is-staff-role .comment-input { width: 100%; min-height: 40px; margin-top: 8px; box-sizing: border-box; }
+        body.is-staff-role .note-label { padding: 6px 9px; font-size: 11px; }
+
+        /* Single column: full-width buttons are far easier to hit while
+           holding the phone one-handed. */
+        body.is-staff-role .action-buttons { grid-template-columns: 1fr !important; gap: 9px; }
+        body.is-staff-role .action-buttons button,
+        body.is-staff-role .action-buttons button.btn-drawer,
+        body.is-staff-role .action-buttons button.btn-ready-order,
+        body.is-staff-role .action-buttons button.btn-move-table,
+        body.is-staff-role .action-buttons button.btn-back-tables { grid-column: 1 / -1 !important; min-height: 54px; }
+
+        /* Kitchen send is the supplier's main action — make it unmistakable */
+        body.is-staff-role #btn-send-kitchen-direct { min-height: 58px !important; font-size: 15px !important; }
+
+        body.is-staff-role .note-label { padding: 7px 10px; font-size: 11.5px; }
+        body.is-staff-role .comment-input { padding: 9px 11px; font-size: 13px; }
+
+        /* Modals on a phone: use the full screen, not a floating box */
+        body.is-staff-role .modal-content { padding: 18px 16px; border-radius: var(--r-xl); max-height: 90vh; }
+        body.is-staff-role .modal-body { max-height: 58vh; }
+        body.is-staff-role .close-modal { min-width: 46px; min-height: 46px; }
+        body.is-staff-role .pay-input-box { font-size: 30px; padding: 17px 14px; }
+        body.is-staff-role .quick-cash-btn { min-height: 54px; font-size: 16px; }
+        body.is-staff-role .pay-btn-confirm, body.is-staff-role .pay-btn-cancel { min-height: 58px; }
+    }
+
+    /* Phones under 400px: single-column menu would be too wide, keep 2 but tighten */
+    @media (max-width: 380px) {
+        body.is-staff-role .menu-grid { grid-template-columns: 1fr !important; }
+        body.is-staff-role .menu-card { min-height: 108px; }
+        body.is-staff-role .card-title { margin-top: 26px; }
+        body.is-staff-role .big-tables-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
+
+    /* ---------- 13. RESPONSIVE ---------- */
+    @media (max-width: 900px) {
+        .main-layout { padding: 11px; gap: 11px; }
+        .right-panel { border-radius: var(--r-xl); padding: 16px; }
+        .admin-buttons-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+    }
+    @media (max-width: 620px) {
+        .admin-dashboard-container { padding: 16px; border-radius: var(--r-xl); }
+        .admin-buttons-grid { grid-template-columns: 1fr 1fr; }
+        .big-tables-grid { gap: 12px; }
+        .big-table-card { min-height: 112px; padding: 16px 12px; border-radius: var(--r-lg); }
+        .big-table-card h3 { font-size: 17px; }
+        .table-selection-header { padding: 13px 15px; border-radius: var(--r-lg); }
+        .modal-content { padding: 18px; border-radius: var(--r-xl); }
+        #admin-quick-add-row > * { flex: 1 1 46% !important; width: auto !important; }
+        .action-buttons { grid-template-columns: 1fr; }
+        .action-buttons button { grid-column: 1 / -1 !important; }
+    }
+    @media (max-width: 400px) {
+        .admin-buttons-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ---------- 14. PRINT SAFETY ---------- */
+    @media print {
+        .admin-buttons-grid { display: block !important; }
+        .big-table-card, .menu-card { box-shadow: none !important; transform: none !important; }
+    }
+    </style>
 <script src="/_aistudio-iframe.js?v=2c34bde1"></script></head>
 <body>
 
@@ -805,7 +1414,7 @@
         </div>
     </div>
 
-    <div id="main-app" style="display: none; height: 100vh; flex-direction: column;">
+    <div id="main-app" role="main" style="display: none; height: 100vh; flex-direction: column;">
         <div class="header">
             <div class="header-title">
                 <button type="button" class="header-home-btn" id="header-home-btn" onclick="backToTableSelection()" title="Home - All Tables Grid" style="display:none;">🏠 Tables</button>
@@ -829,8 +1438,9 @@
                         <button class="table-filter-btn active" id="tbl-filter-all" onclick="filterTablesView('all')">All</button>
                         <button class="table-filter-btn" id="tbl-filter-occupied" onclick="filterTablesView('occupied')">Occupied</button>
                         <button class="table-filter-btn" id="tbl-filter-available" onclick="filterTablesView('available')">Available</button>
+                        </div>
+                        <span id="table-grid-count-note" style="font-size:12px;font-weight:800;color:var(--text-muted);">13 tables</span>
                     </div>
-                </div>
                 <button class="btn-small" style="background:#059669; padding: 7px 12px; font-size: 13px;" onclick="startTakeawayOrder()">+ New Takeaway</button>
             </div>
             <div id="big-tables-grid" class="big-tables-grid"></div>
@@ -851,12 +1461,34 @@
                 </div>
                 
                 <div id="admin-quick-add-row" style="margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                    <input type="text" id="add-m-code" placeholder="Code (e.g. R1)" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 85px; outline: none; font-size: 13px; font-family: inherit; font-weight: bold;">
-                    <input type="text" id="add-m-name" placeholder="New Item Name" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 2; outline: none; font-size: 13px; font-family: inherit;">
-                    <select id="add-m-cat" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 1.5; outline: none; font-size: 13px; font-weight: bold; color: #4f46e5; background: white; font-family: inherit;"></select>
-                    <input type="number" id="add-m-price" placeholder="Price" step="0.50" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 80px; outline: none; font-size: 13px; font-family: inherit;">
+                    <input type="text" id="add-m-code" aria-label="New item code" placeholder="Code (e.g. R1)" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 85px; outline: none; font-size: 13px; font-family: inherit; font-weight: bold;">
+                    <input type="text" id="add-m-name" aria-label="New item name" placeholder="New Item Name" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 2; outline: none; font-size: 13px; font-family: inherit;">
+                    <select id="add-m-cat" aria-label="Category for the new item" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; flex: 1.5; outline: none; font-size: 13px; font-weight: bold; color: var(--brand-700); background: white; font-family: inherit;"></select>
+                    <input type="number" id="add-m-price" aria-label="New item price" placeholder="Price" step="0.50" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 80px; outline: none; font-size: 13px; font-family: inherit;">
                     <button class="btn-small" style="padding: 8px 14px; font-size: 13px;" onclick="addNewMenuItem()">+ Add Item</button>
                     <button class="btn-cat-add" style="padding: 8px 14px; font-size: 13px;" onclick="addNewCategoryPrompt()">+ Category</button>
+                </div>
+
+                <!-- ===== Table Count Manager: add tables beyond 13 (14, 15, 16 ...) ===== -->
+                <div id="table-count-panel">
+                    <div class="tcp-left">
+                        <span class="tcp-icon">🪑</span>
+                        <div class="tcp-copy">
+                            <strong>Number of Tables</strong>
+                            <small>Add table boxes as the shop grows — new tables appear instantly in the grid, QR codes and billing.</small>
+                        </div>
+                    </div>
+                    <div class="tcp-right">
+                        <div class="tcp-stepper">
+                            <button type="button" onclick="adjustTableCount(-1)" title="Remove one table" aria-label="Remove one table">−</button>
+                            <input type="number" id="table-count-input" class="tcp-input" aria-label="Number of tables"
+                                   min="1" max="60" step="1" value="13"
+                                   onchange="setTableCount(this.value)" onkeydown="if(event.key==='Enter'){this.blur();}">
+                            <button type="button" onclick="adjustTableCount(1)" title="Add one table" aria-label="Add one table">+</button>
+                        </div>
+                        <button type="button" class="tcp-reset" onclick="resetTableCount()" title="Go back to the original 13 tables">Reset to 13</button>
+                    </div>
+                    <div class="tcp-foot"><span id="table-count-note">Table 1 – 13</span> · <span id="table-count-warn"></span></div>
                 </div>
 
                 <div class="admin-buttons-grid">
@@ -911,7 +1543,7 @@
                         <span>Order: Table 1</span>
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span id="cart-live-pill" class="live-sync-badge" style="padding: 3px 8px; font-size: 11px;"><span class="live-dot"></span> Live Saved</span>
-                            <span id="desktop-cart-badge" class="badge" style="display:none; background:#fee2e2; color:#ef4444;">0 Items</span>
+                            <span id="desktop-cart-badge" class="badge" style="display:none; background:#fee2e2; color:#b91c1c;">0 Items</span>
                         </div>
                     </h3>
 
@@ -940,7 +1572,7 @@
                         
                         <div id="payment-method-row" style="display: flex; align-items: center; justify-content: space-between; margin-top: 12px; border-top: 1px dashed #cbd5e1; padding-top: 12px;">
                             <span style="font-size: 13px; font-weight: 900; color: var(--text-muted);">Method:</span>
-                            <select id="payment-method">
+                            <select id="payment-method" aria-label="Payment method">
                                 <option value="Cash">Cash</option>
                                 <option value="Card">Card</option>
                                 <option value="QR Pay">QR Pay</option>
@@ -1031,7 +1663,7 @@
             </div>
 
             <div style="font-size: 13.5px; color: #475569; font-weight: 700; margin-bottom: 18px; line-height: 1.4;">
-                Thank you for dining at Al Hussain! 🙏<br><span style="color: #94a3b8; font-size: 12.5px;">Have a wonderful day ahead.</span>
+                Thank you for dining at Al Hussain! 🙏<br><span style="color: #475569; font-size: 12.5px;">Have a wonderful day ahead.</span>
             </div>
 
             <button onclick="resetCustomerTableSessionForNextGuest()" style="width: 100%; padding: 13px; background: #0f172a; color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s;">
@@ -1870,6 +2502,97 @@
         let isProcessingPayment = false;
         let privateStatsState = { sales: false, expenses: false };
 
+        // ---- Table count (admin-configurable: 13 -> 14, 15, 16 ...) ----
+        const DEFAULT_TABLE_COUNT = 13;
+        const MIN_TABLE_COUNT = 1;
+        const MAX_TABLE_COUNT = 60;
+        let tableCount = DEFAULT_TABLE_COUNT;
+
+        function getTableCount() {
+            let n = parseInt(tableCount, 10);
+            if (isNaN(n)) n = DEFAULT_TABLE_COUNT;
+            return Math.min(MAX_TABLE_COUNT, Math.max(MIN_TABLE_COUNT, n));
+        }
+
+        function updateTableCountUI() {
+            const n = getTableCount();
+            const val = document.getElementById('table-count-value');
+            if (val) val.textContent = n;
+            const note = document.getElementById('table-count-note');
+            if (note) note.textContent = 'Table 1 – ' + n;
+            const gridNote = document.getElementById('table-grid-count-note');
+            if (gridNote) gridNote.textContent = n + ' tables';
+            const input = document.getElementById('table-count-input');
+            if (input && document.activeElement !== input) input.value = n;
+            const warn = document.getElementById('table-count-warn');
+            if (warn) {
+                if (n >= MAX_TABLE_COUNT) warn.textContent = 'Maximum reached';
+                else if (n <= MIN_TABLE_COUNT) warn.textContent = 'Minimum reached';
+                else warn.textContent = '';
+            }
+        }
+
+        function canManageTableCount() {
+            if (loggedInRole === 'admin') return true;
+            const cred = credentials[loggedInRole];
+            return Boolean(cred && cred.roleType === 'admin');
+        }
+
+        function setTableCount(n) {
+            if (!canManageTableCount()) {
+                alert('Permission denied: only the owner can change the number of tables.');
+                return;
+            }
+            const parsed = parseInt(n, 10);
+            const next = Math.min(MAX_TABLE_COUNT,
+                Math.max(MIN_TABLE_COUNT, isNaN(parsed) ? DEFAULT_TABLE_COUNT : parsed));
+            tableCount = next;
+            try { localStorage.setItem('ah_pos_table_count', String(next)); } catch (e) {}
+            updateTableCountUI();
+            requestRenderBigTablesGrid();
+            if (typeof renderTableLinkModalList === 'function') renderTableLinkModalList();
+            db.ref('settings/tableCount').set(next).catch(() => {});
+        }
+
+        function adjustTableCount(delta) {
+            if (!canManageTableCount()) {
+                alert('Permission denied: only the owner can change the number of tables.');
+                return;
+            }
+            const current = getTableCount();
+            const next = current + delta;
+            if (next < MIN_TABLE_COUNT || next > MAX_TABLE_COUNT) return;
+
+            if (delta > 0) {
+                setTableCount(next);
+                if (typeof showToast === 'function') showToast('🪑 Added Table ' + next);
+            } else {
+                const occupied = [];
+                for (let i = next + 1; i <= current; i++) {
+                    const od = activeOrders['Table ' + i];
+                    if (od && od.items && od.items.length > 0) occupied.push(i);
+                }
+                let msg = 'Reduce to ' + next + ' tables?';
+                if (occupied.length) {
+                    msg += '\n\nTable ' + occupied.join(', ') +
+                        ' still ' + (occupied.length > 1 ? 'have' : 'has') + ' an unpaid order. ' +
+                        'The table box will be hidden — the order is NOT deleted and can be re-shown by raising the count again.';
+                }
+                if (!confirm(msg)) return;
+                setTableCount(next);
+                if (typeof showToast === 'function') showToast('🪑 Now showing ' + next + ' tables');
+            }
+        }
+
+        function resetTableCount() {
+            if (!canManageTableCount()) {
+                alert('Permission denied: only the owner can change the number of tables.');
+                return;
+            }
+            setTableCount(DEFAULT_TABLE_COUNT);
+            if (typeof showToast === 'function') showToast('🪑 Reset to ' + DEFAULT_TABLE_COUNT + ' tables');
+        }
+
         function isLinkedSlaveTable(tableKey) {
             return Boolean(tableLinks && tableLinks[tableKey] && tableLinks[tableKey] !== tableKey);
         }
@@ -1916,10 +2639,20 @@
             applyPrivateStatVisibility('expenses');
         }
 
-        // Firebase listeners
         db.ref('tableLinks').on('value', (snap) => {
             tableLinks = snap.val() || {};
             requestRenderBigTablesGrid();
+        });
+
+        db.ref('settings/tableCount').on('value', (snap) => {
+            const v = snap.val();
+            const n = parseInt(v, 10);
+            const next = Math.min(MAX_TABLE_COUNT, Math.max(MIN_TABLE_COUNT, isNaN(n) ? tableCount : n));
+            tableCount = next;
+            try { localStorage.setItem('ah_pos_table_count', String(next)); } catch (e) {}
+            updateTableCountUI();
+            requestRenderBigTablesGrid();
+            if (typeof renderTableLinkModalList === 'function') renderTableLinkModalList();
         });
 
         db.ref('categories').on('value', (snapshot) => {
@@ -3055,6 +3788,11 @@
             unlockAudio();
             updateSoundButtonUI();
 
+            // Tag the body for role-specific layout (e.g. supplier on mobile)
+            const isOwnerRole = roleKey === 'admin' || (credentials[roleKey] && credentials[roleKey].roleType === 'admin');
+            document.body.classList.toggle('is-staff-role', !isOwnerRole);
+            document.body.classList.toggle('is-owner-role', isOwnerRole);
+
             resetPrivateStatsVisibility();
             applyRolePermissionsUI();
 
@@ -3095,6 +3833,10 @@
             if (!adminSection) return;
 
             const titleEl = document.getElementById('admin-dashboard-title');
+
+            // Table count panel visibility follows canManageTableCount() (owner only)
+            const tablePanelEl = document.getElementById('table-count-panel');
+            if (tablePanelEl) tablePanelEl.style.display = canManageTableCount() ? '' : 'none';
 
             if (loggedInRole === "admin" || (credentials[loggedInRole] && credentials[loggedInRole].roleType === "admin")) {
                 adminSection.style.display = 'block';
@@ -3140,6 +3882,8 @@
                 adminSection.querySelectorAll('.manage-menu-btn, .manage-cat-btn, .stock-btn').forEach(btn => {
                     btn.style.display = showMenu ? '' : 'none';
                 });
+
+                // Table count is shop-level config: owner only (set above)
 
                 // Expenses
                 const showExp = hasPermission('daily_expense');
@@ -3213,6 +3957,8 @@
                 db.ref('shiftHistory').push(activeShift);
                 db.ref('activeShift').remove();
             }
+            document.body.classList.remove('is-staff-role');
+            document.body.classList.remove('is-owner-role');
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('main-app').style.display = 'none';
             document.getElementById('login-user').value = "";
@@ -3278,7 +4024,7 @@
                     if (badge) {
                         badge.style.background = "#ecfdf5";
                         badge.style.borderColor = "#a7f3d0";
-                        badge.style.color = "#059669";
+                        badge.style.color = "#047857";
                         badge.innerHTML = '<span class="live-dot"></span> Live Sync';
                     }
                 }, 1800);
@@ -3452,7 +4198,7 @@
                         <span class="seated-clock-pulse" style="font-size:16px;">⏱️</span>
                         <div>
                             <span style="font-weight:900; font-size:13px;">${currentTableKey.startsWith('Order-') ? 'Wait Time' : 'Customer Seated'}: ${dur.durationText}</span>
-                            <span style="font-size:11px; opacity:0.85; margin-left:4px;">(since ${startTimeStr})</span>
+                            <span style="font-size:11px; font-weight:700; margin-left:4px; color:#065f46;">(since ${startTimeStr})</span>
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:6px;">
@@ -3577,8 +4323,9 @@
 
             const fragment = document.createDocumentFragment();
             const renderedTableKeys = new Set();
+            const maxT = getTableCount();
 
-            for (let i = 1; i <= 13; i++) {
+            for (let i = 1; i <= maxT; i++) {
                 let tableKey = `Table ${i}`;
                 renderedTableKeys.add(tableKey.toLowerCase());
                 renderedTableKeys.add(`table${i}`.toLowerCase());
@@ -4167,6 +4914,9 @@
 
             // 2. Today's sales counts (RESETS to 0 daily!)
             const todaySalesCounts = getTodayItemSalesCountMap();
+            // Popularity/sold-count badges are internal business info.
+            // Show them only to logged-in admin/staff, never to Customer QR / Takeaway self-order customers.
+            const showMenuSalesBadges = !isCustomerMode;
 
             catsToRender.forEach(cat => {
                 let catItems = menu.filter(item => {
@@ -4212,7 +4962,7 @@
                         };
 
                         let popBadgeHtml = '';
-                        if (todaySold > 0) {
+                        if (showMenuSalesBadges && todaySold > 0) {
                             if (todaySold === maxTodaySoldInCat && maxTodaySoldInCat > 0) {
                                 popBadgeHtml = `<div class="card-pop-tag" title="Today's top seller">★ #1 Today (${todaySold} sold)</div>`;
                             } else if (todaySold >= 3) {
@@ -4220,7 +4970,7 @@
                             } else {
                                 popBadgeHtml = `<div class="card-pop-tag pop-green" title="Sold today">★ ${todaySold} sold today</div>`;
                             }
-                        } else if (itemIdx === 0 && allTimeSold >= 5) {
+                        } else if (showMenuSalesBadges && itemIdx === 0 && allTimeSold >= 5) {
                             // If 0 sold today, but item is an all-time bestseller, show clean tag without yesterday's numbers
                             popBadgeHtml = `<div class="card-pop-tag pop-purple" title="All-time popular item">★ Bestseller</div>`;
                         }
@@ -4283,7 +5033,7 @@
                         };
 
                         let popBadgeHtml = '';
-                        if (todaySold > 0) {
+                        if (showMenuSalesBadges && todaySold > 0) {
                             if (todaySold === maxTodaySoldOther && maxTodaySoldOther > 0) {
                                 popBadgeHtml = `<div class="card-pop-tag" title="Today's top seller">★ #1 Today (${todaySold} sold)</div>`;
                             } else if (todaySold >= 3) {
@@ -4291,7 +5041,7 @@
                             } else {
                                 popBadgeHtml = `<div class="card-pop-tag pop-green" title="Sold today">★ ${todaySold} sold today</div>`;
                             }
-                        } else if (itemIdx === 0 && allTimeSold >= 5) {
+                        } else if (showMenuSalesBadges && itemIdx === 0 && allTimeSold >= 5) {
                             popBadgeHtml = `<div class="card-pop-tag pop-purple" title="All-time popular item">★ Bestseller</div>`;
                         }
 
@@ -5019,15 +5769,15 @@
                         <div style="margin-top: 6px; margin-bottom: 6px; background: ${tkQty > 0 ? '#fffbeb' : '#f8fafc'}; border: 1.5px solid ${tkQty > 0 ? '#f59e0b' : '#e2e8f0'}; padding: 6px 10px; border-radius: 10px;">
                             <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
                                 <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800;">
-                                    <span style="color: #0284c7; background: #e0f2fe; padding: 2px 7px; border-radius: 6px;">
+                                    <span style="color: #0369a1; background: #e0f2fe; padding: 2px 7px; border-radius: 6px;">
                                         🍽️ Dine-In: <b>${totalQty - tkQty}</b>
                                     </span>
-                                    <span style="color: ${tkQty > 0 ? '#b45309' : '#64748b'}; background: ${tkQty > 0 ? '#fef3c7' : '#f1f5f9'}; padding: 2px 7px; border-radius: 6px;">
+                                    <span style="color: ${tkQty > 0 ? '#92400e' : '#475569'}; background: ${tkQty > 0 ? '#fef3c7' : '#f1f5f9'}; padding: 2px 7px; border-radius: 6px;">
                                         🥡 Takeaway: <b>${tkQty}</b>
                                     </span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 4px;">
-                                    <span style="font-size: 11px; font-weight: 700; color: #64748b;">Takeaway:</span>
+                                    <span style="font-size: 11px; font-weight: 700; color: #475569;">Takeaway:</span>
                                     <button type="button" style="width: 26px; height: 26px; border: 1px solid #cbd5e1; background: white; color: #1e293b; border-radius: 6px; font-weight: 900; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="adjustItemTakeawayQty('${item.id}', -1)">-</button>
                                     <span style="min-width: 20px; text-align: center; font-size: 13px; font-weight: 900; color: ${tkQty > 0 ? '#b45309' : '#1e293b'};">${tkQty}</span>
                                     <button type="button" style="width: 26px; height: 26px; border: 1px solid #cbd5e1; background: white; color: #1e293b; border-radius: 6px; font-weight: 900; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="adjustItemTakeawayQty('${item.id}', 1)">+</button>
@@ -5043,7 +5793,7 @@
                                 <button type="button" style="font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; border: 1px solid ${tkQty === totalQty ? '#f59e0b' : '#cbd5e1'}; background: ${tkQty === totalQty ? '#fef3c7' : 'white'}; color: ${tkQty === totalQty ? '#b45309' : '#334155'}; cursor: pointer;" onclick="splitItemDineAndTakeaway('${item.id}', ${totalQty})">
                                     🥡 All ${totalQty} Pack
                                 </button>
-                                <button type="button" style="font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; border: 1px solid ${tkQty === 0 ? '#0284c7' : '#cbd5e1'}; background: ${tkQty === 0 ? '#e0f2fe' : 'white'}; color: ${tkQty === 0 ? '#0284c7' : '#334155'}; cursor: pointer;" onclick="splitItemDineAndTakeaway('${item.id}', 0)">
+                                <button type="button" style="font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; border: 1px solid ${tkQty === 0 ? '#0369a1' : '#cbd5e1'}; background: ${tkQty === 0 ? '#e0f2fe' : 'white'}; color: ${tkQty === 0 ? '#0369a1' : '#334155'}; cursor: pointer;" onclick="splitItemDineAndTakeaway('${item.id}', 0)">
                                     🍽️ All ${totalQty} Dine-In
                                 </button>
                             </div>` : ''}
@@ -5051,7 +5801,7 @@
                         }
                         <div style="margin-top: 4px;">
                             <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px; align-items: center;">
-                                <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Quick Notes:</span>
+                                <span style="font-size: 10px; font-weight: 800; color: #475569; text-transform: uppercase;">Quick Notes:</span>
                                 ${(!isDedicatedTakeaway && tkQty > 0 && tkQty < totalQty) ? `
                                 <button type="button" style="font-size: 10.5px; font-weight: 800; padding: 2px 7px; border-radius: 6px; border: 1px dashed #f59e0b; background: #fffbeb; color: #b45309; cursor: pointer;" onclick="quickAppendItemNote('${item.id}', '${totalQty - tkQty} Dine, ${tkQty} Pack')">
                                     ➕ ${totalQty - tkQty} Dine, ${tkQty} Pack
@@ -5065,11 +5815,11 @@
                                     </span>
                                     `;
                                 }).join('')}
-                                <button type="button" style="font-size: 10.5px; font-weight: 800; padding: 2px 7px; border-radius: 6px; border: 1px dashed #0284c7; background: #f0f9ff; color: #0284c7; cursor: pointer;" onclick="addCustomQuickNote()" title="Add custom quick note tag">
+                                <button type="button" style="font-size: 10.5px; font-weight: 800; padding: 2px 7px; border-radius: 6px; border: 1px dashed #0369a1; background: #f0f9ff; color: #0369a1; cursor: pointer;" onclick="addCustomQuickNote()" title="Add custom quick note tag">
                                     ➕ Add Tag
                                 </button>
                             </div>
-                            <input type="text" class="comment-input" data-item-id="${item.id}" placeholder="Notes / Special instructions (e.g. 2 Dine, 2 Pack)..." value="${itemCommentVal}" oninput="onCartItemCommentInput('${item.id}', this.value)" onchange="updateItemComment('${item.id}', this.value)">
+                            <input type="text" class="comment-input" data-item-id="${item.id}" aria-label="Notes for ${escapeHtml(item.name)}" placeholder="Notes / Special instructions (e.g. 2 Dine, 2 Pack)..." value="${itemCommentVal}" oninput="onCartItemCommentInput('${item.id}', this.value)" onchange="updateItemComment('${item.id}', this.value)">
                         </div>
                     </td>
                     <td>
@@ -5082,7 +5832,7 @@
                     <td style="text-align: right;">
                         ${isCustomerMode ? 
                             `<div style="font-size:14px; font-weight:800; color:var(--text);">$${Number(item.customPrice).toFixed(2)}</div>` : 
-                            `<input type="number" class="price-input" data-item-id="${item.id}" value="${Number(item.customPrice).toFixed(2)}" step="0.50" min="0" onchange="updateItemPrice('${item.id}', this.value)">`
+                            `<input type="number" class="price-input" data-item-id="${item.id}" aria-label="Unit price for ${escapeHtml(item.name)}" value="${Number(item.customPrice).toFixed(2)}" step="0.50" min="0" onchange="updateItemPrice('${item.id}', this.value)">`
                         }
                         <div style="font-size:12px; font-weight:bold; color:var(--text-muted); margin-top:3px;">Tot: $${lineTotal.toFixed(2)}</div>
                     </td>
@@ -5695,8 +6445,9 @@
             const container = document.getElementById('move-table-list');
             container.innerHTML = "";
             targetMoveDestination = null;
+            const maxT = getTableCount();
 
-            for (let i = 1; i <= 13; i++) {
+            for (let i = 1; i <= maxT; i++) {
                 let tKey = "Table " + i;
                 if (tKey === currentTableKey) continue;
                 if (isLinkedSlaveTable(tKey)) continue;
@@ -5768,8 +6519,9 @@
             const wrap = document.getElementById('table-link-list');
             if (!wrap) return;
             wrap.innerHTML = "";
+            const maxT = getTableCount();
 
-            for (let i = 1; i <= 13; i++) {
+            for (let i = 1; i <= maxT; i++) {
                 const k = 'Table ' + i;
                 const isSelected = pendingLinkSelection.includes(k);
                 const master = tableLinks[k];
@@ -5880,7 +6632,8 @@
             new QRCode(tkCard.querySelector('#qr-canvas-takeaway'), { text: tkQrUrl, width: 140, height: 140 });
 
             // Table QR Cards
-            for (let i = 1; i <= 13; i++) {
+            const maxT = getTableCount();
+            for (let i = 1; i <= maxT; i++) {
                 let tableKey = `Table ${i}`;
                 let card = document.createElement('div');
                 card.className = "qr-card";
@@ -5918,7 +6671,8 @@
             new QRCode(tkBox.querySelector('#p-qr-tk'), { text: `${liveBaseUrl}${separator}order=takeaway`, width: 150, height: 150 });
 
             // Tables
-            for (let i = 1; i <= 13; i++) {
+            const maxT = getTableCount();
+            for (let i = 1; i <= maxT; i++) {
                 let box = document.createElement('div');
                 box.style.border = "2px solid #000";
                 box.style.padding = "15px";
