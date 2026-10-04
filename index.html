@@ -1188,6 +1188,77 @@
     html.is-customer-qr .cart-table-wrapper { max-height: 46vh; overflow-y: auto; }
     html.is-customer-qr .menu-card { min-height: 132px; }
     html.is-customer-qr .card-pop-tag { display: none !important; }
+
+    /* Order intake type: Phone vs Walk-in (staff-only control) */
+    .order-intake-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 10px;
+        margin: 8px 0 2px;
+        background: #f8fafc;
+        border: 1.5px dashed #cbd5e1;
+        border-radius: 14px;
+    }
+    .order-intake-label {
+        font-size: 11px;
+        font-weight: 900;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+    .intake-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 9px 14px;
+        min-height: 42px;
+        font-size: 13px;
+        font-weight: 900;
+        border-radius: 999px;
+        border: 2px solid #cbd5e1;
+        background: #ffffff;
+        color: #334155;
+        cursor: pointer;
+        transition: all .15s ease;
+        user-select: none;
+    }
+    .intake-chip:active { transform: scale(.97); }
+    .intake-chip[aria-checked="true"] {
+        border-color: #7c3aed;
+        color: #ffffff;
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        box-shadow: 0 3px 10px rgba(109, 40, 217, .3);
+    }
+    #intake-phone-btn[aria-checked="true"] {
+        background: linear-gradient(135deg, #0284c7, #0369a1);
+        border-color: #0284c7;
+        box-shadow: 0 3px 10px rgba(2, 132, 199, .3);
+    }
+    #intake-walkin-btn[aria-checked="true"] {
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-color: #10b981;
+        box-shadow: 0 3px 10px rgba(16, 185, 129, .3);
+    }
+    .intake-badge {
+        font-size: 11px;
+        font-weight: 900;
+        padding: 2px 8px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        white-space: nowrap;
+    }
+    .intake-badge.phone { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .intake-badge.walkin { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
+    html.is-customer-qr #order-intake-row { display: none !important; }
+    @media (max-width: 768px) {
+        .order-intake-row { gap: 6px; padding: 7px 8px; }
+        .intake-chip { flex: 1 1 auto; min-height: 46px; font-size: 13.5px; padding: 10px 12px; }
+    }
     html.is-customer-qr .cart-seated-bar { font-size: 13.5px; padding: 10px 14px; }
 
     /* ---------- 12b. SUPPLIER / STAFF MOBILE TUNING ----------
@@ -1548,6 +1619,12 @@
                     </h3>
 
                     <div id="cart-seated-header-bar" class="cart-seated-bar" style="display:none;"></div>
+
+                    <div id="order-intake-row" class="order-intake-row" style="display:none;" role="group" aria-label="Order intake type">
+                        <span class="order-intake-label">Intake:</span>
+                        <button type="button" id="intake-phone-btn" class="intake-chip" role="checkbox" aria-checked="false" onclick="toggleOrderIntake('phone')" title="Customer called and ordered over the phone">📞 Phone Order</button>
+                        <button type="button" id="intake-walkin-btn" class="intake-chip" role="checkbox" aria-checked="false" onclick="toggleOrderIntake('walkin')" title="Customer came in person and gave the order">🚶 Walk-in</button>
+                    </div>
                     
                     <div class="cart-table-wrapper">
                         <table>
@@ -2185,9 +2262,9 @@
       </div>
     </div>
 
-    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div><b>Order By:</b> <span id="p-taken-by" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span><br><b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div><div id="p-seated-info" style="display:none; font-size:14px; margin-top:2px;"><b>Seated:</b> <span id="p-seated-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;"> p  ú</div></div>
+    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div><b>Order By:</b> <span id="p-taken-by" class="print-ref-strong"></span></div><div id="p-intake" style="display:none; margin-top:2px;"><b>Intake:</b> <span id="p-intake-val" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span><br><b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span> | <b>Time:</b> <span id="p-time"></span></div><div id="p-seated-info" style="display:none; font-size:14px; margin-top:2px;"><b>Seated:</b> <span id="p-seated-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div style="display:none;"> p  ú</div></div>
     
-    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div><b>Order By:</b> <span id="k-taken-by" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
+    <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div><b>Order By:</b> <span id="k-taken-by" class="print-ref-strong"></span></div><div id="k-intake" style="display:none; margin-top:2px;"><b>Intake:</b> <span id="k-intake-val" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
     
     <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div style="display:none;"> p  ú</div></div>
     <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>SALES HISTORY REPORT</b></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span>$<span id="print-history-grand-total">0.00</span></span></div></div>
@@ -4064,6 +4141,86 @@
             showTableSelection();
         }
 
+        // ---- Order intake type: Phone Order vs Walk-in Customer ----
+        // Staff flag an order while taking it: customer called in (phone) or
+        // walked in and gave the order verbally. Customer QR / self-order
+        // never sees this control.
+        let currentOrderIntake = ""; // "" | "phone" | "walkin"
+
+        function getOrderIntakeText(intakeVal) {
+            if (intakeVal === "phone") return "Phone Order";
+            if (intakeVal === "walkin") return "Walk-in Customer";
+            return "";
+        }
+
+        function getOrderIntakeBadgeHtml(intakeVal) {
+            if (intakeVal === "phone") return `<span class="intake-badge phone" title="Ordered by phone">📞 Phone</span>`;
+            if (intakeVal === "walkin") return `<span class="intake-badge walkin" title="Customer walked in">🚶 Walk-in</span>`;
+            return "";
+        }
+
+        function updateOrderIntakeUI() {
+            const row = document.getElementById('order-intake-row');
+            if (row) row.style.display = (isCustomerMode || !currentTableKey) ? 'none' : 'flex';
+            const ph = document.getElementById('intake-phone-btn');
+            const wk = document.getElementById('intake-walkin-btn');
+            if (ph) ph.setAttribute('aria-checked', currentOrderIntake === 'phone' ? 'true' : 'false');
+            if (wk) wk.setAttribute('aria-checked', currentOrderIntake === 'walkin' ? 'true' : 'false');
+        }
+
+        function refreshCartTitleBadge() {
+            const titleEl = document.getElementById('cart-panel-title');
+            if (!titleEl || !titleEl.firstElementChild) return;
+            const linked = getLinkedTablesForMaster(currentTableKey);
+            const titleSuffix = linked.length > 1 ? (' (Linked: ' + linked.join(', ') + ')') : '';
+            const orderForTitle = activeOrders[currentTableKey];
+            let takerBadge = "";
+            if (orderForTitle && orderForTitle.takenBy) {
+                takerBadge = (orderForTitle.takenBy === "Customer" || orderForTitle.takenBy === "Customer QR") ? " • 📱 Customer Order" : ` • 👤 ${orderForTitle.takenBy}`;
+            } else if (!isCustomerMode) {
+                takerBadge = ` • 👤 ${loggedInDisplayName}`;
+            }
+            let intakeBadge = "";
+            if (orderForTitle && orderForTitle.orderIntake) {
+                intakeBadge = orderForTitle.orderIntake === 'phone' ? " • 📞 Phone Order" : " • 🚶 Walk-in";
+            }
+            titleEl.firstElementChild.innerText = "Order: " + currentTableKey + titleSuffix + takerBadge + intakeBadge;
+        }
+
+        function toggleOrderIntake(type) {
+            if (isCustomerMode || !currentTableKey) return;
+            if (typeof db === 'undefined' || !db || !db.ref) return;
+            const next = (currentOrderIntake === type) ? "" : type;
+            currentOrderIntake = next;
+
+            if (!activeOrders[currentTableKey]) {
+                const now = Date.now();
+                activeOrders[currentTableKey] = {
+                    items: [],
+                    discount: 0.00,
+                    paymentMethod: "Cash",
+                    status: "Active",
+                    seatedAt: now,
+                    seatedTime: new Date(now).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    takenBy: loggedInDisplayName,
+                    orderSource: "Staff"
+                };
+            }
+            if (next) {
+                activeOrders[currentTableKey].orderIntake = next;
+                activeOrders[currentTableKey].intakeUpdatedBy = loggedInDisplayName || "Staff";
+            } else {
+                delete activeOrders[currentTableKey].orderIntake;
+                delete activeOrders[currentTableKey].intakeUpdatedBy;
+            }
+            db.ref('activeOrders/' + currentTableKey).set(activeOrders[currentTableKey]);
+            updateOrderIntakeUI();
+            refreshCartTitleBadge();
+            updateCartSeatedDisplay();
+            renderCart();
+            requestRenderBigTablesGrid();
+        }
+
         function openTable(tableKey) {
             if (isCustomerMode && currentTableKey && currentTableKey !== tableKey) {
                 return;
@@ -4082,15 +4239,9 @@
             if (headHomeBtn && !isCustomerMode) headHomeBtn.style.display = 'inline-flex';
 
             const linked = getLinkedTablesForMaster(currentTableKey);
-            const titleSuffix = linked.length > 1 ? (' (Linked: ' + linked.join(', ') + ')') : '';
-            const orderForTitle = activeOrders[currentTableKey];
-            let takerBadge = "";
-            if (orderForTitle && orderForTitle.takenBy) {
-                takerBadge = (orderForTitle.takenBy === "Customer" || orderForTitle.takenBy === "Customer QR") ? " • 📱 Customer Order" : ` • 👤 ${orderForTitle.takenBy}`;
-            } else if (!isCustomerMode) {
-                takerBadge = ` • 👤 ${loggedInDisplayName}`;
-            }
-            document.getElementById('cart-panel-title').firstElementChild.innerText = "Order: " + currentTableKey + titleSuffix + takerBadge;
+            currentOrderIntake = (activeOrders[currentTableKey] && activeOrders[currentTableKey].orderIntake) || "";
+            updateOrderIntakeUI();
+            refreshCartTitleBadge();
 
             const btnReady = document.getElementById('btn-ready-order-elem');
             if (btnReady) {
@@ -4191,15 +4342,17 @@
             if (order && (orderSeatedMs || order.seatedAt || order.seatedTime)) {
                 const dur = getSeatedDurationInfo(order.seatedAt, order.seatedTime);
                 const startTimeStr = order.seatedTime || (orderSeatedMs ? new Date(orderSeatedMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'just now');
+                const intakeBadgeHtml = (order && order.orderIntake) ? getOrderIntakeBadgeHtml(order.orderIntake) : "";
                 bar.style.display = 'flex';
                 bar.className = 'cart-seated-bar ' + (dur.tier === 'long' ? 'timer-long' : (dur.tier === 'medium' ? 'timer-medium' : 'timer-fresh'));
                 bar.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                         <span class="seated-clock-pulse" style="font-size:16px;">⏱️</span>
                         <div>
                             <span style="font-weight:900; font-size:13px;">${currentTableKey.startsWith('Order-') ? 'Wait Time' : 'Customer Seated'}: ${dur.durationText}</span>
                             <span style="font-size:11px; font-weight:700; margin-left:4px; color:#065f46;">(since ${startTimeStr})</span>
                         </div>
+                        ${intakeBadgeHtml}
                     </div>
                     <div style="display:flex; align-items:center; gap:6px;">
                         <button type="button" class="btn-edit-seated-time" onclick="promptEditSeatedTime()" title="Edit seated time">✏️ Edit Time</button>
@@ -4239,6 +4392,10 @@
                     takenBy: isCustomerMode ? "Customer" : loggedInDisplayName,
                     orderSource: isCustomerMode ? "Customer QR" : "Staff"
                 };
+                if (currentOrderIntake && !isCustomerMode) {
+                    activeOrders[currentTableKey].orderIntake = currentOrderIntake;
+                    activeOrders[currentTableKey].intakeUpdatedBy = loggedInDisplayName || "Staff";
+                }
             } else {
                 activeOrders[currentTableKey].seatedAt = seatedMs;
                 activeOrders[currentTableKey].seatedTime = timeStr;
@@ -4301,6 +4458,10 @@
                     takenBy: loggedInDisplayName,
                     orderSource: "Staff"
                 };
+                if (currentOrderIntake) {
+                    activeOrders[newOrderKey].orderIntake = currentOrderIntake;
+                    activeOrders[newOrderKey].intakeUpdatedBy = loggedInDisplayName || "Staff";
+                }
                 db.ref('activeOrders/' + newOrderKey).set(activeOrders[newOrderKey]);
             }
 
@@ -4456,6 +4617,7 @@
                         <span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; ${(orderData.takenBy === 'Customer' || orderData.takenBy === 'Customer QR') ? 'background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd;' : 'background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff;'}">
                             ${(orderData.takenBy === 'Customer' || orderData.takenBy === 'Customer QR') ? '📱 Customer Order' : ('👤 ' + (orderData.takenBy || 'Staff'))}
                         </span>
+                        ${orderData.orderIntake ? ' ' + getOrderIntakeBadgeHtml(orderData.orderIntake) : ''}
                     </div>` : ''}
                 `;
                 fragment.appendChild(card);
@@ -4539,6 +4701,7 @@
                                 <span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; ${(orderData.takenBy === 'Customer' || orderData.takenBy === 'Customer QR') ? 'background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd;' : 'background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff;'}">
                                     ${(orderData.takenBy === 'Customer' || orderData.takenBy === 'Customer QR') ? '📱 Customer Order' : ('👤 ' + (orderData.takenBy || 'Staff'))}
                                 </span>
+                                ${orderData.orderIntake ? ' ' + getOrderIntakeBadgeHtml(orderData.orderIntake) : ''}
                             </div>
                         `;
                         fragment.appendChild(card);
@@ -5106,6 +5269,10 @@
                     takenBy: isCustomerMode ? "Customer" : loggedInDisplayName,
                     orderSource: isCustomerMode ? "Customer QR" : "Staff"
                 };
+                if (currentOrderIntake && !isCustomerMode) {
+                    activeOrders[currentTableKey].orderIntake = currentOrderIntake;
+                    activeOrders[currentTableKey].intakeUpdatedBy = loggedInDisplayName || "Staff";
+                }
                 if (isCustomerMode && isTakeawayCustomer) {
                     activeOrders[currentTableKey].customerName = sessionStorage.getItem('myTkName') || "";
                     activeOrders[currentTableKey].customerPhone = sessionStorage.getItem('myTkPhone') || "";
@@ -6126,6 +6293,16 @@
                 kTakenByEl.innerText = order.takenBy === 'Customer' ? 'Customer (Self-Order)' : (order.takenBy || loggedInDisplayName);
             }
 
+            const kIntakeEl = document.getElementById('k-intake');
+            if (kIntakeEl) {
+                if (order.orderIntake) {
+                    kIntakeEl.style.display = 'block';
+                    document.getElementById('k-intake-val').innerText = getOrderIntakeText(order.orderIntake) + (order.intakeUpdatedBy ? ' (via ' + order.intakeUpdatedBy + ')' : '');
+                } else {
+                    kIntakeEl.style.display = 'none';
+                }
+            }
+
             const custInfoElem = document.getElementById('k-cust-info');
             if (order.customerName) {
                 custInfoElem.style.display = 'block';
@@ -6174,6 +6351,16 @@
             const pTakenByEl = document.getElementById('p-taken-by');
             if (pTakenByEl) {
                 pTakenByEl.innerText = order.takenBy === 'Customer' ? 'Customer (Self-Order)' : (order.takenBy || (document.getElementById('display-user') ? document.getElementById('display-user').innerText : 'Staff'));
+            }
+
+            const pIntakeEl = document.getElementById('p-intake');
+            if (pIntakeEl) {
+                if (order.orderIntake) {
+                    pIntakeEl.style.display = 'block';
+                    document.getElementById('p-intake-val').innerText = getOrderIntakeText(order.orderIntake) + (order.intakeUpdatedBy ? ' (via ' + order.intakeUpdatedBy + ')' : '');
+                } else {
+                    pIntakeEl.style.display = 'none';
+                }
             }
 
             const custInfoElem = document.getElementById('p-cust-info');
@@ -6378,6 +6565,8 @@
                 paymentMethod: chosenPaymentMethod,
                 servedBy: document.getElementById('display-user') ? document.getElementById('display-user').innerText : 'Staff',
                 takenBy: order.takenBy || (document.getElementById('display-user') ? document.getElementById('display-user').innerText : 'Staff'),
+                intake: order.orderIntake || "",
+                intakeUpdatedBy: order.intakeUpdatedBy || "",
                 seatedAt: order.seatedAt || null,
                 seatedDuration: order.seatedAt ? getSeatedDurationInfo(order.seatedAt).durationText : null
             };
@@ -6422,8 +6611,13 @@
 
             order.paymentMethod = chosenPaymentMethod;
 
-            // Remove order
-            db.ref('activeOrders/' + currentTableKey).remove();
+            // Remove order. Also clear local memory immediately so the table-grid
+            // seated-time auto-repair cannot recreate a just-paid order before
+            // Firebase's async listener returns the removed state.
+            const paidOrderKey = currentTableKey;
+            db.ref('activeOrders/' + paidOrderKey).remove();
+            if (activeOrders && paidOrderKey) delete activeOrders[paidOrderKey];
+            if (previousActiveOrdersMap && paidOrderKey) delete previousActiveOrdersMap[paidOrderKey];
 
             closePaymentModal();
             isProcessingPayment = false;
@@ -7105,7 +7299,7 @@
                 tr.innerHTML = `
                     <td>${s.time || ''}</td>
                     <td style="font-weight:bold;">${s.ref || ''}</td>
-                    <td>${s.source || ''}</td>
+                    <td>${s.source || ''}${s.intake ? ' • ' + (s.intake === 'phone' ? '📞 Phone' : '🚶 Walk-in') : ''}</td>
                     <td>${s.paymentMethod || ''}</td>
                     <td style="text-align:right; font-weight:bold; color:var(--success);">$ ${Number(s.total).toFixed(2)}</td>
                     <td style="text-align:center;">
@@ -7130,6 +7324,7 @@
                 <div style="font-size:14px; font-weight:bold; margin-bottom:10px;">
                     <div>Ref: ${sale.ref}</div>
                     <div>Source: ${sale.source}</div>
+                    ${sale.intake ? `<div>Intake: ${getOrderIntakeText(sale.intake)}${sale.intakeUpdatedBy ? ' (via ' + sale.intakeUpdatedBy + ')' : ''}</div>` : ''}
                     <div>Date/Time: ${sale.date} ${sale.time}</div>
                     <div>Payment Method: ${sale.paymentMethod}</div>
                     ${sale.customerName ? `<div>Customer: ${sale.customerName} (${sale.customerPhone || ''})</div>` : ''}
@@ -7165,7 +7360,7 @@
                 sum += Number(s.total) || 0;
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${s.time} - ${s.ref} (${s.source})</td>
+                    <td>${s.time} - ${s.ref} (${s.source})${s.intake ? ' [' + (s.intake === 'phone' ? 'Phone' : 'Walk-in') + ']' : ''}</td>
                     <td style="text-align:right;">$${Number(s.total).toFixed(2)}</td>
                 `;
                 tbody.appendChild(tr);
