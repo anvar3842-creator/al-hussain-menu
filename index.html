@@ -1931,8 +1931,15 @@
                                     <label class="perm-check-item">
                                         <input type="checkbox" id="perm-sales_history">
                                         <div>
-                                            <span class="perm-title">Sales History & Reports</span>
-                                            <span class="perm-desc">விற்பனை வரலாறு & பொருள் அறிக்கை</span>
+                                            <span class="perm-title">Sales History (விற்பனை வரலாறு)</span>
+                                            <span class="perm-desc">விற்பனை வரலாறு பார்க்க</span>
+                                        </div>
+                                    </label>
+                                    <label class="perm-check-item">
+                                        <input type="checkbox" id="perm-item_report">
+                                        <div>
+                                            <span class="perm-title">Daily Items Report (பொருள் அறிக்கை)</span>
+                                            <span class="perm-desc">தினசரி பொருள் அறிக்கை பார்க்க</span>
                                         </div>
                                     </label>
                                     <label class="perm-check-item">
@@ -2367,6 +2374,7 @@
                 manage_menu: true,
                 daily_expense: true,
                 sales_history: true,
+                item_report: true,
                 payment_summary: true,
                 monthly_reports: true,
                 day_close: true,
@@ -2381,6 +2389,7 @@
                 manage_menu: false,
                 daily_expense: false,
                 sales_history: false,
+                item_report: false,
                 payment_summary: false,
                 monthly_reports: false,
                 day_close: false,
@@ -2408,6 +2417,10 @@
             } else {
                 if (permissions.billing === undefined) {
                     permissions.billing = isAdmin ? true : false;
+                }
+                // Old accounts were saved before Sales History and Items Report became separate permissions — keep them seeing the Report if they already had Sales History
+                if (permissions.item_report === undefined) {
+                    permissions.item_report = isAdmin ? true : (permissions.sales_history === true);
                 }
             }
 
@@ -3938,6 +3951,7 @@
                 'manage_menu',
                 'daily_expense',
                 'sales_history',
+                'item_report',
                 'payment_summary',
                 'monthly_reports',
                 'day_close',
@@ -3968,12 +3982,13 @@
                     btn.style.display = showExp ? '' : 'none';
                 });
 
-                // Sales & Items Report
+                // Sales History (விற்பனை வரலாறு) and Daily Items Report (பொருள் அறிக்கை) are separate permissions
                 const showSales = hasPermission('sales_history');
                 const btnHist = adminSection.querySelector('.history-btn');
                 if (btnHist) btnHist.style.display = showSales ? '' : 'none';
+                const showReport = hasPermission('item_report');
                 const btnReport = adminSection.querySelector('.report-btn');
-                if (btnReport) btnReport.style.display = showSales ? '' : 'none';
+                if (btnReport) btnReport.style.display = showReport ? '' : 'none';
 
                 // Monthly Reports & Shifts
                 const showMonthly = hasPermission('monthly_reports');
@@ -5358,13 +5373,20 @@
             flashLiveSyncSuccess();
         }
 
+        // Which table the current #cart-items DOM was built for. Between selecting a
+        // new table and re-rendering, the DOM still shows the previous table's rows.
+        let cartDomTableKey = null;
+
         function syncCartInputsToMemory() {
             if (!currentTableKey || !activeOrders[currentTableKey]) return;
+            if (cartDomTableKey !== null && cartDomTableKey !== currentTableKey) return;
             const order = activeOrders[currentTableKey];
             const items = getOrderItemsArray(order);
             if (items.length === 0) return;
 
-            // 1. Sync any typed notes / instructions directly from DOM inputs
+            // Only text inputs need syncing. Checkboxes and qty steppers write to
+            // memory the moment they change, so re-reading them from the DOM here
+            // would let a stale render overwrite newer data from another device.
             const commentInputs = document.querySelectorAll('#cart-items .comment-input');
             commentInputs.forEach(input => {
                 const id = input.getAttribute('data-item-id');
@@ -5376,32 +5398,6 @@
                 }
             });
 
-            // 2. Sync any custom checkboxes directly from DOM
-            const customCheckboxes = document.querySelectorAll('#cart-items .custom-opt-checkbox');
-            customCheckboxes.forEach(cb => {
-                const itemId = cb.getAttribute('data-item-id');
-                const optName = cb.getAttribute('data-opt-name');
-                const optPrice = Number(cb.getAttribute('data-opt-price')) || 0;
-                if (itemId && optName) {
-                    const it = items.find(x => String(x.id) === String(itemId));
-                    if (it) {
-                        const opts = getItemOptionsMap(it);
-                        const resolvedName = optName.trim();
-                        const safeKey = resolvedName.replace(/[.#$\[\]\/]/g, '_');
-                        if (cb.checked) {
-                            const existing = opts[safeKey] || opts[resolvedName];
-                            const curQty = (existing && existing.qty) ? Math.max(1, Number(existing.qty)) : 1;
-                            opts[safeKey] = { name: resolvedName, price: optPrice, qty: curQty };
-                        } else {
-                            delete opts[safeKey];
-                            delete opts[resolvedName];
-                        }
-                        it.options = opts;
-                    }
-                }
-            });
-
-            // 3. Sync any custom price inputs
             const priceInputs = document.querySelectorAll('#cart-items .price-input');
             priceInputs.forEach(input => {
                 const id = input.getAttribute('data-item-id');
@@ -5814,6 +5810,8 @@
 
             // Preserve any text currently typed into DOM inputs before clearing
             syncCartInputsToMemory();
+
+            cartDomTableKey = currentTableKey;
 
             const activeEl = document.activeElement;
             let focusedItemId = null;
@@ -7473,7 +7471,7 @@
         }
 
         function openItemReportModal() {
-            if (!hasPermission('sales_history')) {
+            if (!hasPermission('item_report')) {
                 alert("Permission denied: You do not have permission to view Daily Items Report.");
                 return;
             }
@@ -8066,7 +8064,7 @@
 
         // Dynamic Supplier, Staff & Login Credentials Management with Permissions
         const ALL_PERMISSION_KEYS = [
-            'take_orders', 'billing', 'manage_menu', 'daily_expense', 'sales_history',
+            'take_orders', 'billing', 'manage_menu', 'daily_expense', 'sales_history', 'item_report',
             'payment_summary', 'monthly_reports', 'day_close', 'qr_codes',
             'apply_discounts', 'cancel_orders', 'manage_suppliers'
         ];
@@ -8180,7 +8178,7 @@
                 } else if (preset === 'cashier') {
                     cb.checked = ['take_orders', 'billing', 'payment_summary', 'daily_expense', 'apply_discounts'].includes(pk);
                 } else if (preset === 'manager') {
-                    cb.checked = ['take_orders', 'billing', 'manage_menu', 'daily_expense', 'sales_history', 'payment_summary', 'monthly_reports', 'day_close', 'qr_codes', 'apply_discounts', 'cancel_orders', 'manage_suppliers'].includes(pk);
+                    cb.checked = ['take_orders', 'billing', 'manage_menu', 'daily_expense', 'sales_history', 'item_report', 'payment_summary', 'monthly_reports', 'day_close', 'qr_codes', 'apply_discounts', 'cancel_orders', 'manage_suppliers'].includes(pk);
                 }
             });
         }
@@ -8230,7 +8228,8 @@
                     if (perms.billing) tagsHtml += '<span class="cred-perm-tag highlight" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0;">Billing</span>';
                     if (perms.manage_menu) tagsHtml += '<span class="cred-perm-tag">Menu/Stock</span>';
                     if (perms.daily_expense) tagsHtml += '<span class="cred-perm-tag">Expenses</span>';
-                    if (perms.sales_history) tagsHtml += '<span class="cred-perm-tag">Sales Reports</span>';
+                    if (perms.sales_history) tagsHtml += '<span class="cred-perm-tag">Sales History</span>';
+                    if (perms.item_report) tagsHtml += '<span class="cred-perm-tag">Items Report</span>';
                     if (perms.payment_summary) tagsHtml += '<span class="cred-perm-tag">Payments</span>';
                     if (perms.monthly_reports) tagsHtml += '<span class="cred-perm-tag">Monthly</span>';
                     if (perms.day_close) tagsHtml += '<span class="cred-perm-tag">Day Close</span>';
