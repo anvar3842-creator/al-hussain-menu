@@ -2835,6 +2835,223 @@
             return order.items;
         }
 
+        // ---- Concurrent-safe order writes ---------------------------------
+        // Three or four phones can scan one table's QR at the same time and
+        // all of them edit the same activeOrders record. Saving a whole local
+        // copy back lets the last device to write overwrite the others, so
+        // every edit is recorded as a delta against what this device last saw
+        // and replayed inside a transaction on the freshest server data.
+        let orderBaselines = {};
+        const ORDER_ITEM_SCALARS = ['name', 'code', 'cat', 'comment', 'customPrice', 'takeawayQty'];
+
+        function cloneOrd(value) {
+            if (value === undefined || value === null) return value;
+            return JSON.parse(JSON.stringify(value));
+        }
+
+        function syncOrderBaselines(orders) {
+            orderBaselines = {};
+            Object.keys(orders || {}).forEach(k => { orderBaselines[k] = cloneOrd(orders[k]); });
+        }
+
+        function orderItemsById(items) {
+            const map = {};
+            (items || []).forEach(it => {
+                if (it && it.id !== undefined && it.id !== null) map[String(it.id)] = it;
+            });
+            return map;
+        }
+
+        function sameVal(a, b) {
+            return JSON.stringify(a === undefined ? null : a) === JSON.stringify(b === undefined ? null : b);
+        }
+
+        function buildOrderDiff(base, next) {
+            const d = {
+                added: [], removed: [], qty: {},
+                itemFields: {}, itemNotes: {}, itemNoteOff: {},
+                itemOpts: {}, itemOptOff: {}, doc: {}, docOff: []
+            };
+            const bItems = base ? getOrderItemsArray(base) : [];
+            const nItems = getOrderItemsArray(next);
+            const bMap = orderItemsById(bItems);
+            const nMap = orderItemsById(nItems);
+
+            nItems.forEach(ni => {
+                const id = String(ni.id);
+                const bi = bMap[id];
+                if (!bi) { d.added.push(cloneOrd(ni)); return; }
+
+                const bq = Math.max(0, Number(bi.qty) || 0);
+                const nq = Math.max(0, Number(ni.qty) || 0);
+                if (nq !== bq) d.qty[id] = nq - bq;
+
+                ORDER_ITEM_SCALARS.forEach(f => {
+                    if (!sameVal(bi[f], ni[f])) {
+                        if (!d.itemFields[id]) d.itemFields[id] = {};
+                        d.itemFields[id][f] = ni[f] === undefined ? null : cloneOrd(ni[f]);
+                    }
+                });
+
+                // Notes and add-on options merge key by key, so two phones ticking
+                // different options on the same dish keep both ticks.
+                const bNotes = (bi.notes && typeof bi.notes === 'object') ? bi.notes : {};
+                const nNotes = (ni.notes && typeof ni.notes === 'object') ? ni.notes : {};
+                Object.keys(nNotes).forEach(k => {
+                    if (nNotes[k] !== bNotes[k]) {
+                        if (!d.itemNotes[id]) d.itemNotes[id] = {};
+                        d.itemNotes[id][k] = nNotes[k];
+                    }
+                });
+                Object.keys(bNotes).forEach(k => {
+                    if (!(k in nNotes)) {
+                        if (!d.itemNoteOff[id]) d.itemNoteOff[id] = [];
+                        d.itemNoteOff[id].push(k);
+                    }
+                });
+
+                const bOpts = (bi.options && typeof bi.options === 'object') ? bi.options : {};
+                const nOpts = (ni.options && typeof ni.options === 'object') ? ni.options : {};
+                Object.keys(nOpts).forEach(k => {
+                    if (nOpts[k] === undefined) return;
+                    if (!sameVal(bOpts[k], nOpts[k])) {
+                        if (!d.itemOpts[id]) d.itemOpts[id] = {};
+                        d.itemOpts[id][k] = cloneOrd(nOpts[k]);
+                    }
+                });
+                Object.keys(bOpts).forEach(k => {
+                    if (!(k in nOpts)) {
+                        if (!d.itemOptOff[id]) d.itemOptOff[id] = [];
+                        d.itemOptOff[id].push(k);
+                    }
+                });
+            });
+
+            bItems.forEach(bi => {
+                if (bi && !nMap[String(bi.id)]) d.removed.push(String(bi.id));
+            });
+
+            const bDoc = base || {};
+            Object.keys(next).forEach(f => {
+                if (f === 'items') return;
+                if (next[f] === undefined) { d.docOff.push(f); return; }
+                if (!sameVal(bDoc[f], next[f])) d.doc[f] = cloneOrd(next[f]);
+            });
+            Object.keys(bDoc).forEach(f => {
+                if (f === 'items') return;
+                if (!(f in next)) d.docOff.push(f);
+            });
+
+            if (!d.added.length && !d.removed.length && !d.docOff.length &&
+                !Object.keys(d.qty).length && !Object.keys(d.itemFields).length &&
+                !Object.keys(d.itemNotes).length && !Object.keys(d.itemNoteOff).length &&
+                !Object.keys(d.itemOpts).length && !Object.keys(d.itemOptOff).length &&
+                !Object.keys(d.doc).length) return null;
+            return d;
+        }
+
+        function applyOrderDiff(serverDoc, d) {
+            const doc = (serverDoc && typeof serverDoc === 'object') ? serverDoc : {};
+            const items = getOrderItemsArray(doc);
+            const map = orderItemsById(items);
+            const drop = {};
+            d.removed.forEach(id => { drop[id] = true; });
+
+            d.added.forEach(ni => {
+                const ex = map[String(ni.id)];
+                if (ex) {
+                    ex.qty = Math.max(0, (Number(ex.qty) || 0) + (Number(ni.qty) || 1));
+                } else {
+                    const copy = cloneOrd(ni);
+                    items.push(copy);
+                    map[String(copy.id)] = copy;
+                }
+            });
+
+            Object.keys(d.qty).forEach(id => {
+                const it = map[id];
+                if (it) it.qty = Math.max(0, (Number(it.qty) || 0) + d.qty[id]);
+            });
+
+            Object.keys(d.itemFields).forEach(id => {
+                const it = map[id];
+                if (!it) return;
+                Object.keys(d.itemFields[id]).forEach(f => {
+                    const v = d.itemFields[id][f];
+                    if (v === null) delete it[f];
+                    else it[f] = v;
+                });
+            });
+
+            Object.keys(d.itemNotes).forEach(id => {
+                const it = map[id];
+                if (!it) return;
+                if (!it.notes || typeof it.notes !== 'object') it.notes = {};
+                Object.keys(d.itemNotes[id]).forEach(k => { it.notes[k] = d.itemNotes[id][k]; });
+            });
+            Object.keys(d.itemNoteOff).forEach(id => {
+                const it = map[id];
+                if (!it || !it.notes || typeof it.notes !== 'object') return;
+                d.itemNoteOff[id].forEach(k => { delete it.notes[k]; });
+            });
+
+            Object.keys(d.itemOpts).forEach(id => {
+                const it = map[id];
+                if (!it) return;
+                if (!it.options || typeof it.options !== 'object') it.options = {};
+                Object.keys(d.itemOpts[id]).forEach(k => { it.options[k] = d.itemOpts[id][k]; });
+            });
+            Object.keys(d.itemOptOff).forEach(id => {
+                const it = map[id];
+                if (!it || !it.options || typeof it.options !== 'object') return;
+                d.itemOptOff[id].forEach(k => { delete it.options[k]; });
+            });
+
+            doc.items = items.filter(it => it && !drop[String(it.id)] && Math.max(0, Number(it.qty) || 0) > 0);
+
+            Object.keys(d.doc).forEach(f => { doc[f] = d.doc[f]; });
+            d.docOff.forEach(f => { delete doc[f]; });
+            return doc;
+        }
+
+        function saveOrder(key, doc, opts) {
+            const options = opts || {};
+            const fallbackKey = key || currentTableKey;
+            const next = doc || (fallbackKey ? activeOrders[fallbackKey] : null);
+            if (!fallbackKey || !next) return Promise.resolve(null);
+            if (typeof db === 'undefined' || !db || !db.ref) return Promise.resolve(null);
+
+            const diff = buildOrderDiff(orderBaselines[fallbackKey], next);
+            if (!diff) return Promise.resolve(null);
+            const seed = cloneOrd(next);
+
+            return db.ref('activeOrders/' + fallbackKey).runTransaction(serverDoc => {
+                let merged;
+                if (!serverDoc) {
+                    merged = seed;
+                } else {
+                    merged = applyOrderDiff(serverDoc, diff);
+                }
+                if (options.deleteIfEmpty && getOrderItemsArray(merged).length === 0) return null;
+                return merged;
+            }).then(res => {
+                if (!res || !res.committed) return res;
+                const val = res.snapshot && res.snapshot.val ? res.snapshot.val() : null;
+                if (val) {
+                    orderBaselines[fallbackKey] = cloneOrd(val);
+                    activeOrders[fallbackKey] = cloneOrd(val);
+                } else {
+                    delete orderBaselines[fallbackKey];
+                    delete activeOrders[fallbackKey];
+                }
+                return res;
+            }).catch(err => {
+                console.error('Could not save order for ' + fallbackKey, err);
+                return null;
+            });
+        }
+
+
         function checkActiveOrdersForExternalChanges(incomingOrders) {
             if (!initialActiveOrdersLoaded) {
                 initialActiveOrdersLoaded = true;
@@ -2917,6 +3134,7 @@
             }
 
             activeOrders = raw;
+            syncOrderBaselines(raw);
             if (isCustomerMode && isTakeawayCustomer && activeOrders[currentTableKey]) {
                 if (activeOrders[currentTableKey].isReady) {
                     document.getElementById('customer-ready-screen').style.display = 'flex';
@@ -3676,7 +3894,7 @@
                         takenBy: 'Customer QR',
                         createdAt: Date.now()
                     };
-                    db.ref('activeOrders/' + storedTkKey).set(activeOrders[storedTkKey]);
+                    saveOrder(storedTkKey, activeOrders[storedTkKey]);
                 }
 
                 document.getElementById('takeaway-details-modal').style.display = 'none';
@@ -4148,7 +4366,7 @@
                     if (!ord.sentToKitchen) {
                         ord.sentToKitchen = true;
                         ord.lastUpdatedAt = Date.now();
-                        db.ref('activeOrders/' + currentTableKey).set(ord);
+                        saveOrder(currentTableKey, ord);
                         broadcastLiveOrderEvent(currentTableKey, 'order', ord);
                     }
                 }
@@ -4228,7 +4446,7 @@
                 delete activeOrders[currentTableKey].orderIntake;
                 delete activeOrders[currentTableKey].intakeUpdatedBy;
             }
-            db.ref('activeOrders/' + currentTableKey).set(activeOrders[currentTableKey]);
+            saveOrder(currentTableKey, activeOrders[currentTableKey]);
             updateOrderIntakeUI();
             refreshCartTitleBadge();
             updateCartSeatedDisplay();
@@ -4416,7 +4634,7 @@
                 activeOrders[currentTableKey].seatedTime = timeStr;
             }
 
-            db.ref('activeOrders/' + currentTableKey).set(activeOrders[currentTableKey]);
+            saveOrder(currentTableKey, activeOrders[currentTableKey]);
             flashLiveSyncSuccess();
             renderCart();
             renderBigTablesGrid();
@@ -4477,7 +4695,7 @@
                     activeOrders[newOrderKey].orderIntake = currentOrderIntake;
                     activeOrders[newOrderKey].intakeUpdatedBy = loggedInDisplayName || "Staff";
                 }
-                db.ref('activeOrders/' + newOrderKey).set(activeOrders[newOrderKey]);
+                saveOrder(newOrderKey, activeOrders[newOrderKey]);
             }
 
             openTable(newOrderKey);
@@ -5328,7 +5546,7 @@
                 });
             }
 
-            db.ref('activeOrders/' + currentTableKey).set(order);
+            saveOrder(currentTableKey, order);
             renderCart();
             renderMenuGrid();
             showToast(`✓ ${item.name} added!`);
@@ -5361,12 +5579,8 @@
                 item.takeawayQty = item.qty;
             }
 
-            if (order.items.length === 0) {
-                delete activeOrders[currentTableKey];
-                db.ref('activeOrders/' + currentTableKey).remove();
-            } else {
-                db.ref('activeOrders/' + currentTableKey).set(order);
-            }
+            saveOrder(currentTableKey, order, { deleteIfEmpty: true });
+            if (order.items.length === 0) delete activeOrders[currentTableKey];
 
             renderCart();
             renderMenuGrid();
@@ -5384,30 +5598,23 @@
             const items = getOrderItemsArray(order);
             if (items.length === 0) return;
 
-            // Only text inputs need syncing. Checkboxes and qty steppers write to
-            // memory the moment they change, so re-reading them from the DOM here
-            // would let a stale render overwrite newer data from another device.
-            const commentInputs = document.querySelectorAll('#cart-items .comment-input');
-            commentInputs.forEach(input => {
-                const id = input.getAttribute('data-item-id');
-                if (id) {
-                    const it = items.find(x => String(x.id) === String(id));
-                    if (it) {
-                        it.comment = input.value;
-                    }
-                }
-            });
+            // Only the box being typed in can hold text that memory does not have
+            // yet. Every other input repeats the last render, so reading those back
+            // lets a stale render erase notes and prices that a quick-note chip or
+            // another phone has just written.
+            const typing = document.activeElement;
+            if (!typing || !typing.matches('#cart-items .comment-input, #cart-items .price-input')) return;
 
-            const priceInputs = document.querySelectorAll('#cart-items .price-input');
-            priceInputs.forEach(input => {
-                const id = input.getAttribute('data-item-id');
-                if (id) {
-                    const it = items.find(x => String(x.id) === String(id));
-                    if (it) {
-                        it.customPrice = Math.max(0, Number(input.value) || 0);
-                    }
-                }
-            });
+            const id = typing.getAttribute('data-item-id');
+            if (!id) return;
+            const it = items.find(x => String(x.id) === String(id));
+            if (!it) return;
+
+            if (typing.classList.contains('comment-input')) {
+                it.comment = typing.value;
+            } else {
+                it.customPrice = Math.max(0, Number(typing.value) || 0);
+            }
             order.items = items;
         }
 
@@ -5422,7 +5629,7 @@
                 item.takeawayQty = newTk;
                 if (!item.notes || typeof item.notes !== 'object') item.notes = {};
                 item.notes.takeaway = (newTk > 0);
-                db.ref('activeOrders/' + currentTableKey).set(order);
+                saveOrder(currentTableKey, order);
                 renderCart();
                 flashLiveSyncSuccess();
             }
@@ -5463,7 +5670,7 @@
                 } else {
                     item.comment = cur + ", " + noteText;
                 }
-                db.ref('activeOrders/' + currentTableKey).set(order);
+                saveOrder(currentTableKey, order);
                 renderCart();
                 flashLiveSyncSuccess();
             }
@@ -5560,7 +5767,7 @@
                 item.takeawayQty = newTk;
                 if (!item.notes || typeof item.notes !== 'object') item.notes = {};
                 item.notes.takeaway = (newTk > 0);
-                db.ref('activeOrders/' + currentTableKey).set(order);
+                saveOrder(currentTableKey, order);
                 renderCart();
                 flashLiveSyncSuccess();
             }
@@ -5576,7 +5783,7 @@
                 if (item.notes && typeof item.notes === 'object') {
                     item.notes.takeaway = false;
                 }
-                db.ref('activeOrders/' + currentTableKey).set(order);
+                saveOrder(currentTableKey, order);
                 renderCart();
                 flashLiveSyncSuccess();
             }
@@ -5593,7 +5800,7 @@
                 item.takeawayQty = newTk;
                 if (!item.notes || typeof item.notes !== 'object') item.notes = {};
                 item.notes.takeaway = (newTk > 0);
-                db.ref('activeOrders/' + currentTableKey).set(order);
+                saveOrder(currentTableKey, order);
                 renderCart();
                 flashLiveSyncSuccess();
             }
@@ -5609,7 +5816,7 @@
             let item = order.items.find(x => String(x.id) === String(itemId));
             if (item) {
                 item.customPrice = Math.max(0, Number(newPrice) || 0);
-                db.ref('activeOrders/' + currentTableKey).set(order);
+                saveOrder(currentTableKey, order);
                 updateCart();
                 flashLiveSyncSuccess();
             }
@@ -5623,7 +5830,7 @@
             if (item) {
                 if (!item.notes || typeof item.notes !== 'object') item.notes = {};
                 item.notes[noteType] = Boolean(checked);
-                db.ref('activeOrders/' + currentTableKey).set(order);
+                saveOrder(currentTableKey, order);
                 renderCart();
                 flashLiveSyncSuccess();
             }
@@ -5659,7 +5866,7 @@
                 order.items = items;
                 order.lastDeviceId = posDeviceId;
                 order.lastUpdatedAt = Date.now();
-                db.ref('activeOrders/' + currentTableKey).set(order);
+                saveOrder(currentTableKey, order);
                 renderCart();
                 flashLiveSyncSuccess();
             }
@@ -5698,7 +5905,7 @@
                 order.items = items;
                 order.lastDeviceId = posDeviceId;
                 order.lastUpdatedAt = Date.now();
-                db.ref('activeOrders/' + currentTableKey).set(order);
+                saveOrder(currentTableKey, order);
                 renderCart();
                 flashLiveSyncSuccess();
             }
@@ -5724,7 +5931,7 @@
                 order.items = items;
                 order.lastDeviceId = posDeviceId;
                 order.lastUpdatedAt = Date.now();
-                db.ref('activeOrders/' + currentTableKey).set(order);
+                saveOrder(currentTableKey, order);
                 renderCart();
                 flashLiveSyncSuccess();
             }
@@ -5762,7 +5969,7 @@
                 item.comment = value;
                 clearTimeout(commentDebounceTimers[itemId]);
                 commentDebounceTimers[itemId] = setTimeout(() => {
-                    db.ref('activeOrders/' + currentTableKey).set(order);
+                    saveOrder(currentTableKey, order);
                     flashLiveSyncSuccess();
                 }, 300);
             }
@@ -5775,7 +5982,7 @@
             if (item) {
                 item.comment = comment;
                 clearTimeout(commentDebounceTimers[itemId]);
-                db.ref('activeOrders/' + currentTableKey).set(order);
+                saveOrder(currentTableKey, order);
                 flashLiveSyncSuccess();
             }
         }
@@ -5800,7 +6007,7 @@
                 order.paymentMethod = payMethodSelect.value;
             }
 
-            db.ref('activeOrders/' + currentTableKey).set(order);
+            saveOrder(currentTableKey, order);
             flashLiveSyncSuccess();
         }
 
@@ -6133,7 +6340,7 @@
                 sendBtn.innerText = "Sending to Kitchen...";
             }
 
-            db.ref("activeOrders/" + currentTableKey).set(order).then(() => {
+            saveOrder(currentTableKey, order).then(() => {
                 broadcastLiveOrderEvent(currentTableKey, isUpdate ? "update" : "order", order);
 
                 const modalTitle = document.querySelector("#customer-success-screen h2");
@@ -6201,7 +6408,7 @@
             let order = activeOrders[currentTableKey];
             if (!order) return;
             order.isReady = !order.isReady;
-            db.ref('activeOrders/' + currentTableKey).set(order).then(() => {
+            saveOrder(currentTableKey, order).then(() => {
                 const btnReady = document.getElementById('btn-ready-order-elem');
                 if (btnReady) {
                     btnReady.innerText = order.isReady ? "Mark Order Not Ready" : "Mark Order Ready";
@@ -6226,7 +6433,7 @@
                 order.takenBy = loggedInDisplayName || "Staff";
             }
 
-            db.ref('activeOrders/' + currentTableKey).set(order).then(() => {
+            saveOrder(currentTableKey, order).then(() => {
                 broadcastLiveOrderEvent(currentTableKey, isUpdate ? 'update' : 'order', order);
                 showToast(isUpdate ? `✓ ${currentTableKey} update sent to Kitchen & Counter!` : `✓ ${currentTableKey} order sent to Kitchen & Counter!`);
 
@@ -6282,7 +6489,7 @@
             }
 
             // Immediately persist latest notes to DB
-            db.ref('activeOrders/' + currentTableKey).set(order);
+            saveOrder(currentTableKey, order);
 
             document.getElementById('k-order-type').innerText = currentTableKey.startsWith("Order-") ? "TAKEAWAY" : "DINE-IN";
             document.getElementById('k-table').innerText = currentTableKey;
@@ -6336,7 +6543,7 @@
             if (!order || !order.items || order.items.length === 0) return alert("Cart is empty!");
 
             // Immediately persist latest notes to DB
-            db.ref('activeOrders/' + currentTableKey).set(order);
+            saveOrder(currentTableKey, order);
 
             populateCustomerReceipt(order, 0, 0);
             triggerPrint("print-customer", onComplete);
@@ -6426,7 +6633,7 @@
             let order = activeOrders[currentTableKey];
             if (!order || !order.items || order.items.length === 0) return alert("Cart is empty!");
 
-            db.ref('activeOrders/' + currentTableKey).set(order);
+            saveOrder(currentTableKey, order);
 
             let grand = getOrderGrandTotal(order);
             document.getElementById('modal-grand-total').innerText = grand.toFixed(2);
@@ -6685,11 +6892,11 @@
                     if (ex) ex.qty += it.qty;
                     else destOrder.items.push(it);
                 });
-                db.ref('activeOrders/' + targetMoveDestination).set(destOrder);
+                saveOrder(targetMoveDestination, destOrder);
                 db.ref('activeOrders/' + currentTableKey).remove();
             } else {
                 let currentOrder = activeOrders[currentTableKey];
-                db.ref('activeOrders/' + targetMoveDestination).set(currentOrder);
+                saveOrder(targetMoveDestination, currentOrder);
                 db.ref('activeOrders/' + currentTableKey).remove();
             }
 
