@@ -52,8 +52,8 @@
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -1444,7 +1444,6 @@
     }
     </style>
 
-    <!-- NEW: Responsive size fix -->
     <style id="responsive-size-fix">
       #main-app {
         height: 100dvh !important;
@@ -1736,6 +1735,7 @@
                     <button class="admin-btn history-btn" onclick="openHistoryModal()">Sales History</button>
                     <button class="admin-btn payment-summary-btn" onclick="openPaymentSummaryModal()">Payment Summary</button>
                     <button class="admin-btn manage-suppliers-btn" onclick="openCredentialsModal()">👥 Manage Suppliers & Logins</button>
+                    <button class="admin-btn" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);" onclick="repairCategoriesNow()">🛠️ Fix Menu Categories</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">Day Close</button>
                 </div>
             </div>
@@ -2485,7 +2485,6 @@
         };
         firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const auth = firebase.auth();
 
         const CRED_SALT = "alhussain_pos_secure_salt_2026";
 
@@ -2743,6 +2742,79 @@ const auth = firebase.auth();
         const MAX_TABLE_COUNT = 60;
         let tableCount = DEFAULT_TABLE_COUNT;
 
+        /* ==================== MENU/CATEGORY HELPERS (FIXED) ==================== */
+
+        function sanitizeFirebaseKey(k) {
+            return String(k === null || k === undefined ? '' : k)
+                .replace(/[.#$\[\]\/]/g, '_')
+                .trim();
+        }
+
+        /* Normalize: duplicates + string id + safe category text */
+        function normalizeMenuList(list) {
+            const seen = new Set();
+            const out = [];
+            (list || []).forEach(m => {
+                if (!m || typeof m !== 'object') return;
+                const item = { ...m, stock: m.stock !== undefined ? m.stock : 999999 };
+
+                const rawCat = String(item.cat || item.category || '').trim();
+                item.cat = rawCat;
+                item.category = rawCat;
+
+                let id = (item.id === undefined || item.id === null || item.id === '')
+                    ? (rawCat.toLowerCase() + '|' + String(item.name || '').trim().toLowerCase())
+                    : String(item.id);
+                id = sanitizeFirebaseKey(id) || ('item_' + Date.now() + '_' + out.length);
+
+                let cand = id, n = 2;
+                while (seen.has(cand)) { cand = id + '#' + n; n++; }
+                seen.add(cand);
+                item.id = cand;
+                out.push(item);
+            });
+            return out;
+        }
+
+        /* Menu-வில் உள்ள ஆனா categories list-ல இல்லாத category-ஐ சேர்க்கும் */
+        function mergeMenuCategoriesIntoList() {
+            if (!Array.isArray(categories)) categories = [];
+            const existing = new Set(categories.map(c => String(c).trim().toLowerCase()));
+            let added = [];
+            (menu || []).forEach(m => {
+                const c = String((m && (m.cat || m.category)) || '').trim();
+                if (!c) return;
+                if (!existing.has(c.toLowerCase())) {
+                    existing.add(c.toLowerCase());
+                    categories.push(c);
+                    added.push(c);
+                }
+            });
+            return added;
+        }
+
+        function saveMenuToCloudReturningPromise() {
+            const clean = (menu || []).map(m => {
+                const c = String(m.cat || m.category || '').trim();
+                return {
+                    id: String(m.id),
+                    code: String(m.code || ''),
+                    name: String(m.name || ''),
+                    cat: c,
+                    category: c,
+                    price: Number(m.price) || 0,
+                    stock: m.stock !== undefined ? Number(m.stock) : 999999
+                };
+            });
+            return db.ref('menu').set(clean);
+        }
+
+        function saveMenuToCloud() {
+            return saveMenuToCloudReturningPromise().catch(err => console.error('Menu save failed:', err));
+        }
+
+        /* ==================== END MENU/CATEGORY HELPERS ==================== */
+
         function getTableCount() {
             let n = parseInt(tableCount, 10);
             if (isNaN(n)) n = DEFAULT_TABLE_COUNT;
@@ -2871,21 +2943,7 @@ const auth = firebase.auth();
             applyPrivateStatVisibility('sales');
             applyPrivateStatVisibility('expenses');
         }
-// ===== Firebase Auth Gate =====
-// Anonymous sign-in -> gives auth token -> lets us use "auth != null" rules
-auth.onAuthStateChanged(function(user) {
-    if (user) {
-        startRealtimeListeners();
-    } else {
-        auth.signInAnonymously().catch(function(err) {
-            console.error("Firebase anonymous auth failed:", err);
-        });
-    }
-});
 
-function startRealtimeListeners() {
-
-// ↓↓↓ இங்கிருந்து கீழே இருக்கிற எல்லா code-ம் (db.ref listeners) இந்த function-க்கு உள்ளே இருக்கணும்
         db.ref('tableLinks').on('value', (snap) => {
             tableLinks = snap.val() || {};
             requestRenderBigTablesGrid();
@@ -2902,22 +2960,42 @@ function startRealtimeListeners() {
             if (typeof renderTableLinkModalList === 'function') renderTableLinkModalList();
         });
 
+        /* ========== FIXED CATEGORIES LISTENER ========== */
         db.ref('categories').on('value', (snapshot) => {
             const val = snapshot.val();
             let list = [];
-            if (val) {
-                if (Array.isArray(val)) list = val;
-                else if (typeof val === 'object') list = Object.values(val);
+
+            if (Array.isArray(val)) {
+                list = val.slice();
+            } else if (val && typeof val === 'object') {
+                // Firebase key order-ஐ சரியா பாதுகாக்கும் (0,1,2...)
+                list = Object.keys(val)
+                    .sort((a, b) => {
+                        const na = Number(a), nb = Number(b);
+                        const aN = !isNaN(na), bN = !isNaN(nb);
+                        if (aN && bN) return na - nb;
+                        if (aN) return -1;
+                        if (bN) return 1;
+                        return String(a).localeCompare(String(b));
+                    })
+                    .map(k => val[k]);
             }
+
+            list = list.map(c => (c === null || c === undefined) ? '' : String(c).trim()).filter(Boolean);
+
             if (list.length > 0) {
-                categories = list.filter(Boolean);
+                categories = list;
             } else {
-                db.ref('categories').set(categories);
+                db.ref('categories').set(categories).catch(() => {});
             }
+
+            mergeMenuCategoriesIntoList();
+
             renderCategories();
             populateCategoryDropdowns();
             renderCategoryManagerTable();
             renderCheckboxManagerCategorySelect();
+            renderMenuGrid();
         });
 
         function refreshUnifiedCheckboxes() {
@@ -2934,6 +3012,7 @@ function startRealtimeListeners() {
             }
         });
 
+        /* ========== FIXED MENU LISTENER ========== */
         db.ref('menu').on('value', (snapshot) => {
             const val = snapshot.val();
             let rawList = [];
@@ -2943,30 +3022,28 @@ function startRealtimeListeners() {
                 } else if (typeof val === 'object') {
                     rawList = Object.entries(val).map(([k, v]) => {
                         if (v && typeof v === 'object') {
-                            return { id: v.id || k, ...v };
+                            return { ...v, id: (v.id != null && v.id !== '') ? v.id : k };
                         }
                         return v;
                     });
                 }
             }
             if (rawList.length > 0) {
-                menu = rawList.map(m => ({
+                menu = normalizeMenuList(rawList.map(m => ({
                     ...m,
-                    id: m.id || Date.now(),
                     code: m.code || "",
                     name: m.name || "",
-                    cat: (m.cat || m.category || "Special").trim(),
+                    cat: String(m.cat || m.category || "").trim(),
                     price: Number(m.price) || 0
-                }));
-                const itemCats = Array.from(new Set(menu.map(m => (m.cat || '').trim()).filter(Boolean)));
-                itemCats.forEach(c => {
-                    if (!categories.some(x => x.toLowerCase() === c.toLowerCase())) {
-                        categories.push(c);
-                    }
-                });
+                })));
+
+                mergeMenuCategoriesIntoList();
+
                 renderCategories();
                 populateCategoryDropdowns();
                 renderMenuGrid();
+                renderCategoryManagerTable();
+                renderCheckboxManagerCategorySelect();
             }
         });
 
@@ -3721,14 +3798,24 @@ function startRealtimeListeners() {
             }
         }
 
+        function acknowledgeCustomerOrder(tKey) {
+            const ord = activeOrders[tKey];
+            if (ord && typeof ord === 'object') {
+                ord.staffAcknowledged = true;
+            }
+            db.ref('activeOrders/' + tKey + '/staffAcknowledged').set(true).catch(() => {});
+        }
+
         function staffOpenAlertTable(tKey) {
             db.ref('newCustomerOrderAlerts/' + tKey).remove();
             db.ref('staffAlerts/' + tKey).remove();
+            acknowledgeCustomerOrder(tKey);
             openTable(tKey);
         }
 
         function dismissCustomerOrderAlert(tKey) {
             db.ref('newCustomerOrderAlerts/' + tKey).remove();
+            acknowledgeCustomerOrder(tKey);
         }
 
         function dismissStaffAlert(tKey) {
@@ -4677,14 +4764,6 @@ function startRealtimeListeners() {
                 });
             });
         }
-        } // ← saveCredentials ends
-
-} // ← இந்த `}`-ஐ சேர்க்கணும் (startRealtimeListeners-ஐ close பண்ண)
-
-    </script>
-
-</body>
-</html>
         let renderBigTablesGridScheduled = false;
         function requestRenderBigTablesGrid() {
             if (renderBigTablesGridScheduled) return;
@@ -5024,7 +5103,8 @@ function startRealtimeListeners() {
 
         function getItemLineTotal(item) {
             const qty = Math.max(0, Number(item && item.qty) || 0);
-            const base = Math.max(0, Number(item && item.customPrice) || 0);
+            const rawBase = item ? (item.customPrice != null ? item.customPrice : item.price) : 0;
+            const base = Math.max(0, Number(rawBase) || 0);
             return (base * qty) + getItemOptionTotal(item);
         }
 
@@ -5436,14 +5516,28 @@ function startRealtimeListeners() {
             renderMenuGrid();
         }
 
+        function assignMissingItemIds(items) {
+            const seen = new Set();
+            items.forEach(x => {
+                if (!x) return;
+                const id = (x.id === undefined || x.id === null || x.id === '')
+                    ? String((x.cat || x.category || '')).trim().toLowerCase() + '|' + String(x.name || 'item').trim().toLowerCase()
+                    : String(x.id);
+                let cand = id, n = 2;
+                while (seen.has(cand)) { cand = id + '#' + n; n++; }
+                seen.add(cand);
+                x.id = cand;
+            });
+        }
+
         function refreshMenuData() {
             db.ref('menu').once('value', (snapshot) => {
                 const val = snapshot.val();
                 if (val) {
                     if (Array.isArray(val)) {
-                        menu = val.map(m => ({ ...m, stock: 999999 }));
+                        menu = normalizeMenuList(val);
                     } else if (typeof val === 'object') {
-                        menu = Object.entries(val).map(([k, v]) => ({ id: v.id || k, ...v, stock: 999999 }));
+                        menu = normalizeMenuList(Object.entries(val).map(([k, v]) => ({ id: (v && v.id != null && v.id !== '') ? v.id : k, ...v })));
                     }
                 }
                 renderMenuGrid();
@@ -6057,6 +6151,7 @@ function startRealtimeListeners() {
             tbody.innerHTML = "";
 
             const order = activeOrders[currentTableKey];
+            assignMissingItemIds(getOrderItemsArray(order));
             const items = getSortedOrderItems(getOrderItemsArray(order));
             const totalItemCount = items.reduce((s, x) => s + (Number(x.qty) || 1), 0);
 
@@ -6087,7 +6182,10 @@ function startRealtimeListeners() {
                 (currentTableKey && currentTableKey.startsWith("Order-"))
             );
 
-            items.forEach(item => {
+            items.forEach((item, itemIndex) => {
+                if (item.customPrice == null && item.price != null) {
+                    item.customPrice = Math.max(0, Number(item.price) || 0);
+                }
                 const totalQty = Math.max(1, Number(item.qty) || 1);
                 if (isDedicatedTakeaway) {
                     item.takeawayQty = totalQty;
@@ -6223,8 +6321,8 @@ function startRealtimeListeners() {
                     </td>
                     <td style="text-align: right;">
                         ${isCustomerMode ? 
-                            `<div style="font-size:14px; font-weight:800; color:var(--text);">$${Number(item.customPrice).toFixed(2)}</div>` : 
-                            `<input type="number" class="price-input" data-item-id="${item.id}" aria-label="Unit price for ${escapeHtml(item.name)}" value="${Number(item.customPrice).toFixed(2)}" step="0.50" min="0" onchange="updateItemPrice('${item.id}', this.value)">`
+                            `<div style="font-size:14px; font-weight:800; color:var(--text);">$${(Number(item.customPrice) || 0).toFixed(2)}</div>` : 
+                            `<input type="number" class="price-input" data-item-id="${item.id}" aria-label="Unit price for ${escapeHtml(item.name)}" value="${(Number(item.customPrice) || 0).toFixed(2)}" step="0.50" min="0" onchange="updateItemPrice('${item.id}', this.value)">`
                         }
                         <div style="font-size:12px; font-weight:bold; color:var(--text-muted); margin-top:3px;">Tot: $${lineTotal.toFixed(2)}</div>
                     </td>
@@ -7257,9 +7355,10 @@ function startRealtimeListeners() {
             }
 
             setTimeout(() => {
+                const prevBodyClass = document.body.className;
                 document.body.className = "print-qr-mode";
                 window.print();
-                setTimeout(() => { document.body.className = ""; }, 1000);
+                setTimeout(() => { document.body.className = prevBodyClass; }, 1000);
             }, 500);
         }
         function openMenuManagerModal() {
@@ -7275,28 +7374,35 @@ function startRealtimeListeners() {
             document.getElementById('menu-manager-modal').style.display = 'none';
         }
 
+        /* ========== FIXED Menu Manager Table ========== */
         function renderMenuManagerTable() {
             const tbody = document.getElementById('menu-manager-tbody');
             if (!tbody) return;
             tbody.innerHTML = "";
 
-            const sVal = document.getElementById('menu-manager-search') ? document.getElementById('menu-manager-search').value.trim().toLowerCase() : "";
+            const sVal = document.getElementById('menu-manager-search')
+                ? document.getElementById('menu-manager-search').value.trim().toLowerCase() : "";
+
+            const esc = s => String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
             menu.forEach(item => {
-                if (sVal && !item.name.toLowerCase().includes(sVal) && !item.code.toLowerCase().includes(sVal)) return;
+                const nm = String(item.name || '').toLowerCase();
+                const cd = String(item.code || '').toLowerCase();
+                if (sVal && !nm.includes(sVal) && !cd.includes(sVal)) return;
 
+                const safeId = esc(item.id);
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><input type="text" value="${item.code || ''}" style="width:70px; padding:6px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField(${item.id}, 'code', this.value)"></td>
-                    <td><input type="text" value="${item.name}" style="width:100%; padding:6px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField(${item.id}, 'name', this.value)"></td>
+                    <td><input type="text" value="${escapeHtml(item.code || '')}" style="width:70px; padding:6px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField('${safeId}', 'code', this.value)"></td>
+                    <td><input type="text" value="${escapeHtml(item.name || '')}" style="width:100%; padding:6px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField('${safeId}', 'name', this.value)"></td>
                     <td>
-                        <select style="padding:6px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;" onchange="updateMenuItemField(${item.id}, 'cat', this.value)">
-                            ${categories.map(c => `<option value="${c}" ${item.cat === c ? 'selected' : ''}>${c}</option>`).join('')}
+                        <select style="padding:6px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;" onchange="updateMenuItemField('${safeId}', 'cat', this.value)">
+                            ${categories.map(c => `<option value="${escapeHtml(c)}" ${String(item.cat) === String(c) ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
                         </select>
                     </td>
-                    <td style="text-align:right;"><input type="number" step="0.50" value="${Number(item.price).toFixed(2)}" style="width:75px; padding:6px; text-align:right; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField(${item.id}, 'price', this.value)"></td>
+                    <td style="text-align:right;"><input type="number" step="0.50" value="${(Number(item.price) || 0).toFixed(2)}" style="width:75px; padding:6px; text-align:right; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField('${safeId}', 'price', this.value)"></td>
                     <td style="text-align:center;">
-                        <button class="btn-small" style="background:#ef4444;" onclick="deleteMenuItem(${item.id})">Delete</button>
+                        <button class="btn-small" style="background:#ef4444;" onclick="deleteMenuItem('${safeId}')">Delete</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -7308,15 +7414,21 @@ function startRealtimeListeners() {
         }
 
         function updateMenuItemField(itemId, field, val) {
-            let item = menu.find(m => m.id === itemId);
+            const item = menu.find(m => String(m.id) === String(itemId));
             if (!item) return;
+
             if (field === 'price') {
-                item[field] = Math.max(0, Number(val) || 0);
+                item.price = Math.max(0, Number(val) || 0);
+            } else if (field === 'cat') {
+                item.cat = String(val || '').trim();
+                item.category = item.cat;
             } else {
-                item[field] = val;
+                item[field] = String(val || '');
             }
-            db.ref('menu').set(menu);
+
+            saveMenuToCloud();
             renderMenuGrid();
+            renderMenuManagerTable();
         }
 
         function toggleItemStockStatus(itemId) {
@@ -7324,8 +7436,8 @@ function startRealtimeListeners() {
 
         function deleteMenuItem(itemId) {
             if (!confirm("Are you sure you want to delete this item?")) return;
-            menu = menu.filter(m => m.id !== itemId);
-            db.ref('menu').set(menu);
+            menu = menu.filter(m => String(m.id) !== String(itemId));
+            saveMenuToCloud();
             renderMenuManagerTable();
             renderMenuGrid();
         }
@@ -7338,15 +7450,23 @@ function startRealtimeListeners() {
 
             if (!name || price <= 0) return alert("Please enter valid item name and price!");
 
-            let newId = Date.now();
-            menu.push({ id: newId, code: code, name: name, cat: cat, price: price, stock: 999999 });
-            db.ref('menu').set(menu).then(() => {
-                document.getElementById('add-m-code').value = "";
-                document.getElementById('add-m-name').value = "";
-                document.getElementById('add-m-price').value = "";
-                alert("New menu item added!");
-                renderMenuGrid();
+            menu.push({
+                id: sanitizeFirebaseKey(Date.now() + '_' + name.toLowerCase()),
+                code: code,
+                name: name,
+                cat: cat,
+                category: cat,
+                price: price,
+                stock: 999999
             });
+
+            saveMenuToCloud();
+            document.getElementById('add-m-code').value = "";
+            document.getElementById('add-m-name').value = "";
+            document.getElementById('add-m-price').value = "";
+            alert("New menu item added!");
+            renderMenuGrid();
+            renderMenuManagerTable();
         }
 
         function openCategoryManagerModal() {
@@ -7375,37 +7495,100 @@ function startRealtimeListeners() {
                     <td style="text-align:right;">
                         <button class="btn-small" style="padding:4px 8px; margin-right:4px;" onclick="moveCategory(${index}, -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
                         <button class="btn-small" style="padding:4px 8px; margin-right:4px;" onclick="moveCategory(${index}, 1)" ${index === categories.length - 1 ? 'disabled' : ''}>▼</button>
-                        <button class="btn-small" style="background:#ef4444; padding:4px 8px;" onclick="deleteCategory('${cat}')">X</button>
+                        <button class="btn-small" style="background:#3b82f6; padding:4px 8px; margin-right:4px;" onclick="editCategory('${cat.replace(/'/g, "\\'")}')">✏️</button>
+                        <button class="btn-small" style="background:#ef4444; padding:4px 8px;" onclick="deleteCategory('${cat.replace(/'/g, "\\'")}')">X</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
+        function editCategory(oldCat) {
+            const newCat = prompt("Edit category name:", oldCat);
+            if (!newCat || !newCat.trim()) return;
+            const trimmed = newCat.trim();
+            if (trimmed === oldCat) return;
+
+            if (categories.some(c => c.trim().toLowerCase() === trimmed.toLowerCase() && c !== oldCat)) {
+                alert("Category '" + trimmed + "' already exists.");
+                return;
+            }
+
+            const idx = categories.findIndex(c => c === oldCat);
+            if (idx === -1) return;
+            categories[idx] = trimmed;
+
+            let menuChanged = false;
+            menu.forEach(m => {
+                if (String(m.cat || m.category || '').trim() === oldCat) {
+                    m.cat = trimmed;
+                    m.category = trimmed;
+                    menuChanged = true;
+                }
+            });
+
+            const jobs = [db.ref('categories').set(categories)];
+            if (menuChanged) jobs.push(saveMenuToCloudReturningPromise());
+
+            Promise.all(jobs).then(() => {
+                renderCategoryManagerTable();
+                renderCategories();
+                populateCategoryDropdowns();
+                renderMenuGrid();
+                renderMenuManagerTable();
+            }).catch(err => alert('Save failed: ' + err.message));
+        }
+
         function moveCategory(index, direction) {
-            let targetIndex = index + direction;
+            const targetIndex = index + direction;
             if (targetIndex < 0 || targetIndex >= categories.length) return;
-            let temp = categories[index];
+            const temp = categories[index];
             categories[index] = categories[targetIndex];
             categories[targetIndex] = temp;
-            db.ref('categories').set(categories);
+            db.ref('categories').set(categories).then(() => {
+                renderCategoryManagerTable();
+                renderCategories();
+                populateCategoryDropdowns();
+                renderMenuGrid();
+            });
         }
 
         function deleteCategory(cat) {
-            if (!confirm("Are you sure you want to remove category '" + cat + "'?")) return;
+            const used = menu.filter(m => String(m.cat || m.category || '').trim() === cat);
+
+            if (used.length > 0) {
+                if (!confirm("'" + cat + "'-ல " + used.length + " item(s) இருக்கு.\n\nஇந்த category-ஐ நீக்கினா அந்த items 'Uncategorized'-க்கு மாறும்.\n\nதொடரவா?")) return;
+
+                used.forEach(m => { m.cat = 'Uncategorized'; m.category = 'Uncategorized'; });
+                if (!categories.some(c => c.toLowerCase() === 'uncategorized')) categories.push('Uncategorized');
+                saveMenuToCloudReturningPromise().catch(() => {});
+            } else {
+                if (!confirm("Are you sure you want to remove category '" + cat + "'?")) return;
+            }
+
             categories = categories.filter(c => c !== cat);
-            db.ref('categories').set(categories);
+            db.ref('categories').set(categories).then(() => {
+                renderCategoryManagerTable();
+                renderCategories();
+                populateCategoryDropdowns();
+                renderMenuGrid();
+            });
         }
 
         function addNewCategoryPrompt() {
             let cat = prompt("Enter new category name:");
-            if (cat && cat.trim()) {
-                cat = cat.trim();
-                if (!categories.includes(cat)) {
-                    categories.push(cat);
-                    db.ref('categories').set(categories);
-                }
+            if (!cat || !cat.trim()) return;
+            cat = cat.trim();
+            if (categories.some(c => c.toLowerCase() === cat.toLowerCase())) {
+                alert("இந்த category ஏற்கனவே இருக்கு!");
+                return;
             }
+            categories.push(cat);
+            db.ref('categories').set(categories).then(() => {
+                renderCategoryManagerTable();
+                renderCategories();
+                populateCategoryDropdowns();
+            });
         }
 
         function openCheckboxManagerModal() {
@@ -7620,9 +7803,27 @@ function startRealtimeListeners() {
 
             let expArr = Object.values(expenses || {}).sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
             let total = 0;
+            let monthTotal = 0;
+            const monthCounts = {};
+            const now = new Date();
+            const curMonthKey = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
 
             expArr.forEach(x => {
-                total += Number(x.amount) || 0;
+                const amount = Number(x.amount) || 0;
+                total += amount;
+
+                let mk = '';
+                const dateParts = String(x.date || '').split('/');
+                if (dateParts.length === 3) mk = String(parseInt(dateParts[1], 10)).padStart(2, '0') + '/' + dateParts[2];
+                if (!mk && x.timestamp) {
+                    const d = new Date(x.timestamp);
+                    if (!isNaN(d.getTime())) mk = String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+                }
+                if (mk) {
+                    monthCounts[mk] = (monthCounts[mk] || 0) + amount;
+                    if (mk === curMonthKey) monthTotal += amount;
+                }
+
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${x.date || ''} ${x.time || ''}</td>
@@ -7633,8 +7834,33 @@ function startRealtimeListeners() {
             });
 
             document.getElementById('view-expenses-total').innerText = total.toFixed(2);
-            document.getElementById('view-expenses-month-total').innerText = total.toFixed(2);
-            document.getElementById('view-expenses-month-average').innerText = (total / Math.max(1, new Date().getDate())).toFixed(2);
+            document.getElementById('view-expenses-month-total').innerText = monthTotal.toFixed(2);
+            document.getElementById('view-expenses-month-average').innerText = (monthTotal / Math.max(1, now.getDate())).toFixed(2);
+
+            const emptyEl = document.getElementById('view-expenses-empty');
+            if (emptyEl) emptyEl.style.display = expArr.length === 0 ? 'block' : 'none';
+
+            const trendEl = document.getElementById('view-expenses-trend');
+            if (trendEl) {
+                const trendKeys = Object.keys(monthCounts).sort((a, b) => {
+                    const pa = a.split('/'), pb = b.split('/');
+                    return (parseInt(pb[1], 10) - parseInt(pa[1], 10)) || (parseInt(pb[0], 10) - parseInt(pa[0], 10));
+                });
+                if (trendKeys.length === 0) {
+                    trendEl.innerHTML = '<div style="color:#64748b; font-size:12px;">No monthly data yet.</div>';
+                } else {
+                    const maxVal = Math.max.apply(null, trendKeys.map(k => monthCounts[k]).concat([0.01]));
+                    trendEl.innerHTML = trendKeys.map(k => {
+                        const val = monthCounts[k];
+                        const pct = Math.max(2, Math.round((val / maxVal) * 100));
+                        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px;">
+                            <span style="min-width:64px;font-weight:800;color:#475569;">${k}</span>
+                            <span style="flex:1;background:#f1f5f9;border-radius:6px;height:14px;overflow:hidden;"><span style="display:block;height:100%;width:${pct}%;background:linear-gradient(90deg,#f97316,#ef4444);"></span></span>
+                            <span style="min-width:60px;text-align:right;font-weight:800;color:#b91c1c;">$${val.toFixed(2)}</span>
+                        </div>`;
+                    }).join('');
+                }
+            }
         }
 
         function calculateTotalSales() {
@@ -7740,9 +7966,10 @@ function startRealtimeListeners() {
             });
 
             document.getElementById('print-history-grand-total').innerText = sum.toFixed(2);
+            const prevBodyClass = document.body.className;
             document.body.className = "print-history-mode";
             window.print();
-            setTimeout(() => { document.body.className = ""; }, 1000);
+            setTimeout(() => { document.body.className = prevBodyClass; }, 1000);
         }
 
         function openMonthlyReportModal() {
@@ -7771,7 +7998,16 @@ function startRealtimeListeners() {
             });
 
             let tableHtml = '<table class="admin-table"><thead><tr><th>Date</th><th style="text-align:right;">Total Sales</th></tr></thead><tbody>';
-            Object.keys(dailyMap).sort().reverse().forEach(d => {
+            const parseReportDate = (s) => {
+                const p = String(s || '').split('/');
+                if (p.length === 3) {
+                    const t = new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10)).getTime();
+                    if (!isNaN(t)) return t;
+                }
+                const t2 = new Date(s).getTime();
+                return isNaN(t2) ? 0 : t2;
+            };
+            Object.keys(dailyMap).sort((a, b) => parseReportDate(b) - parseReportDate(a)).forEach(d => {
                 tableHtml += `<tr><td style="font-weight:bold;">${d}</td><td style="text-align:right; font-weight:bold; color:var(--primary);">$ ${dailyMap[d].toFixed(2)}</td></tr>`;
             });
             tableHtml += '</tbody></table>';
@@ -7849,7 +8085,10 @@ function startRealtimeListeners() {
                 return;
             }
             const dateFilter = document.getElementById('item-report-date-filter');
-            if (dateFilter) dateFilter.value = new Date().toISOString().split('T')[0];
+            if (dateFilter) {
+                const today = new Date();
+                dateFilter.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            }
             populateItemReportCategoryFilter();
             setItemReportScope('session');
             document.getElementById('item-report-modal').style.display = 'flex';
@@ -7894,8 +8133,8 @@ function startRealtimeListeners() {
 
                     const menuItem = menu.find(m => String(m.id) === String(it.id) || (m.name && m.name.trim().toLowerCase() === itemName.toLowerCase()));
                     const itemCat = (it.cat || (menuItem ? (menuItem.cat || menuItem.category) : "") || "Other").trim();
-                    const unitPrice = Number(it.price) || (menuItem ? Number(menuItem.price) : 0);
-                    const itemTotal = Number(it.total) || (qty * unitPrice);
+                    const unitPrice = Number(it.customPrice != null ? it.customPrice : it.price) || (menuItem ? Number(menuItem.price) : 0);
+                    const itemTotal = Number(it.total) || getItemLineTotal(it) || (qty * unitPrice);
 
                     const key = itemName.toLowerCase();
                     if (!itemMap[key]) {
@@ -8037,9 +8276,10 @@ function startRealtimeListeners() {
                 if (pAmt) pAmt.innerText = totalAmt.toFixed(2);
             }
 
+            const prevBodyClass = document.body.className;
             document.body.className = "print-item-report-mode";
             window.print();
-            setTimeout(() => { document.body.className = ""; }, 1000);
+            setTimeout(() => { document.body.className = prevBodyClass; }, 1000);
         }
 
         function openPaymentSummaryModal() {
@@ -8318,10 +8558,11 @@ function startRealtimeListeners() {
                 closeDayCloseModal();
 
                 if (printReceipt) {
+                    const prevBodyClass = document.body.className;
                     document.body.className = "print-day-close-mode";
                     window.print();
                     setTimeout(() => {
-                        document.body.className = "";
+                        document.body.className = prevBodyClass;
                         if (confirm("✓ Day Close successfully processed!\n\nAll counters have been reset to $0.00.\nWould you like to log out now?")) {
                             logout();
                         }
@@ -8408,15 +8649,94 @@ function startRealtimeListeners() {
                 }
             }
 
+            const prevBodyClass = document.body.className;
             document.body.className = "print-day-close-mode";
             window.print();
             setTimeout(() => {
-                document.body.className = "";
+                document.body.className = prevBodyClass;
             }, 1000);
         }
 
         function closeDay() {
             openDayCloseModal();
+        }
+
+        /* ==================== 🛠️ REPAIR MENU CATEGORIES ==================== */
+        async function repairCategoriesNow() {
+            if (!confirm("இது மெனு பொருட்களின் கேட்டகிரியை சரிசெய்து,\nகேட்டகிரி பட்டியலை ஒழுங்குபடுத்தும்.\n\nFirebase backup எடுத்தாச்சா?\n\nதொடரவா?")) return;
+
+            try {
+                const snap = await db.ref('menu').once('value');
+                const val = snap.val();
+                let rawList = [];
+                if (Array.isArray(val)) rawList = val.slice();
+                else if (val && typeof val === 'object') rawList = Object.values(val);
+
+                const cleaned = [];
+                const seenKeys = new Set();
+                rawList.forEach(m => {
+                    if (!m || typeof m !== 'object') return;
+                    const name = String(m.name || '').trim();
+                    if (!name) return;
+                    const cat = String(m.cat || m.category || '').trim() || 'Uncategorized';
+                    const dupKey = name.toLowerCase() + '||' + cat.toLowerCase();
+                    if (seenKeys.has(dupKey)) return;
+                    seenKeys.add(dupKey);
+                    cleaned.push({
+                        id: sanitizeFirebaseKey(m.id || (cat.toLowerCase() + '|' + name.toLowerCase())),
+                        code: String(m.code || '').trim(),
+                        name: name,
+                        cat: cat,
+                        category: cat,
+                        price: Number(m.price) || 0,
+                        stock: m.stock !== undefined ? m.stock : 999999
+                    });
+                });
+
+                const catSnap = await db.ref('categories').once('value');
+                const cval = catSnap.val();
+                let catList = [];
+                if (Array.isArray(cval)) catList = cval.slice();
+                else if (cval && typeof cval === 'object') {
+                    catList = Object.keys(cval)
+                        .sort((a, b) => {
+                            const na = Number(a), nb = Number(b);
+                            const aN = !isNaN(na), bN = !isNaN(nb);
+                            if (aN && bN) return na - nb;
+                            if (aN) return -1;
+                            if (bN) return 1;
+                            return String(a).localeCompare(String(b));
+                        })
+                        .map(k => cval[k]);
+                }
+                catList = catList.map(c => String(c || '').trim()).filter(Boolean);
+
+                const lowerSet = new Set(catList.map(c => c.toLowerCase()));
+                cleaned.forEach(m => {
+                    if (!lowerSet.has(m.cat.toLowerCase())) {
+                        lowerSet.add(m.cat.toLowerCase());
+                        catList.push(m.cat);
+                    }
+                });
+
+                const outMenu = normalizeMenuList(cleaned);
+                await db.ref('menu').set(outMenu);
+                await db.ref('categories').set(catList);
+
+                menu = outMenu;
+                categories = catList;
+
+                renderCategories();
+                populateCategoryDropdowns();
+                renderMenuGrid();
+                renderCategoryManagerTable();
+                renderMenuManagerTable();
+
+                alert("✅ சரிசெய்யப்பட்டது!\n\n" + outMenu.length + " items\n" + catList.length + " categories");
+            } catch (e) {
+                console.error(e);
+                alert("Repair failed: " + e.message);
+            }
         }
 
         const ALL_PERMISSION_KEYS = [
@@ -8596,11 +8916,11 @@ function startRealtimeListeners() {
                         </div>
                         <div style="min-width: 0; flex: 1;">
                             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                                <span style="font-weight: 900; color: #0f172a; font-size: 13.5px;">${name}</span>
+                                <span style="font-weight: 900; color: #0f172a; font-size: 13.5px;">${escapeHtml(name)}</span>
                                 <span style="font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 4px; background: #e2e8f0; color: #475569; text-transform: uppercase;">${roleType}</span>
                             </div>
                             <div style="font-size: 11.5px; color: #64748b; font-weight: 700; margin-top: 1px;">
-                                ID: <b style="color: #2563eb;">${user}</b> &bull; Pass: <b style="color: #059669;">${pass}</b>
+                                ID: <b style="color: #2563eb;">${escapeHtml(user)}</b> &bull; Pass: <b style="color: #059669;">${escapeHtml(pass)}</b>
                             </div>
                             <div class="cred-perm-tags">${tagsHtml}</div>
                         </div>
@@ -8610,7 +8930,7 @@ function startRealtimeListeners() {
                             ✏️ Edit
                         </button>
                         ${!isProtectedAdmin ? `
-                        <button type="button" class="btn-small" style="background: #fee2e2; color: #b91c1c; padding: 5px 8px; font-size: 12px; font-weight: 800;" onclick="deleteUserCredential('${k}', '${name}')" title="Delete this account">
+                        <button type="button" class="btn-small" style="background: #fee2e2; color: #b91c1c; padding: 5px 8px; font-size: 12px; font-weight: 800;" onclick="deleteUserCredential('${k}')" title="Delete this account">
                             🗑️
                         </button>` : ''}
                     </div>
@@ -8624,6 +8944,7 @@ function startRealtimeListeners() {
                 alert("The primary Admin account cannot be deleted.");
                 return;
             }
+            if (!userName) userName = (credentials[userKey] && credentials[userKey].name) || userKey;
             if (!confirm(`Are you sure you want to remove account "${userName || userKey}"? This user will no longer be able to log in.`)) {
                 return;
             }
@@ -8648,6 +8969,7 @@ function startRealtimeListeners() {
             const roleType = document.getElementById('cred-role-type').value;
             const username = document.getElementById('cred-username').value.trim();
             const password = document.getElementById('cred-password').value.trim();
+            const isNewAccount = !targetKey;
 
             if (!username) {
                 alert("Please enter a Login ID / Username (e.g. user1)!");
@@ -8674,16 +8996,10 @@ function startRealtimeListeners() {
             );
 
             if (duplicateKey) {
-                if (!targetKey || duplicateKey === targetKey) {
-                    targetKey = duplicateKey;
-                } else if (duplicateKey === 'user1' || duplicateKey === 'user2' || duplicateKey === 'user3') {
-                    targetKey = duplicateKey;
-                } else {
-                    const dupName = credentials[duplicateKey].name || duplicateKey;
-                    alert(`The username "${username}" is already assigned to "${dupName}". Please pick a unique username/ID.`);
-                    document.getElementById('cred-username').focus();
-                    return;
-                }
+                const dupName = credentials[duplicateKey].name || duplicateKey;
+                alert(`The username "${username}" is already assigned to "${dupName}". Please pick a unique username/ID.`);
+                document.getElementById('cred-username').focus();
+                return;
             }
 
             if (!targetKey) {
@@ -8698,6 +9014,13 @@ function startRealtimeListeners() {
                     const cleanSlug = (username || name || 'user').toLowerCase().replace(/[^a-z0-9]/gi, '') || 'staff';
                     targetKey = 'user_' + cleanSlug.slice(0, 15) + '_' + Date.now().toString().slice(-6);
                 }
+            }
+
+            if (isNewAccount && credentials[targetKey]) {
+                const cleanSlug = (username || name || 'user').toLowerCase().replace(/[^a-z0-9]/gi, '') || 'staff';
+                do {
+                    targetKey = 'user_' + cleanSlug.slice(0, 15) + '_' + Date.now().toString().slice(-6) + Math.floor(Math.random() * 1000);
+                } while (credentials[targetKey]);
             }
 
             const perms = {};
