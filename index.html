@@ -6,7 +6,6 @@
     <meta name="description" content="Al Hussain Restaurant point-of-sale system: table management, ordering, kitchen KOT, billing, payments, stock, expenses and daily reports.">
     <title>Al Hussain Restaurant - POS System</title>
     
-    <!-- Instant Customer QR Detection to prevent any login or table selection screen flash -->
     <script>
       (function() {
         var p = new URLSearchParams(window.location.search);
@@ -53,7 +52,8 @@
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -155,7 +155,6 @@
         .big-table-card p { margin: 0; font-size: 13px; font-weight: 800; color: var(--text-muted); line-height: 1.4; }
         .table-items-summary { font-size: 11px; font-weight: 700; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 8px; border-radius: 8px; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; text-align: left; }
 
-        /* Seated Timer Badges & Banners */
         .table-seated-banner { display: flex; align-items: center; justify-content: space-between; padding: 4px 10px; border-radius: 10px; margin: 6px 0 3px 0; font-size: 11.5px; font-weight: 800; transition: all 0.2s ease; }
         .table-seated-banner.timer-fresh { background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #047857; }
         .table-seated-banner.timer-medium { background: #fffbeb; border: 1.5px solid #fde68a; color: #b45309; }
@@ -221,7 +220,6 @@
         .btn-clear { background: #fef2f2; color: var(--danger); }
         .btn-clear:hover { background: var(--danger); color: white; }
 
-        /* Category Bar & Navigation */
         .category-bar-wrapper {
             display: flex;
             align-items: center;
@@ -271,7 +269,6 @@
             scroll-behavior: smooth;
             align-items: center;
         }
-        /* Thick, comfortable, easily clickable and visible scrollbar */
         .category-filters::-webkit-scrollbar {
             height: 9px;
         }
@@ -288,7 +285,6 @@
             background: #64748b;
         }
 
-        /* Wrap view mode: shows all categories cleanly without horizontal scrolling */
         .category-filters.wrap-mode {
             flex-wrap: wrap;
             overflow-x: visible;
@@ -297,7 +293,6 @@
             padding-bottom: 8px;
         }
 
-        /* Larger, clearer Category buttons */
         .cat-btn {
             background: #ffffff;
             border: 2px solid #cbd5e1;
@@ -586,7 +581,6 @@
         .table-link-item { border:2px solid #e2e8f0; border-radius:10px; padding:10px; text-align:center; font-weight:900; cursor:pointer; background:#f8fafc; }
         .table-link-item.selected { border-color:#7c3aed; background:#ede9fe; color:#6d28d9; }
 
-        /* Manage Suppliers & Logins modal styles */
         .cred-modal-grid { display: grid; grid-template-columns: 1fr 1.35fr; gap: 16px; align-items: start; }
         @media (max-width: 820px) { .cred-modal-grid { grid-template-columns: 1fr; } }
         .cred-user-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; transition: all 0.2s ease; display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer; }
@@ -659,18 +653,11 @@
             box-shadow: 0 2px 6px rgba(79,70,229,0.25);
         }
 
-        /* ============================================================
-           UI POLISH LAYER — Purple Theme Refresh
-           Cleaner cards, softer shadows, smoother micro-interactions.
-           Happy to keep the familiar purple/cyan look — just tidier.
-           ============================================================ */
-
         ::selection { background: rgba(124, 58, 237, .18); color: #172033; }
         button { -webkit-tap-highlight-color: transparent; }
         button:focus-visible { outline: 3px solid rgba(124, 58, 237, .45); outline-offset: 2px; }
         input:focus-visible, select:focus-visible { outline: none; }
 
-        /* --- Login --- */
         .login-overlay {
             background:
                 radial-gradient(circle at 12% 18%, rgba(255,255,255,.16), transparent 24%),
@@ -685,30 +672,25 @@
         .btn-login:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(79,70,229,.42); }
         .btn-login:active { transform: translateY(0) scale(.98); }
 
-        /* --- Header --- */
         .header { border-radius: 20px; box-shadow: 0 8px 24px rgba(15,23,42,.06); }
         .header-home-btn, .btn-logout { border-radius: 12px; min-height: 38px; }
         .btn-logout:active, .header-home-btn:active { transform: scale(.97); }
 
-        /* --- Table cards --- */
         .big-table-card.free { background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 62%); }
         .big-table-card.occupied { background: linear-gradient(180deg, #fff1f2 0%, #ffffff 62%); }
         .big-table-card:active { transform: scale(.985); }
 
-        /* --- Menu cards --- */
         .menu-card { border-radius: 20px; }
         .card-code { background: #f5f3ff; color: #7c3aed; border: 1px solid #ede9fe; font-size: 10.5px; padding: 3px 9px; border-radius: 999px; }
         .card-title { letter-spacing: .1px; }
         .card-price { font-variant-numeric: tabular-nums; }
 
-        /* --- Category chips & navigation --- */
         .cat-btn { border-width: 1.5px; box-shadow: 0 1px 3px rgba(15,23,42,.05); }
         .cat-btn.active { box-shadow: 0 6px 18px rgba(109,40,217,.32); }
         .cat-btn:active { transform: scale(.97); }
         .cat-nav-btn { border-width: 1.5px; }
         .cat-nav-btn:active { transform: scale(.92); }
 
-        /* --- Cart panel --- */
         .qty-controls { border-radius: 999px; border-color: #e2e8f0; padding: 4px 7px; gap: 7px; }
         .qty-btn { width: 32px; height: 32px; border-radius: 999px; font-size: 17px; }
         .qty-btn:active { transform: scale(.9); }
@@ -717,16 +699,13 @@
         .summary-row { font-variant-numeric: tabular-nums; }
         #payment-method { border-radius: 12px; }
 
-        /* --- Action buttons: comfortable touch size + press feedback --- */
         .action-buttons button { min-height: 46px; border-radius: 13px; }
         .action-buttons button:active { transform: scale(.97); box-shadow: none !important; }
 
-        /* --- Mobile tab bar --- */
         .mob-tab-btn { border-radius: 14px; min-height: 46px; }
         .mob-tab-btn.active { box-shadow: 0 6px 16px rgba(109,40,217,.32); }
         .mob-tab-btn:active { transform: scale(.97); }
 
-        /* --- Modals: smooth entrance --- */
         @keyframes overlayFade { from { opacity: 0; } to { opacity: 1; } }
         @keyframes modalPop { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .modal-overlay, .timeout-overlay, #table-link-modal { animation: overlayFade .18s ease-out; }
@@ -734,27 +713,18 @@
         .pay-btn-confirm:active, .pay-btn-cancel:active, .quick-cash-btn:active { transform: scale(.97); }
         .quick-cash-btn { border-radius: 13px; }
 
-        /* --- Admin quick actions & misc --- */
         .admin-btn { border-radius: 13px; }
         .admin-btn:active { transform: translateX(4px) scale(.98); }
         .staff-alert-banner { border-radius: 16px; }
         .live-toast { border-radius: 14px; background: linear-gradient(135deg, #1e1b4b, #0f172a); border: 1px solid rgba(139,92,246,.28); }
         .btn-customer-send:active, .btn-call-waiter:active, .btn-ready-order:active, .btn-move-table:active { transform: scale(.97); }
 
-        /* --- Accessibility: respect reduced-motion preference --- */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
         }
     </style>
 
-    <!-- ================================================================
-         UI v2 DESIGN SYSTEM — refined purple/cyan
-         Token-driven. Consistent radius / spacing / type scale,
-         touch-sized targets, unified brand gradients.
-         Purely presentational: markup + logic untouched.
-         ================================================================ -->
     <style>
-    /* ---------- 1. TOKENS ---------- */
     :root {
         --brand-50:  #f5f3ff;  --brand-100: #ede9fe;  --brand-200: #ddd6fe;
         --brand-300: #c4b5fd;  --brand-400: #a78bfa;  --brand-500: #8b5cf6;
@@ -764,7 +734,6 @@
         --cyan-50:  #ecfeff;  --cyan-100: #cffafe;  --cyan-400: #22d3ee;
         --cyan-500: #06b6d4;  --cyan-600: #0891b2;  --cyan-700: #0e7490;
 
-        /* one gradient, used everywhere the old code drifted to #4f46e5 */
         --grad-brand: linear-gradient(135deg, var(--brand-600) 0%, var(--brand-500) 48%, var(--cyan-500) 100%);
         --grad-brand-deep: linear-gradient(135deg, var(--brand-800) 0%, var(--brand-600) 55%, var(--cyan-600) 100%);
 
@@ -784,7 +753,6 @@
         --lift: cubic-bezier(.34,1.36,.64,1);
     }
 
-    /* ---------- 2. BASE ---------- */
     body {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
@@ -799,11 +767,9 @@
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; border: 2px solid #eef1f7; }
     ::-webkit-scrollbar-thumb:hover { background: var(--brand-400); }
 
-    /* money + counts line up in columns */
     .card-price, .total-row, .summary-row, .pay-row, .stat-box,
     td, th, .seated-time-val, .table-items-summary { font-variant-numeric: tabular-nums; }
 
-    /* consistent focus ring everywhere */
     :is(button, a, input, select, textarea):focus-visible {
         outline: 2px solid var(--brand-500);
         outline-offset: 2px;
@@ -811,7 +777,6 @@
     }
     :is(button, input, select, textarea) { transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease; }
 
-    /* ---------- 3. UNIFY STRAY INDIGO ACTIVES ---------- */
     .table-filter-btn.active,
     .item-rep-filter-btn.active {
         background: var(--grad-brand) !important;
@@ -821,11 +786,8 @@
     }
     .table-filter-btn { border-radius: var(--r-full); padding: 7px 15px; border-width: 1.5px; }
     .table-filter-btn:hover { border-color: var(--brand-400); color: var(--brand-700); }
-    /* Inactive pill was #64748b on #f1f5f9 = 4.34:1, just under AA */
     .table-filter-btn { color: #475569; }
 
-    /* Small status pills: darken the text so they clear WCAG AA on their
-       own tinted backgrounds. */
     .live-sync-badge { color: #047857; }
     #live-sync-indicator { color: #047857; }
     .btn-logout { color: #b91c1c; }
@@ -838,7 +800,6 @@
     .card-code, .cart-item-tag { color: #475569; }
     .quick-note-btn, .cart-quick-note { color: #0369a1; }
 
-    /* ---------- 4. LOGIN ---------- */
     .login-box {
         border-radius: var(--r-2xl);
         padding: 42px 34px;
@@ -854,7 +815,6 @@
     .login-box input:focus { border-color: var(--brand-500); background: #fff; box-shadow: var(--ring); }
     .btn-login { background: var(--grad-brand); border-radius: var(--r-md); }
     .btn-login:hover { box-shadow: var(--e-brand-lg); }
-    /* the QR/takeaway modal has a second login button locked by inline styles — align it */
     #takeaway-details-modal .btn-login {
         background: var(--grad-brand) !important;
         border-radius: var(--r-md) !important;
@@ -862,15 +822,12 @@
         box-shadow: var(--e-brand) !important;
     }
     #takeaway-details-modal .btn-login:hover { box-shadow: var(--e-brand-lg) !important; }
-    /* staff chips */
     #login-accounts-preview button {
         border-radius: var(--r-full) !important;
         border-width: 1.5px !important;
         transition: transform .16s var(--lift), box-shadow .16s ease;
     }
     #login-accounts-preview button:hover { transform: translateY(-2px); box-shadow: var(--e-2); }
-    /* chips are built with inline cssText — unify the stray #3b82f6 hover and
-       restore contrast on the username (was opacity .7 -> failed WCAG AA) */
     #login-accounts-chips button:hover { border-color: var(--brand-400) !important; background: var(--brand-50) !important; }
     #login-accounts-chips button span:last-child {
         opacity: 1 !important;
@@ -880,7 +837,6 @@
     }
     #login-accounts-preview > div > span { color: var(--text-muted) !important; }
 
-    /* ---------- 5. HEADER ---------- */
     .header { border-radius: var(--r-xl); box-shadow: var(--e-2); border-color: var(--brand-100); }
     .header h2 { letter-spacing: -.3px; }
     .header-home-btn { border-radius: var(--r-full); background: var(--brand-100); color: var(--brand-700); border-color: var(--brand-200); min-height: 38px; }
@@ -888,7 +844,6 @@
     .btn-logout { border-radius: var(--r-full); min-height: 38px; }
     .badge { border-radius: var(--r-full); background: var(--brand-100); color: var(--brand-700); border-color: var(--brand-200); }
 
-    /* ---------- 6. TABLE SELECTION ---------- */
     #table-selection-view { gap: 18px; }
     .table-selection-header {
         border-radius: var(--r-xl);
@@ -924,7 +879,6 @@
     .linked-table-card { outline: 3px solid var(--brand-500) !important; outline-offset: 2px; }
     .table-link-badge { border-radius: var(--r-full); background: var(--brand-700); }
 
-    /* ---------- 7. ADMIN DASHBOARD ---------- */
     .admin-dashboard-container {
         border-radius: var(--r-2xl);
         padding: 22px 24px;
@@ -944,7 +898,6 @@
         letter-spacing: -.1px;
     }
 
-    /* quick-add toolbar (had heavy inline styles) */
     #admin-quick-add-row {
         background: linear-gradient(180deg, #fbfaff, #f6f5fe);
         border: 1px solid var(--brand-100);
@@ -971,11 +924,9 @@
     #add-m-price { width: 96px !important; }
     #admin-quick-add-row .btn-small,
     #admin-quick-add-row .btn-cat-add { border-radius: var(--r-full) !important; padding: 10px 16px !important; min-height: 42px; }
-    /* --success green (#059669) is only 3.76:1 against white text; darken it here */
     #admin-quick-add-row .btn-small { background: var(--grad-brand) !important; }
     #admin-quick-add-row .btn-cat-add { background: linear-gradient(135deg, #047857, #065f46) !important; }
 
-    /* 14 stacked full-width buttons -> responsive multi-column grid */
     .admin-buttons-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
@@ -987,12 +938,9 @@
     .admin-btn:active { transform: translateY(-1px) scale(.985); }
     .close-day-btn { grid-column: 1 / -1; margin-top: 6px; }
 
-    /* These two never had a background in the original markup, so they
-       rendered as white text on a white card - effectively invisible. */
     .payment-summary-btn { background: var(--grad-brand); }
     .manage-suppliers-btn { background: linear-gradient(135deg, var(--brand-700), var(--brand-900)); }
 
-    /* ---------- 8b. TABLE COUNT PANEL (admin) ---------- */
     #table-count-panel {
         display: flex;
         align-items: center;
@@ -1062,7 +1010,6 @@
         .tcp-input { flex: 1; width: auto; }
     }
 
-    /* ---------- 8c. POS: CONTROLS + MENU ---------- */
     .controls-bar { border-radius: var(--r-xl); padding: 14px 16px; box-shadow: var(--e-1); border-color: var(--brand-100); }
     .search-box { border-width: 1.5px; border-radius: var(--r-md); padding: 11px 16px; }
     .search-box:focus { border-color: var(--brand-500); box-shadow: var(--ring); }
@@ -1099,7 +1046,6 @@
     .card-title { margin-top: 32px; letter-spacing: -.1px; }
     .card-price { font-size: 18px; letter-spacing: -.2px; }
     .btn-add { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--grad-brand); }
-    /* keep the "in cart" badge and the bestseller tag from colliding */
     .card-pop-tag { top: 12px; right: 13px; border-radius: var(--r-full); max-width: calc(100% - 78px); }
     .card-qty-badge { top: 12px; right: 13px; width: 26px; height: 26px; }
     .card-qty-badge + .card-pop-tag { top: 44px; }
@@ -1107,7 +1053,6 @@
     .card-qty-badge + .card-pop-tag ~ .card-title { margin-top: 62px; }
     .category-section-header { color: var(--brand-900); border-bottom-color: var(--brand-200); letter-spacing: -.3px; }
 
-    /* ---------- 9. POS: CART PANEL ---------- */
     .right-panel {
         border-radius: var(--r-2xl);
         padding: 20px;
@@ -1147,13 +1092,11 @@
     .cart-seated-bar { border-radius: var(--r-md); }
     .live-toast { border-radius: var(--r-md); }
 
-    /* ---------- 10. MOBILE TAB BAR ---------- */
     .mobile-tab-bar { padding: 9px 13px; border-bottom-color: var(--brand-100); }
     .mob-tab-btn { border-radius: var(--r-md); min-height: 48px; }
     .mob-tab-btn.active { background: var(--grad-brand); box-shadow: var(--e-brand); }
     .mob-home-btn { background: var(--brand-100) !important; color: var(--brand-700) !important; border-color: var(--brand-200) !important; }
 
-    /* ---------- 11. MODALS ---------- */
     .modal-content {
         border-radius: var(--r-2xl);
         padding: 26px;
@@ -1181,7 +1124,6 @@
     .staff-alert-banner { border-radius: var(--r-lg); }
     .item-rep-filter-btn { border-radius: var(--r-full); border-width: 1.5px; padding: 7px 15px; }
 
-    /* ---------- 12. CUSTOMER QR MODE ---------- */
     html.is-customer-qr .right-panel { box-shadow: var(--e-2); }
     html.is-customer-qr .action-buttons button,
     html.is-customer-qr #customer-action-div button { min-height: 54px; }
@@ -1189,7 +1131,6 @@
     html.is-customer-qr .menu-card { min-height: 132px; }
     html.is-customer-qr .card-pop-tag { display: none !important; }
 
-    /* Order intake type: Phone vs Walk-in (staff-only control) */
     .order-intake-row {
         display: flex;
         align-items: center;
@@ -1261,17 +1202,9 @@
     }
     html.is-customer-qr .cart-seated-bar { font-size: 13.5px; padding: 10px 14px; }
 
-    /* ---------- 12b. SUPPLIER / STAFF MOBILE TUNING ----------
-       Supplier login on a phone should be a fast, one-handed job:
-       fewer taps, bigger targets, less scrolling. These rules are
-       opt-in: the body gets .is-staff-role from JS on staff logins. */
-
-    /* Admin-only panels should not leave dead space for staff */
     body.is-staff-role .admin-dashboard-container:empty,
     body.is-staff-role .table-selection-view > .admin-dashboard-container[style*="display: none"] { display: none !important; }
 
-    /* Supplier sees: Tables -> Menu -> Cart. Make the tab bar a real bottom nav
-       with large thumb-friendly targets. */
     @media (max-width: 900px) {
         body.is-staff-role .mobile-tab-bar {
             position: sticky;
@@ -1283,19 +1216,15 @@
         body.is-staff-role .mob-tab-btn { min-height: 52px; font-size: 13px; }
         body.is-staff-role .mob-home-btn { flex: 1 !important; }
 
-        /* Table grid: 3 columns on phones reads better than 5 and keeps
-           each card tappable without pinch-zoom. */
         body.is-staff-role .big-tables-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px; }
         body.is-staff-role .big-table-card { min-height: 96px; padding: 14px 8px; border-radius: var(--r-lg); }
         body.is-staff-role .big-table-card h3 { font-size: 16px; margin-bottom: 4px; }
         body.is-staff-role .big-table-card p { font-size: 11.5px; }
         body.is-staff-role .big-table-card .table-items-summary { font-size: 10px; }
 
-        /* Seated timer must stay legible — it drives table turnover */
         body.is-staff-role .table-seated-banner { padding: 5px 7px; font-size: 10.5px; border-radius: 8px; }
         body.is-staff-role .seated-time-val { font-size: 11.5px; }
 
-        /* Menu: 2 columns so item names are readable, not truncated */
         body.is-staff-role .menu-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
         body.is-staff-role .menu-card { min-height: 132px; padding: 12px; border-radius: var(--r-lg); }
         body.is-staff-role .card-title { font-size: 13px; margin-top: 28px; }
@@ -1303,8 +1232,6 @@
         body.is-staff-role .btn-add { width: 34px; height: 34px; border-radius: var(--r-sm); }
         body.is-staff-role .card-code { font-size: 10px; padding: 3px 7px; }
 
-        /* Category chips: supplier/staff phones need big, readable one-tap targets.
-           The older mobile rule made every category only ~42px tall, so names felt tiny. */
         body.is-staff-role .category-bar-wrapper { gap: 10px; margin-top: 10px; }
         body.is-staff-role .category-filters {
             gap: 12px;
@@ -1329,12 +1256,10 @@
         body.is-staff-role .cat-nav-btn { width: 48px; height: 56px; font-size: 18px; border-radius: 16px; }
         body.is-staff-role .cat-wrap-toggle-btn { height: 56px; min-width: 52px; padding: 10px 14px; font-size: 14px; border-radius: 16px; }
 
-        /* Controls bar: search becomes the dominant control */
         body.is-staff-role .controls-bar { padding: 12px; border-radius: var(--r-lg); }
         body.is-staff-role .search-box { padding: 13px 15px; font-size: 15px; }
         body.is-staff-role .btn-menu-refresh { padding: 12px 15px; min-height: 46px; }
 
-        /* Cart panel: full-height sheet, primary action pinned at the bottom */
         body.is-staff-role .right-panel { padding: 16px 14px; border-radius: var(--r-xl); }
         body.is-staff-role .right-panel h3 { font-size: 15.5px; }
         body.is-staff-role .cart-item-name { font-size: 13.5px; }
@@ -1343,9 +1268,6 @@
         body.is-staff-role .bill-summary { padding: 14px; border-radius: var(--r-md); }
         body.is-staff-role .total-row { font-size: 19px; }
 
-        /* The 3-column cart table needs ~422px and a phone has ~358px, so it
-           used to overflow sideways. Turn each row into a stacked card:
-           item name on top, then qty stepper and price side by side. */
         body.is-staff-role .cart-table-wrapper table,
         body.is-staff-role .cart-table-wrapper tbody { display: block; width: 100%; }
         body.is-staff-role .cart-table-wrapper thead { display: none; }
@@ -1357,7 +1279,6 @@
             padding: 12px 2px;
         }
         body.is-staff-role #cart-items tr td { display: block; padding: 0 !important; border: none !important; }
-        /* name + note tags span the full width */
         body.is-staff-role #cart-items tr td:nth-child(1) { grid-column: 1 / -1; }
         body.is-staff-role #cart-items tr td:nth-child(2) { grid-column: 1; }
         body.is-staff-role #cart-items tr td:nth-child(3) { grid-column: 2; text-align: right !important; }
@@ -1365,8 +1286,6 @@
         body.is-staff-role .comment-input { width: 100%; min-height: 40px; margin-top: 8px; box-sizing: border-box; }
         body.is-staff-role .note-label { padding: 6px 9px; font-size: 11px; }
 
-        /* Single column: full-width buttons are far easier to hit while
-           holding the phone one-handed. */
         body.is-staff-role .action-buttons { grid-template-columns: 1fr !important; gap: 9px; }
         body.is-staff-role .action-buttons button,
         body.is-staff-role .action-buttons button.btn-drawer,
@@ -1374,13 +1293,11 @@
         body.is-staff-role .action-buttons button.btn-move-table,
         body.is-staff-role .action-buttons button.btn-back-tables { grid-column: 1 / -1 !important; min-height: 54px; }
 
-        /* Kitchen send is the supplier's main action — make it unmistakable */
         body.is-staff-role #btn-send-kitchen-direct { min-height: 58px !important; font-size: 15px !important; }
 
         body.is-staff-role .note-label { padding: 7px 10px; font-size: 11.5px; }
         body.is-staff-role .comment-input { padding: 9px 11px; font-size: 13px; }
 
-        /* Modals on a phone: use the full screen, not a floating box */
         body.is-staff-role .modal-content { padding: 18px 16px; border-radius: var(--r-xl); max-height: 90vh; }
         body.is-staff-role .modal-body { max-height: 58vh; }
         body.is-staff-role .close-modal { min-width: 46px; min-height: 46px; }
@@ -1389,7 +1306,6 @@
         body.is-staff-role .pay-btn-confirm, body.is-staff-role .pay-btn-cancel { min-height: 58px; }
     }
 
-    /* Phones under 400px: single-column menu would be too wide, keep 2 but tighten */
     @media (max-width: 380px) {
         body.is-staff-role .menu-grid { grid-template-columns: 1fr !important; }
         body.is-staff-role .menu-card { min-height: 108px; }
@@ -1397,7 +1313,6 @@
         body.is-staff-role .big-tables-grid { grid-template-columns: repeat(2, 1fr) !important; }
     }
 
-    /* ---------- 13. RESPONSIVE ---------- */
     @media (max-width: 900px) {
         .main-layout { padding: 11px; gap: 11px; }
         .right-panel { border-radius: var(--r-xl); padding: 16px; }
@@ -1419,13 +1334,10 @@
         .admin-buttons-grid { grid-template-columns: 1fr; }
     }
 
-
-    /* ---------- 13b. CONSISTENT MOBILE UI: QR, TAKEAWAY & STAFF ---------- */
     * { -webkit-tap-highlight-color: transparent; }
     button, input, select, textarea { max-width: 100%; }
     img, canvas, svg { max-width: 100%; }
 
-    /* QR customers should see a focused ordering screen without desktop-sized gaps. */
     html.is-customer-qr body { min-height: 100%; }
     html.is-customer-qr #main-app { min-height: 100dvh; height: 100dvh !important; }
     html.is-customer-qr #pos-main-view { min-height: 0; min-width: 0; }
@@ -1451,7 +1363,6 @@
     html.is-customer-qr #customer-action-div { display: flex; gap: 10px; }
     html.is-customer-qr #customer-action-div button { min-height: 52px; font-size: 15px; }
 
-    /* Waiter login and ordering pages use the same comfortable sizing on phones. */
     body.is-staff-role #main-app { min-height: 100dvh; height: 100dvh !important; }
     body.is-staff-role #table-selection-view { min-height: 0; }
     body.is-staff-role .table-selection-header { min-width: 0; }
@@ -1467,13 +1378,11 @@
     body.is-staff-role .menu-card { min-width: 0; overflow-wrap: anywhere; }
     body.is-staff-role .card-title { overflow-wrap: anywhere; }
 
-    /* The login panel scales to small screens without clipping account choices. */
     .login-overlay { overflow-y: auto; overscroll-behavior: contain; }
     .login-box { box-sizing: border-box; max-height: calc(100dvh - 24px); overflow-y: auto; }
     #login-accounts-preview, #login-accounts-chips { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
     #login-accounts-chips button { min-height: 38px; max-width: 100%; overflow-wrap: anywhere; }
 
-    /* Takeaway customer details form: touch-friendly fields and no modal cut-off. */
     #takeaway-details-modal { overflow-y: auto; overscroll-behavior: contain; padding: 14px; box-sizing: border-box; }
     #takeaway-details-modal .timeout-box { box-sizing: border-box; max-height: calc(100dvh - 28px); overflow-y: auto; }
     #takeaway-details-modal input,
@@ -1529,13 +1438,156 @@
         html.is-customer-qr #pos-main-view { min-height: 0; }
     }
 
-    /* ---------- 14. PRINT SAFETY ---------- */
     @media print {
         .admin-buttons-grid { display: block !important; }
         .big-table-card, .menu-card { box-shadow: none !important; transform: none !important; }
     }
     </style>
-<script src="/_aistudio-iframe.js?v=2c34bde1"></script></head>
+
+    <!-- NEW: Responsive size fix -->
+    <style id="responsive-size-fix">
+      #main-app {
+        height: 100dvh !important;
+        min-height: 100dvh !important;
+      }
+      html, body { min-height: 100dvh; }
+
+      #login-screen.login-overlay {
+        padding: 14px !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
+      }
+      #login-screen .login-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 28px 22px !important;
+        max-height: calc(100dvh - 28px) !important;
+        overflow-y: auto !important;
+        border-radius: 22px !important;
+      }
+      #login-screen .login-box h2 {
+        font-size: 22px !important;
+        margin-bottom: 18px !important;
+      }
+      #login-screen .login-box input {
+        font-size: 16px !important;
+        min-height: 50px !important;
+        padding: 13px 14px !important;
+        margin-bottom: 14px !important;
+      }
+      #login-screen .login-box .btn-login,
+      #login-screen .login-box button[type="submit"] {
+        min-height: 50px !important;
+        font-size: 16px !important;
+      }
+      #login-accounts-preview,
+      #login-accounts-chips { font-size: 12px !important; }
+      #login-accounts-chips button {
+        min-height: 36px !important;
+        padding: 5px 10px !important;
+      }
+
+      @media (min-width: 768px) {
+        #login-screen.login-overlay { padding: 28px !important; }
+        #login-screen .login-box {
+          width: min(92vw, 500px) !important;
+          max-width: 500px !important;
+          padding: 44px 40px !important;
+          max-height: calc(100dvh - 56px) !important;
+          overflow-y: auto !important;
+          border-radius: 28px !important;
+        }
+        #login-screen .login-box h2 {
+          font-size: 30px !important;
+          margin-bottom: 28px !important;
+        }
+        #login-screen .login-box input {
+          font-size: 17px !important;
+          min-height: 56px !important;
+          padding: 15px 18px !important;
+          margin-bottom: 18px !important;
+        }
+        #login-screen .login-box .btn-login,
+        #login-screen .login-box button[type="submit"] {
+          min-height: 56px !important;
+          font-size: 17px !important;
+        }
+        #login-accounts-preview,
+        #login-accounts-chips { font-size: 13.5px !important; }
+      }
+
+      @media (max-width: 620px) {
+        .big-tables-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          gap: 10px;
+        }
+        .big-table-card { min-height: 108px; padding: 14px 10px; }
+        .big-table-card h3 { font-size: 16px; }
+
+        .table-selection-header {
+          padding: 12px 14px !important;
+          border-radius: var(--r-lg) !important;
+          gap: 10px;
+        }
+        .table-selection-header h2 { font-size: 17px !important; }
+
+        #admin-quick-add-row > * {
+          flex: 1 1 45% !important;
+          width: auto !important;
+          min-width: 0 !important;
+        }
+        #add-m-code, #add-m-price { width: 100% !important; }
+
+        .admin-buttons-grid { grid-template-columns: 1fr 1fr !important; }
+        .close-day-btn { grid-column: 1 / -1 !important; }
+      }
+      @media (max-width: 400px) {
+        .admin-buttons-grid { grid-template-columns: 1fr !important; }
+        .big-tables-grid { gap: 8px; }
+      }
+
+      @media (max-width: 620px) {
+        .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; }
+        .menu-card { min-height: 130px; padding: 12px; }
+        .card-title { font-size: 13px; }
+        .card-price { font-size: 16px; }
+      }
+      @media (max-width: 380px) {
+        .menu-grid { gap: 8px; }
+        .menu-card { padding: 10px; min-height: 120px; }
+        .card-title { font-size: 12px; }
+      }
+
+      @media (max-width: 620px) {
+        .modal-content {
+          padding: 16px !important;
+          border-radius: 18px !important;
+          max-height: 92dvh !important;
+        }
+        .modal-body { max-height: 65dvh !important; }
+        .pay-modal-box {
+          padding: 26px 20px !important;
+          border-radius: 22px !important;
+          max-height: 92dvh !important;
+          overflow-y: auto;
+        }
+        .timeout-box { max-height: 92dvh !important; overflow-y: auto; }
+      }
+
+      @media (min-width: 901px) {
+        .admin-buttons-grid {
+          grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)) !important;
+        }
+        .close-day-btn { grid-column: 1 / -1 !important; }
+      }
+
+      @media (max-width: 900px) {
+        .main-layout { padding: 10px !important; gap: 10px !important; }
+        .left-panel, .right-panel { min-width: 0; }
+      }
+    </style>
+
+</head>
 <body>
 
     <div id="takeaway-details-modal" class="timeout-overlay" style="display: none; z-index: 9999; background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(8px);">
@@ -1561,7 +1613,6 @@
         </div>
     </div>
 
-    <!-- Move Table Modal -->
     <div id="move-table-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 420px;">
             <div class="modal-header">
@@ -1650,7 +1701,6 @@
                     <button class="btn-cat-add" style="padding: 8px 14px; font-size: 13px;" onclick="addNewCategoryPrompt()">+ Category</button>
                 </div>
 
-                <!-- ===== Table Count Manager: add tables beyond 13 (14, 15, 16 ...) ===== -->
                 <div id="table-count-panel">
                     <div class="tcp-left">
                         <span class="tcp-icon">🪑</span>
@@ -1945,18 +1995,15 @@
 
             <div class="modal-body" style="overflow-y: auto; flex: 1; padding-top: 14px;">
                 <div class="cred-modal-grid">
-                    <!-- Left Side: List of All Current Users & Suppliers -->
                     <div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <span style="font-size: 13px; font-weight: 900; color: #334155;">Active Logins (<span id="cred-count-badge">4</span>)</span>
                             <span style="font-size: 11px; font-weight: 700; color: #64748b;">Click ✏️ to edit</span>
                         </div>
                         <div id="cred-overview-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 480px; overflow-y: auto; padding-right: 4px;">
-                            <!-- Populated dynamically -->
                         </div>
                     </div>
 
-                    <!-- Right Side: Edit / Add Form with Permissions Checklist -->
                     <div>
                         <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 14px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1.5px solid #f1f5f9; padding-bottom: 8px;">
@@ -1996,7 +2043,6 @@
                                 </div>
                             </div>
 
-                            <!-- Permissions Checklist -->
                             <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; margin-bottom: 14px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
                                     <span style="font-size: 12px; font-weight: 900; color: #1e293b;">🔐 Granted Permissions (அனுமதிகள்):</span>
@@ -2236,7 +2282,6 @@
                 </div>
             </div>
             <div class="modal-body" style="padding:15px 5px 5px 5px;">
-                <!-- Filter bar -->
                 <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:12px 14px; margin-bottom:14px;">
                     <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
                         <span style="font-size:12px; font-weight:900; color:#475569; margin-right:4px;">Shift / Scope:</span>
@@ -2250,7 +2295,6 @@
                     </div>
                 </div>
 
-                <!-- Secondary Filters: Category & Search -->
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:14px;">
                     <div>
                         <label for="item-report-cat-filter" style="display:block; font-size:11.5px; font-weight:800; color:#64748b; margin-bottom:4px;">Filter by Category (வகை):</label>
@@ -2264,7 +2308,6 @@
                     </div>
                 </div>
 
-                <!-- Summary statistics cards -->
                 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:15px;">
                     <div style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:12px; padding:10px 14px; text-align:center;">
                         <span style="display:block; font-size:11px; font-weight:800; color:#065f46;">TOTAL QUANTITY SOLD</span>
@@ -2282,7 +2325,6 @@
                     </div>
                 </div>
 
-                <!-- Table -->
                 <table class="admin-table">
                     <thead>
                         <tr>
@@ -2430,21 +2472,21 @@
         </div>
       </div>
     </div>
-
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyDyS5K86fT8v0w5L2l_bY5-xH6H7J8K9L",
+            apiKey: "AIzaSyBE0YtYy09zV2HCI2DUfKfq8VQdXUb-ekE",
             authDomain: "al-hussain-pos.firebaseapp.com",
             databaseURL: "https://al-hussain-pos-default-rtdb.firebaseio.com",
             projectId: "al-hussain-pos",
-            storageBucket: "al-hussain-pos.appspot.com",
-            messagingSenderId: "1234567890",
-            appId: "1:1234567890:web:abcdef123456"
+            storageBucket: "al-hussain-pos.firebasestorage.app",
+            messagingSenderId: "936176326095",
+            appId: "1:936176326095:web:249b4b9f2d76f6189aaeba",
+            measurementId: "G-LVP94YF74C"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+const db = firebase.database();
+const auth = firebase.auth();
 
-        // Security: Salted SHA-256 password encryption
         const CRED_SALT = "alhussain_pos_secure_salt_2026";
 
         async function sha256Hash(text) {
@@ -2461,7 +2503,6 @@
                 if (storedPass === inputPass) return true;
                 const hashedInput = await sha256Hash(inputPass);
                 if (storedPass === hashedInput) return true;
-                // A custom password exists — hardcoded defaults must never unlock this account.
                 return false;
             }
             if (Array.isArray(defaultValidPasses)) {
@@ -2528,7 +2569,6 @@
                 if (permissions.billing === undefined) {
                     permissions.billing = isAdmin ? true : false;
                 }
-                // Old accounts were saved before Sales History and Items Report became separate permissions — keep them seeing the Report if they already had Sales History
                 if (permissions.item_report === undefined) {
                     permissions.item_report = isAdmin ? true : (permissions.sales_history === true);
                 }
@@ -2539,7 +2579,6 @@
 
             let rawName = (data.name !== undefined && data.name !== null) ? String(data.name).trim() : '';
 
-            // Clean up old generic placeholder names (Supplier A, Supplier 1, Supplier, Staff 1, etc.)
             const isGenericName = !rawName || 
                 /^supplier[\s_-]*[a-c0-9]*$/i.test(rawName) || 
                 /^staff[\s_-]*[a-c0-9]*$/i.test(rawName) ||
@@ -2547,7 +2586,6 @@
 
             let displayName = rawName;
             if (isGenericName) {
-                // If it's a generic placeholder, use the username (e.g. user1) or key
                 displayName = rawUser || (key === 'admin' ? 'Admin' : key);
             }
 
@@ -2632,15 +2670,12 @@
             });
         }
 
-        // Do NOT expose credentials to customers scanning QR code!
         if (!isCustomerVisitor) {
             function syncCredentialsFromSnapshot(val) {
                 if (!val || typeof val !== 'object') return;
-                // Merge Firebase items directly into credentials to keep user-saved names intact
                 Object.keys(val).forEach(k => {
                     if (val[k]) {
                         const item = normalizeCredentialEntry(k, val[k]);
-                        // If Firebase stored an old generic placeholder (e.g. "Supplier A", "Supplier 1", "Staff 1"), sync the clean name back to Firebase
                         if (val[k].name && (/^supplier[\s_-]*[a-c0-9]*$/i.test(val[k].name) || /^staff[\s_-]*[a-c0-9]*$/i.test(val[k].name) || val[k].name.toLowerCase() === 'supplier')) {
                             db.ref('credentials/' + k + '/name').set(item.name);
                             db.ref('userCredentials/' + k + '/name').set(item.name);
@@ -2653,7 +2688,6 @@
                     }
                 });
 
-                // Update active user display name if changed in database
                 if (loggedInRole && credentials[loggedInRole] && credentials[loggedInRole].name) {
                     loggedInDisplayName = credentials[loggedInRole].name;
                     const dispEl = document.getElementById('display-user');
@@ -2688,8 +2722,6 @@
         let dayCloseHistory = {};
         let currentTableKey = "Table 1";
         let activeOrders = {};
-        // Customer QR sessions keep a private, device-local draft until Send Order.
-        // This prevents each phone from overwriting the shared table order while browsing.
         let customerDraftOrder = null;
         let customerDraftTableKey = null;
         let orderItemComments = {};
@@ -2706,7 +2738,6 @@
         let isProcessingPayment = false;
         let privateStatsState = { sales: false, expenses: false };
 
-        // ---- Table count (admin-configurable: 13 -> 14, 15, 16 ...) ----
         const DEFAULT_TABLE_COUNT = 13;
         const MIN_TABLE_COUNT = 1;
         const MAX_TABLE_COUNT = 60;
@@ -2720,8 +2751,6 @@
 
         function updateTableCountUI() {
             const n = getTableCount();
-            const val = document.getElementById('table-count-value');
-            if (val) val.textContent = n;
             const note = document.getElementById('table-count-note');
             if (note) note.textContent = 'Table 1 – ' + n;
             const gridNote = document.getElementById('table-grid-count-note');
@@ -2842,7 +2871,21 @@
             applyPrivateStatVisibility('sales');
             applyPrivateStatVisibility('expenses');
         }
+// ===== Firebase Auth Gate =====
+// Anonymous sign-in -> gives auth token -> lets us use "auth != null" rules
+auth.onAuthStateChanged(function(user) {
+    if (user) {
+        startRealtimeListeners();
+    } else {
+        auth.signInAnonymously().catch(function(err) {
+            console.error("Firebase anonymous auth failed:", err);
+        });
+    }
+});
 
+function startRealtimeListeners() {
+
+// ↓↓↓ இங்கிருந்து கீழே இருக்கிற எல்லா code-ம் (db.ref listeners) இந்த function-க்கு உள்ளே இருக்கணும்
         db.ref('tableLinks').on('value', (snap) => {
             tableLinks = snap.val() || {};
             requestRenderBigTablesGrid();
@@ -2915,7 +2958,6 @@
                     cat: (m.cat || m.category || "Special").trim(),
                     price: Number(m.price) || 0
                 }));
-                // Auto sync categories from items if needed
                 const itemCats = Array.from(new Set(menu.map(m => (m.cat || '').trim()).filter(Boolean)));
                 itemCats.forEach(c => {
                     if (!categories.some(x => x.toLowerCase() === c.toLowerCase())) {
@@ -2968,7 +3010,6 @@
                 const curItems = getOrderItemsArray(curOrd);
                 if (curItems.length === 0) return;
 
-                // Skip if this device authored the last edit
                 if (curOrd.lastDeviceId && curOrd.lastDeviceId === posDeviceId) return;
 
                 const prevOrd = prev[tKey];
@@ -2979,10 +3020,8 @@
                 const total = getOrderGrandTotal(curOrd);
 
                 if (!prevOrd) {
-                    // New order on table
                     handleIncomingOrderAlert('order', tKey, who, curCount, total);
                 } else if (curCount > prevCount || (curOrd.lastUpdatedAt && curOrd.lastUpdatedAt > (prevOrd.lastUpdatedAt || 0))) {
-                    // Items added or order updated
                     handleIncomingOrderAlert('update', tKey, who, curCount, total);
                 }
             });
@@ -2998,10 +3037,8 @@
             Object.keys(raw).forEach(k => {
                 const ord = raw[k];
                 if (!ord || typeof ord !== 'object') return;
-                // Normalize order item arrays before any view calculates counts/totals.
                 getOrderItemsArray(ord);
 
-                // Auto-repair missing or corrupt seatedAt for any table with active items
                 const hasItems = ord.items && ord.items.length > 0;
                 if (hasItems) {
                     let parsed = parseSeatedTimestamp(ord.seatedAt) ||
@@ -3017,7 +3054,6 @@
                             ord.seatedTime = new Date(parsed).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                         }
                     } else {
-                        // Truly missing seated time: initialize once and persist to Firebase
                         ord.seatedAt = now;
                         ord.seatedTime = new Date(now).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                         missingSeatedUpdates[k + '/seatedAt'] = now;
@@ -3026,14 +3062,11 @@
                 }
             });
 
-            // Persist any auto-repaired seatedAt timestamps to Firebase so they never get reset to 0 again!
             if (Object.keys(missingSeatedUpdates).length > 0) {
                 db.ref('activeOrders').update(missingSeatedUpdates).catch(() => {});
             }
 
             activeOrders = raw;
-            // Keep the current QR customer's unsent cart local. Other customers/staff
-            // may update Firebase at any time; those snapshots must not replace this draft.
             if (isCustomerMode && customerDraftOrder && customerDraftTableKey === currentTableKey) {
                 activeOrders[currentTableKey] = customerDraftOrder;
             }
@@ -3044,15 +3077,9 @@
             }
             checkActiveOrdersForExternalChanges(activeOrders);
             requestRenderBigTablesGrid();
-            // This render is driven by a fresh Firebase snapshot. Do not copy the
-            // old cart DOM back into the newly received order; that could restore
-            // stale comments/prices/options over a waiter's latest update.
             if (currentTableKey) renderCart({ skipInputSync: true });
         });
 
-        // Extra real-time safety net for table cards:
-        // child events refresh the affected table immediately, while the full
-        // value listener above remains the authoritative complete snapshot.
         function syncSingleActiveOrderSnapshot(snapshot, removed = false) {
             const key = snapshot && snapshot.key;
             if (!key) return;
@@ -3061,9 +3088,6 @@
             } else {
                 const value = snapshot.val();
                 if (value && typeof value === 'object') {
-                    // Firebase can return numeric-keyed item collections as objects.
-                    // Normalize them before rendering so table cards never show a false
-                    // empty state while the cart is still unopened.
                     getOrderItemsArray(value);
                     activeOrders[key] = value;
                 } else {
@@ -3071,7 +3095,6 @@
                 }
             }
 
-            // Keep an unsent QR draft private on its own device.
             if (isCustomerMode && customerDraftOrder && customerDraftTableKey === currentTableKey) {
                 activeOrders[currentTableKey] = customerDraftOrder;
             }
@@ -3093,8 +3116,6 @@
             syncSingleActiveOrderSnapshot(snapshot, true);
         }, (error) => console.error('activeOrders child_removed listener failed:', error));
 
-        // Browsers may throttle rendering while the admin POS is backgrounded.
-        // Re-render and re-sync from Firebase when the tab/app becomes active again.
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
                 db.ref('activeOrders').once('value').then((snapshot) => {
@@ -3139,9 +3160,6 @@
             renderViewExpensesModal();
         });
 
-        // After every payment this listener re-fires with the FULL salesHistory (1MB+ and growing).
-        // Rendering all reports + the whole menu grid synchronously here freezes the POS right after
-        // each payment, so heavy renders are visibility-guarded and the menu grid is debounced.
         let salesHistoryRenderTimer = null;
         db.ref('salesHistory').on('value', (snapshot) => {
             salesHistory = snapshot.val() || [];
@@ -3189,13 +3207,12 @@
         let tableSessions = {};
         let activeModalPaymentMethod = "Cash";
 
-        // Unique session identifier to prevent self-echoing when the same device places an order
         const posDeviceId = 'pos_' + Math.random().toString(36).substring(2, 9);
 
         let posAudioContext = null;
         let audioUnlocked = false;
-        let activeSpeechUtterance = null; // Prevent Chromium garbage-collection freeze
-        let lastAnnouncedTableActionTimes = {}; // Debounce tracker: tableKey -> timestamp
+        let activeSpeechUtterance = null;
+        let lastAnnouncedTableActionTimes = {};
 
         function getPosAudioContext() {
             try {
@@ -3259,12 +3276,10 @@
             }
         }
 
-        // Global listeners to unlock browser audio automatically on any touch, pointer, or key
         ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'].forEach(evt => {
             window.addEventListener(evt, () => unlockAudio(), { passive: true });
         });
 
-        // Periodic keep-alive for AudioContext to prevent idle background sleep
         setInterval(() => {
             if (audioUnlocked && posAudioContext && posAudioContext.state === 'suspended') {
                 posAudioContext.resume().catch(() => {});
@@ -3279,7 +3294,6 @@
 
         function playFallbackBeep(type = 'order') {
             try {
-                // Standalone base64 encoded audio beep as backup when AudioContext is constrained
                 const snd = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbqWE1KDCX1+fTagwIL5jP4dBmCQMglcvf13AGAB+Tv9vXcAQAHpK619VwBAAdkbfV1nAEABmPtNPWcAMAGIuxz9VuBwAZibLM13AJABaGrczYcgoAE4Koy9h0DAAQf6LK13UNAA93m8nWdw8=");
                 snd.volume = 0.95;
                 snd.play().catch(() => {});
@@ -3299,24 +3313,23 @@
                 }
                 const now = ctx.currentTime;
 
-                let f1 = 523.25; // C5
-                let f2 = 783.99; // G5
+                let f1 = 523.25;
+                let f2 = 783.99;
                 let gainVal1 = 0.38;
                 let gainVal2 = 0.42;
 
                 if (type === 'waiter') {
-                    f1 = 659.25; // E5
-                    f2 = 880.00; // A5
+                    f1 = 659.25;
+                    f2 = 880.00;
                     gainVal1 = 0.45;
                     gainVal2 = 0.50;
                 } else if (type === 'update') {
-                    f1 = 587.33; // D5
-                    f2 = 987.77; // B5
+                    f1 = 587.33;
+                    f2 = 987.77;
                     gainVal1 = 0.40;
                     gainVal2 = 0.46;
                 }
 
-                // Tone 1: gentle sine chime
                 const osc1 = ctx.createOscillator();
                 const gain1 = ctx.createGain();
                 osc1.type = 'sine';
@@ -3328,7 +3341,6 @@
                 osc1.start(now);
                 osc1.stop(now + 0.35);
 
-                // Tone 2: melodic harmonic chime
                 const osc2 = ctx.createOscillator();
                 const gain2 = ctx.createGain();
                 osc2.type = 'sine';
@@ -3345,7 +3357,6 @@
             }
         }
 
-        // Backward compatibility
         function playPosChime(type = 'order') {
             playChimeTone(type);
         }
@@ -3369,7 +3380,6 @@
             try {
                 if (!('speechSynthesis' in window)) return;
                 
-                // Unstick Chromium synthesis engine if paused
                 if (window.speechSynthesis.paused) {
                     window.speechSynthesis.resume();
                 }
@@ -3378,7 +3388,7 @@
                 setTimeout(() => {
                     try {
                         const utterance = new SpeechSynthesisUtterance(text);
-                        activeSpeechUtterance = utterance; // Prevent garbage collection mid-speech
+                        activeSpeechUtterance = utterance;
                         utterance.rate = 0.92;
                         utterance.pitch = 1.05;
                         utterance.volume = 1.0;
@@ -3412,7 +3422,7 @@
         }
 
         function playChimeAndVoice(type, tableKey, byUser = '') {
-            if (isCustomerMode) return; // Do not voice announce on customer phone
+            if (isCustomerMode) return;
             unlockAudio();
             playChimeTone(type);
 
@@ -3426,7 +3436,6 @@
                 speechText = `New Order, ${tableVoice}`;
             }
 
-            // Speak 320ms after pleasant chime starts
             setTimeout(() => {
                 speakAnnouncement(speechText);
             }, 320);
@@ -3444,7 +3453,7 @@
             const now = Date.now();
             const debKey = type + '_' + tableKey;
             if (lastAnnouncedTableActionTimes[debKey] && (now - lastAnnouncedTableActionTimes[debKey] < 3500)) {
-                return; // Debounced
+                return;
             }
             lastAnnouncedTableActionTimes[debKey] = now;
 
@@ -3468,7 +3477,7 @@
             const alertData = {
                 eventId: Date.now() + '_' + Math.random().toString(36).substring(2, 7),
                 table: tableKey,
-                action: actionType, // 'order' or 'update'
+                action: actionType,
                 isUpdate: actionType === 'update',
                 itemsCount: itemCount,
                 total: totalDue,
@@ -3479,10 +3488,7 @@
                 originDeviceId: posDeviceId
             };
 
-            // 1. Direct realtime broadcast event node
             db.ref('liveOrderNotification').set(alertData);
-
-            // 2. Persistent table-keyed alert banner node
             db.ref('newCustomerOrderAlerts/' + tableKey).set(alertData);
         }
 
@@ -3493,7 +3499,6 @@
         let initialLiveNotificationLoaded = false;
         let lastLiveNotificationTimestamp = 0;
 
-        // Dedicated live order event broadcast listener
         db.ref('liveOrderNotification').on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data || !data.timestamp) return;
@@ -3507,7 +3512,6 @@
             if (data.timestamp <= lastLiveNotificationTimestamp) return;
             lastLiveNotificationTimestamp = data.timestamp;
 
-            // Do not announce if current device was the one that placed the order
             if (data.originDeviceId === posDeviceId) return;
 
             if (!isCustomerMode) {
@@ -3522,7 +3526,6 @@
 
             if (!initialOrderAlertsLoaded) {
                 initialOrderAlertsLoaded = true;
-                // Pre-populate with existing timestamps on page load to prevent historical noise
                 Object.keys(data).forEach(tKey => {
                     const item = data[tKey];
                     if (item && item.timestamp) {
@@ -3579,12 +3582,11 @@
             renderLiveStaffAlerts();
         });
 
-        // TableSessions listener removed - customers scanning QR will NEVER see "Payment Complete"
         try {
             db.ref('tableSessions').remove().catch(() => {});
         } catch(e) {}
 
-        const ALERT_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes auto-expiration
+        const ALERT_TIMEOUT_MS = 5 * 60 * 1000;
 
         function cleanExpiredStaffAlerts() {
             if (isCustomerMode) return;
@@ -3615,7 +3617,6 @@
             }
         }
 
-        // Periodically remove alerts older than 5 minutes so screen never gets cluttered
         setInterval(cleanExpiredStaffAlerts, 15000);
 
         function renderLiveStaffAlerts() {
@@ -3764,7 +3765,6 @@
                 }
             }
 
-            // Instantly hide login screen and table selection if arriving via customer QR
             if (tableParam || orderParam === "takeaway") {
                 isCustomerMode = true;
                 document.documentElement.classList.add('is-customer-qr');
@@ -3780,9 +3780,7 @@
                 let storedName = sessionStorage.getItem('myTkName');
                 let storedPhone = sessionStorage.getItem('myTkPhone');
 
-                // If already paid or no existing active session name, prompt for details
                 if (!storedTkKey || !storedName || !storedPhone) {
-                    // Reset old session
                     sessionStorage.removeItem('myTakeawayKey');
                     const nameInput = document.getElementById('tk-cust-name');
                     if (nameInput) nameInput.value = storedName || "";
@@ -3794,7 +3792,6 @@
                     initializeCustomerSession(storedTkKey, true);
                 }
 
-                // Check online status in background
                 checkShopOnlineForCustomer((isOnline) => {
                     if (!isOnline) {
                         document.getElementById('takeaway-details-modal').style.display = 'none';
@@ -3804,10 +3801,8 @@
                 });
                 return;
             } else if (tableParam && tableParam.trim() !== "") {
-                // Table QR Order: open table menu directly without any table selection view!
                 initializeCustomerSession(tableParam, false);
 
-                // Check online status in background
                 checkShopOnlineForCustomer((isOnline) => {
                     if (!isOnline) {
                         document.getElementById('main-app').style.display = 'none';
@@ -3816,14 +3811,12 @@
                 });
                 return;
             } else {
-                // Staff or admin: show login screen
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-app').style.display = 'none';
                 renderLoginAccountsPreview();
             }
         });
 
-        // Fixed Takeaway: atomic transaction on counter + attach customer name & phone to order
         function saveTakeawayCustomerDetails(event) {
             event.preventDefault();
             const name = document.getElementById('tk-cust-name').value.trim();
@@ -3843,8 +3836,6 @@
                 let counter = Number(current);
                 if (!Number.isFinite(counter) || counter < 100) counter = 100;
                 assignedNum = counter;
-                // Never recycle order numbers: wrapping to 100 could reuse an old
-                // active Order-100 and mix a new customer's takeaway with it.
                 return counter + 1;
             }, (error, committed, snapshot) => {
                 if (error || !committed || assignedNum === null) {
@@ -3863,7 +3854,6 @@
                 sessionStorage.setItem('myTkPhone', phone);
                 sessionStorage.removeItem('paid_' + storedTkKey);
 
-                // Initialize empty order with customer details
                 if (!activeOrders[storedTkKey]) {
                     activeOrders[storedTkKey] = {
                         items: [],
@@ -3889,8 +3879,6 @@
             isTakeawayCustomer = isTakeaway;
             currentTableKey = key;
 
-            // Each scanned QR starts with its own empty cart. The shared table order
-            // remains in Firebase and is merged atomically only when this customer sends.
             const existingSharedOrder = activeOrders[key] || {};
             customerDraftTableKey = key;
             customerDraftOrder = {
@@ -3911,10 +3899,8 @@
             delete customerDraftOrder.isReady;
             activeOrders[key] = customerDraftOrder;
 
-            // Mark document element with customer QR class
             document.documentElement.classList.add('is-customer-qr');
 
-            // Force hide login screen and table selection view
             const loginEl = document.getElementById('login-screen');
             if (loginEl) loginEl.style.display = 'none';
 
@@ -3924,7 +3910,6 @@
             document.getElementById('main-app').style.display = 'flex';
             document.getElementById('pos-main-view').style.display = 'flex';
 
-            // Hide all table navigation buttons
             const navElementsToHide = [
                 'header-home-btn',
                 'btn-menu-home-elem',
@@ -3945,7 +3930,6 @@
             const classBtnsToHide = document.querySelectorAll('.header-home-btn, .btn-menu-home, .mob-home-btn, .btn-back-tables, .table-link-controls');
             classBtnsToHide.forEach(el => el.style.display = 'none');
 
-            // Set customer header
             let custName = isTakeaway ? (sessionStorage.getItem('myTkName') || '') : '';
             if (isTakeaway) {
                 document.getElementById('app-header-title').innerText = "🥡 " + key + (custName ? (" (" + custName + ")") : "") + " - Takeaway";
@@ -3969,7 +3953,6 @@
                 if (sendBtn) sendBtn.innerText = "Send Order to Kitchen";
             }
 
-            // Ensure mobile tab bar has only 2 tabs for customers (Menu Items & Cart)
             const mobHome = document.getElementById('mob-home-btn');
             if (mobHome) mobHome.style.display = 'none';
 
@@ -3995,7 +3978,6 @@
                 return;
             }
 
-            // Sync latest credentials from Firebase in case updated recently
             try {
                 const snap = await db.ref('credentials').once('value');
                 const val = snap.val();
@@ -4012,14 +3994,12 @@
             let displayName = "";
             let matched = false;
 
-            // STAGE 1: Exact match on configured username (cred.user), display name (cred.name), or account key
             for (const [key, cred] of Object.entries(credentials)) {
                 if (!cred) continue;
                 const cUser = (cred.user || "").trim().toLowerCase();
                 const cName = (cred.name || "").trim().toLowerCase();
                 const keyLower = key.toLowerCase();
 
-                // Match exact configured user, or exact display name, or exact internal key
                 if (userInput === cUser || (cName && userInput === cName) || userInput === keyLower) {
                     const fallbackPasses = (key === "admin" || cred.roleType === "admin") ? ["al@123", "admin123", "1234"] : ["1234", "1111", "2222", "3333"];
                     if (await verifyPassword(passInput, cred.pass, fallbackPasses)) {
@@ -4037,7 +4017,6 @@
                 }
             }
 
-            // STAGE 2: If no direct match on real account, check legacy default aliases
             if (!matched) {
                 for (const [key, cred] of Object.entries(credentials)) {
                     if (!cred) continue;
@@ -4080,7 +4059,6 @@
         function grantAccess(roleKey, roleName) {
             isCustomerMode = false;
             loggedInRole = roleKey;
-            // Never show generic Supplier/Staff placeholder if account is user1
             if (roleKey === 'user1' || (credentials[roleKey] && credentials[roleKey].user === 'user1')) {
                 if (!roleName || /^supplier[\s_-]*[a-c0-9]*$/i.test(roleName) || /^staff[\s_-]*[a-c0-9]*$/i.test(roleName) || roleName.toLowerCase() === 'supplier') {
                     roleName = 'user1';
@@ -4096,7 +4074,6 @@
             unlockAudio();
             updateSoundButtonUI();
 
-            // Tag the body for role-specific layout (e.g. supplier on mobile)
             const isOwnerRole = roleKey === 'admin' || (credentials[roleKey] && credentials[roleKey].roleType === 'admin');
             document.body.classList.toggle('is-staff-role', !isOwnerRole);
             document.body.classList.toggle('is-owner-role', isOwnerRole);
@@ -4142,7 +4119,6 @@
 
             const titleEl = document.getElementById('admin-dashboard-title');
 
-            // Table count panel visibility follows canManageTableCount() (owner only)
             const tablePanelEl = document.getElementById('table-count-panel');
             if (tablePanelEl) tablePanelEl.style.display = canManageTableCount() ? '' : 'none';
 
@@ -4182,25 +4158,19 @@
                 adminSection.style.display = 'block';
                 if (titleEl) titleEl.innerText = `${loggedInDisplayName} - Staff Access Panel`;
 
-                // Quick add menu items
                 const quickAdd = document.getElementById('admin-quick-add-row');
                 if (quickAdd) quickAdd.style.display = hasPermission('manage_menu') ? 'flex' : 'none';
 
-                // Menu management buttons
                 const showMenu = hasPermission('manage_menu');
                 adminSection.querySelectorAll('.manage-menu-btn, .manage-cat-btn, .stock-btn').forEach(btn => {
                     btn.style.display = showMenu ? '' : 'none';
                 });
 
-                // Table count is shop-level config: owner only (set above)
-
-                // Expenses
                 const showExp = hasPermission('daily_expense');
                 adminSection.querySelectorAll('.expense-btn').forEach(btn => {
                     btn.style.display = showExp ? '' : 'none';
                 });
 
-                // Sales History (விற்பனை வரலாறு) and Daily Items Report (பொருள் அறிக்கை) are separate permissions
                 const showSales = hasPermission('sales_history');
                 const btnHist = adminSection.querySelector('.history-btn');
                 if (btnHist) btnHist.style.display = showSales ? '' : 'none';
@@ -4208,34 +4178,28 @@
                 const btnReport = adminSection.querySelector('.report-btn');
                 if (btnReport) btnReport.style.display = showReport ? '' : 'none';
 
-                // Monthly Reports & Shifts
                 const showMonthly = hasPermission('monthly_reports');
                 const btnStaff = adminSection.querySelector('.staff-btn:not(.manage-suppliers-btn)');
                 if (btnStaff) btnStaff.style.display = showMonthly ? '' : 'none';
                 const btnMonthly = adminSection.querySelector('.monthly-btn');
                 if (btnMonthly) btnMonthly.style.display = showMonthly ? '' : 'none';
 
-                // Payment Summary
                 const showPaySum = hasPermission('payment_summary');
                 const btnPaySum = adminSection.querySelector('.payment-summary-btn');
                 if (btnPaySum) btnPaySum.style.display = showPaySum ? '' : 'none';
 
-                // QR Codes
                 const showQr = hasPermission('qr_codes');
                 const btnQr = adminSection.querySelector('.qr-btn');
                 if (btnQr) btnQr.style.display = showQr ? '' : 'none';
 
-                // Manage Suppliers & Logins
                 const showSuppliers = hasPermission('manage_suppliers');
                 const btnCreds = adminSection.querySelector('.manage-suppliers-btn');
                 if (btnCreds) btnCreds.style.display = showSuppliers ? '' : 'none';
 
-                // Day Close
                 const showDayClose = hasPermission('day_close');
                 const btnCloseDay = adminSection.querySelector('.close-day-btn');
                 if (btnCloseDay) btnCloseDay.style.display = showDayClose ? '' : 'none';
 
-                // Stats toggles
                 const statBoxes = adminSection.querySelectorAll('.stat-toggle-box');
                 statBoxes.forEach(box => {
                     box.style.display = showSales ? 'flex' : 'none';
@@ -4244,7 +4208,6 @@
                 adminSection.style.display = 'none';
             }
 
-            // In Cart: Discount input control
             const discInput = document.getElementById('discount-input');
             if (discInput) {
                 const canDisc = hasPermission('apply_discounts');
@@ -4252,7 +4215,6 @@
                 discInput.title = canDisc ? "Enter discount ($)" : "Discount permission not enabled for this account";
             }
 
-            // In Cart: Billing action buttons control (Pay, Print Bill, Open Drawer)
             const canBill = hasPermission('billing');
             const btnPay = document.getElementById('btn-pay-elem');
             if (btnPay) btnPay.style.display = canBill ? '' : 'none';
@@ -4344,7 +4306,6 @@
 
         function showTableSelection() {
             if (isCustomerMode) {
-                // Customer Mode Lock: Customers can NEVER see or access the tables grid!
                 return;
             }
             document.getElementById('table-selection-view').style.display = 'flex';
@@ -4357,7 +4318,6 @@
 
         function backToTableSelection() {
             if (isCustomerMode) {
-                // Customer Mode Lock: Customers can NEVER see or access the tables grid!
                 return;
             }
             if (currentTableKey && activeOrders[currentTableKey]) {
@@ -4374,11 +4334,7 @@
             showTableSelection();
         }
 
-        // ---- Order intake type: Phone Order vs Walk-in Customer ----
-        // Staff flag an order while taking it: customer called in (phone) or
-        // walked in and gave the order verbally. Customer QR / self-order
-        // never sees this control.
-        let currentOrderIntake = ""; // "" | "phone" | "walkin"
+        let currentOrderIntake = "";
 
         function getOrderIntakeText(intakeVal) {
             if (intakeVal === "phone") return "Phone Order";
@@ -4491,13 +4447,10 @@
             }
 
             switchMobileTab('menu');
-            // Load the latest committed Firebase order before showing the cart.
-            // This prevents an old local cache from being treated as the current table.
             if (!isCustomerMode && currentTableKey) {
                 const openingKey = currentTableKey;
                 try {
                     const freshSnapshot = await db.ref('activeOrders/' + openingKey).once('value');
-                    // User may have switched tables while the request was in flight.
                     if (currentTableKey !== openingKey) return;
                     const freshOrder = freshSnapshot.val();
                     if (freshOrder && typeof freshOrder === 'object') {
@@ -4508,7 +4461,6 @@
                     }
                 } catch (error) {
                     console.error('Could not refresh table order before opening:', error);
-                    // Keep the live-listener cache if Firebase is temporarily unavailable.
                 }
             }
             renderCart({ skipInputSync: true });
@@ -4517,7 +4469,6 @@
             applyRolePermissionsUI();
         }
 
-        // Robust parsing of any seated timestamp format (number, numeric string, ISO date, or locale time string)
         function parseSeatedTimestamp(val) {
             if (!val) return null;
             if (typeof val === 'number' && !isNaN(val) && val > 0) return val;
@@ -4531,7 +4482,6 @@
                 if (!isNaN(parsedDate.getTime()) && parsedDate.getTime() > 100000000000) {
                     return parsedDate.getTime();
                 }
-                // Match time string e.g. "04:15 PM" or "16:20" or "4:15 pm"
                 const timeMatch = val.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)?$/i);
                 if (timeMatch) {
                     let h = parseInt(timeMatch[1], 10);
@@ -4542,7 +4492,6 @@
                     const now = new Date();
                     const guess = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
                     let resultMs = guess.getTime();
-                    // If calculated time is slightly in the future (within 2 mins), cap to now
                     if (resultMs > now.getTime() && (resultMs - now.getTime() < 120000)) {
                         resultMs = now.getTime();
                     }
@@ -4552,7 +4501,6 @@
             return null;
         }
 
-        // Seated duration calculation and timing helpers
         function getSeatedDurationInfo(seatedAt, fallbackTimeStr) {
             let ms = parseSeatedTimestamp(seatedAt);
             if (!ms && fallbackTimeStr) {
@@ -4693,14 +4641,12 @@
         }
 
         function startTakeawayOrder() {
-            // Share the same atomic counter as customer takeaway QR orders so
-            // two staff devices / QR customers cannot receive the same order key.
             let assignedNum = null;
             db.ref('takeawaySequenceCounter').transaction(current => {
                 let counter = Number(current);
                 if (!Number.isFinite(counter) || counter < 100) counter = 100;
                 assignedNum = counter;
-                return counter + 1; // Do not wrap and reuse an existing order key.
+                return counter + 1;
             }, (error, committed, snapshot) => {
                 if (error || !committed || assignedNum === null) {
                     alert("Could not create a takeaway order. Please try again.");
@@ -4723,8 +4669,6 @@
                     newOrder.orderIntake = currentOrderIntake;
                     newOrder.intakeUpdatedBy = loggedInDisplayName || "Staff";
                 }
-                // Transactional numbering guarantees this key is new; set the
-                // initial record only after the counter allocation succeeds.
                 activeOrders[newOrderKey] = newOrder;
                 db.ref('activeOrders/' + newOrderKey).set(newOrder).then(() => {
                     openTable(newOrderKey);
@@ -4733,7 +4677,14 @@
                 });
             });
         }
+        } // ← saveCredentials ends
 
+} // ← இந்த `}`-ஐ சேர்க்கணும் (startRealtimeListeners-ஐ close பண்ண)
+
+    </script>
+
+</body>
+</html>
         let renderBigTablesGridScheduled = false;
         function requestRenderBigTablesGrid() {
             if (renderBigTablesGridScheduled) return;
@@ -4795,7 +4746,6 @@
                 let itemCount = hasItems ? tableItems.reduce((sum, item) => sum + (Number(item && item.qty) || 1), 0) : 0;
                 let orderTotal = hasItems ? getOrderGrandTotal(orderData) : 0;
 
-                // Seated duration indicator banner
                 let seatedBannerHtml = "";
                 if (isOccupied && orderData && (orderData.seatedAt || orderData.seatedTime)) {
                     let dur = getSeatedDurationInfo(orderData.seatedAt, orderData.seatedTime);
@@ -4892,7 +4842,6 @@
 
             Object.keys(activeOrders).forEach(key => {
                 const norm = key.trim().toLowerCase();
-                // Strictly skip any table 1 to 13 key so it NEVER duplicates
                 if (renderedTableKeys.has(norm)) return;
                 const match = norm.match(/^(?:table|order-table)?\s*(\d+)$/i);
                 if (match) {
@@ -4977,11 +4926,9 @@
                 }
             });
 
-            // Atomic replacement: zero flash, zero blink, zero duplicate elements
             grid.replaceChildren(fragment);
         }
 
-        // Auto refresh seated duration timer every 30 seconds
         setInterval(() => {
             const tblView = document.getElementById('table-selection-view');
             if (tblView && tblView.style.display !== 'none') {
@@ -4992,7 +4939,6 @@
                 updateCartSeatedDisplay();
             }
         }, 15000);
-
         function getItemOptionsMap(item) {
             if (!item) return {};
             if (!item.options) {
@@ -5061,7 +5007,6 @@
             return { active: false, qty: 1, price: 0, optObj: null };
         }
 
-        // Calculation helpers with Option prices accurately multiplied by option quantity
         function getItemOptionTotal(item) {
             let total = 0;
             if (item && item.options) {
@@ -5080,7 +5025,6 @@
         function getItemLineTotal(item) {
             const qty = Math.max(0, Number(item && item.qty) || 0);
             const base = Math.max(0, Number(item && item.customPrice) || 0);
-            // Base item price multiplied by item quantity, plus exact option addition
             return (base * qty) + getItemOptionTotal(item);
         }
 
@@ -5136,7 +5080,6 @@
             if (!container || container.dataset.mouseScrollBound) return;
             container.dataset.mouseScrollBound = "true";
 
-            // Mouse wheel horizontal scroll without interfering with button clicks
             container.addEventListener('wheel', (e) => {
                 if (container.classList.contains('wrap-mode')) return;
                 if (e.deltaY !== 0) {
@@ -5179,7 +5122,6 @@
 
             initCategoryMouseScroll();
 
-            // Auto-scroll active category button smoothly inside container without whole-window jumping
             if (!isCategoryWrapMode) {
                 const activeBtn = container.querySelector('.cat-btn.active');
                 if (activeBtn) {
@@ -5269,8 +5211,7 @@
             return false;
         }
 
-        // Persistent all-time popularity map (NEVER resets - keeps popular items at the top)
-        function getAllTimeItemSalesMap() {
+                function getAllTimeItemSalesMap() {
             let counts = {};
             try {
                 counts = JSON.parse(localStorage.getItem('al_hussain_alltime_sales') || '{}');
@@ -5285,19 +5226,18 @@
                     if (!it) return;
                     const qty = Number(it.qty) || 1;
                     if (it.id) {
-                        counts[String(it.id)] = Math.max(counts[String(it.id)] || 0, (counts[String(it.id)] || 0) + qty);
+                        const k = String(it.id);
+                        counts[k] = (counts[k] || 0) + qty;
                     }
                     if (it.name) {
                         const nameKey = String(it.name).trim().toLowerCase();
-                        counts[nameKey] = Math.max(counts[nameKey] || 0, (counts[nameKey] || 0) + qty);
+                        counts[nameKey] = (counts[nameKey] || 0) + qty;
                     }
                 });
             });
             return counts;
         }
-
-        // Today's sales counts only (RESETS to 0 each new day / session)
-        function getTodayItemSalesCountMap() {
+              function getTodayItemSalesCountMap() {
             const counts = {};
             const sales = Object.values(salesHistory || {});
             sales.forEach(sale => {
@@ -5310,7 +5250,8 @@
                     if (!it) return;
                     const qty = Number(it.qty) || 1;
                     if (it.id) {
-                        counts[String(it.id)] = (counts[String(it.id)] || 0) + qty;
+                        const k = String(it.id);
+                        counts[k] = (counts[k] || 0) + qty;
                     }
                     if (it.name) {
                         const nameKey = String(it.name).trim().toLowerCase();
@@ -5320,6 +5261,7 @@
             });
             return counts;
         }
+        
 
         function getItemPopularityScore(item, countMap) {
             if (!item) return 0;
@@ -5340,13 +5282,8 @@
             const isAll = !selectedCategory || selectedCategory === "All";
             const catsToRender = isAll ? categories : [selectedCategory];
 
-            // 1. All-time sales counts for permanent sorting (highest ordered items ALWAYS stay FIRST in each category)
             const allTimeSalesCounts = getAllTimeItemSalesMap();
-
-            // 2. Today's sales counts (RESETS to 0 daily!)
             const todaySalesCounts = getTodayItemSalesCountMap();
-            // Popularity/sold-count badges are internal business info.
-            // Show them only to logged-in admin/staff, never to Customer QR / Takeaway self-order customers.
             const showMenuSalesBadges = !isCustomerMode;
 
             catsToRender.forEach(cat => {
@@ -5356,7 +5293,6 @@
                     return itmCat === targetCat;
                 });
 
-                // Always sort items by ALL-TIME popularity (most ordered items stay first, never resets!)
                 catItems.sort((a, b) => {
                     const countA = getItemPopularityScore(a, allTimeSalesCounts);
                     const countB = getItemPopularityScore(b, allTimeSalesCounts);
@@ -5402,7 +5338,6 @@
                                 popBadgeHtml = `<div class="card-pop-tag pop-green" title="Sold today">★ ${todaySold} sold today</div>`;
                             }
                         } else if (showMenuSalesBadges && itemIdx === 0 && allTimeSold >= 5) {
-                            // If 0 sold today, but item is an all-time bestseller, show clean tag without yesterday's numbers
                             popBadgeHtml = `<div class="card-pop-tag pop-purple" title="All-time popular item">★ Bestseller</div>`;
                         }
 
@@ -5421,7 +5356,6 @@
                 }
             });
 
-            // If selectedCategory is "All", also render items whose category isn't in categories list
             if (isAll) {
                 const knownCats = categories.map(c => (c || "").trim().toLowerCase());
                 let otherItems = menu.filter(item => {
@@ -5626,8 +5560,6 @@
             flashLiveSyncSuccess();
         }
 
-        // Which table the current #cart-items DOM was built for. Between selecting a
-        // new table and re-rendering, the DOM still shows the previous table's rows.
         let cartDomTableKey = null;
 
         function syncCartInputsToMemory() {
@@ -5637,9 +5569,6 @@
             const items = getOrderItemsArray(order);
             if (items.length === 0) return;
 
-            // Only text inputs need syncing. Checkboxes and qty steppers write to
-            // memory the moment they change, so re-reading them from the DOM here
-            // would let a stale render overwrite newer data from another device.
             const commentInputs = document.querySelectorAll('#cart-items .comment-input');
             commentInputs.forEach(input => {
                 const id = input.getAttribute('data-item-id');
@@ -5711,7 +5640,6 @@
                 if (!cur) {
                     item.comment = noteText;
                 } else if (cur.toLowerCase().includes(noteText.toLowerCase())) {
-                    // Toggle off if already present
                     item.comment = cur.split(',').map(s => s.trim()).filter(s => s && s.toLowerCase() !== noteText.toLowerCase()).join(', ');
                 } else {
                     item.comment = cur + ", " + noteText;
@@ -5726,7 +5654,6 @@
             if (!item) return [];
             let list = [];
 
-            // 1. Takeaway & Dine-in portion breakdown (e.g. 2 Dine-In, 2 Takeaway)
             const qty = Math.max(1, Number(item.qty) || 1);
             const tkQty = Math.max(0, Math.min(qty, Number(item.takeawayQty) || 0));
             if (tkQty > 0) {
@@ -5740,7 +5667,6 @@
                 list.push("🥡 Takeaway");
             }
 
-            // 2. Custom category checkboxes in item.options (manually configured by user in Checkbox Manager)
             if (item.options) {
                 if (Array.isArray(item.options)) {
                     item.options.forEach(opt => {
@@ -5775,7 +5701,6 @@
                 }
             }
 
-            // 3. Any other manual custom notes in item.notes (excluding legacy spicy/noVeg/takeaway)
             if (item.notes && typeof item.notes === 'object') {
                 Object.entries(item.notes).forEach(([k, v]) => {
                     if (['takeaway', 'spicy', 'noVeg'].includes(k)) return;
@@ -5787,12 +5712,10 @@
                 });
             }
 
-            // 4. Custom typed text from note input
             if (item.comment && typeof item.comment === 'string' && item.comment.trim()) {
                 list.push(item.comment.trim());
             }
 
-            // 5. item.note or other variations
             if (item.note && typeof item.note === 'string' && item.note.trim()) {
                 const val = item.note.trim();
                 if (!list.includes(val)) list.push(val);
@@ -5882,9 +5805,6 @@
             }
         }
 
-
-        // Persist one checkbox/add-on change against the latest Firebase order.
-        // Do not write the whole stale local order: that can erase another device's changes.
         function persistItemOptionChange(tableKey, itemId, optName, change) {
             if (!tableKey || isCustomerMode) return Promise.resolve();
             const resolvedName = String(optName || "").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
@@ -6114,8 +6034,6 @@
             const tbody = document.getElementById('cart-items');
             if (!tbody) return;
 
-            // Only preserve typed input when re-rendering the same table locally.
-            // Never apply DOM values from a different/older table or Firebase snapshot.
             if (!options.skipInputSync && cartDomTableKey === currentTableKey) {
                 syncCartInputsToMemory();
             }
@@ -6314,7 +6232,6 @@
                 tbody.appendChild(tr);
             });
 
-            // Restore focus and cursor position if user was typing in this input
             if (focusedItemId) {
                 if (isCommentFocused) {
                     const newInput = document.querySelector(`.comment-input[data-item-id="${focusedItemId}"]`);
@@ -6445,8 +6362,6 @@
             const tableKeyForSend = currentTableKey;
             const submittedItems = JSON.parse(JSON.stringify(order.items || []));
             const submittedOrderMeta = { ...order };
-            // A Firebase transaction serializes simultaneous sends from different phones.
-            // Merge only this phone's private draft into the latest shared table order.
             db.ref("activeOrders/" + tableKeyForSend).transaction(current => {
                 const latest = current && typeof current === "object" ? current : {
                     items: [], discount: 0, paymentMethod: "Cash", status: "Active",
@@ -6458,9 +6373,6 @@
                 submittedItems.forEach(incoming => {
                     const qty = Math.max(0, Number(incoming.qty) || 0);
                     if (!qty) return;
-                    // Only combine lines when their selected checkboxes/options and notes match.
-                    // Same menu item with different add-ons must remain a separate line, or one
-                    // customer's checkbox choices can overwrite another customer's choices.
                     const variantKey = it => JSON.stringify({
                         options: it.options || {},
                         comment: it.comment || "",
@@ -6512,14 +6424,12 @@
                         modalDesc.innerHTML = `Your order for <b>${tableKeyForSend}</b> has been sent to the kitchen and is being prepared! 🍳`;
                     }
                 }
-                // Clear only this device's draft after the transaction commits.
                 customerDraftOrder = { ...customerDraftOrder, items: [], customerSent: false, customerSentAt: null };
                 activeOrders[tableKeyForSend] = customerDraftOrder;
                 const successModal = document.getElementById("customer-success-screen");
                 if (successModal) successModal.style.display = "flex";
                 renderCart();
 
-                // Start 3-second countdown to redirect directly to Google page
                 startGoogleRedirectCountdown(3);
             }).catch(err => {
                 if (sendBtn) {
@@ -6628,7 +6538,6 @@
                 }
             };
             window.addEventListener('afterprint', cleanup);
-            // Fallback safety timeout if afterprint is unsupported or cancelled
             setTimeout(cleanup, 6000);
 
             requestAnimationFrame(() => {
@@ -6643,10 +6552,6 @@
             });
         }
 
-
-        // Order display helper: group all drinks before food, then keep items together
-        // by their configured menu category. This changes display/print order only;
-        // it never mutates the saved order.items array.
         function getOrderItemCategory(item) {
             return String((item && (item.cat || item.category)) || '').trim();
         }
@@ -6661,7 +6566,6 @@
             ];
             if (drinkCategoryTerms.some(term => category.includes(term))) return true;
 
-            // Fallback for menus where the category field is generic or missing.
             const drinkItemTerms = [
                 'teh tarik', 'teh c', 'teh o', 'tea', 'coffee', 'milo', 'nescafe',
                 'milkshake', 'milk shake', 'fresh juice', 'juice', 'sirap',
@@ -6706,7 +6610,6 @@
                 return alert("Cart is empty!");
             }
 
-            // Immediately persist latest notes to DB
             if (!isCustomerMode) db.ref('activeOrders/' + currentTableKey).set(order);
 
             document.getElementById('k-order-type').innerText = currentTableKey.startsWith("Order-") ? "TAKEAWAY" : "DINE-IN";
@@ -6777,7 +6680,6 @@
             let order = activeOrders[currentTableKey];
             if (!order || !order.items || order.items.length === 0) return alert("Cart is empty!");
 
-            // Immediately persist latest notes to DB
             if (!isCustomerMode) db.ref('activeOrders/' + currentTableKey).set(order);
 
             populateCustomerReceipt(order, 0, 0);
@@ -6969,7 +6871,6 @@
         }
 
         async function confirmPaymentProcess() {
-            // Prevent duplicate clicks while a payment is being saved.
             if (isProcessingPayment) return;
 
             syncCartInputsToMemory();
@@ -6986,8 +6887,6 @@
             const chosenPaymentMethod = activeModalPaymentMethod ||
                 (document.getElementById('payment-method') ? document.getElementById('payment-method').value : 'Cash');
 
-            // Card and QR payments are entered as the exact bill amount by default;
-            // cash must cover the bill total.
             if (!Number.isFinite(paid) || paid < (grand - 0.001)) {
                 alert("Paid amount is less than total due!");
                 return;
@@ -7008,7 +6907,6 @@
             const change = Math.max(0, Math.round((paid - grand) * 100) / 100);
             const printCheckbox = document.getElementById('modal-print-checkbox');
             const shouldPrint = !!(printCheckbox && printCheckbox.checked);
-            // Firebase push keys are unique, unlike a timestamp suffix which can collide.
             const saleRef = db.ref('salesHistory').push();
             const invRef = "INV-" + String(saleRef.key || Date.now()).toUpperCase();
             const order = JSON.parse(JSON.stringify(currentOrder));
@@ -7040,8 +6938,6 @@
             }
 
             try {
-                // Save the sale and remove the active order atomically. If Firebase fails,
-                // the order remains open and the cashier can retry without losing the bill.
                 const updates = {};
                 updates['salesHistory/' + saleRef.key] = saleRecord;
                 updates['activeOrders/' + paidOrderKey] = null;
@@ -7050,7 +6946,6 @@
                 updates['staffAlerts/' + paidOrderKey] = null;
                 await db.ref().update(updates);
 
-                // Update shift totals without overwriting concurrent cashier updates.
                 if (activeShift) {
                     try {
                         const shiftResult = await db.ref('activeShift').transaction(function (shift) {
@@ -7068,7 +6963,6 @@
                     }
                 }
 
-                // Keep the local menu popularity counter only after payment is safely saved.
                 try {
                     const allTimeMap = JSON.parse(localStorage.getItem('al_hussain_alltime_sales') || '{}');
                     order.items.forEach(it => {
@@ -7277,9 +7171,7 @@
         function setQRBaseUrlToCurrent() {
             let cur = window.location.origin + window.location.pathname;
             if (!cur.endsWith('/')) {
-                // If it ends with .html, keep the path or directory
                 if (cur.endsWith('.html')) {
-                    // keep full page url
                 } else {
                     cur += '/';
                 }
@@ -7302,7 +7194,6 @@
             const input = document.getElementById('qr-custom-base-url');
             if (input) input.value = liveBaseUrl;
 
-            // Takeaway QR Card
             const tkCard = document.createElement('div');
             tkCard.className = "qr-card";
             tkCard.style.borderColor = "#7c3aed";
@@ -7317,7 +7208,6 @@
             grid.appendChild(tkCard);
             new QRCode(tkCard.querySelector('#qr-canvas-takeaway'), { text: tkQrUrl, width: 140, height: 140 });
 
-            // Table QR Cards
             const maxT = getTableCount();
             for (let i = 1; i <= maxT; i++) {
                 let tableKey = `Table ${i}`;
@@ -7347,7 +7237,6 @@
             const liveBaseUrl = getQRBaseUrl();
             const separator = liveBaseUrl.includes('?') ? '&' : '?';
 
-            // Takeaway
             let tkBox = document.createElement('div');
             tkBox.style.border = "2px solid #000";
             tkBox.style.padding = "15px";
@@ -7356,7 +7245,6 @@
             printContainer.appendChild(tkBox);
             new QRCode(tkBox.querySelector('#p-qr-tk'), { text: `${liveBaseUrl}${separator}order=takeaway`, width: 150, height: 150 });
 
-            // Tables
             const maxT = getTableCount();
             for (let i = 1; i <= maxT; i++) {
                 let box = document.createElement('div');
@@ -7374,8 +7262,6 @@
                 setTimeout(() => { document.body.className = ""; }, 1000);
             }, 500);
         }
-
-        // Menu Manager
         function openMenuManagerModal() {
             if (!hasPermission('manage_menu')) {
                 alert("Permission denied: You do not have permission to manage Menu & Prices.");
@@ -7434,7 +7320,6 @@
         }
 
         function toggleItemStockStatus(itemId) {
-            // All items are unlimited in restaurant POS
         }
 
         function deleteMenuItem(itemId) {
@@ -7464,7 +7349,6 @@
             });
         }
 
-        // Category Manager
         function openCategoryManagerModal() {
             if (!hasPermission('manage_menu')) {
                 alert("Permission denied: You do not have permission to manage Categories.");
@@ -7524,7 +7408,6 @@
             }
         }
 
-        // Checkbox Manager
         function openCheckboxManagerModal() {
             if (!hasPermission('manage_menu')) {
                 alert("Permission denied: You do not have permission to manage Item Checkboxes.");
@@ -7606,7 +7489,6 @@
             });
         }
 
-        // Stock & Expenses
         function openStockModal() {
             if (!hasPermission('manage_menu')) {
                 alert("Permission denied: You do not have permission to manage Stock & Inventory.");
@@ -7755,7 +7637,6 @@
             document.getElementById('view-expenses-month-average').innerText = (total / Math.max(1, new Date().getDate())).toFixed(2);
         }
 
-        // Sales Calculations & Reports
         function calculateTotalSales() {
             const total = Object.values(salesHistory || {})
                 .filter(x => isSaleInCurrentSession(x))
@@ -7897,8 +7778,8 @@
             container.innerHTML = tableHtml;
         }
 
-        let itemReportScope = 'session'; // 'session' | 'date' | 'all'
-        let itemReportSortColumn = 'qty'; // 'name' | 'price' | 'qty' | 'amount'
+        let itemReportScope = 'session';
+        let itemReportSortColumn = 'qty';
         let itemReportSortAsc = false;
 
         function setItemReportScope(scope) {
@@ -7906,7 +7787,6 @@
             const dateWrap = document.getElementById('item-report-date-wrapper');
             if (dateWrap) dateWrap.style.display = (scope === 'date') ? 'flex' : 'none';
 
-            // Update button active states
             document.querySelectorAll('.item-rep-filter-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('data-scope') === scope);
             });
@@ -7939,13 +7819,12 @@
             if (itemReportScope === 'date') {
                 const dateInput = document.getElementById('item-report-date-filter');
                 if (!dateInput || !dateInput.value) return true;
-                const inputVal = dateInput.value; // "YYYY-MM-DD"
+                const inputVal = dateInput.value;
                 const parts = inputVal.split('-');
                 if (parts.length !== 3) return true;
                 const [yyyy, mm, dd] = parts;
                 const expectedDStrGB = `${parseInt(dd, 10).toString().padStart(2, '0')}/${parseInt(mm, 10).toString().padStart(2, '0')}/${yyyy}`;
 
-                // Check sale.date or sale.timestamp
                 if (sale.date && sale.date === expectedDStrGB) return true;
                 if (sale.date && (sale.date === inputVal || sale.date === `${yyyy}-${mm}-${dd}`)) return true;
 
@@ -7985,7 +7864,7 @@
                 itemReportSortAsc = !itemReportSortAsc;
             } else {
                 itemReportSortColumn = column;
-                itemReportSortAsc = (column === 'name'); // name default asc, numbers default desc
+                itemReportSortAsc = (column === 'name');
             }
             renderItemReportTable();
         }
@@ -8000,8 +7879,7 @@
             const selectedCat = document.getElementById('item-report-cat-filter') ? document.getElementById('item-report-cat-filter').value : "All";
             const searchVal = document.getElementById('item-report-search') ? document.getElementById('item-report-search').value.trim().toLowerCase() : "";
 
-            // Aggregate items
-            const itemMap = {}; // key -> { name, cat, unitPrice, qty, totalSales }
+            const itemMap = {};
 
             const matchingSales = Object.values(salesHistory || {}).filter(s => isSaleMatchingReportScope(s));
 
@@ -8014,7 +7892,6 @@
                     const qty = Number(it.qty) || 0;
                     if (qty <= 0) return;
 
-                    // Match with menu item to find category and base price if not present
                     const menuItem = menu.find(m => String(m.id) === String(it.id) || (m.name && m.name.trim().toLowerCase() === itemName.toLowerCase()));
                     const itemCat = (it.cat || (menuItem ? (menuItem.cat || menuItem.category) : "") || "Other").trim();
                     const unitPrice = Number(it.price) || (menuItem ? Number(menuItem.price) : 0);
@@ -8039,12 +7916,10 @@
 
             let itemsArray = Object.values(itemMap);
 
-            // Filter by category
             if (selectedCat && selectedCat !== "All") {
                 itemsArray = itemsArray.filter(it => it.cat.toLowerCase() === selectedCat.toLowerCase());
             }
 
-            // Filter by search
             if (searchVal) {
                 itemsArray = itemsArray.filter(it => 
                     it.name.toLowerCase().includes(searchVal) || 
@@ -8052,7 +7927,6 @@
                 );
             }
 
-            // Sort
             itemsArray.sort((a, b) => {
                 let valA, valB;
                 if (itemReportSortColumn === 'name') {
@@ -8065,14 +7939,13 @@
                 } else if (itemReportSortColumn === 'amount') {
                     valA = a.totalSales;
                     valB = b.totalSales;
-                } else { // 'qty'
+                } else {
                     valA = a.qty;
                     valB = b.qty;
                 }
                 return itemReportSortAsc ? (valA - valB) : (valB - valA);
             });
 
-            // Update summary statistics
             let grandQty = 0;
             let grandAmt = 0;
             itemsArray.forEach(it => {
@@ -8231,7 +8104,6 @@
             }
         }
 
-        // Day Close & Settlement System
         function openDayCloseModal() {
             if (!hasPermission('day_close')) {
                 alert("Permission denied: You do not have permission to perform Day Close.");
@@ -8286,7 +8158,6 @@
             const qEl = document.getElementById('dc-modal-qr');
             if (qEl) qEl.innerText = totals["QR Pay"].toFixed(2);
 
-            // Check active tables
             const activeTables = Object.keys(activeOrders || {}).filter(k => activeOrders[k] && activeOrders[k].items && activeOrders[k].items.length > 0);
             const warnEl = document.getElementById('dc-alert-tables-warning');
             if (warnEl) {
@@ -8364,14 +8235,12 @@
             updates['lastDayClose'] = dayCloseRecord;
             updates['isShopOnline'] = false;
 
-            // Mark all today's session sales as closed
             curSalesEntries.forEach(([k, s]) => {
                 updates['salesHistory/' + k + '/dayClosed'] = true;
                 updates['salesHistory/' + k + '/dayClosedAt'] = closeTimestamp;
                 updates['salesHistory/' + k + '/dayCloseId'] = dayCloseKey;
             });
 
-            // Also mark any past unclosed sales from today (fail-safe for previously stuck amounts!)
             Object.entries(salesHistory || {}).forEach(([k, s]) => {
                 if (s && s.date === todayStr && !s.dayClosed) {
                     updates['salesHistory/' + k + '/dayClosed'] = true;
@@ -8380,7 +8249,6 @@
                 }
             });
 
-            // Mark all today's session expenses as closed
             curExpEntries.forEach(([k, e]) => {
                 updates['expenses/' + k + '/dayClosed'] = true;
                 updates['expenses/' + k + '/dayClosedAt'] = closeTimestamp;
@@ -8395,20 +8263,17 @@
                 }
             });
 
-            // Archive shift
             if (activeShift) {
                 updates['shiftHistory/' + closeTimestamp] = activeShift;
                 updates['activeShift'] = null;
             }
 
-            // Clear alerts
             updates['newCustomerOrderAlerts'] = null;
             updates['staffAlerts'] = null;
 
             try {
                 await db.ref().update(updates);
 
-                // Instantly force local memory and UI counters to 0.00
                 totalSales = 0;
                 lastDayClose = dayCloseRecord;
 
@@ -8420,7 +8285,6 @@
                 calculateTotalSales();
                 calculateTotalExpenses();
 
-                // Prepare print receipt
                 const dcDate = document.getElementById('dc-date');
                 if (dcDate) dcDate.innerText = todayStr + " " + closeTimeStr;
                 const dcBy = document.getElementById('dc-closed-by');
@@ -8551,12 +8415,10 @@
             }, 1000);
         }
 
-        // Backward compatibility
         function closeDay() {
             openDayCloseModal();
         }
 
-        // Dynamic Supplier, Staff & Login Credentials Management with Permissions
         const ALL_PERMISSION_KEYS = [
             'take_orders', 'billing', 'manage_menu', 'daily_expense', 'sales_history', 'item_report',
             'payment_summary', 'monthly_reports', 'day_close', 'qr_codes',
@@ -8569,7 +8431,6 @@
                 return;
             }
             renderCredentialOverview();
-            // Start editing user1 or first available
             const defaultKey = credentials['user1'] ? 'user1' : (Object.keys(credentials)[0] || 'admin');
             loadUserForEditing(defaultKey);
             document.getElementById('credentials-modal').style.display = 'flex';
@@ -8597,7 +8458,6 @@
 
             applyPermPreset('supplier');
 
-            // Remove active highlight from all cards
             document.querySelectorAll('.cred-user-card').forEach(card => card.classList.remove('active-editing'));
             document.getElementById('cred-name').focus();
         }
@@ -8606,7 +8466,6 @@
             const cred = credentials[userKey];
             if (!cred) return;
 
-            // If cred.name is generic placeholder, use cred.user or userKey (user1)
             let editName = cred.name || "";
             if (!editName || /^supplier[\s_-]*[a-c0-9]*$/i.test(editName) || /^staff[\s_-]*[a-c0-9]*$/i.test(editName) || editName.toLowerCase() === 'supplier') {
                 editName = cred.user || userKey;
@@ -8627,7 +8486,6 @@
             document.getElementById('cred-username').value = cred.user || userKey;
             document.getElementById('cred-password').value = cred.pass || "";
 
-            // Populate checkboxes
             const perms = cred.permissions || (userKey === 'admin' ? DEFAULT_PERMISSIONS.admin : DEFAULT_PERMISSIONS.supplier);
             ALL_PERMISSION_KEYS.forEach(pk => {
                 const cb = document.getElementById('perm-' + pk);
@@ -8636,7 +8494,6 @@
                 }
             });
 
-            // Update card active styling
             document.querySelectorAll('.cred-user-card').forEach(card => {
                 if (card.getAttribute('data-user-key') === userKey) {
                     card.classList.add('active-editing');
@@ -8710,7 +8567,6 @@
                 else if (roleType === 'cashier') { avatarIcon = "💵"; avatarClass = "cashier"; }
                 else if (roleType === 'manager') { avatarIcon = "📋"; avatarClass = "manager"; }
 
-                // Build permission badges
                 let tagsHtml = "";
                 const activePermsCount = ALL_PERMISSION_KEYS.filter(pk => perms[pk] === true).length;
                 if (roleType === 'admin' || activePermsCount === ALL_PERMISSION_KEYS.length) {
@@ -8799,7 +8655,6 @@
                 return;
             }
 
-            // If name is empty, or has generic supplier/staff default, default it to username or user1
             if (!name || /^supplier[\s_-]*[a-c0-9]*$/i.test(name) || /^staff[\s_-]*[a-c0-9]*$/i.test(name) || name.toLowerCase() === 'supplier') {
                 name = username || (targetKey || 'user1');
                 document.getElementById('cred-name').value = name;
@@ -8811,7 +8666,6 @@
                 return;
             }
 
-            // Check if username is already taken by another account
             const duplicateKey = Object.keys(credentials).find(k => 
                 k !== targetKey && 
                 credentials[k] && 
@@ -8820,7 +8674,6 @@
             );
 
             if (duplicateKey) {
-                // If targetKey is empty or duplicateKey matches standard slots, adapt that slot smoothly
                 if (!targetKey || duplicateKey === targetKey) {
                     targetKey = duplicateKey;
                 } else if (duplicateKey === 'user1' || duplicateKey === 'user2' || duplicateKey === 'user3') {
@@ -8833,7 +8686,6 @@
                 }
             }
 
-            // If targetKey is empty, check if username matches user1, user2, user3
             if (!targetKey) {
                 const uLower = username.toLowerCase().replace(/[\s_-]/g, '');
                 if (uLower === 'user1') {
@@ -8848,14 +8700,12 @@
                 }
             }
 
-            // Collect granted permissions
             const perms = {};
             ALL_PERMISSION_KEYS.forEach(pk => {
                 const cb = document.getElementById('perm-' + pk);
                 perms[pk] = cb ? cb.checked : false;
             });
 
-            // If roleType is admin, force all permissions
             if (roleType === 'admin') {
                 ALL_PERMISSION_KEYS.forEach(pk => perms[pk] = true);
             }
@@ -8871,7 +8721,6 @@
 
             credentials[targetKey] = roleObj;
 
-            // Update live display if current logged-in user edited themselves
             if (loggedInRole === targetKey) {
                 loggedInDisplayName = name;
                 const dispEl = document.getElementById('display-user');
@@ -8893,5 +8742,6 @@
         }
     
     </script>
+
 </body>
 </html>
