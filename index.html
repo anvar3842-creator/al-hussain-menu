@@ -1463,7 +1463,10 @@
     body.is-staff-role .right-panel { min-width: 0; }
     body.is-staff-role .search-container { min-width: 0; }
     body.is-staff-role .search-box { min-width: 0; }
-    body.is-staff-role .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* 2-column menu is a phone layout only — desktop keeps the auto-fill grid */
+    @media (max-width: 900px) {
+        body.is-staff-role .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
     body.is-staff-role .menu-card { min-width: 0; overflow-wrap: anywhere; }
     body.is-staff-role .card-title { overflow-wrap: anywhere; }
 
