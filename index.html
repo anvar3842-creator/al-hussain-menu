@@ -1686,6 +1686,7 @@
                     <button class="admin-btn history-btn" onclick="openHistoryModal()">Sales History</button>
                     <button class="admin-btn payment-summary-btn" onclick="openPaymentSummaryModal()">Payment Summary</button>
                     <button class="admin-btn manage-suppliers-btn" onclick="openCredentialsModal()">👥 Manage Suppliers & Logins</button>
+                    <button class="admin-btn" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);" onclick="repairCategoriesNow()">🛠️ Fix Menu Categories</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">Day Close</button>
                 </div>
             </div>
@@ -2900,22 +2901,21 @@
                 } else if (typeof val === 'object') {
                     rawList = Object.entries(val).map(([k, v]) => {
                         if (v && typeof v === 'object') {
-                            return { id: v.id || k, ...v };
+                            return { ...v, id: (v.id != null && v.id !== '') ? v.id : k };
                         }
                         return v;
                     });
                 }
             }
             if (rawList.length > 0) {
-                menu = rawList.map(m => ({
+                menu = normalizeMenuList(rawList.map(m => ({
                     ...m,
-                    id: m.id || Date.now(),
                     code: m.code || "",
                     name: m.name || "",
-                    cat: (m.cat || m.category || "Special").trim(),
+                    cat: String(m.cat || m.category || "").trim(),  // ⛔ "Special" auto-fill நீக்கப்பட்டது
                     price: Number(m.price) || 0
-                }));
-                // Auto sync categories from items if needed
+                })));
+                // Category list-ல இல்லாதவற்றை auto-add
                 const itemCats = Array.from(new Set(menu.map(m => (m.cat || '').trim()).filter(Boolean)));
                 itemCats.forEach(c => {
                     if (!categories.some(x => x.toLowerCase() === c.toLowerCase())) {
@@ -2930,6 +2930,36 @@
 
         let previousActiveOrdersMap = null;
         let initialActiveOrdersLoaded = false;
+
+        function normalizeMenuList(list) {
+            const seen = new Set();
+            return list.map(m => {
+                if (!m || typeof m !== 'object') return m;
+                const item = { ...m, stock: m.stock !== undefined ? m.stock : 999999 };
+                let id = (item.id === undefined || item.id === null || item.id === '')
+                    ? String((item.cat || item.category || '')).trim().toLowerCase() + '|' + String(item.name || '').trim().toLowerCase()
+                    : String(item.id);
+                let cand = id, n = 2;
+                while (seen.has(cand)) { cand = id + '#' + n; n++; }
+                seen.add(cand);
+                item.id = cand;
+                return item;
+            });
+        }
+
+        function assignMissingItemIds(items) {
+            const seen = new Set();
+            items.forEach(x => {
+                if (!x) return;
+                const id = (x.id === undefined || x.id === null || x.id === '')
+                    ? String((x.cat || x.category || '')).trim().toLowerCase() + '|' + String(x.name || 'item').trim().toLowerCase()
+                    : String(x.id);
+                let cand = id, n = 2;
+                while (seen.has(cand)) { cand = id + '#' + n; n++; }
+                seen.add(cand);
+                x.id = cand;
+            });
+        }
 
         function getOrderItemsArray(order) {
             if (!order) return [];
@@ -5079,8 +5109,8 @@
 
         function getItemLineTotal(item) {
             const qty = Math.max(0, Number(item && item.qty) || 0);
-            const base = Math.max(0, Number(item && item.customPrice) || 0);
-            // Base item price multiplied by item quantity, plus exact option addition
+            const rawBase = item ? (item.customPrice != null ? item.customPrice : item.price) : 0;
+            const base = Math.max(0, Number(rawBase) || 0);
             return (base * qty) + getItemOptionTotal(item);
         }
 
@@ -5507,9 +5537,9 @@
                 const val = snapshot.val();
                 if (val) {
                     if (Array.isArray(val)) {
-                        menu = val.map(m => ({ ...m, stock: 999999 }));
+                        menu = normalizeMenuList(val);
                     } else if (typeof val === 'object') {
-                        menu = Object.entries(val).map(([k, v]) => ({ id: v.id || k, ...v, stock: 999999 }));
+                        menu = normalizeMenuList(Object.entries(val).map(([k, v]) => ({ ...v, id: (v.id != null && v.id !== '') ? v.id : k })));
                     }
                 }
                 renderMenuGrid();
@@ -6139,6 +6169,7 @@
             tbody.innerHTML = "";
 
             const order = activeOrders[currentTableKey];
+            assignMissingItemIds(getOrderItemsArray(order));
             const items = getSortedOrderItems(getOrderItemsArray(order));
             const totalItemCount = items.reduce((s, x) => s + (Number(x.qty) || 1), 0);
 
@@ -6171,6 +6202,9 @@
 
             items.forEach(item => {
                 const totalQty = Math.max(1, Number(item.qty) || 1);
+                if (item.customPrice == null && item.price != null) {
+                    item.customPrice = Math.max(0, Number(item.price) || 0);
+                }
                 if (isDedicatedTakeaway) {
                     item.takeawayQty = totalQty;
                     if (!item.notes || typeof item.notes !== 'object') item.notes = {};
@@ -7390,60 +7424,72 @@
         }
 
         function renderMenuManagerTable() {
-            const tbody = document.getElementById('menu-manager-tbody');
-            if (!tbody) return;
-            tbody.innerHTML = "";
+    const tbody = document.getElementById('menu-manager-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = "";
 
-            const sVal = document.getElementById('menu-manager-search') ? document.getElementById('menu-manager-search').value.trim().toLowerCase() : "";
+    const sVal = document.getElementById('menu-manager-search')
+        ? document.getElementById('menu-manager-search').value.trim().toLowerCase() : "";
 
-            menu.forEach(item => {
-                if (sVal && !item.name.toLowerCase().includes(sVal) && !item.code.toLowerCase().includes(sVal)) return;
+    const esc = s => String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><input type="text" value="${item.code || ''}" style="width:70px; padding:6px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField(${item.id}, 'code', this.value)"></td>
-                    <td><input type="text" value="${item.name}" style="width:100%; padding:6px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField(${item.id}, 'name', this.value)"></td>
-                    <td>
-                        <select style="padding:6px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;" onchange="updateMenuItemField(${item.id}, 'cat', this.value)">
-                            ${categories.map(c => `<option value="${c}" ${item.cat === c ? 'selected' : ''}>${c}</option>`).join('')}
-                        </select>
-                    </td>
-                    <td style="text-align:right;"><input type="number" step="0.50" value="${Number(item.price).toFixed(2)}" style="width:75px; padding:6px; text-align:right; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField(${item.id}, 'price', this.value)"></td>
-                    <td style="text-align:center;">
-                        <button class="btn-small" style="background:#ef4444;" onclick="deleteMenuItem(${item.id})">Delete</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+    menu.forEach(item => {
+        const nm = String(item.name || '').toLowerCase();
+        const cd = String(item.code || '').toLowerCase();
+        if (sVal && !nm.includes(sVal) && !cd.includes(sVal)) return;
 
-        function filterMenuManagerList() {
-            renderMenuManagerTable();
-        }
+        const safeId = esc(item.id);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" value="${escapeHtml(item.code || '')}" style="width:70px; padding:6px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField('${safeId}', 'code', this.value)"></td>
+            <td><input type="text" value="${escapeHtml(item.name || '')}" style="width:100%; padding:6px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField('${safeId}', 'name', this.value)"></td>
+            <td>
+                <select style="padding:6px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;" onchange="updateMenuItemField('${safeId}', 'cat', this.value)">
+                    ${categories.map(c => `<option value="${escapeHtml(c)}" ${String(item.cat) === String(c) ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+                </select>
+            </td>
+            <td style="text-align:right;"><input type="number" step="0.50" value="${(Number(item.price) || 0).toFixed(2)}" style="width:75px; padding:6px; text-align:right; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px;" onchange="updateMenuItemField('${safeId}', 'price', this.value)"></td>
+            <td style="text-align:center;">
+                <button class="btn-small" style="background:#ef4444;" onclick="deleteMenuItem('${safeId}')">Delete</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
-        function updateMenuItemField(itemId, field, val) {
-            let item = menu.find(m => m.id === itemId);
-            if (!item) return;
-            if (field === 'price') {
-                item[field] = Math.max(0, Number(val) || 0);
-            } else {
-                item[field] = val;
-            }
-            db.ref('menu').set(menu);
-            renderMenuGrid();
-        }
+function filterMenuManagerList() {
+    renderMenuManagerTable();
+}
+
+function updateMenuItemField(itemId, field, val) {
+    const item = menu.find(m => String(m.id) === String(itemId));
+    if (!item) return;
+
+    if (field === 'price') {
+        item.price = Math.max(0, Number(val) || 0);
+    } else if (field === 'cat') {
+        item.cat = String(val || '').trim();
+        item.category = item.cat;
+    } else {
+        item[field] = String(val || '');
+    }
+
+    db.ref('menu').set(menu);
+    renderMenuGrid();
+    renderMenuManagerTable();
+}
 
         function toggleItemStockStatus(itemId) {
             // All items are unlimited in restaurant POS
         }
 
-        function deleteMenuItem(itemId) {
-            if (!confirm("Are you sure you want to delete this item?")) return;
-            menu = menu.filter(m => m.id !== itemId);
-            db.ref('menu').set(menu);
-            renderMenuManagerTable();
-            renderMenuGrid();
-        }
+function deleteMenuItem(itemId) {
+    if (!confirm("Are you sure you want to delete this item?")) return;
+    menu = menu.filter(m => String(m.id) !== String(itemId));
+    db.ref('menu').set(menu);
+    renderMenuManagerTable();
+    renderMenuGrid();
+}
 
         function addNewMenuItem() {
             const code = document.getElementById('add-m-code').value.trim();
@@ -8892,6 +8938,84 @@
             });
         }
     
+
+async function repairCategoriesNow() {
+    if (!confirm("இது மெனுவில் duplicate items-ஐ நீக்கி, கேட்டகிரிகளை சரிசெய்யும்.\n\nFirebase backup எடுத்தாச்சா?\n\nதொடரவா?")) return;
+
+    try {
+        const snap = await db.ref('menu').once('value');
+        const val = snap.val();
+        let rawList = [];
+        if (Array.isArray(val)) rawList = val.slice();
+        else if (val && typeof val === 'object') rawList = Object.values(val);
+
+        const cleaned = [];
+        const seenKeys = new Set();
+        rawList.forEach(m => {
+            if (!m || typeof m !== 'object') return;
+            const name = String(m.name || '').trim();
+            if (!name) return;
+            const cat = String(m.cat || m.category || '').trim() || 'Uncategorized';
+            const dupKey = name.toLowerCase() + '||' + cat.toLowerCase();
+            if (seenKeys.has(dupKey)) return;
+            seenKeys.add(dupKey);
+            cleaned.push({
+                ...m,
+                id: String(m.id || (cat.toLowerCase() + '|' + name.toLowerCase())),
+                code: String(m.code || '').trim(),
+                name: name,
+                cat: cat,
+                category: cat,
+                price: Number(m.price) || 0,
+                stock: m.stock !== undefined ? m.stock : 999999
+            });
+        });
+
+        const catSnap = await db.ref('categories').once('value');
+        const cval = catSnap.val();
+        let catList = [];
+        if (Array.isArray(cval)) catList = cval.slice();
+        else if (cval && typeof cval === 'object') {
+            catList = Object.keys(cval)
+                .sort((a, b) => {
+                    const na = Number(a), nb = Number(b);
+                    const aN = !isNaN(na), bN = !isNaN(nb);
+                    if (aN && bN) return na - nb;
+                    if (aN) return -1;
+                    if (bN) return 1;
+                    return String(a).localeCompare(String(b));
+                })
+                .map(k => cval[k]);
+        }
+        catList = catList.map(c => String(c || '').trim()).filter(Boolean);
+
+        const lowerSet = new Set(catList.map(c => c.toLowerCase()));
+        cleaned.forEach(m => {
+            if (!lowerSet.has(m.cat.toLowerCase())) {
+                lowerSet.add(m.cat.toLowerCase());
+                catList.push(m.cat);
+            }
+        });
+
+        await db.ref('menu').set(cleaned);
+        await db.ref('categories').set(catList);
+
+        menu = cleaned;
+        categories = catList;
+
+        renderCategories();
+        populateCategoryDropdowns();
+        renderMenuGrid();
+        renderCategoryManagerTable();
+        renderMenuManagerTable();
+
+        alert("✅ சரிசெய்யப்பட்டது!\n\n" + cleaned.length + " items\n" + catList.length + " categories\n\n" + (rawList.length - cleaned.length) + " duplicate(s) நீக்கப்பட்டது.");
+    } catch (e) {
+        console.error(e);
+        alert("Repair failed: " + e.message);
+    }
+}
+
     </script>
 
     <style id="pc-login-size-restore">
