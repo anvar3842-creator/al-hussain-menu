@@ -1678,7 +1678,7 @@
                 <div class="admin-buttons-grid">
                     <button class="admin-btn manage-menu-btn" onclick="openMenuManagerModal()">Manage Menu & Prices</button>
                     <button class="admin-btn manage-cat-btn" onclick="openCategoryManagerModal()">Categories Priority</button>
-                    <button class="admin-btn manage-cat-btn" onclick="openCheckboxManagerModal()">Manage Item Checkboxes</button>
+                    <button class="admin-btn manage-cat-btn checkbox-mgr-btn" onclick="openCheckboxManagerModal()">Manage Item Checkboxes</button>
                     <button class="admin-btn stock-btn" onclick="openStockModal()">Manual Stock</button>
                     <button class="admin-btn expense-btn" onclick="openExpenseModal()">Daily Expense</button>
                     <button class="admin-btn expense-btn" onclick="openExpenseViewModal()">View Expenses</button>
@@ -1689,7 +1689,7 @@
                     <button class="admin-btn history-btn" onclick="openHistoryModal()">Sales History</button>
                     <button class="admin-btn payment-summary-btn" onclick="openPaymentSummaryModal()">Payment Summary</button>
                     <button class="admin-btn manage-suppliers-btn" onclick="openCredentialsModal()">👥 Manage Suppliers & Logins</button>
-                    <button class="admin-btn" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);" onclick="repairCategoriesNow()">🛠️ Fix Menu Categories</button>
+                    <button class="admin-btn menu-repair-btn" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);" onclick="repairCategoriesNow()">🛠️ Fix Menu Categories</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">Day Close</button>
                 </div>
             </div>
@@ -4267,6 +4267,12 @@
                 const showDayClose = hasPermission('day_close');
                 const btnCloseDay = adminSection.querySelector('.close-day-btn');
                 if (btnCloseDay) btnCloseDay.style.display = showDayClose ? '' : 'none';
+
+                // Menu repair & item-checkbox manager: admin login only, never staff
+                const btnRepair = adminSection.querySelector('.menu-repair-btn');
+                if (btnRepair) btnRepair.style.display = 'none';
+                const btnChkMgr = adminSection.querySelector('.checkbox-mgr-btn');
+                if (btnChkMgr) btnChkMgr.style.display = 'none';
 
                 // Stats toggles
                 const statBoxes = adminSection.querySelectorAll('.stat-toggle-box');
@@ -7575,6 +7581,10 @@ function deleteMenuItem(itemId) {
 
         // Checkbox Manager
         function openCheckboxManagerModal() {
+            if (!(loggedInRole === 'admin' || (credentials[loggedInRole] && credentials[loggedInRole].roleType === 'admin'))) {
+                alert("⛔ Admin மட்டும் Item Checkboxes manage பண்ண முடியும்.");
+                return;
+            }
             if (!hasPermission('manage_menu')) {
                 alert("Permission denied: You do not have permission to manage Item Checkboxes.");
                 return;
@@ -8943,6 +8953,10 @@ function deleteMenuItem(itemId) {
     
 
 async function repairCategoriesNow() {
+    if (!(loggedInRole === 'admin' || (credentials[loggedInRole] && credentials[loggedInRole].roleType === 'admin'))) {
+        alert("⛔ Admin மட்டும் இதை use பண்ண முடியும்.");
+        return;
+    }
     if (!confirm("இது மெனுவில் duplicate items-ஐ நீக்கி, கேட்டகிரிகளை சரிசெய்யும்.\n\nFirebase backup எடுத்தாச்சா?\n\nதொடரவா?")) return;
 
     try {
