@@ -2182,9 +2182,16 @@
                 <button class="close-modal" onclick="closeCheckboxManagerModal()">X</button>
             </div>
             <div class="modal-body">
-                <p style="font-size:13px;font-weight:800;color:#64748b;margin-top:0;">Add checkbox options once per category. Every item in that category will use the same options.</p>
+                <p style="font-size:13px;font-weight:800;color:#64748b;margin-top:0;">Add a checkbox option to a whole category, or to one single item only.</p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+                    <select id="checkbox-manager-scope" onchange="updateCheckboxManagerScopeUI()" title="Where should this checkbox apply?" style="flex:1;min-width:150px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-weight:800;font-family:inherit;">
+                        <option value="category">Whole category</option>
+                        <option value="item">Single item only</option>
+                    </select>
+                    <select id="checkbox-manager-category" onchange="renderCheckboxManagerItemSelect()" style="flex:1;min-width:150px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-weight:800;font-family:inherit;"></select>
+                    <select id="checkbox-manager-item" title="Pick the one item" style="display:none;flex:1;min-width:150px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-weight:800;font-family:inherit;"></select>
+                </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:15px;">
-                    <select id="checkbox-manager-category" style="flex:1;min-width:150px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-weight:800;font-family:inherit;"></select>
                     <input type="text" id="checkbox-manager-name" placeholder="Checkbox name" style="flex:2;min-width:150px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-family:inherit;">
                     <input type="number" id="checkbox-manager-price" placeholder="Extra price" min="0" step="0.01" value="0.00" style="width:105px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-family:inherit;">
                     <button class="btn-small" style="background:var(--success);padding:9px 14px;" onclick="addCategoryCheckboxOption()">+ Add</button>
@@ -2683,6 +2690,10 @@
 
         let categories = ["Mee", "Rice", "Drinks", "Roti", "Soup"];
         let categoryCheckboxes = {};
+        // Per-item checkbox options that apply to ONE specific menu item only.
+        // Array of { itemId, name, price } — an array (not an id-keyed map) because
+        // item ids can contain characters Firebase keys dislike (e.g. "cat|name#2").
+        let itemCheckboxes = [];
         let takeawaySequenceCounter = 100;
         let menu = [];
         let rawMaterials = [];
@@ -2877,6 +2888,18 @@
             populateCategoryDropdowns();
             renderCategoryManagerTable();
             renderCheckboxManagerCategorySelect();
+        });
+
+        function normalizeItemCheckboxes(val) {
+            if (!val) return [];
+            if (Array.isArray(val)) return val.filter(Boolean);
+            if (typeof val === 'object') return Object.values(val).filter(Boolean);
+            return [];
+        }
+
+        db.ref('itemCheckboxes').on('value', (snapshot) => {
+            itemCheckboxes = normalizeItemCheckboxes(snapshot.val());
+            refreshUnifiedCheckboxes();
         });
 
         function refreshUnifiedCheckboxes() {
@@ -5279,6 +5302,19 @@
                     }
                 }
             }
+            // Per-item checkboxes (added for ONE item only in the Checkbox Manager)
+            if (Array.isArray(itemCheckboxes) && itemCheckboxes.length > 0) {
+                const itemId = (item.id != null) ? String(item.id) : "";
+                if (itemId) {
+                    itemCheckboxes.forEach(o => {
+                        if (!o || !o.name) return;
+                        if (String(o.itemId) !== itemId) return;
+                        if (!allOpts.some(x => x.name.toLowerCase() === String(o.name).toLowerCase())) {
+                            allOpts.push({ name: o.name, price: Number(o.price !== undefined ? o.price : (o.extraPrice || 0)) || 0 });
+                        }
+                    });
+                }
+            }
             return allOpts;
         }
 
@@ -7664,6 +7700,7 @@ function deleteMenuItem(itemId) {
                 return;
             }
             renderCheckboxManagerCategorySelect();
+            updateCheckboxManagerScopeUI();
             renderCheckboxManagerList();
             document.getElementById('checkbox-manager-modal').style.display = 'flex';
         }
@@ -7682,6 +7719,43 @@ function deleteMenuItem(itemId) {
                 opt.innerText = c;
                 sel.appendChild(opt);
             });
+            renderCheckboxManagerItemSelect();
+        }
+
+        // Show / hide the "single item" picker depending on the chosen scope.
+        function updateCheckboxManagerScopeUI() {
+            const scopeEl = document.getElementById('checkbox-manager-scope');
+            const itemSel = document.getElementById('checkbox-manager-item');
+            if (!scopeEl || !itemSel) return;
+            if (scopeEl.value === 'item') {
+                itemSel.style.display = '';
+                renderCheckboxManagerItemSelect();
+            } else {
+                itemSel.style.display = 'none';
+            }
+        }
+
+        // Populate the item picker with only the items of the selected category.
+        function renderCheckboxManagerItemSelect() {
+            const sel = document.getElementById('checkbox-manager-item');
+            if (!sel) return;
+            const catEl = document.getElementById('checkbox-manager-category');
+            const cat = catEl ? String(catEl.value || '').trim().toLowerCase() : '';
+            sel.innerHTML = "";
+            const items = menu.filter(m => String(m.cat || m.category || '').trim().toLowerCase() === cat);
+            if (items.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.innerText = "(no items in this category)";
+                sel.appendChild(opt);
+                return;
+            }
+            items.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = String(m.id);
+                opt.innerText = m.name ? (m.name + (m.code ? ' (' + m.code + ')' : '')) : String(m.id);
+                sel.appendChild(opt);
+            });
         }
 
         function renderCheckboxManagerList() {
@@ -7696,7 +7770,7 @@ function deleteMenuItem(itemId) {
                 sec.style.padding = "10px";
                 sec.style.background = "#f8fafc";
                 sec.style.borderRadius = "10px";
-                sec.innerHTML = `<h4 style="margin:0 0 8px 0; color:var(--primary);">${cat} Checkboxes</h4>`;
+                sec.innerHTML = `<h4 style="margin:0 0 8px 0; color:var(--primary);">${escapeHtml(cat)} — whole category</h4>`;
 
                 if (opts.length === 0) {
                     sec.innerHTML += '<span style="font-size:12px; color:#94a3b8;">No options added yet.</span>';
@@ -7704,29 +7778,87 @@ function deleteMenuItem(itemId) {
                     opts.forEach((o, i) => {
                         sec.innerHTML += `
                             <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #e2e8f0;">
-                                <span style="font-size:13px; font-weight:bold;">${o.name} (+$ ${Number(o.price).toFixed(2)})</span>
-                                <button class="btn-small" style="background:#ef4444; padding:3px 8px;" onclick="deleteCategoryCheckboxOption('${cat}', ${i})">Delete</button>
+                                <span style="font-size:13px; font-weight:bold;">${escapeHtml(o.name)} (+$ ${Number(o.price).toFixed(2)})</span>
+                                <button class="btn-small" style="background:#ef4444; padding:3px 8px;" onclick="deleteCategoryCheckboxOption(decodeURIComponent('${encodeURIComponent(cat)}'), ${i})">Delete</button>
                             </div>
                         `;
                     });
                 }
                 list.appendChild(sec);
             });
+
+            // ---- Single-item checkbox options (apply to ONE item only) ----
+            if (Array.isArray(itemCheckboxes) && itemCheckboxes.length > 0) {
+                const groups = {};
+                itemCheckboxes.forEach((o, i) => {
+                    if (!o) return;
+                    const key = String(o.itemId);
+                    (groups[key] = groups[key] || []).push({ opt: o, index: i });
+                });
+
+                Object.keys(groups).forEach(itemId => {
+                    const menuItem = menu.find(m => String(m.id) === itemId);
+                    const label = menuItem ? (menuItem.name || menuItem.code || itemId) : itemId;
+                    const catLabel = menuItem ? (menuItem.cat || menuItem.category || '') : '';
+
+                    let sec = document.createElement('div');
+                    sec.style.marginBottom = "15px";
+                    sec.style.padding = "10px";
+                    sec.style.background = "#eef2ff";
+                    sec.style.border = "1px solid #c7d2fe";
+                    sec.style.borderRadius = "10px";
+                    sec.innerHTML = `<h4 style="margin:0 0 8px 0; color:#4338ca;">🔖 ${escapeHtml(label)}${catLabel ? ' <span style="color:#94a3b8; font-weight:700; font-size:12px;">(' + escapeHtml(catLabel) + ')</span>' : ''} — this item only</h4>`;
+
+                    groups[itemId].forEach(g => {
+                        sec.innerHTML += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #c7d2fe;">
+                                <span style="font-size:13px; font-weight:bold;">${escapeHtml(g.opt.name)} (+$ ${Number(g.opt.price).toFixed(2)})</span>
+                                <button class="btn-small" style="background:#ef4444; padding:3px 8px;" onclick="deleteItemCheckboxOption(${g.index})">Delete</button>
+                            </div>
+                        `;
+                    });
+                    list.appendChild(sec);
+                });
+            }
         }
 
         function addCategoryCheckboxOption() {
-            const cat = document.getElementById('checkbox-manager-category').value;
-            const name = document.getElementById('checkbox-manager-name').value.trim();
-            const price = Number(document.getElementById('checkbox-manager-price').value) || 0;
+            const scopeEl = document.getElementById('checkbox-manager-scope');
+            const scope = scopeEl ? scopeEl.value : 'category';
+            const catEl = document.getElementById('checkbox-manager-category');
+            const cat = catEl ? catEl.value : "";
+            const nameEl = document.getElementById('checkbox-manager-name');
+            const name = nameEl ? nameEl.value.trim() : "";
+            const priceEl = document.getElementById('checkbox-manager-price');
+            const price = Number(priceEl ? priceEl.value : 0) || 0;
 
             if (!name) return alert("Please enter checkbox option name!");
 
+            const resetInputs = () => {
+                if (nameEl) nameEl.value = "";
+                if (priceEl) priceEl.value = "0.00";
+            };
+
+            // Single item only: store in the per-item list.
+            if (scope === 'item') {
+                const itemSel = document.getElementById('checkbox-manager-item');
+                const itemId = itemSel ? itemSel.value : "";
+                if (!itemId) return alert("Please choose an item in this category first!");
+                if (!Array.isArray(itemCheckboxes)) itemCheckboxes = [];
+                itemCheckboxes.push({ itemId: itemId, name: name, price: price });
+                db.ref('itemCheckboxes').set(itemCheckboxes).then(() => {
+                    resetInputs();
+                    renderCheckboxManagerList();
+                }).catch(err => alert("Could not save: " + (err && err.message ? err.message : err)));
+                return;
+            }
+
+            // Whole category (existing behaviour).
             if (!categoryCheckboxes[cat]) categoryCheckboxes[cat] = [];
             categoryCheckboxes[cat].push({ name: name, price: price });
 
             db.ref('categoryCheckboxes').set(categoryCheckboxes).then(() => {
-                document.getElementById('checkbox-manager-name').value = "";
-                document.getElementById('checkbox-manager-price').value = "0.00";
+                resetInputs();
                 renderCheckboxManagerList();
             });
         }
@@ -7735,6 +7867,14 @@ function deleteMenuItem(itemId) {
             if (!categoryCheckboxes[cat]) return;
             categoryCheckboxes[cat].splice(index, 1);
             db.ref('categoryCheckboxes').set(categoryCheckboxes).then(() => {
+                renderCheckboxManagerList();
+            });
+        }
+
+        function deleteItemCheckboxOption(index) {
+            if (!Array.isArray(itemCheckboxes)) return;
+            itemCheckboxes.splice(index, 1);
+            db.ref('itemCheckboxes').set(itemCheckboxes).then(() => {
                 renderCheckboxManagerList();
             });
         }
