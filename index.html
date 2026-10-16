@@ -2724,8 +2724,6 @@
 
         function updateTableCountUI() {
             const n = getTableCount();
-            const val = document.getElementById('table-count-value');
-            if (val) val.textContent = n;
             const note = document.getElementById('table-count-note');
             if (note) note.textContent = 'Table 1 – ' + n;
             const gridNote = document.getElementById('table-grid-count-note');
@@ -2982,14 +2980,31 @@
             return order.items;
         }
 
+        // Lightweight per-order summary used only to detect external order changes.
+        // Avoids deep-cloning the whole activeOrders tree on every Firebase snapshot.
+        function buildActiveOrdersSummary(orders) {
+            const summary = {};
+            const keys = Object.keys(orders || {});
+            for (let i = 0; i < keys.length; i++) {
+                const k = keys[i];
+                const o = orders[k];
+                if (!o || typeof o !== 'object') continue;
+                const items = getOrderItemsArray(o);
+                let count = 0;
+                for (let j = 0; j < items.length; j++) count += (Number(items[j] && items[j].qty) || 1);
+                summary[k] = { count: count, lastUpdatedAt: o.lastUpdatedAt || 0 };
+            }
+            return summary;
+        }
+
         function checkActiveOrdersForExternalChanges(incomingOrders) {
             if (!initialActiveOrdersLoaded) {
                 initialActiveOrdersLoaded = true;
-                previousActiveOrdersMap = JSON.parse(JSON.stringify(incomingOrders || {}));
+                previousActiveOrdersMap = buildActiveOrdersSummary(incomingOrders);
                 return;
             }
             if (isCustomerMode || !previousActiveOrdersMap) {
-                previousActiveOrdersMap = JSON.parse(JSON.stringify(incomingOrders || {}));
+                previousActiveOrdersMap = buildActiveOrdersSummary(incomingOrders);
                 return;
             }
 
@@ -3005,9 +3020,8 @@
                 if (curOrd.lastDeviceId && curOrd.lastDeviceId === posDeviceId) return;
 
                 const prevOrd = prev[tKey];
-                const prevItems = getOrderItemsArray(prevOrd);
                 const curCount = curItems.reduce((s, it) => s + (Number(it.qty) || 1), 0);
-                const prevCount = prevItems.reduce((s, it) => s + (Number(it.qty) || 1), 0);
+                const prevCount = prevOrd ? (prevOrd.count || 0) : 0;
                 const who = curOrd.takenBy || curOrd.lastUpdatedBy || '';
                 const total = getOrderGrandTotal(curOrd);
 
@@ -3020,7 +3034,7 @@
                 }
             });
 
-            previousActiveOrdersMap = JSON.parse(JSON.stringify(curr));
+            previousActiveOrdersMap = buildActiveOrdersSummary(curr);
         }
 
         db.ref('activeOrders').on('value', (snapshot) => {
@@ -3178,6 +3192,7 @@
         let salesHistoryRenderTimer = null;
         db.ref('salesHistory').on('value', (snapshot) => {
             salesHistory = snapshot.val() || [];
+            invalidateSalesMapCache();
             calculateTotalSales();
             const modalIsOpen = (id) => {
                 const el = document.getElementById(id);
@@ -3197,6 +3212,7 @@
 
         db.ref('lastDayClose').on('value', (snapshot) => {
             lastDayClose = snapshot.val() || null;
+            invalidateSalesMapCache();
             calculateTotalSales();
             calculateTotalExpenses();
             if (document.getElementById('day-close-modal') && document.getElementById('day-close-modal').style.display === 'flex') {
@@ -3989,6 +4005,10 @@
             }
 
             document.getElementById('customer-action-div').style.display = 'flex';
+
+            // Keep the cart panel title in sync for QR / takeaway sessions too
+            // (previously only openTable() updated it, so customers always saw the hardcoded "Table 1").
+            refreshCartTitleBadge();
 
             if (isTakeaway) {
                 const callBtn = document.getElementById('btn-call-waiter-elem');
@@ -5309,7 +5329,24 @@
         }
 
         // Persistent all-time popularity map (NEVER resets - keeps popular items at the top)
+        // ---- Perf: memoize expensive sales-history scans ----
+        // These maps walk the ENTIRE salesHistory (which only ever grows) and were
+        // recomputed on every menu render (every keystroke / cart change). Cache them
+        // until the underlying data actually changes, and bump salesMapVersion so the
+        // menu-grid fingerprint below knows a re-render is required.
+        let __allTimeSalesMapCache = null;
+        let __todaySalesMapCache = null;
+        let __todaySalesMapCacheDay = null;
+        let salesMapVersion = 0;
+        function invalidateSalesMapCache() {
+            __allTimeSalesMapCache = null;
+            __todaySalesMapCache = null;
+            __todaySalesMapCacheDay = null;
+            salesMapVersion++;
+        }
+
         function getAllTimeItemSalesMap() {
+            if (__allTimeSalesMapCache) return __allTimeSalesMapCache;
             let counts = {};
             try {
                 counts = JSON.parse(localStorage.getItem('al_hussain_alltime_sales') || '{}');
@@ -5332,11 +5369,14 @@
                     }
                 });
             });
+            __allTimeSalesMapCache = counts;
             return counts;
         }
 
         // Today's sales counts only (RESETS to 0 each new day / session)
         function getTodayItemSalesCountMap() {
+            const todayKey = new Date().toDateString();
+            if (__todaySalesMapCache && __todaySalesMapCacheDay === todayKey) return __todaySalesMapCache;
             const counts = {};
             const sales = Object.values(salesHistory || {});
             sales.forEach(sale => {
@@ -5357,6 +5397,8 @@
                     }
                 });
             });
+            __todaySalesMapCache = counts;
+            __todaySalesMapCacheDay = todayKey;
             return counts;
         }
 
@@ -5367,14 +5409,42 @@
             return Math.max(byId, byName);
         }
 
+        let lastMenuGridSignature = null;
+
+        // Cheap fingerprint of every input that affects the rendered menu grid.
+        // When nothing relevant changed we skip the full DOM rebuild entirely.
+        function buildMenuGridSignature(searchVal, currentItems) {
+            let sig = searchVal + '\u0002' + selectedCategory + '\u0002' + (isCustomerMode ? '1' : '0')
+                + '\u0002' + (currentTableKey || '') + '\u0002' + salesMapVersion + '\u0002' + categories.join('\u0001');
+            for (let i = 0; i < menu.length; i++) {
+                const it = menu[i];
+                sig += '\u0003' + (it.id || '') + '\u0004' + (it.name || '') + '\u0004' + (it.price || 0)
+                    + '\u0004' + (it.cat || it.category || '') + '\u0004' + (it.code || '');
+            }
+            sig += '\u0005';
+            for (let i = 0; i < currentItems.length; i++) {
+                const it = currentItems[i];
+                sig += '\u0006' + (it.id || '') + '\u0004' + (Number(it.qty) || 1);
+            }
+            return sig;
+        }
+
         function renderMenuGrid() {
             const grid = document.getElementById('menu-grid');
             if (!grid) return;
-            grid.innerHTML = "";
 
             const searchVal = document.getElementById('search-input') ? document.getElementById('search-input').value.trim().toLowerCase() : "";
             const currentOrder = activeOrders[currentTableKey];
             const currentItems = getOrderItemsArray(currentOrder);
+
+            const currentQtyById = new Map();
+            currentItems.forEach(x => { if (x && x.id != null) currentQtyById.set(String(x.id), Number(x.qty) || 0); });
+
+            // Skip rebuilding the grid when the result would be byte-for-byte identical.
+            const menuGridSig = buildMenuGridSignature(searchVal, currentItems);
+            if (menuGridSig === lastMenuGridSignature && grid.childElementCount > 0) return;
+
+            grid.innerHTML = "";
 
             const isAll = !selectedCategory || selectedCategory === "All";
             const catsToRender = isAll ? categories : [selectedCategory];
@@ -5419,8 +5489,7 @@
                     const maxTodaySoldInCat = Math.max(0, ...catItems.map(it => getItemPopularityScore(it, todaySalesCounts)));
 
                     catItems.forEach((item, itemIdx) => {
-                        let cartItem = currentItems.find(x => String(x.id) === String(item.id));
-                        let inCartQty = cartItem ? (Number(cartItem.qty) || 0) : 0;
+                        let inCartQty = currentQtyById.get(String(item.id)) || 0;
                         let todaySold = getItemPopularityScore(item, todaySalesCounts);
                         let allTimeSold = getItemPopularityScore(item, allTimeSalesCounts);
 
@@ -5490,8 +5559,7 @@
                     const maxTodaySoldOther = Math.max(0, ...otherItems.map(it => getItemPopularityScore(it, todaySalesCounts)));
 
                     otherItems.forEach((item, itemIdx) => {
-                        let cartItem = currentItems.find(x => String(x.id) === String(item.id));
-                        let inCartQty = cartItem ? (Number(cartItem.qty) || 0) : 0;
+                        let inCartQty = currentQtyById.get(String(item.id)) || 0;
                         let todaySold = getItemPopularityScore(item, todaySalesCounts);
                         let allTimeSold = getItemPopularityScore(item, allTimeSalesCounts);
 
@@ -5529,10 +5597,15 @@
                     });
                 }
             }
+
+            lastMenuGridSignature = menuGridSig;
         }
 
+        let searchRenderTimer = null;
         function handleSearchInput(e) {
-            renderMenuGrid();
+            // Debounce: typing no longer rebuilds the whole menu on every keystroke.
+            clearTimeout(searchRenderTimer);
+            searchRenderTimer = setTimeout(renderMenuGrid, 120);
         }
 
         function clearSearch() {
@@ -7124,6 +7197,7 @@
                         }
                     });
                     localStorage.setItem('al_hussain_alltime_sales', JSON.stringify(allTimeMap));
+                    invalidateSalesMapCache();
                 } catch (e) {
                     console.error("All time sales storage error", e);
                 }
