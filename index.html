@@ -6768,6 +6768,30 @@
         }
 
         function triggerPrint(modeClass, onComplete) {
+            // Kitchen/reports must NEVER carry the ESC/POS drawer-kick bytes that
+            // live inside #print-receipt and #print-drawer. Some thermal printer
+            // drivers in text/ESC-POS mode pass hidden bytes through and pulse the
+            // cash drawer on every print job. Detach those sections for any print
+            // mode that is not the customer receipt or the explicit drawer open.
+            const drawerKickModes = { 'print-customer': true, 'print-drawer-mode': true };
+            let detached = [];
+            if (!drawerKickModes[modeClass]) {
+                ['print-receipt', 'print-drawer'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.parentNode) {
+                        detached.push({ el, parent: el.parentNode, next: el.nextSibling });
+                        el.parentNode.removeChild(el);
+                    }
+                });
+            }
+            const restoreDetached = () => {
+                detached.forEach(({ el, parent, next }) => {
+                    if (next && next.parentNode === parent) parent.insertBefore(el, next);
+                    else parent.appendChild(el);
+                });
+                detached = [];
+            };
+
             document.body.classList.add(modeClass);
             let finished = false;
             const cleanup = () => {
@@ -6775,6 +6799,7 @@
                 finished = true;
                 document.body.classList.remove(modeClass);
                 window.removeEventListener('afterprint', cleanup);
+                restoreDetached();
                 if (typeof onComplete === 'function') {
                     try { onComplete(); } catch (err) { console.error(err); }
                 }
@@ -7383,15 +7408,106 @@
             if (pendingLinkSelection.length < 2) return alert("Select at least 2 tables to link together.");
             const sorted = pendingLinkSelection.slice().sort((a, b) => parseInt(a.replace('Table ', '')) - parseInt(b.replace('Table ', '')));
             const master = sorted[0];
+            mergeOrdersIntoMasterOnLink(master, sorted);
+        }
 
-            sorted.forEach(k => {
-                tableLinks[k] = master;
-            });
+        // Linking tables that already have orders must merge those orders into the
+        // master's order in the SAME atomic write as the link itself. Otherwise the
+        // slave's items stay orphaned in Firebase: opening the slave redirects to the
+        // master, the items look "missing", and they are never billed at payment.
+        async function mergeOrdersIntoMasterOnLink(master, linkedKeys) {
+            try {
+                const snaps = await Promise.all(linkedKeys.map(k => db.ref('activeOrders/' + k).once('value')));
+                const orders = {};
+                snaps.forEach((snap, i) => { orders[linkedKeys[i]] = snap.val(); });
 
-            db.ref('tableLinks').set(tableLinks).then(() => {
+                const nextLinks = { ...tableLinks };
+                linkedKeys.forEach(k => { nextLinks[k] = master; });
+
+                const updates = { tableLinks: nextLinks };
+                const masterOrder = orders[master];
+                const slaveEntries = linkedKeys
+                    .filter(k => k !== master)
+                    .map(k => [k, orders[k]])
+                    .filter(([, o]) => o && typeof o === 'object');
+
+                if (masterOrder || slaveEntries.length > 0) {
+                    const variantKey = it => JSON.stringify({
+                        options: it.options || {},
+                        comment: it.comment || "",
+                        notes: it.notes || {},
+                        customPrice: Number(it.customPrice) || 0
+                    });
+
+                    const merged = (masterOrder && typeof masterOrder === 'object') ? { ...masterOrder } : { status: "Active", discount: 0, paymentMethod: "Cash" };
+                    getOrderItemsArray(merged);
+                    const mergedItems = merged.items.map(it => ({ ...it }));
+                    merged.items = mergedItems;
+
+                    let earliestSeated = parseSeatedTimestamp(merged.seatedAt) || 0;
+                    let anyCustomerSent = Boolean(merged.customerSent);
+                    let earliestSentAt = parseSeatedTimestamp(merged.customerSentAt) || 0;
+
+                    slaveEntries.forEach(([slaveKey, slaveOrder]) => {
+                        getOrderItemsArray(slaveOrder).forEach(incoming => {
+                            const qty = Math.max(0, Number(incoming.qty) || 0);
+                            if (!qty) return;
+                            // Same rule as the customer-QR merge: combine lines only when
+                            // options/comment/notes/customPrice match, so different add-ons
+                            // never overwrite each other.
+                            const incomingVariant = variantKey(incoming);
+                            const existing = mergedItems.find(it => String(it.id) === String(incoming.id) && variantKey(it) === incomingVariant);
+                            if (existing) {
+                                existing.qty = (Number(existing.qty) || 0) + qty;
+                                if (incoming.takeawayQty) existing.takeawayQty = (Number(existing.takeawayQty) || 0) + Number(incoming.takeawayQty || 0);
+                            } else {
+                                mergedItems.push({ ...incoming, qty });
+                            }
+                        });
+
+                        const slaveSeated = parseSeatedTimestamp(slaveOrder.seatedAt) || 0;
+                        if (slaveSeated && (!earliestSeated || slaveSeated < earliestSeated)) {
+                            earliestSeated = slaveSeated;
+                            merged.seatedAt = slaveOrder.seatedAt;
+                            if (slaveOrder.seatedTime) merged.seatedTime = slaveOrder.seatedTime;
+                        }
+
+                        if (slaveOrder.customerSent) {
+                            anyCustomerSent = true;
+                            const slaveSentAt = parseSeatedTimestamp(slaveOrder.customerSentAt) || 0;
+                            if (slaveSentAt && (!earliestSentAt || slaveSentAt < earliestSentAt)) {
+                                earliestSentAt = slaveSentAt;
+                                merged.customerSentAt = slaveOrder.customerSentAt;
+                                if (slaveOrder.customerSentTime) merged.customerSentTime = slaveOrder.customerSentTime;
+                            }
+                        }
+
+                        ['customerName', 'customerPhone'].forEach(f => {
+                            if (!merged[f] && slaveOrder[f]) merged[f] = slaveOrder[f];
+                        });
+
+                        updates['activeOrders/' + slaveKey] = null;
+                    });
+
+                    merged.customerSent = anyCustomerSent;
+                    merged.lastUpdatedAt = Date.now();
+                    merged.lastUpdatedBy = loggedInDisplayName || "Staff";
+                    updates['activeOrders/' + master] = merged;
+                }
+
+                await db.ref().update(updates);
+
+                linkedKeys.forEach(k => { tableLinks[k] = master; });
+                if (updates['activeOrders/' + master]) activeOrders[master] = updates['activeOrders/' + master];
+                slaveEntries.forEach(([slaveKey]) => { delete activeOrders[slaveKey]; });
+
                 closeTableLinkModal();
+                if (currentTableKey === master && typeof renderCart === 'function') renderCart({ skipInputSync: true });
                 renderBigTablesGrid();
-            });
+            } catch (err) {
+                console.error("Could not link tables / merge orders:", err);
+                alert("Linking failed. Please check your connection and try again.");
+            }
         }
 
         function unlinkSelectedTables() {
