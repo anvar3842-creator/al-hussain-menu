@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Al Hussain Restaurant point-of-sale system: table management, ordering, kitchen KOT, billing, payments, stock, expenses and daily reports.">
-    <title>Al Hussain Restaurant - POS System v2.1</title>
+    <title>Al Hussain Restaurant - POS System v2.2</title>
     
     <!-- Instant Customer QR Detection to prevent any login or table selection screen flash -->
     <script>
@@ -6792,10 +6792,11 @@
                 detached = [];
             };
 
-            // Inject the real ESC/POS drawer kick (ESC 'p' m=1 25 250 -> pin 5 /
-            // Drawer #2 circuit) only for modes allowed to open the drawer.
-            // Built from escapes so an editor can never strip the ESC byte again.
-            const KICK_BYTES = '\x1B' + 'p' + '\x01' + '\x19' + '\xFA';
+            // ESC/POS drawer kick on BOTH circuits: ESC 'p' 1 25 250 (pin 5 /
+            // Drawer #2) + ESC 'p' '0' 25 250 (pin 2 / Drawer #1, m=48 avoids the
+            // NUL byte that DOM/HTML would destroy). Whichever circuit the drawer
+            // is wired to responds; the other pulse is ignored.
+            const KICK_BYTES = '\x1B' + 'p' + '\x01' + '\x19' + '\xFA' + '\x1B' + 'p' + '0' + '\x19' + '\xFA';
             const kickId = modeClass === 'print-customer' ? 'receipt-kick' : (modeClass === 'print-drawer-mode' ? 'drawer-kick' : null);
             const kickEl = kickId ? document.getElementById(kickId) : null;
             if (kickEl) kickEl.textContent = KICK_BYTES;
