@@ -1690,6 +1690,7 @@
                     <button class="admin-btn payment-summary-btn" onclick="openPaymentSummaryModal()">Payment Summary</button>
                     <button class="admin-btn manage-suppliers-btn" onclick="openCredentialsModal()">👥 Manage Suppliers & Logins</button>
                     <button class="admin-btn menu-repair-btn" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);" onclick="repairCategoriesNow()">🛠️ Fix Menu Categories</button>
+                    <button class="admin-btn" style="background:linear-gradient(135deg,#0f766e,#0d9488);" onclick="openDrawerSetupModal()">Cash Drawer Setup</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">Day Close</button>
                 </div>
             </div>
@@ -1928,6 +1929,38 @@
         </div>
     </div>
 
+    <div id="drawer-setup-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 520px; max-height: 90vh; padding: 22px;">
+            <div class="modal-header">
+                <h3 style="margin:0; font-size:18px; font-weight:900; display:flex; align-items:center; gap:8px;">
+                    <span id="drawer-setup-dot" style="width:10px; height:10px; border-radius:50%; background:#f59e0b; display:inline-block;"></span>
+                    Cash Drawer Setup
+                </h3>
+                <button class="close-modal" onclick="closeDrawerSetupModal()">Close</button>
+            </div>
+            <div class="modal-body" style="max-height:70vh;">
+                <div id="drawer-setup-status" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px 14px; font-size:13px; font-weight:700; color:#334155; line-height:1.7; margin-bottom:14px;"></div>
+
+                <label style="display:flex; align-items:center; gap:10px; font-size:14px; font-weight:800; margin-bottom:14px; cursor:pointer;">
+                    <input type="checkbox" id="drawer-open-on-pay" style="width:18px; height:18px; accent-color:#4f46e5;" onchange="toggleDrawerOnPay(this.checked)">
+                    Open cash drawer when Pay Now is pressed
+                </label>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
+                    <button type="button" class="btn-small" style="padding:11px; font-size:13px;" onclick="connectDrawerUSB()">Connect USB Printer</button>
+                    <button type="button" class="btn-small" style="padding:11px; font-size:13px; background:#0ea5e9;" onclick="connectDrawerSerial()">Connect Serial Port</button>
+                    <button type="button" class="btn-small" style="padding:11px; font-size:13px; background:#059669;" onclick="testCashDrawer()">Test Drawer</button>
+                    <button type="button" class="btn-small" style="padding:11px; font-size:13px; background:#64748b;" onclick="forgetDrawerDevice()">Forget Device</button>
+                </div>
+
+                <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:12px 14px; font-size:12.5px; line-height:1.7; color:#92400e; font-weight:600;">
+                    <b>Want no print dialog?</b> Either connect the printer once with <b>Connect USB Printer</b> (Chrome or Edge on the POS computer), or launch the browser with silent printing:
+                    <code style="display:block; margin:6px 0; padding:8px; background:#fff; border-radius:8px; font-size:11.5px; overflow-x:auto;">chrome.exe --kiosk-printing</code>
+                    With kiosk printing the drawer opens instantly on Pay Now and no dialog appears.
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="credentials-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 880px; width: 96%; max-height: 92vh; display: flex; flex-direction: column; padding: 18px 22px;">
             <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">
@@ -7061,15 +7094,218 @@
             document.getElementById('p-change').innerText = Number(changeAmount).toFixed(2);
         }
 
+        // ================= CASH DRAWER (ESC/POS) =================
+        // The drawer is wired to the receipt printer, so the ESC/POS "kick" bytes
+        // must reach the printer. Three paths are supported:
+        //   1) WebUSB direct  - silent, after a one-time "Connect USB Printer".
+        //   2) Web Serial      - silent, after a one-time "Connect Serial Port".
+        //   3) Print job       - works everywhere, and is silent when the browser
+        //                        runs with --kiosk-printing.
+        const DRAWER_KICK = new Uint8Array([0x1B, 0x70, 0x00, 0x19, 0xFA, 0x1B, 0x70, 0x01, 0x19, 0xFA]);
+        const DRAWER_CFG_KEY = 'al_hussain_cash_drawer';
+        let drawerConfig = (function () {
+            let cfg = { mode: 'auto', openOnPayNow: true, usb: null, serialBaud: 9600 };
+            try {
+                const raw = localStorage.getItem(DRAWER_CFG_KEY);
+                if (raw) cfg = Object.assign(cfg, JSON.parse(raw) || {});
+            } catch (err) { console.warn('Drawer config read failed', err); }
+            return cfg;
+        })();
+        let drawerPulseBusy = false;
+
+        function saveDrawerConfig() {
+            try { localStorage.setItem(DRAWER_CFG_KEY, JSON.stringify(drawerConfig)); }
+            catch (err) { console.warn('Drawer config save failed', err); }
+            updateDrawerSetupStatus();
+        }
+
+        function updateDrawerSetupStatus() {
+            const el = document.getElementById('drawer-setup-status');
+            if (!el) return;
+            let modeText = 'Print job fallback (dialog unless kiosk printing)';
+            if (drawerConfig.mode === 'usb' && drawerConfig.usb) modeText = 'USB printer saved - silent opening';
+            if (drawerConfig.mode === 'serial') modeText = 'Serial port saved - silent opening';
+            const autoText = drawerConfig.openOnPayNow === false ? 'Off' : 'On';
+            el.innerHTML = '<b>Mode:</b> ' + modeText + '<br><b>Open on Pay Now:</b> ' + autoText;
+            const statusDot = document.getElementById('drawer-setup-dot');
+            if (statusDot) statusDot.style.background = (drawerConfig.mode === 'usb' || drawerConfig.mode === 'serial') ? '#10b981' : '#f59e0b';
+        }
+
+        async function sendUsbBytes(device, bytes) {
+            await device.open();
+            try {
+                if (device.configuration === null) await device.selectConfiguration(1);
+                let target = null;
+                for (const config of device.configurations) {
+                    for (const iface of config.interfaces) {
+                        for (const alt of iface.alternates) {
+                            const out = (alt.endpoints || []).find(ep => ep.direction === 'out');
+                            if (!out) continue;
+                            const candidate = {
+                                iface: iface.interfaceNumber,
+                                alt: alt.alternateSetting,
+                                ep: out.endpointNumber,
+                                isPrinter: alt.interfaceClass === 7
+                            };
+                            if (!target || (candidate.isPrinter && !target.isPrinter)) target = candidate;
+                        }
+                    }
+                }
+                if (!target) throw new Error('No USB output endpoint found on this printer.');
+                await device.claimInterface(target.iface);
+                try {
+                    if (target.alt) {
+                        try { await device.selectAlternateInterface(target.iface, target.alt); } catch (e) { }
+                    }
+                    await device.transferOut(target.ep, bytes);
+                } finally {
+                    try { await device.releaseInterface(target.iface); } catch (e) { }
+                }
+            } finally {
+                try { await device.close(); } catch (e) { }
+            }
+        }
+
+        async function tryDrawerUSB() {
+            if (!navigator.usb || !drawerConfig.usb) return false;
+            try {
+                const devices = await navigator.usb.getDevices();
+                const device = devices.find(d =>
+                    d.vendorId === drawerConfig.usb.vendorId &&
+                    d.productId === drawerConfig.usb.productId
+                );
+                if (!device) return false;
+                await sendUsbBytes(device, DRAWER_KICK);
+                return true;
+            } catch (err) {
+                console.warn('USB drawer kick failed:', err);
+                return false;
+            }
+        }
+
+        async function tryDrawerSerial() {
+            if (!navigator.serial || drawerConfig.mode !== 'serial') return false;
+            try {
+                const ports = await navigator.serial.getPorts();
+                if (!ports.length) return false;
+                const port = ports[0];
+                await port.open({
+                    baudRate: Number(drawerConfig.serialBaud) || 9600,
+                    dataBits: 8,
+                    stopBits: 1,
+                    parity: 'none',
+                    flowControl: 'none'
+                });
+                try {
+                    const writer = port.writable.getWriter();
+                    try { await writer.write(DRAWER_KICK); }
+                    finally { writer.releaseLock(); }
+                } finally {
+                    try { await port.close(); } catch (e) { }
+                }
+                return true;
+            } catch (err) {
+                console.warn('Serial drawer kick failed:', err);
+                return false;
+            }
+        }
+
+        // Pulses the drawer once. Returns true when the drawer was triggered.
+        async function pulseCashDrawer(allowPrintFallback) {
+            if (drawerPulseBusy) return false;
+            drawerPulseBusy = true;
+            try {
+                if (window.AndroidPOS && typeof window.AndroidPOS.openCashDrawer === 'function') {
+                    try { window.AndroidPOS.openCashDrawer(); return true; } catch (e) { }
+                }
+                if (drawerConfig.mode !== 'serial' && await tryDrawerUSB()) return true;
+                if (await tryDrawerSerial()) return true;
+                if (allowPrintFallback !== false) {
+                    triggerPrint('print-drawer-mode');
+                    return true;
+                }
+                return false;
+            } finally {
+                drawerPulseBusy = false;
+            }
+        }
+
+        async function connectDrawerUSB() {
+            if (!navigator.usb) {
+                alert('This browser cannot talk to the printer directly. Use Chrome or Edge on the POS computer, or keep the print fallback.');
+                return;
+            }
+            try {
+                const device = await navigator.usb.requestDevice({ filters: [] });
+                drawerConfig.usb = {
+                    vendorId: device.vendorId,
+                    productId: device.productId,
+                    name: device.productName || 'USB Printer'
+                };
+                drawerConfig.mode = 'usb';
+                saveDrawerConfig();
+                alert('Printer connected: ' + (device.productName || 'USB Printer') + '\n\nPress Test Drawer to check it.');
+            } catch (err) {
+                if (err && err.name === 'NotFoundError') return;
+                alert('Could not connect the USB printer: ' + (err.message || err) + '\n\nClose any app that is using the printer, then try again.');
+            }
+        }
+
+        async function connectDrawerSerial() {
+            if (!navigator.serial) {
+                alert('This browser does not support serial ports. Use Chrome or Edge on the POS computer.');
+                return;
+            }
+            try {
+                await navigator.serial.requestPort();
+                drawerConfig.mode = 'serial';
+                saveDrawerConfig();
+                alert('Serial port saved. Press Test Drawer to check it.');
+            } catch (err) {
+                if (err && err.name === 'NotFoundError') return;
+                alert('Could not open the serial port: ' + (err.message || err));
+            }
+        }
+
+        function openDrawerSetupModal() {
+            updateDrawerSetupStatus();
+            const cb = document.getElementById('drawer-open-on-pay');
+            if (cb) cb.checked = drawerConfig.openOnPayNow !== false;
+            const modal = document.getElementById('drawer-setup-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeDrawerSetupModal() {
+            const modal = document.getElementById('drawer-setup-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function toggleDrawerOnPay(checked) {
+            drawerConfig.openOnPayNow = !!checked;
+            saveDrawerConfig();
+        }
+
+        function testCashDrawer() {
+            pulseCashDrawer(true);
+        }
+
+        function forgetDrawerDevice() {
+            drawerConfig.mode = 'auto';
+            drawerConfig.usb = null;
+            saveDrawerConfig();
+            showToast('Cash drawer device forgotten. Using print fallback.');
+        }
+
         function openCashDrawerOnly() {
             if (!hasPermission('billing')) {
                 alert("Permission denied: You do not have permission to open the cash drawer.");
                 return;
             }
-            triggerPrint("print-drawer-mode");
+            pulseCashDrawer(true);
         }
 
         function openPaymentModal() {
+            if (hasPermission('billing') && drawerConfig.openOnPayNow !== false) pulseCashDrawer(true);
             if (!hasPermission('billing')) {
                 alert("Permission denied: You do not have permission for billing and payment. (பில்லிங் செய்ய அனுமதி இல்லை)");
                 return;
@@ -9418,7 +9654,33 @@ async function repairCategoriesNow() {
           max-width: 100%;
         }
       }
-    </style>
+    
+    /* Mobile layout: keep the POS usable on narrow screens after login. */
+    @media (max-width: 600px) {
+        html, body { min-width: 0; width: 100%; }
+        body { height: 100vh; height: 100dvh; min-height: 100dvh; }
+        .header { margin: 8px 8px 0; padding: 10px; gap: 8px; flex-wrap: wrap; }
+        .header-title { flex: 1 1 100%; min-width: 0; flex-wrap: wrap; gap: 7px; }
+        .header h2 { font-size: 17px; flex: 1 1 140px; min-width: 0; }
+        .header-home-btn, .live-sync-badge, .badge, .btn-logout { padding: 6px 9px; font-size: 11px; }
+        .main-layout { min-width: 0; width: 100%; padding: 8px; gap: 8px; }
+        .left-panel, .right-panel { min-width: 0; }
+        .mobile-tab-bar { padding: 7px 8px; gap: 6px; }
+        .mob-tab-btn { min-width: 0; padding: 9px 5px; font-size: 12px; }
+        .controls-bar { padding: 10px; gap: 8px; }
+        .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .menu-card { min-width: 0; }
+        .login-overlay { padding: 16px; overflow-y: auto; }
+        .login-box { width: 100%; max-width: 380px; padding: 30px 22px; box-sizing: border-box; }
+        .login-box input { font-size: 16px; }
+    }
+    @media (max-width: 380px) {
+        .header-title { gap: 5px; }
+        .header h2 { font-size: 15px; }
+        .header-home-btn, .live-sync-badge, .badge, .btn-logout { padding: 5px 7px; font-size: 10px; }
+        .mob-tab-btn { font-size: 11px; }
+    }
+</style>
 
 </body>
 </html>
