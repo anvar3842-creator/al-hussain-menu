@@ -1946,17 +1946,22 @@
                     Open cash drawer when Pay Now is pressed
                 </label>
 
+                <div style="display:flex; gap:8px; margin-bottom:10px;">
+                    <input type="text" id="drawer-helper-url" placeholder="http://127.0.0.1:8787" style="flex:1; padding:10px 12px; border:2px solid #e2e8f0; border-radius:10px; font-size:13px; font-family:inherit; font-weight:700; outline:none; box-sizing:border-box;">
+                    <button type="button" class="btn-small" style="padding:10px 14px; font-size:13px; background:#0f766e;" onclick="saveDrawerHelperUrl()">Save</button>
+                </div>
+
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
+                    <button type="button" class="btn-small" style="padding:11px; font-size:13px; background:#0f766e;" onclick="pingDrawerHelper()">Check Helper</button>
                     <button type="button" class="btn-small" style="padding:11px; font-size:13px;" onclick="connectDrawerUSB()">Connect USB Printer</button>
                     <button type="button" class="btn-small" style="padding:11px; font-size:13px; background:#0ea5e9;" onclick="connectDrawerSerial()">Connect Serial Port</button>
                     <button type="button" class="btn-small" style="padding:11px; font-size:13px; background:#059669;" onclick="testCashDrawer()">Test Drawer</button>
                     <button type="button" class="btn-small" style="padding:11px; font-size:13px; background:#64748b;" onclick="forgetDrawerDevice()">Forget Device</button>
                 </div>
 
-                <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:12px 14px; font-size:12.5px; line-height:1.7; color:#92400e; font-weight:600;">
-                    <b>Want no print dialog?</b> Either connect the printer once with <b>Connect USB Printer</b> (Chrome or Edge on the POS computer), or launch the browser with silent printing:
-                    <code style="display:block; margin:6px 0; padding:8px; background:#fff; border-radius:8px; font-size:11.5px; overflow-x:auto;">chrome.exe --kiosk-printing</code>
-                    With kiosk printing the drawer opens instantly on Pay Now and no dialog appears.
+                <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:12px; padding:12px 14px; font-size:12.5px; line-height:1.7; color:#065f46; font-weight:600;">
+                    <b>Best for silent opening:</b> run <b>Start Cash Drawer Helper.bat</b> once on the POS computer (folder <b>cash-drawer-helper</b> next to this HTML). It stays in the background and sends the drawer pulse directly to the printer. No print dialog appears on Pay Now.<br>
+                    With the helper running, press <b>Check Helper</b>. The status above turns green.
                 </div>
             </div>
         </div>
@@ -7104,7 +7109,7 @@
         const DRAWER_KICK = new Uint8Array([0x1B, 0x70, 0x00, 0x19, 0xFA, 0x1B, 0x70, 0x01, 0x19, 0xFA]);
         const DRAWER_CFG_KEY = 'al_hussain_cash_drawer';
         let drawerConfig = (function () {
-            let cfg = { mode: 'auto', openOnPayNow: true, usb: null, serialBaud: 9600 };
+            let cfg = { mode: 'auto', openOnPayNow: true, usb: null, serialBaud: 9600, helperUrl: 'http://127.0.0.1:8787' };
             try {
                 const raw = localStorage.getItem(DRAWER_CFG_KEY);
                 if (raw) cfg = Object.assign(cfg, JSON.parse(raw) || {});
@@ -7114,21 +7119,66 @@
         let drawerPulseBusy = false;
 
         function saveDrawerConfig() {
-            try { localStorage.setItem(DRAWER_CFG_KEY, JSON.stringify(drawerConfig)); }
-            catch (err) { console.warn('Drawer config save failed', err); }
+            try {
+                localStorage.setItem(DRAWER_CFG_KEY, JSON.stringify({
+                    mode: drawerConfig.mode,
+                    openOnPayNow: drawerConfig.openOnPayNow,
+                    usb: drawerConfig.usb,
+                    serialBaud: drawerConfig.serialBaud,
+                    helperUrl: drawerConfig.helperUrl
+                }));
+            } catch (err) { console.warn('Drawer config save failed', err); }
             updateDrawerSetupStatus();
         }
 
         function updateDrawerSetupStatus() {
             const el = document.getElementById('drawer-setup-status');
             if (!el) return;
-            let modeText = 'Print job fallback (dialog unless kiosk printing)';
+            let modeText = 'Not connected - Pay Now cannot open the drawer yet';
             if (drawerConfig.mode === 'usb' && drawerConfig.usb) modeText = 'USB printer saved - silent opening';
             if (drawerConfig.mode === 'serial') modeText = 'Serial port saved - silent opening';
+            if (drawerConfig.helperOk) modeText = 'Local helper connected - silent opening';
             const autoText = drawerConfig.openOnPayNow === false ? 'Off' : 'On';
-            el.innerHTML = '<b>Mode:</b> ' + modeText + '<br><b>Open on Pay Now:</b> ' + autoText;
+            el.innerHTML = '<b>Mode:</b> ' + modeText + '<br><b>Open on Pay Now:</b> ' + autoText +
+                '<br><b>Helper URL:</b> ' + (drawerConfig.helperUrl || '-');
             const statusDot = document.getElementById('drawer-setup-dot');
-            if (statusDot) statusDot.style.background = (drawerConfig.mode === 'usb' || drawerConfig.mode === 'serial') ? '#10b981' : '#f59e0b';
+            if (statusDot) statusDot.style.background = (drawerConfig.helperOk || (drawerConfig.mode === 'usb' && drawerConfig.usb) || drawerConfig.mode === 'serial') ? '#10b981' : '#f59e0b';
+        }
+
+        function saveDrawerHelperUrl() {
+            const input = document.getElementById('drawer-helper-url');
+            if (!input) return;
+            drawerConfig.helperUrl = String(input.value || '').trim() || 'http://127.0.0.1:8787';
+            saveDrawerConfig();
+            showToast('Cash drawer helper URL saved.');
+        }
+
+        // The local helper is a tiny program on the POS computer that sends the
+        // ESC/POS kick bytes straight to the printer through the Windows spooler.
+        // It needs no print dialog and no printer driver dialog.
+        async function tryDrawerHelper() {
+            if (!drawerConfig.helperUrl) return false;
+            try {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 1200);
+                await fetch(String(drawerConfig.helperUrl).replace(/\/+$/, '') + '/kick', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-store',
+                    signal: controller.signal
+                });
+                clearTimeout(timer);
+                drawerConfig.helperOk = true;
+                return true;
+            } catch (err) {
+                drawerConfig.helperOk = false;
+                return false;
+            }
+        }
+
+        async function pingDrawerHelper() {
+            await tryDrawerHelper();
+            updateDrawerSetupStatus();
         }
 
         async function sendUsbBytes(device, bytes) {
@@ -7212,12 +7262,13 @@
 
         // Pulses the drawer once. Returns true when the drawer was triggered.
         async function pulseCashDrawer(allowPrintFallback) {
-            if (drawerPulseBusy) return false;
+            if (drawerPulseBusy) return true;
             drawerPulseBusy = true;
             try {
                 if (window.AndroidPOS && typeof window.AndroidPOS.openCashDrawer === 'function') {
                     try { window.AndroidPOS.openCashDrawer(); return true; } catch (e) { }
                 }
+                if (await tryDrawerHelper()) return true;
                 if (drawerConfig.mode !== 'serial' && await tryDrawerUSB()) return true;
                 if (await tryDrawerSerial()) return true;
                 if (allowPrintFallback !== false) {
@@ -7305,7 +7356,11 @@
         }
 
         function openPaymentModal() {
-            if (hasPermission('billing') && drawerConfig.openOnPayNow !== false) pulseCashDrawer(true);
+            if (hasPermission('billing') && drawerConfig.openOnPayNow !== false) {
+                pulseCashDrawer(false).then(function (opened) {
+                    if (!opened) showToast('Drawer not connected - open Admin > Cash Drawer Setup');
+                });
+            }
             if (!hasPermission('billing')) {
                 alert("Permission denied: You do not have permission for billing and payment. (பில்லிங் செய்ய அனுமதி இல்லை)");
                 return;
