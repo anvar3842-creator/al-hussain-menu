@@ -1949,7 +1949,7 @@
 
                 <label style="display:flex; align-items:center; gap:10px; font-size:14px; font-weight:800; margin-bottom:14px; cursor:pointer;">
                     <input type="checkbox" id="drawer-open-on-pay" style="width:18px; height:18px; accent-color:#4f46e5;" onchange="toggleDrawerOnPay(this.checked)">
-                    Open cash drawer when Pay Now is pressed
+                    Open cash drawer on Cash payments (Confirm &amp; Pay)
                 </label>
 
                 <div style="display:flex; gap:8px; margin-bottom:10px;">
@@ -1966,7 +1966,7 @@
                 </div>
 
                 <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:12px; padding:12px 14px; font-size:12.5px; line-height:1.7; color:#065f46; font-weight:600;">
-                    <b>Best for silent opening:</b> run <b>Start Cash Drawer Helper.bat</b> once on the POS computer (folder <b>cash-drawer-helper</b> next to this HTML). It stays in the background and sends the drawer pulse directly to the printer. No print dialog appears on Pay Now.<br>
+                    <b>Best for silent opening:</b> run <b>Start Cash Drawer Helper.bat</b> once on the POS computer (folder <b>cash-drawer-helper</b> next to this HTML). It stays in the background and sends the drawer pulse directly to the printer. No print dialog appears when you confirm a cash payment.<br>
                     With the helper running, press <b>Check Helper</b>. The status above turns green.
                 </div>
             </div>
@@ -6941,15 +6941,21 @@
             staffSendOrderToKitchen(!skipPrint);
         }
 
-        function triggerPrint(modeClass, onComplete) {
+        function triggerPrint(modeClass, onComplete, options) {
+            const printOptions = options || {};
+            const isReceiptPrint = modeClass === 'print-customer';
+            const isDrawerOpenPrint = modeClass === 'print-drawer-mode';
             // Kitchen/reports must NEVER carry the ESC/POS drawer-kick bytes that
             // live inside #print-receipt and #print-drawer. Some thermal printer
             // drivers in text/ESC-POS mode pass hidden bytes through and pulse the
             // cash drawer on every print job. Detach those sections for any print
             // mode that is not the customer receipt or the explicit drawer open.
-            const drawerKickModes = { 'print-customer': true, 'print-drawer-mode': true };
+            // Receipt prints only pulse the drawer when the caller explicitly asks
+            // for it (Cash payments); Card/QR receipts must never open the drawer.
+            const allowDrawerKick = isDrawerOpenPrint ||
+                (isReceiptPrint && printOptions.drawerKick === true);
             let detached = [];
-            if (!drawerKickModes[modeClass]) {
+            if (!isReceiptPrint && !isDrawerOpenPrint) {
                 ['print-receipt', 'print-drawer'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el && el.parentNode) {
@@ -6971,9 +6977,9 @@
             // NUL byte that DOM/HTML would destroy). Whichever circuit the drawer
             // is wired to responds; the other pulse is ignored.
             const KICK_BYTES = '\x1B' + 'p' + '\x01' + '\x19' + '\xFA' + '\x1B' + 'p' + '0' + '\x19' + '\xFA';
-            const kickId = modeClass === 'print-customer' ? 'receipt-kick' : (modeClass === 'print-drawer-mode' ? 'drawer-kick' : null);
+            const kickId = isReceiptPrint ? 'receipt-kick' : (isDrawerOpenPrint ? 'drawer-kick' : null);
             const kickEl = kickId ? document.getElementById(kickId) : null;
-            if (kickEl) kickEl.textContent = KICK_BYTES;
+            if (kickEl) kickEl.textContent = allowDrawerKick ? KICK_BYTES : '';
 
             document.body.classList.add(modeClass);
             let finished = false;
@@ -7270,12 +7276,12 @@
         function updateDrawerSetupStatus() {
             const el = document.getElementById('drawer-setup-status');
             if (!el) return;
-            let modeText = 'Not connected - Pay Now cannot open the drawer yet';
+            let modeText = 'Not connected - payment cannot open the drawer yet';
             if (drawerConfig.mode === 'usb' && drawerConfig.usb) modeText = 'USB printer saved - silent opening';
             if (drawerConfig.mode === 'serial') modeText = 'Serial port saved - silent opening';
             if (drawerConfig.helperOk) modeText = 'Local helper connected - silent opening';
             const autoText = drawerConfig.openOnPayNow === false ? 'Off' : 'On';
-            el.innerHTML = '<b>Mode:</b> ' + modeText + '<br><b>Open on Pay Now:</b> ' + autoText +
+            el.innerHTML = '<b>Mode:</b> ' + modeText + '<br><b>Open on Cash payment:</b> ' + autoText +
                 '<br><b>Helper URL:</b> ' + (drawerConfig.helperUrl || '-');
             const statusDot = document.getElementById('drawer-setup-dot');
             if (statusDot) statusDot.style.background = (drawerConfig.helperOk || (drawerConfig.mode === 'usb' && drawerConfig.usb) || drawerConfig.mode === 'serial') ? '#10b981' : '#f59e0b';
@@ -7630,11 +7636,6 @@
         pushCustomerDisplayState({ type: 'idle' });
 
         function openPaymentModal() {
-            if (hasPermission('billing') && drawerConfig.openOnPayNow !== false) {
-                pulseCashDrawer(false).then(function (opened) {
-                    if (!opened) showToast('Drawer not connected - open Admin > Cash Drawer Setup');
-                });
-            }
             if (!hasPermission('billing')) {
                 alert("Permission denied: You do not have permission for billing and payment. (பில்லிங் செய்ய அனுமதி இல்லை)");
                 return;
@@ -7839,6 +7840,14 @@
                 updates['staffAlerts/' + paidOrderKey] = null;
                 await db.ref().update(updates);
 
+                // Open the cash drawer only after a CASH bill has been saved successfully.
+                if (String(chosenPaymentMethod).trim().toLowerCase() === 'cash' &&
+                    hasPermission('billing') && drawerConfig.openOnPayNow !== false) {
+                    pulseCashDrawer(false).then(function (opened) {
+                        if (!opened) showToast('Drawer not connected - open Admin > Cash Drawer Setup');
+                    });
+                }
+
                 // Update shift totals without overwriting concurrent cashier updates.
                 if (activeShift) {
                     try {
@@ -7912,7 +7921,7 @@
                         if (currentTableKey !== paidOrderKey) return;
                         if (activeOrders[paidOrderKey]) return;
                         backToTableSelection();
-                    });
+                    }, { drawerKick: String(chosenPaymentMethod).trim().toLowerCase() === 'cash' });
                 } else {
                     backToTableSelection();
                 }
