@@ -35,6 +35,7 @@
       html.is-customer-qr .mob-home-btn,
       html.is-customer-qr .btn-back-tables,
       html.is-customer-qr .table-link-controls,
+      html.is-customer-qr #btn-customer-display,
       html.is-customer-qr #btn-sound-test,
       html.is-customer-qr #btn-logout-elem,
       html.is-customer-qr #staff-action-buttons,
@@ -524,6 +525,7 @@
         .staff-alert-banner.update-type { background: linear-gradient(135deg, #fff7ed, #ffedd5); border-color: #fdba74; box-shadow: 0 4px 15px rgba(234, 88, 12, 0.15); }
         .sound-test-btn { background: #f1f5f9; border: 1.5px solid #cbd5e1; color: #1e293b; padding: 6px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s; }
         .sound-test-btn:hover { background: #e2e8f0; border-color: #94a3b8; }
+        @media (max-width: 760px) { #btn-customer-display { display: none !important; } }
         .staff-alert-btn-view { background: #2563eb; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer; }
         .staff-alert-btn-dismiss { background: transparent; color: #64748b; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; }
 
@@ -1390,6 +1392,7 @@
     }
 
     /* Phones under 400px: single-column menu would be too wide, keep 2 but tighten */
+
     @media (max-width: 380px) {
         body.is-staff-role .menu-grid { grid-template-columns: 1fr !important; }
         body.is-staff-role .menu-card { min-height: 108px; }
@@ -1433,6 +1436,7 @@
     html.is-customer-qr #app-header-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     html.is-customer-qr #display-user,
     html.is-customer-qr #btn-logout-elem,
+    html.is-customer-qr #btn-customer-display,
     html.is-customer-qr #btn-sound-test { display: none !important; }
     html.is-customer-qr .mobile-tab-bar { gap: 8px; padding: 9px 10px; }
     html.is-customer-qr .mob-tab-btn { min-height: 48px; padding: 10px 8px; font-size: 13px; }
@@ -1516,6 +1520,7 @@
         .btn-login { min-height: 50px; }
         #takeaway-details-modal .timeout-box { width: 100% !important; padding: 22px 17px !important; }
     }
+
     @media (max-width: 380px) {
         html.is-customer-qr .menu-grid,
         body.is-staff-role .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px; }
@@ -1607,6 +1612,7 @@
                 <span class="badge" id="display-user">Admin</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
+                <button type="button" id="btn-customer-display" class="sound-test-btn" onclick="openCustomerDisplay()" title="Open the customer display on the second monitor">Display</button>
                 <button type="button" id="btn-sound-test" class="sound-test-btn" onclick="testPosSound()" title="Sound active - click to test voice announcement">🔊 Sound</button>
                 <button class="btn-logout" id="btn-logout-elem" onclick="logout()">Logout</button>
             </div>
@@ -1690,7 +1696,7 @@
                     <button class="admin-btn payment-summary-btn" onclick="openPaymentSummaryModal()">Payment Summary</button>
                     <button class="admin-btn manage-suppliers-btn" onclick="openCredentialsModal()">👥 Manage Suppliers & Logins</button>
                     <button class="admin-btn menu-repair-btn" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);" onclick="repairCategoriesNow()">🛠️ Fix Menu Categories</button>
-                    <button class="admin-btn" style="background:linear-gradient(135deg,#0f766e,#0d9488);" onclick="openDrawerSetupModal()">Cash Drawer Setup</button>
+                    <button class="admin-btn drawer-setup-btn" style="background:linear-gradient(135deg,#0f766e,#0d9488);" onclick="openDrawerSetupModal()">Cash Drawer Setup</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">Day Close</button>
                 </div>
             </div>
@@ -4354,6 +4360,9 @@
                 if (btnRepair) btnRepair.style.display = 'none';
                 const btnChkMgr = adminSection.querySelector('.checkbox-mgr-btn');
                 if (btnChkMgr) btnChkMgr.style.display = 'none';
+                // Cash Drawer Setup: admin login only, never staff
+                const btnDrawerSetup = adminSection.querySelector('.drawer-setup-btn');
+                if (btnDrawerSetup) btnDrawerSetup.style.display = 'none';
 
                 // Stats toggles
                 const statBoxes = adminSection.querySelectorAll('.stat-toggle-box');
@@ -7318,12 +7327,22 @@
             }
         }
 
+        function isAdminAccount() {
+            return loggedInRole === 'admin' ||
+                (typeof credentials !== 'undefined' && credentials[loggedInRole] && credentials[loggedInRole].roleType === 'admin');
+        }
+
         function openDrawerSetupModal() {
+            if (!isAdminAccount()) {
+                alert('Only the Admin account can open Cash Drawer Setup.');
+                return;
+            }
             updateDrawerSetupStatus();
             const cb = document.getElementById('drawer-open-on-pay');
             if (cb) cb.checked = drawerConfig.openOnPayNow !== false;
             const modal = document.getElementById('drawer-setup-modal');
             if (modal) modal.style.display = 'flex';
+            pingDrawerHelper();
         }
 
         function closeDrawerSetupModal() {
@@ -7354,6 +7373,134 @@
             }
             pulseCashDrawer(true);
         }
+
+        /* ============================================================
+           CUSTOMER DISPLAY (second monitor / VGL51-2)
+           The POS broadcasts the current bill state to customer-display.html
+           using BroadcastChannel (with a localStorage fallback). The display
+           window can be moved to the customer-facing monitor and run in
+           full screen. No Firebase data is shared between branches.
+           ============================================================ */
+        const CUSTOMER_DISPLAY_CHANNEL = 'al_hussain_customer_display_v1';
+        const CUSTOMER_DISPLAY_STORAGE = 'al_hussain_customer_display_state';
+        const CUSTOMER_DISPLAY_DONE_MS = 15000;
+
+        let customerDisplayChannel = null;
+        let customerDisplayIdleTimer = null;
+        let lastCustomerDisplayState = { type: 'idle', ts: Date.now() };
+
+        function getCustomerDisplayChannel() {
+            if (!('BroadcastChannel' in window)) return null;
+            if (!customerDisplayChannel) {
+                try {
+                    customerDisplayChannel = new BroadcastChannel(CUSTOMER_DISPLAY_CHANNEL);
+                    customerDisplayChannel.onmessage = function (event) {
+                        const data = event && event.data;
+                        if (!data) return;
+                        if (data.type === 'request') {
+                            try { customerDisplayChannel.postMessage(lastCustomerDisplayState); } catch (e) {}
+                        }
+                    };
+                } catch (e) {
+                    customerDisplayChannel = null;
+                }
+            }
+            return customerDisplayChannel;
+        }
+
+        function pushCustomerDisplayState(state) {
+            const payload = Object.assign({}, state || {}, { ts: Date.now() });
+            lastCustomerDisplayState = payload;
+
+            try {
+                localStorage.setItem(CUSTOMER_DISPLAY_STORAGE, JSON.stringify(payload));
+            } catch (e) { /* storage may be unavailable on file:// */ }
+
+            const channel = getCustomerDisplayChannel();
+            if (channel) {
+                try { channel.postMessage(payload); } catch (e) {}
+            }
+
+            if (customerDisplayIdleTimer) {
+                clearTimeout(customerDisplayIdleTimer);
+                customerDisplayIdleTimer = null;
+            }
+            if (payload.type === 'done') {
+                customerDisplayIdleTimer = setTimeout(function () {
+                    pushCustomerDisplayState({ type: 'idle' });
+                }, CUSTOMER_DISPLAY_DONE_MS);
+            }
+        }
+
+        function updateCustomerDisplayForPayment() {
+            const order = currentTableKey ? activeOrders[currentTableKey] : null;
+            const total = order ? getOrderGrandTotal(order) : 0;
+            const paidEl = document.getElementById('modal-paid-input');
+            const paid = paidEl ? (Number(paidEl.value) || 0) : 0;
+            const change = Math.max(0, paid - total);
+            const method = activeModalPaymentMethod || 'Cash';
+            pushCustomerDisplayState({
+                type: 'pay',
+                total: total,
+                paid: paid,
+                change: change,
+                method: method,
+                table: currentTableKey || ''
+            });
+        }
+
+        function openCustomerDisplay() {
+            const displayUrl = new URL('customer-display.html', window.location.href);
+            displayUrl.searchParams.set('branch', 'main');
+            const url = displayUrl.href;
+            const width = 1024;
+            const height = 600;
+            const screenWidth = (window.screen && window.screen.availWidth) || 1024;
+            const screenHeight = (window.screen && window.screen.availHeight) || 768;
+            // Open on the current screen first, then try to move it to the second
+            // monitor automatically (Chrome Window Management API).
+            const left = Math.max(0, Math.round((screenWidth - width) / 2));
+            const top = Math.max(0, Math.round((screenHeight - height) / 2));
+            const features = 'popup=yes,width=' + width + ',height=' + height +
+                ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=no';
+            const win = window.open(url, 'alHussainCustomerDisplay', features);
+            if (!win) {
+                alert('Please allow pop-ups for this page, then click Display again.\n\n' +
+                    'After the window opens, drag it to the customer monitor (VGL51-2) and press F11 for full screen.');
+                return;
+            }
+
+            if ('getScreenDetails' in window) {
+                try {
+                    const screensPromise = window.getScreenDetails();
+                    if (screensPromise && typeof screensPromise.then === 'function') {
+                        screensPromise.then(function (details) {
+                            try {
+                                const current = details.currentScreen;
+                                const other = details.screens.find(function (s) {
+                                    return s !== current && s.availWidth > 0 && s.availHeight > 0;
+                                });
+                                if (other) {
+                                    win.moveTo(other.availLeft, other.availTop);
+                                    win.resizeTo(
+                                        Math.min(width, other.availWidth),
+                                        Math.min(height, other.availHeight)
+                                    );
+                                }
+                            } catch (e) { /* ignore move errors */ }
+                        }).catch(function () { /* permission denied - user can drag it */ });
+                    }
+                } catch (e) { /* ignore */ }
+            }
+
+            setTimeout(function () {
+                try { win.focus(); } catch (e) {}
+                try { win.postMessage({ type: 'request' }, '*'); } catch (e) {}
+            }, 500);
+        }
+
+        // Start idle when the POS loads; the display window will pick this up.
+        pushCustomerDisplayState({ type: 'idle' });
 
         function openPaymentModal() {
             if (hasPermission('billing') && drawerConfig.openOnPayNow !== false) {
@@ -7429,8 +7576,11 @@
             }
         }
 
-        function closePaymentModal() {
+        function closePaymentModal(keepDisplay) {
             document.getElementById('payment-modal').style.display = 'none';
+            if (!keepDisplay) {
+                pushCustomerDisplayState({ type: 'idle' });
+            }
         }
 
         function setQuickCash(val) {
@@ -7450,6 +7600,7 @@
             let paid = Number(document.getElementById('modal-paid-input').value) || 0;
             let change = Math.max(0, paid - grand);
             document.getElementById('modal-change-amount').innerText = change.toFixed(2);
+            updateCustomerDisplayForPayment();
         }
 
         async function confirmPaymentProcess() {
@@ -7589,7 +7740,15 @@
                 if (previousActiveOrdersMap && paidOrderKey) delete previousActiveOrdersMap[paidOrderKey];
 
                 order.paymentMethod = chosenPaymentMethod;
-                closePaymentModal();
+                closePaymentModal(true);
+                pushCustomerDisplayState({
+                    type: 'done',
+                    total: grand,
+                    paid: paid,
+                    change: change,
+                    method: chosenPaymentMethod,
+                    table: paidOrderKey || ''
+                });
 
                 if (shouldPrint) {
                     populateCustomerReceipt(order, paid, change);
@@ -9710,6 +9869,8 @@ async function repairCategoriesNow() {
         }
       }
     
+    /* Cash Drawer Setup is visible to the Admin account only */
+    body.is-staff-role .drawer-setup-btn { display: none !important; }
     /* Mobile layout: keep the POS usable on narrow screens after login. */
     @media (max-width: 600px) {
         html, body { min-width: 0; width: 100%; }
@@ -9729,6 +9890,7 @@ async function repairCategoriesNow() {
         .login-box { width: 100%; max-width: 380px; padding: 30px 22px; box-sizing: border-box; }
         .login-box input { font-size: 16px; }
     }
+
     @media (max-width: 380px) {
         .header-title { gap: 5px; }
         .header h2 { font-size: 15px; }
