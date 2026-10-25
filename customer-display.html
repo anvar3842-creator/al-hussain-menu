@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Al Hussain Restaurant - Customer Display</title>
+<style>
+  :root{
+    --bg-0:#020a06;
+    --bg-1:#04170e;
+    --bg-2:#0a2b1a;
+    --green:#34d399;
+    --green-2:#6ee7b7;
+    --gold:#fbbf24;
+    --text:#f0fdf4;
+    --muted:#9db8aa;
+    --line:rgba(110,231,183,.18);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    height:100%;margin:0;overflow:hidden;
+    background:
+      radial-gradient(1100px 620px at 50% -12%, #0d3d27 0%, rgba(6,30,18,.75) 42%, rgba(2,10,6,1) 78%),
+      linear-gradient(180deg,#03110a 0%,#020a06 100%);
+    color:var(--text);
+    font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    user-select:none;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(900px 500px at 50% 50%, rgba(52,211,153,.06), transparent 70%);
+  }
+  #display{
+    position:relative;height:100%;width:100%;
+    display:flex;flex-direction:column;
+    padding:clamp(14px,2.4vw,34px) clamp(16px,3vw,52px);
+    gap:clamp(6px,1.4vh,18px);
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    gap:14px;flex-shrink:0;
+  }
+  .brand .name{
+    font-size:clamp(16px,2.35vw,32px);font-weight:900;
+    letter-spacing:.045em;line-height:1.05;white-space:nowrap;
+    background:linear-gradient(180deg,#ffffff 0%,#c7f9e0 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .brand .tag{
+    margin-top:clamp(4px,.7vh,9px);
+    font-size:clamp(8px,.95vw,13px);font-weight:700;
+    letter-spacing:.42em;color:var(--green);text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .top-right{display:flex;align-items:center;gap:clamp(8px,1.2vw,16px);flex-shrink:0;}
+  .status{
+    display:flex;align-items:center;gap:8px;
+    padding:7px 13px;border:1px solid var(--line);border-radius:999px;
+    background:rgba(6,35,22,.55);backdrop-filter:blur(6px);
+    font-size:clamp(9px,1.02vw,13px);font-weight:800;letter-spacing:.14em;color:var(--green-2);
+  }
+  .status-dot{
+    width:8px;height:8px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 0 0 rgba(52,211,153,.7);animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(52,211,153,.55);}
+    70%{box-shadow:0 0 0 9px rgba(52,211,153,0);}
+    100%{box-shadow:0 0 0 0 rgba(52,211,153,0);}
+  }
+  .clock{
+    font-size:clamp(11px,1.3vw,18px);font-weight:800;color:var(--muted);
+    font-variant-numeric:tabular-nums;letter-spacing:.06em;
+  }
+  .fs-btn{
+    border:1px solid var(--line);background:rgba(8,40,26,.6);color:var(--muted);
+    border-radius:11px;padding:8px 12px;cursor:pointer;
+    font-size:clamp(10px,1.05vw,13px);font-weight:800;letter-spacing:.08em;
+    transition:.18s;white-space:nowrap;
+  }
+  .fs-btn:hover{color:var(--green-2);border-color:rgba(110,231,183,.5);background:rgba(14,60,38,.7);}
+
+  /* ---------- stage ---------- */
+  .stage{
+    flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .panel{
+    width:100%;max-width:1180px;display:none;
+    animation:fadeUp .32s ease both;
+  }
+  .panel.active{display:block;}
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(14px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
+  /* ---------- idle ---------- */
+  .idle-wrap{text-align:center;padding:clamp(10px,3vh,40px) 0;}
+  .idle-kicker{
+    font-size:clamp(9px,1.1vw,14px);font-weight:800;letter-spacing:.5em;
+    color:var(--green);text-transform:uppercase;margin-bottom:clamp(10px,2vh,24px);
+  }
+  .idle-title{
+    font-size:clamp(42px,9vw,132px);font-weight:900;line-height:.95;letter-spacing:.03em;
+    background:linear-gradient(180deg,#ffffff 0%,#b7f5d6 60%,#34d399 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 60px rgba(52,211,153,.12);
+  }
+  .idle-sub{
+    margin-top:clamp(8px,1.6vh,20px);
+    font-size:clamp(16px,2.5vw,38px);font-weight:800;letter-spacing:.18em;color:#7fe3b6;
+  }
+  .idle-note{
+    margin-top:clamp(14px,2.6vh,34px);
+    font-size:clamp(11px,1.35vw,19px);font-weight:600;color:var(--muted);letter-spacing:.06em;
+  }
+
+  /* ---------- payment ---------- */
+  .pay-head{
+    text-align:center;font-size:clamp(10px,1.15vw,15px);font-weight:800;
+    letter-spacing:.42em;color:var(--green);text-transform:uppercase;
+    margin-bottom:clamp(12px,2.4vh,30px);
+  }
+  .rows{display:flex;flex-direction:column;gap:clamp(9px,1.7vh,20px);}
+  .row{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:clamp(11px,2.1vh,26px) clamp(16px,2.6vw,38px);
+    border:1px solid var(--line);border-radius:clamp(12px,1.4vw,22px);
+    background:linear-gradient(90deg,rgba(9,45,29,.72),rgba(5,26,17,.5));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  }
+  .row .label{
+    font-size:clamp(11px,1.35vw,20px);font-weight:800;letter-spacing:.22em;color:var(--muted);
+  }
+  .row .amount{
+    font-size:clamp(30px,4.6vw,70px);font-weight:900;letter-spacing:.01em;
+    font-variant-numeric:tabular-nums;line-height:1;color:var(--text);white-space:nowrap;
+  }
+  .row .amount .cur{font-size:.58em;color:var(--muted);margin-right:.14em;font-weight:800;}
+  .row.total{
+    border-color:rgba(251,191,36,.38);
+    background:linear-gradient(90deg,rgba(80,52,5,.32),rgba(9,45,29,.6));
+  }
+  .row.total .label{color:#fcd34d;}
+  .row.total .amount{color:var(--gold);text-shadow:0 0 32px rgba(251,191,36,.18);}
+  .row.total .amount .cur{color:#d6a52a;}
+  .row.change{
+    border-color:rgba(52,211,153,.42);
+    background:linear-gradient(90deg,rgba(9,70,44,.62),rgba(5,30,19,.62));
+  }
+  .row.change .label,.row.change .amount{color:var(--green-2);}
+  .row.change .amount{text-shadow:0 0 34px rgba(52,211,153,.22);}
+  .row.change .amount .cur{color:#4fd1a1;}
+  .pay-foot{
+    margin-top:clamp(11px,2vh,24px);text-align:center;
+    font-size:clamp(10px,1.15vw,16px);font-weight:800;letter-spacing:.2em;color:var(--muted);
+  }
+  .pay-foot .pill{
+    display:inline-block;padding:5px 12px;border-radius:999px;
+    border:1px solid var(--line);color:var(--green-2);background:rgba(8,40,26,.55);
+    margin:0 5px;
+  }
+
+  /* ---------- thank you ---------- */
+  .done-wrap{text-align:center;padding:clamp(6px,2vh,26px) 0;}
+  .done-check{
+    width:clamp(54px,7.5vw,96px);height:clamp(54px,7.5vw,96px);margin:0 auto clamp(8px,1.6vh,18px);
+    border-radius:50%;border:clamp(2px,.32vw,4px) solid var(--green);
+    display:flex;align-items:center;justify-content:center;
+    font-size:clamp(28px,4.2vw,54px);font-weight:900;color:var(--green-2);
+    background:rgba(16,90,58,.35);box-shadow:0 0 44px rgba(52,211,153,.22);
+  }
+  .done-title{
+    font-size:clamp(36px,7.2vw,104px);font-weight:900;line-height:.95;letter-spacing:.035em;
+    background:linear-gradient(180deg,#ffffff 0%,#c9fbdf 55%,#34d399 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .done-sub{
+    margin-top:clamp(4px,1vh,12px);
+    font-size:clamp(19px,3.1vw,46px);font-weight:900;letter-spacing:.3em;color:var(--gold);
+  }
+  .done-summary{
+    display:flex;justify-content:center;gap:clamp(10px,2.2vw,34px);flex-wrap:wrap;
+    margin-top:clamp(14px,2.6vh,34px);
+  }
+  .done-box{
+    min-width:clamp(140px,17vw,240px);
+    padding:clamp(9px,1.6vh,18px) clamp(14px,2vw,30px);
+    border:1px solid var(--line);border-radius:clamp(10px,1.2vw,18px);
+    background:linear-gradient(180deg,rgba(9,45,29,.7),rgba(5,24,16,.55));
+  }
+  .done-box .k{
+    font-size:clamp(8px,.95vw,12px);font-weight:800;letter-spacing:.24em;color:var(--muted);
+  }
+  .done-box .v{
+    margin-top:5px;font-size:clamp(17px,2.15vw,32px);font-weight:900;color:var(--text);
+    font-variant-numeric:tabular-nums;
+  }
+  .done-box.hi .v{color:var(--green-2);}
+
+  /* ---------- footer ---------- */
+  .footer{
+    flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+    gap:14px;padding-top:clamp(4px,1vh,12px);
+    border-top:1px solid rgba(110,231,183,.12);
+    font-size:clamp(9px,1.02vw,13px);font-weight:700;letter-spacing:.16em;color:rgba(157,184,170,.7);
+    text-transform:uppercase;
+  }
+  .footer .dot-sep{color:rgba(110,231,183,.4);margin:0 7px;}
+
+  /* ---------- waiting / connection ---------- */
+  .waiting{
+    position:absolute;inset:auto 0 0;text-align:center;
+    font-size:clamp(9px,1vw,12px);font-weight:800;letter-spacing:.2em;
+    color:rgba(157,184,170,.55);text-transform:uppercase;
+    opacity:0;transition:.35s;pointer-events:none;
+  }
+  .waiting.show{opacity:1;}
+
+  body.hide-cursor{cursor:none;}
+
+  @media (max-width:640px){
+    .brand .tag{letter-spacing:.24em;}
+    .status{display:none;}
+    .clock{font-size:11px;}
+    .row .label{letter-spacing:.12em;}
+    .footer .mid{display:none;}
+  }
+  @media (max-height:520px){
+    #display{padding:10px 18px;gap:5px;}
+    .brand .tag{margin-top:3px;}
+    .row{padding:8px 16px;}
+    .idle-title{font-size:clamp(34px,7vw,72px);}
+    .done-check{width:44px;height:44px;font-size:24px;margin-bottom:6px;}
+    .done-title{font-size:clamp(30px,6vw,60px);}
+    .done-sub{font-size:clamp(16px,2.4vw,30px);}
+    .done-summary{margin-top:8px;}
+    .footer{display:none;}
+  }
+</style>
+</head>
+<body>
+<div id="display">
+  <div class="topbar">
+    <div class="brand">
+      <div class="name">AL HUSSAIN RESTAURANT</div>
+      <div class="tag">Customer Display</div>
+    </div>
+    <div class="top-right">
+      <div class="status"><span class="status-dot"></span><span id="conn-text">LIVE</span></div>
+      <div class="clock" id="clock">--:--</div>
+      <button type="button" class="fs-btn" id="fs-btn" onclick="toggleFullscreen()">&#9974; FULL SCREEN</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <!-- IDLE -->
+    <div class="panel active" id="panel-idle">
+      <div class="idle-wrap">
+        <div class="idle-kicker">Welcome to</div>
+        <div class="idle-title">AL HUSSAIN</div>
+        <div class="idle-sub">RESTAURANT</div>
+        <div class="idle-note">Please wait for your bill</div>
+      </div>
+    </div>
+
+    <!-- PAYMENT -->
+    <div class="panel" id="panel-pay">
+      <div class="pay-head">Payment Summary</div>
+      <div class="rows">
+        <div class="row total">
+          <span class="label">TOTAL</span>
+          <span class="amount"><span class="cur">$</span><span id="pay-total">0.00</span></span>
+        </div>
+        <div class="row">
+          <span class="label">PAID</span>
+          <span class="amount"><span class="cur">$</span><span id="pay-paid">0.00</span></span>
+        </div>
+        <div class="row change">
+          <span class="label">CHANGE</span>
+          <span class="amount"><span class="cur">$</span><span id="pay-change">0.00</span></span>
+        </div>
+      </div>
+      <div class="pay-foot">
+        <span class="pill" id="pay-method">CASH</span>
+        <span id="pay-table"></span>
+      </div>
+    </div>
+
+    <!-- THANK YOU -->
+    <div class="panel" id="panel-done">
+      <div class="done-wrap">
+        <div class="done-check">&#10003;</div>
+        <div class="done-title">THANK YOU</div>
+        <div class="done-sub">COME AGAIN</div>
+        <div class="done-summary">
+          <div class="done-box">
+            <div class="k">PAID</div>
+            <div class="v">$<span id="done-paid">0.00</span></div>
+          </div>
+          <div class="done-box hi">
+            <div class="k">CHANGE</div>
+            <div class="v">$<span id="done-change">0.00</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="waiting" id="waiting">Waiting for POS&hellip;</div>
+  </div>
+
+  <div class="footer">
+    <span>Al Hussain Restaurant</span>
+    <span class="mid" id="footer-mid">Welcome <span class="dot-sep">&bull;</span> Please wait for your bill</span>
+    <span id="footer-date"></span>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // Branch 1 and branch 2 are served from the same GitHub Pages origin, so the
+  // channel and storage key must be different to keep the two branches separate.
+  var params = new URLSearchParams(window.location.search || "");
+  var branchParam = (params.get("branch") || "").toLowerCase();
+  var pathHint = (window.location.pathname || "").toLowerCase();
+  var isBranch2 = branchParam === "branch2" ||
+    (!branchParam && (pathHint.indexOf("branch2") !== -1 || pathHint.indexOf("al-ahussain") !== -1));
+
+  var CHANNEL_NAME = isBranch2
+    ? "al_hussain_customer_display_branch2_v1"
+    : "al_hussain_customer_display_v1";
+  var STORAGE_KEY = isBranch2
+    ? "al_hussain_customer_display_state_branch2"
+    : "al_hussain_customer_display_state";
+  var DONE_AUTO_IDLE_MS = 15000;
+
+  if (isBranch2) {
+    var tagEl = document.querySelector(".brand .tag");
+    if (tagEl) tagEl.textContent = "Customer Display - Branch 2";
+  }
+
+  var panels = {
+    idle: document.getElementById("panel-idle"),
+    pay: document.getElementById("panel-pay"),
+    done: document.getElementById("panel-done")
+  };
+  var waitingEl = document.getElementById("waiting");
+  var connText = document.getElementById("conn-text");
+
+  var lastState = null;
+  var doneTimer = null;
+  var lastMessageAt = 0;
+  var waitingTimer = null;
+  var channel = null;
+
+  function money(value) {
+    var n = Number(value);
+    if (!isFinite(n) || n < 0) n = 0;
+    return n.toFixed(2);
+  }
+
+  function setText(id, value) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  function showPanel(name) {
+    Object.keys(panels).forEach(function (key) {
+      if (panels[key]) panels[key].classList.toggle("active", key === name);
+    });
+  }
+
+  function render(state) {
+    if (!state || !state.type) state = { type: "idle" };
+    lastState = state;
+
+    if (state.type === "pay") {
+      showPanel("pay");
+      setText("pay-total", money(state.total));
+      setText("pay-paid", money(state.paid));
+      setText("pay-change", money(state.change));
+      setText("pay-method", String(state.method || "CASH").toUpperCase());
+      setText("pay-table", state.table ? String(state.table).toUpperCase() : "");
+      setText("footer-mid", "Please check your bill \u2022 Thank you");
+      setWaiting(false);
+      if (doneTimer) { clearTimeout(doneTimer); doneTimer = null; }
+      return;
+    }
+
+    if (state.type === "done") {
+      showPanel("done");
+      setText("done-paid", money(state.paid));
+      setText("done-change", money(state.change));
+      setText("footer-mid", "Thank you for dining with us \u2022 Please come again");
+      setWaiting(false);
+      if (doneTimer) clearTimeout(doneTimer);
+      doneTimer = setTimeout(function () { render({ type: "idle" }); }, DONE_AUTO_IDLE_MS);
+      return;
+    }
+
+    showPanel("idle");
+    setText("footer-mid", "Welcome \u2022 Please wait for your bill");
+    if (doneTimer) { clearTimeout(doneTimer); doneTimer = null; }
+    setWaiting(false);
+  }
+
+  function setWaiting(on) {
+    if (!waitingEl) return;
+    waitingEl.classList.toggle("show", !!on);
+    if (connText) connText.textContent = on ? "WAITING" : "LIVE";
+  }
+
+  function scheduleWaiting() {
+    if (waitingTimer) clearTimeout(waitingTimer);
+    waitingTimer = setTimeout(function () {
+      // Only complain when the POS has never talked to us.
+      if (!lastMessageAt) setWaiting(true);
+    }, 4000);
+  }
+
+  function acceptState(state, fromStorage) {
+    if (!state || typeof state !== "object") return;
+    if (!state.type) return;
+    var ts = Number(state.ts) || 0;
+    if (ts && ts < lastMessageAt) return; // ignore older updates
+    if (ts) lastMessageAt = ts;
+    else lastMessageAt = Date.now();
+
+    // A stale "thank you" from a previous session should not stay on screen forever.
+    if (!fromStorage && state.type === "done") {
+      // handled by render timer
+    }
+    if (fromStorage && state.type === "done" && ts && (Date.now() - ts > DONE_AUTO_IDLE_MS)) {
+      render({ type: "idle" });
+      return;
+    }
+    render(state);
+  }
+
+  function readStoredState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      return parsed && parsed.type ? parsed : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function initChannel() {
+    if (!("BroadcastChannel" in window)) {
+      connText && (connText.textContent = "LOCAL");
+      return;
+    }
+    try {
+      channel = new BroadcastChannel(CHANNEL_NAME);
+      channel.onmessage = function (event) {
+        var data = event && event.data;
+        if (!data) return;
+        if (data.type === "request") {
+          // POS will answer with the current state; nothing to do here.
+          return;
+        }
+        acceptState(data, false);
+      };
+      // Ask the POS for its current state.
+      try { channel.postMessage({ type: "request", from: "customer-display" }); } catch (e) {}
+      connText && (connText.textContent = "LIVE");
+    } catch (e) {
+      channel = null;
+    }
+  }
+
+  // Fallback for browsers without BroadcastChannel: localStorage events.
+  window.addEventListener("storage", function (event) {
+    if (event.key !== STORAGE_KEY || !event.newValue) return;
+    try {
+      acceptState(JSON.parse(event.newValue), true);
+    } catch (e) { /* ignore */ }
+  });
+
+  // Poll localStorage once per second as a safety net (same-browser windows).
+  setInterval(function () {
+    var stored = readStoredState();
+    if (!stored) return;
+    if (!lastState || (Number(stored.ts) || 0) > (Number(lastState.ts) || 0)) {
+      acceptState(stored, true);
+    }
+  }, 1000);
+
+  function updateClock() {
+    var now = new Date();
+    var hh = String(now.getHours()).padStart(2, "0");
+    var mm = String(now.getMinutes()).padStart(2, "0");
+    setText("clock", hh + ":" + mm);
+    var dateEl = document.getElementById("footer-date");
+    if (dateEl) {
+      dateEl.textContent = now.toLocaleDateString(undefined, {
+        weekday: "short", day: "2-digit", month: "short", year: "numeric"
+      });
+    }
+  }
+
+  function toggleFullscreen() {
+    var doc = document;
+    var el = doc.documentElement;
+    if (!doc.fullscreenElement && !doc.webkitFullscreenElement) {
+      var request = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      if (request) {
+        try {
+          var result = request.call(el);
+          if (result && typeof result.catch === "function") result.catch(function () {});
+        } catch (e) { /* ignore */ }
+      }
+    } else {
+      var exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+      if (exit) {
+        try {
+          var r = exit.call(doc);
+          if (r && typeof r.catch === "function") r.catch(function () {});
+        } catch (e) { /* ignore */ }
+      }
+    }
+  }
+
+  // Keep the screen awake when the browser allows it.
+  var wakeLock = null;
+  function requestWakeLock() {
+    if (!("wakeLock" in navigator)) return;
+    if (wakeLock) return;
+    try {
+      var p = navigator.wakeLock.request("screen");
+      if (p && typeof p.then === "function") {
+        p.then(function (lock) {
+          wakeLock = lock;
+          lock.addEventListener("release", function () { wakeLock = null; });
+        }).catch(function () {});
+      }
+    } catch (e) { /* ignore */ }
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") {
+      requestWakeLock();
+      // Ask for a fresh state when the display comes back.
+      if (channel) {
+        try { channel.postMessage({ type: "request", from: "customer-display" }); } catch (e) {}
+      }
+    }
+  });
+
+  // Hide the mouse cursor after a short idle period, show it on movement.
+  var cursorTimer = null;
+  function bumpCursor() {
+    document.body.classList.remove("hide-cursor");
+    if (cursorTimer) clearTimeout(cursorTimer);
+    cursorTimer = setTimeout(function () {
+      document.body.classList.add("hide-cursor");
+    }, 3000);
+  }
+  ["mousemove", "mousedown", "touchstart", "keydown"].forEach(function (evt) {
+    window.addEventListener(evt, bumpCursor, { passive: true });
+  });
+
+  // Double-click anywhere toggles full screen (handy on the customer monitor).
+  window.addEventListener("dblclick", function (event) {
+    if (event.target && event.target.closest && event.target.closest("button")) return;
+    toggleFullscreen();
+  });
+
+  // Keyboard shortcut: F for full screen.
+  window.addEventListener("keydown", function (event) {
+    if (event.key === "f" || event.key === "F") {
+      event.preventDefault();
+      toggleFullscreen();
+    }
+  });
+
+  // Boot.
+  updateClock();
+  setInterval(updateClock, 1000);
+  bumpCursor();
+  requestWakeLock();
+  var stored = readStoredState();
+  if (stored) {
+    var storedTs = Number(stored.ts) || 0;
+    // Never keep an old payment on screen after the POS was closed or reloaded.
+    if (stored.type === "pay" && storedTs && (Date.now() - storedTs > 10 * 60 * 1000)) {
+      stored = { type: "idle" };
+    }
+    render(stored);
+  } else {
+    render({ type: "idle" });
+  }
+  initChannel();
+  scheduleWaiting();
+
+  // Expose a tiny debug API (useful when testing from the console).
+  window.AlHussainCustomerDisplay = {
+    showIdle: function () { render({ type: "idle" }); },
+    showPayment: function (total, paid, change, method, table) {
+      render({ type: "pay", total: total, paid: paid, change: change, method: method || "Cash", table: table || "" });
+    },
+    showThankYou: function (paid, change) {
+      render({ type: "done", paid: paid, change: change });
+    }
+  };
+})();
+</script>
+</body>
+</html>
