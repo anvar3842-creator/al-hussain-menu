@@ -1697,6 +1697,7 @@
                     <button class="admin-btn manage-suppliers-btn" onclick="openCredentialsModal()">👥 Manage Suppliers & Logins</button>
                     <button class="admin-btn menu-repair-btn" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);" onclick="repairCategoriesNow()">🛠️ Fix Menu Categories</button>
                     <button class="admin-btn drawer-setup-btn" style="background:linear-gradient(135deg,#0f766e,#0d9488);" onclick="openDrawerSetupModal()">Cash Drawer Setup</button>
+                    <button class="admin-btn notif-settings-btn" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);" onclick="openNotificationSettingsModal()">🔔 Notification Settings</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">Day Close</button>
                 </div>
             </div>
@@ -1969,6 +1970,25 @@
                     <b>Best for silent opening:</b> run <b>Start Cash Drawer Helper.bat</b> once on the POS computer (folder <b>cash-drawer-helper</b> next to this HTML). It stays in the background and sends the drawer pulse directly to the printer. No print dialog appears when you confirm a cash payment.<br>
                     With the helper running, press <b>Check Helper</b>. The status above turns green.
                 </div>
+            </div>
+        </div>
+    </div>
+    <div id="notification-settings-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 640px; width: 96%; max-height: 92vh; display: flex; flex-direction: column; padding: 18px 22px;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">
+                <div>
+                    <h3 style="margin:0;font-size:18px;">🔔 Notification Settings</h3>
+                    <p style="margin:4px 0 0;font-size:12px;color:#64748b;font-weight:700;">யாருக்கு எந்த notification வேண்டும் என்று தேர்வு செய்யுங்கள்</p>
+                </div>
+                <button class="close-modal" onclick="closeNotificationSettingsModal()">Close</button>
+            </div>
+            <div class="modal-body" style="max-height:70vh;">
+                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 14px;font-size:12.5px;font-weight:700;color:#1e3a8a;line-height:1.7;margin-bottom:14px;">
+                    🔔 <b>Orders</b> = புது ஆர்டர் / ஆர்டர் update (சத்தம் + banner).<br>
+                    🙋 <b>Waiter</b> = customer "Call Waiter" (சத்தம் + banner).<br>
+                    மாற்றம் உடனே எல்லா devices-க்கும் apply ஆகும்.
+                </div>
+                <div id="notification-settings-list"></div>
             </div>
         </div>
     </div>
@@ -3021,6 +3041,19 @@
             if (typeof renderTableLinkModalList === 'function') renderTableLinkModalList();
         });
 
+        // Admin-controlled notification recipients. Shape:
+        //   { roleKey: { orders: true/false, waiter: true/false } }
+        // Missing entries fall back to the safe defaults (orders = admin only,
+        // waiter calls = everyone) so the app keeps working before it is configured.
+        let notificationSettings = {};
+        db.ref('settings/notificationSettings').on('value', (snap) => {
+            notificationSettings = snap.val() || {};
+            const modal = document.getElementById('notification-settings-modal');
+            if (modal && modal.style.display === 'flex') renderNotificationSettingsList();
+            requestRenderBigTablesGrid();
+            renderLiveStaffAlerts();
+        });
+
         db.ref('categories').on('value', (snapshot) => {
             const val = snapshot.val();
             let list = [];
@@ -3660,8 +3693,34 @@
             showToast("🔊 Testing Audio: 'New Order, Table 1'");
         }
 
+        // Per-account notification preferences. Admin can change these from
+        // Admin > Notification Settings. Defaults keep the previous behaviour:
+        // orders -> admin accounts only, waiter calls -> everyone.
+        function roleNotificationPrefs(roleKey) {
+            const cfg = (notificationSettings && notificationSettings[roleKey]) || {};
+            const isAdmin = roleKey === 'admin' ||
+                (credentials[roleKey] && credentials[roleKey].roleType === 'admin');
+            return {
+                orders: typeof cfg.orders === 'boolean' ? cfg.orders : isAdmin,
+                waiter: typeof cfg.waiter === 'boolean' ? cfg.waiter : true
+            };
+        }
+
+        function canReceiveOrderNotifications() {
+            if (isCustomerMode) return false;
+            return roleNotificationPrefs(loggedInRole).orders;
+        }
+
+        function canReceiveWaiterNotifications() {
+            if (isCustomerMode) return false;
+            return roleNotificationPrefs(loggedInRole).waiter;
+        }
+
         function handleIncomingOrderAlert(type, tableKey, byUser, itemsCount, total) {
             if (isCustomerMode) return;
+            // New-order / update chime + toast + banner follows the admin-managed
+            // per-account notification settings.
+            if (!canReceiveOrderNotifications()) return;
             const now = Date.now();
             const debKey = type + '_' + tableKey;
             if (lastAnnouncedTableActionTimes[debKey] && (now - lastAnnouncedTableActionTimes[debKey] < 3500)) {
@@ -3790,8 +3849,10 @@
                     const prevTs = lastNotifiedStaffAlerts[tKey] || 0;
                     if (ts > prevTs) {
                         lastNotifiedStaffAlerts[tKey] = ts;
-                        playChimeAndVoice('waiter', item.table || tKey);
-                        showToast(`🙋 Call Waiter: ${item.table || tKey}`);
+                        if (canReceiveWaiterNotifications()) {
+                            playChimeAndVoice('waiter', item.table || tKey);
+                            showToast(`🙋 Call Waiter: ${item.table || tKey}`);
+                        }
                     }
                 });
             }
@@ -3848,8 +3909,9 @@
             }
 
             const now = Date.now();
-            const orderKeys = Object.keys(newCustomerOrderAlerts);
-            const waiterKeys = Object.keys(staffAlerts);
+            // Banners follow the same per-account settings as the chime/toast.
+            const orderKeys = canReceiveOrderNotifications() ? Object.keys(newCustomerOrderAlerts) : [];
+            const waiterKeys = canReceiveWaiterNotifications() ? Object.keys(staffAlerts) : [];
 
             let visibleOrderCount = 0;
             let visibleWaiterCount = 0;
@@ -4470,6 +4532,9 @@
                 // Cash Drawer Setup: admin login only, never staff
                 const btnDrawerSetup = adminSection.querySelector('.drawer-setup-btn');
                 if (btnDrawerSetup) btnDrawerSetup.style.display = 'none';
+                // Notification Settings: admin login only, never staff
+                const btnNotifSettings = adminSection.querySelector('.notif-settings-btn');
+                if (btnNotifSettings) btnNotifSettings.style.display = 'none';
 
                 // Stats toggles
                 const statBoxes = adminSection.querySelectorAll('.stat-toggle-box');
@@ -5057,12 +5122,12 @@
                 card.className = `big-table-card ${isOccupied ? 'occupied' : 'free'} ${isLinked ? 'linked-table-card' : ''}`;
                 card.onclick = () => openTable(tableKey);
 
-                let orderAlertData = newCustomerOrderAlerts[tableKey];
+                let orderAlertData = canReceiveOrderNotifications() ? newCustomerOrderAlerts[tableKey] : null;
                 let isOrderAlertActive = orderAlertData && (!orderAlertData.timestamp || (Date.now() - orderAlertData.timestamp <= ALERT_TIMEOUT_MS));
-                let orderAlert = isOrderAlertActive || (orderData && orderData.customerSent && !orderData.staffAcknowledged && (!orderData.customerSentAt || (Date.now() - orderData.customerSentAt <= ALERT_TIMEOUT_MS)));
+                let orderAlert = canReceiveOrderNotifications() && (isOrderAlertActive || (orderData && orderData.customerSent && !orderData.staffAcknowledged && (!orderData.customerSentAt || (Date.now() - orderData.customerSentAt <= ALERT_TIMEOUT_MS))));
 
                 let waiterAlertData = staffAlerts[tableKey];
-                let waiterAlert = waiterAlertData && (!waiterAlertData.timestamp || (Date.now() - waiterAlertData.timestamp <= ALERT_TIMEOUT_MS));
+                let waiterAlert = canReceiveWaiterNotifications() && waiterAlertData && (!waiterAlertData.timestamp || (Date.now() - waiterAlertData.timestamp <= ALERT_TIMEOUT_MS));
 
                 if (orderAlert) {
                     card.style.borderColor = "#2563eb";
@@ -7463,6 +7528,85 @@
         function isAdminAccount() {
             return loggedInRole === 'admin' ||
                 (typeof credentials !== 'undefined' && credentials[loggedInRole] && credentials[loggedInRole].roleType === 'admin');
+        }
+
+        // ================= NOTIFICATION SETTINGS (ADMIN) =================
+        // Lets the admin choose, per login account, which alerts that account
+        // receives. Saved in Firebase so every device follows the same choice.
+        function openNotificationSettingsModal() {
+            if (!isAdminAccount()) {
+                alert('Only the Admin account can change notification settings.');
+                return;
+            }
+            renderNotificationSettingsList();
+            const modal = document.getElementById('notification-settings-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeNotificationSettingsModal() {
+            const modal = document.getElementById('notification-settings-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function renderNotificationSettingsList() {
+            const container = document.getElementById('notification-settings-list');
+            if (!container) return;
+            if (!isAdminAccount()) {
+                container.innerHTML = '<p style="font-size:13px;font-weight:700;color:#64748b;">Only the Admin account can change these settings.</p>';
+                return;
+            }
+            const keys = Object.keys(credentials || {});
+            keys.sort((a, b) => {
+                const aAdmin = a === 'admin' || (credentials[a] && credentials[a].roleType === 'admin');
+                const bAdmin = b === 'admin' || (credentials[b] && credentials[b].roleType === 'admin');
+                if (aAdmin !== bAdmin) return aAdmin ? -1 : 1;
+                const aName = String((credentials[a] && credentials[a].name) || a);
+                const bName = String((credentials[b] && credentials[b].name) || b);
+                return aName.localeCompare(bName);
+            });
+            if (keys.length === 0) {
+                container.innerHTML = '<p style="font-size:13px;font-weight:700;color:#64748b;">No accounts found.</p>';
+                return;
+            }
+            container.innerHTML = keys.map(key => {
+                const cred = credentials[key] || {};
+                const prefs = roleNotificationPrefs(key);
+                const isAdmin = key === 'admin' || cred.roleType === 'admin';
+                const roleLabel = (cred.roleType || (isAdmin ? 'admin' : 'supplier')).toUpperCase();
+                return `
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#fff;">
+                        <div style="flex:1;min-width:150px;">
+                            <div style="font-weight:900;color:#0f172a;font-size:14px;">${isAdmin ? '👑 ' : '👤 '}${escapeHtml(cred.name || key)}</div>
+                            <div style="font-size:11px;color:#64748b;font-weight:700;">${escapeHtml(cred.user || key)} · ${escapeHtml(roleLabel)}</div>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#1e3a8a;cursor:pointer;">
+                            <input type="checkbox" style="width:18px;height:18px;accent-color:#2563eb;" ${prefs.orders ? 'checked' : ''} onchange="setRoleNotificationPref('${key}','orders',this.checked)">
+                            🔔 Orders
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#b45309;cursor:pointer;">
+                            <input type="checkbox" style="width:18px;height:18px;accent-color:#d97706;" ${prefs.waiter ? 'checked' : ''} onchange="setRoleNotificationPref('${key}','waiter',this.checked)">
+                            🙋 Waiter
+                        </label>
+                    </div>`;
+            }).join('');
+        }
+
+        function setRoleNotificationPref(roleKey, field, value) {
+            if (!isAdminAccount()) return;
+            if (field !== 'orders' && field !== 'waiter') return;
+            if (!roleKey || !credentials[roleKey]) return;
+            const patch = {};
+            patch[field] = !!value;
+            db.ref('settings/notificationSettings/' + roleKey).update(patch).then(() => {
+                if (!notificationSettings[roleKey] || typeof notificationSettings[roleKey] !== 'object') {
+                    notificationSettings[roleKey] = {};
+                }
+                notificationSettings[roleKey][field] = !!value;
+                showToast('Notification setting saved for ' + (credentials[roleKey].name || roleKey));
+            }).catch((err) => {
+                alert('Could not save notification setting: ' + (err && err.message ? err.message : err));
+                renderNotificationSettingsList();
+            });
         }
 
         function openDrawerSetupModal() {
