@@ -4793,14 +4793,31 @@
             }
 
             switchMobileTab('menu');
-            // Load the latest committed Firebase order before showing the cart.
-            // This prevents an old local cache from being treated as the current table.
+            // Paint the locally cached cart immediately, then refresh this table from
+            // Firebase in the background. Waiting for the network here made opening
+            // a table feel slow on every click.
+            renderCart({ skipInputSync: true });
+            renderMenuGrid();
+            requestRenderBigTablesGrid();
+            applyRolePermissionsUI();
+
             if (!isCustomerMode && currentTableKey) {
                 const openingKey = currentTableKey;
-                try {
-                    const freshSnapshot = await db.ref('activeOrders/' + openingKey).once('value');
+                const cachedAtOpen = activeOrders[openingKey];
+                const stampAtOpen = (cachedAtOpen && cachedAtOpen.lastUpdatedAt) || 0;
+                const sessionAtOpen = (cachedAtOpen && cachedAtOpen.sessionId) || '';
+                db.ref('activeOrders/' + openingKey).once('value').then((freshSnapshot) => {
                     // User may have switched tables while the request was in flight.
                     if (currentTableKey !== openingKey) return;
+                    // The cashier may have already edited the cart while this
+                    // network request was running. Never overwrite newer local
+                    // edits with the older snapshot; the live listener and the
+                    // transactional writer will reconcile Firebase safely.
+                    const localNow = activeOrders[openingKey];
+                    if (localNow && ((localNow.lastUpdatedAt || 0) > stampAtOpen ||
+                        (localNow.sessionId || '') !== sessionAtOpen)) {
+                        return;
+                    }
                     const freshOrder = freshSnapshot.val();
                     if (freshOrder && typeof freshOrder === 'object' && !isClosedOrder(freshOrder)) {
                         getOrderItemsArray(freshOrder);
@@ -4808,15 +4825,13 @@
                     } else {
                         delete activeOrders[openingKey];
                     }
-                } catch (error) {
+                    requestRenderBigTablesGrid();
+                    if (currentTableKey === openingKey) renderCart({ skipInputSync: true });
+                }).catch((error) => {
                     console.error('Could not refresh table order before opening:', error);
                     // Keep the live-listener cache if Firebase is temporarily unavailable.
-                }
+                });
             }
-            renderCart({ skipInputSync: true });
-            renderMenuGrid();
-            requestRenderBigTablesGrid();
-            applyRolePermissionsUI();
         }
 
         // Robust parsing of any seated timestamp format (number, numeric string, ISO date, or locale time string)
@@ -5675,18 +5690,37 @@
         // When nothing relevant changed we skip the full DOM rebuild entirely.
         function buildMenuGridSignature(searchVal, currentItems) {
             let sig = searchVal + '\u0002' + selectedCategory + '\u0002' + (isCustomerMode ? '1' : '0')
-                + '\u0002' + (currentTableKey || '') + '\u0002' + salesMapVersion + '\u0002' + categories.join('\u0001');
+                + '\u0002' + salesMapVersion + '\u0002' + categories.join('\u0001');
             for (let i = 0; i < menu.length; i++) {
                 const it = menu[i];
                 sig += '\u0003' + (it.id || '') + '\u0004' + (it.name || '') + '\u0004' + (it.price || 0)
                     + '\u0004' + (it.cat || it.category || '') + '\u0004' + (it.code || '');
             }
-            sig += '\u0005';
-            for (let i = 0; i < currentItems.length; i++) {
-                const it = currentItems[i];
-                sig += '\u0006' + (it.id || '') + '\u0004' + (Number(it.qty) || 1);
-            }
+            // Cart quantities are intentionally NOT part of the signature: they are
+            // patched onto the existing cards by updateMenuGridQuantityBadges(), so
+            // adding an item no longer rebuilds the whole menu.
             return sig;
+        }
+
+        function updateMenuGridQuantityBadges(currentQtyById) {
+            const grid = document.getElementById('menu-grid');
+            if (!grid) return;
+            const cards = grid.querySelectorAll('.menu-card[data-item-id]');
+            cards.forEach(card => {
+                const qty = currentQtyById.get(String(card.getAttribute('data-item-id'))) || 0;
+                let badge = card.querySelector('.card-qty-badge');
+                if (qty > 0) {
+                    if (!badge) {
+                        badge = document.createElement('div');
+                        badge.className = 'card-qty-badge';
+                        card.insertBefore(badge, card.firstChild);
+                    }
+                    badge.textContent = qty;
+                    badge.style.display = '';
+                } else if (badge) {
+                    badge.remove();
+                }
+            });
         }
 
         function renderMenuGrid() {
@@ -5702,7 +5736,12 @@
 
             // Skip rebuilding the grid when the result would be byte-for-byte identical.
             const menuGridSig = buildMenuGridSignature(searchVal, currentItems);
-            if (menuGridSig === lastMenuGridSignature && grid.childElementCount > 0) return;
+            if (menuGridSig === lastMenuGridSignature && grid.childElementCount > 0) {
+                // Only the "in cart" quantities can change without a structural
+                // reason to rebuild; update those badges in place.
+                updateMenuGridQuantityBadges(currentQtyById);
+                return;
+            }
 
             grid.innerHTML = "";
 
@@ -5755,6 +5794,7 @@
 
                         const card = document.createElement('div');
                         card.className = 'menu-card';
+                        card.setAttribute('data-item-id', String(item.id));
                         card.onclick = (e) => {
                             if (e) e.stopPropagation();
                             addToCart(item);
@@ -5825,6 +5865,7 @@
 
                         const card = document.createElement('div');
                         card.className = 'menu-card';
+                        card.setAttribute('data-item-id', String(item.id));
                         card.onclick = (e) => {
                             if (e) e.stopPropagation();
                             addToCart(item);
@@ -7788,8 +7829,6 @@
             let order = activeOrders[currentTableKey];
             if (!order || !order.items || order.items.length === 0) return alert("Cart is empty!");
 
-            writeActiveOrder(currentTableKey, order);
-
             let grand = getOrderGrandTotal(order);
             document.getElementById('modal-grand-total').innerText = grand.toFixed(2);
             document.getElementById('modal-paid-input').value = grand.toFixed(2);
@@ -7984,7 +8023,8 @@
                 updates['staffAlerts/' + paidOrderKey] = null;
                 await db.ref().update(updates);
 
-                // Open the cash drawer only after a CASH bill has been saved successfully.
+                // The bill is saved. Return to the tables immediately — drawer,
+                // shift totals and linked-table cleanup must never block the next order.
                 if (String(chosenPaymentMethod).trim().toLowerCase() === 'cash' &&
                     hasPermission('billing') && drawerConfig.openOnPayNow !== false) {
                     pulseCashDrawer(false).then(function (opened) {
@@ -7992,22 +8032,21 @@
                     });
                 }
 
-                // Update shift totals without overwriting concurrent cashier updates.
+                // Update shift totals in the background without overwriting concurrent updates.
                 if (activeShift) {
-                    try {
-                        const shiftResult = await db.ref('activeShift').transaction(function (shift) {
-                            if (!shift) return shift;
-                            shift.billsCount = (Number(shift.billsCount) || 0) + 1;
-                            shift.totalCollected = Math.round(((Number(shift.totalCollected) || 0) + grand) * 100) / 100;
-                            return shift;
-                        });
+                    db.ref('activeShift').transaction(function (shift) {
+                        if (!shift) return shift;
+                        shift.billsCount = (Number(shift.billsCount) || 0) + 1;
+                        shift.totalCollected = Math.round(((Number(shift.totalCollected) || 0) + grand) * 100) / 100;
+                        return shift;
+                    }).then(function (shiftResult) {
                         if (shiftResult && shiftResult.committed && shiftResult.snapshot) {
                             activeShift = shiftResult.snapshot.val() || activeShift;
                         }
-                    } catch (shiftError) {
+                    }).catch(function (shiftError) {
                         console.error("Payment saved, but shift totals could not be updated:", shiftError);
-                        alert("Payment was saved, but shift totals could not be updated. Please check the shift summary.");
-                    }
+                        showToast('⚠️ Payment saved, but shift totals could not be updated');
+                    });
                 }
 
                 // Keep the local menu popularity counter only after payment is safely saved.
@@ -8038,8 +8077,9 @@
                         }
                     });
                     if (linkChanged) {
-                        try { await db.ref('tableLinks').set(tableLinks); }
-                        catch (linkError) { console.error("Could not clear table links after payment:", linkError); }
+                        db.ref('tableLinks').set(tableLinks).catch(function (linkError) {
+                            console.error("Could not clear table links after payment:", linkError);
+                        });
                     }
                 }
 
@@ -8057,15 +8097,13 @@
                     table: paidOrderKey || ''
                 });
 
+                // Leave the table screen first; the receipt print runs afterwards.
                 if (shouldPrint) {
                     populateCustomerReceipt(order, paid, change);
-                    triggerPrint("print-customer", () => {
-                        // The print callbacks can fire several seconds later. Never yank
-                        // the cashier out of a table they already re-opened meanwhile.
-                        if (currentTableKey !== paidOrderKey) return;
-                        if (activeOrders[paidOrderKey]) return;
-                        backToTableSelection();
-                    }, { drawerKick: String(chosenPaymentMethod).trim().toLowerCase() === 'cash' });
+                    backToTableSelection();
+                    triggerPrint("print-customer", null, {
+                        drawerKick: String(chosenPaymentMethod).trim().toLowerCase() === 'cash'
+                    });
                 } else {
                     backToTableSelection();
                 }
