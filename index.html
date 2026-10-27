@@ -7988,9 +7988,17 @@
             try {
                 // Final safety check: never charge a cart that belongs to an older
                 // seating (or to a bill that another device already settled).
-                try {
-                    const serverSnap = await db.ref('activeOrders/' + paidOrderKey).once('value');
-                    const serverOrder = serverSnap.val();
+                // Race it against a short timeout: on a weak connection the old
+                // code could sit on "Saving Payment…" forever.
+                const checkPromise = db.ref('activeOrders/' + paidOrderKey).once('value')
+                    .then(function (snap) { return { snap: snap }; })
+                    .catch(function (err) { return { error: err }; });
+                const checkTimeout = new Promise(function (resolve) {
+                    setTimeout(function () { resolve({ timedOut: true }); }, 1500);
+                });
+                const checkResult = await Promise.race([checkPromise, checkTimeout]);
+                if (checkResult && checkResult.snap) {
+                    const serverOrder = checkResult.snap.val();
                     const serverClosed = isClosedOrder(serverOrder);
                     const localSid = currentOrder.sessionId || '';
                     const serverOtherSession = serverOrder && typeof serverOrder === 'object' &&
@@ -8004,8 +8012,10 @@
                         requestRenderBigTablesGrid();
                         return;
                     }
-                } catch (checkError) {
-                    console.error('Could not verify the table before payment:', checkError);
+                } else if (checkResult && checkResult.timedOut) {
+                    console.warn('Payment safety check timed out; saving the bill with the local seating id.');
+                } else if (checkResult && checkResult.error) {
+                    console.error('Could not verify the table before payment:', checkResult.error);
                 }
 
                 // Save the sale and close the table atomically. A tiny "Closed" marker
@@ -8021,66 +8031,84 @@
                 updates['tableSessions/' + paidOrderKey] = null;
                 updates['newCustomerOrderAlerts/' + paidOrderKey] = null;
                 updates['staffAlerts/' + paidOrderKey] = null;
-                await db.ref().update(updates);
 
-                // The bill is saved. Return to the tables immediately — drawer,
-                // shift totals and linked-table cleanup must never block the next order.
+                // Do NOT await the network write. Firebase applies it to the local
+                // cache immediately, so the cashier can take the next order while
+                // the bill syncs. The promise below only handles confirmation and
+                // the rare failure (rules/connection) to restore the table.
+                const paymentWrite = db.ref().update(updates);
+                paymentWrite.then(function () {
+                    // Shift totals are updated only after the bill is confirmed.
+                    if (activeShift) {
+                        db.ref('activeShift').transaction(function (shift) {
+                            if (!shift) return shift;
+                            shift.billsCount = (Number(shift.billsCount) || 0) + 1;
+                            shift.totalCollected = Math.round(((Number(shift.totalCollected) || 0) + grand) * 100) / 100;
+                            return shift;
+                        }).then(function (shiftResult) {
+                            if (shiftResult && shiftResult.committed && shiftResult.snapshot) {
+                                activeShift = shiftResult.snapshot.val() || activeShift;
+                            }
+                        }).catch(function (shiftError) {
+                            console.error("Payment saved, but shift totals could not be updated:", shiftError);
+                            showToast('⚠️ Payment saved, but shift totals could not be updated');
+                        });
+                    }
+
+                    // Keep the local menu popularity counter only after payment is safely saved.
+                    try {
+                        const allTimeMap = JSON.parse(localStorage.getItem('al_hussain_alltime_sales') || '{}');
+                        order.items.forEach(it => {
+                            if (!it) return;
+                            const q = Number(it.qty) || 1;
+                            if (it.id) allTimeMap[String(it.id)] = (Number(allTimeMap[String(it.id)]) || 0) + q;
+                            if (it.name) {
+                                const nk = String(it.name).trim().toLowerCase();
+                                allTimeMap[nk] = (Number(allTimeMap[nk]) || 0) + q;
+                            }
+                        });
+                        localStorage.setItem('al_hussain_alltime_sales', JSON.stringify(allTimeMap));
+                        invalidateSalesMapCache();
+                    } catch (e) {
+                        console.error("All time sales storage error", e);
+                    }
+
+                    if (typeof tableLinks !== 'undefined' && tableLinks) {
+                        const groupMaster = tableLinks[paidOrderKey] || paidOrderKey;
+                        const linkRemovals = {};
+                        Object.keys(tableLinks).forEach(k => {
+                            if (k === groupMaster || tableLinks[k] === groupMaster) {
+                                delete tableLinks[k];
+                                linkRemovals[k] = null;
+                            }
+                        });
+                        if (Object.keys(linkRemovals).length > 0) {
+                            db.ref('tableLinks').update(linkRemovals).catch(function (linkError) {
+                                console.error("Could not clear table links after payment:", linkError);
+                            });
+                        }
+                    }
+                }).catch(function (writeError) {
+                    console.error('Payment could not be saved:', writeError);
+                    // Put the unpaid cart back (only if the table is still on this
+                    // seating) so the cashier can retry instead of losing the order.
+                    if (paidOrderKey) {
+                        const localNow = activeOrders[paidOrderKey];
+                        if (!localNow || (localNow.sessionId || '') === (order.sessionId || '')) {
+                            activeOrders[paidOrderKey] = order;
+                        }
+                    }
+                    requestRenderBigTablesGrid();
+                    alert('Payment could not be saved. Please check the connection — the table has been restored so you can try again.');
+                });
+
+                // Open the cash drawer immediately for a cash bill; the write is
+                // already queued locally, so this no longer waits on the network.
                 if (String(chosenPaymentMethod).trim().toLowerCase() === 'cash' &&
                     hasPermission('billing') && drawerConfig.openOnPayNow !== false) {
                     pulseCashDrawer(false).then(function (opened) {
                         if (!opened) showToast('Drawer not connected - open Admin > Cash Drawer Setup');
                     });
-                }
-
-                // Update shift totals in the background without overwriting concurrent updates.
-                if (activeShift) {
-                    db.ref('activeShift').transaction(function (shift) {
-                        if (!shift) return shift;
-                        shift.billsCount = (Number(shift.billsCount) || 0) + 1;
-                        shift.totalCollected = Math.round(((Number(shift.totalCollected) || 0) + grand) * 100) / 100;
-                        return shift;
-                    }).then(function (shiftResult) {
-                        if (shiftResult && shiftResult.committed && shiftResult.snapshot) {
-                            activeShift = shiftResult.snapshot.val() || activeShift;
-                        }
-                    }).catch(function (shiftError) {
-                        console.error("Payment saved, but shift totals could not be updated:", shiftError);
-                        showToast('⚠️ Payment saved, but shift totals could not be updated');
-                    });
-                }
-
-                // Keep the local menu popularity counter only after payment is safely saved.
-                try {
-                    const allTimeMap = JSON.parse(localStorage.getItem('al_hussain_alltime_sales') || '{}');
-                    order.items.forEach(it => {
-                        if (!it) return;
-                        const q = Number(it.qty) || 1;
-                        if (it.id) allTimeMap[String(it.id)] = (Number(allTimeMap[String(it.id)]) || 0) + q;
-                        if (it.name) {
-                            const nk = String(it.name).trim().toLowerCase();
-                            allTimeMap[nk] = (Number(allTimeMap[nk]) || 0) + q;
-                        }
-                    });
-                    localStorage.setItem('al_hussain_alltime_sales', JSON.stringify(allTimeMap));
-                    invalidateSalesMapCache();
-                } catch (e) {
-                    console.error("All time sales storage error", e);
-                }
-
-                if (typeof tableLinks !== 'undefined' && tableLinks) {
-                    const groupMaster = tableLinks[paidOrderKey] || paidOrderKey;
-                    let linkChanged = false;
-                    Object.keys(tableLinks).forEach(k => {
-                        if (k === groupMaster || tableLinks[k] === groupMaster) {
-                            delete tableLinks[k];
-                            linkChanged = true;
-                        }
-                    });
-                    if (linkChanged) {
-                        db.ref('tableLinks').set(tableLinks).catch(function (linkError) {
-                            console.error("Could not clear table links after payment:", linkError);
-                        });
-                    }
                 }
 
                 if (activeOrders && paidOrderKey) delete activeOrders[paidOrderKey];
