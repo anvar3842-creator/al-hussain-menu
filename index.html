@@ -2944,6 +2944,10 @@
         let tableLinks = {};
         let pendingLinkSelection = [];
         let isProcessingPayment = false;
+        // Tables whose payment write has been queued but not acknowledged yet.
+        // While a table is in this set, opening it is blocked so a fast cashier
+        // cannot start a new order on a table that is still being closed.
+        const pendingPaymentTables = new Set();
         let privateStatsState = { sales: false, expenses: false };
 
         // ---- Order session protection --------------------------------------
@@ -2968,12 +2972,41 @@
             return orders;
         }
 
+        // Takeaway order keys are never reused (the sequence counter only moves
+        // forward), so their tombstones only protect devices that still hold that
+        // exact cart. Keeping them forever bloats activeOrders and makes every
+        // live snapshot slower, so old takeaway markers are pruned automatically.
+        const TAKEAWAY_TOMBSTONE_TTL_MS = 24 * 60 * 60 * 1000;
+        function cleanupOldTakeawayTombstones(orders) {
+            if (isCustomerMode || !orders || typeof orders !== 'object' ||
+                typeof db === 'undefined' || !db || !db.ref) return;
+            const now = Date.now();
+            const removals = {};
+            Object.keys(orders).forEach(function (key) {
+                if (!key || key.indexOf('Order-') !== 0) return;
+                const marker = orders[key];
+                if (!isClosedOrder(marker)) return;
+                const closedAt = Number(marker.closedAt) || 0;
+                if (closedAt > 0 && (now - closedAt) > TAKEAWAY_TOMBSTONE_TTL_MS) {
+                    removals[key] = null;
+                }
+            });
+            if (Object.keys(removals).length === 0) return;
+            db.ref('activeOrders').update(removals).catch(function (error) {
+                console.warn('Could not clean old takeaway order markers:', error);
+            });
+        }
+
         // Marks a table as settled without deleting the node (tombstone).
+        // The marker MUST always carry a real session id. An empty
+        // closedSessionId used to let a stale cart that still had an old
+        // sessionId slip past the tombstone and resurrect a paid table.
         function closedOrderMarker(order, reason, extra) {
+            const sessionId = (order && order.sessionId) || newOrderSessionId();
             return Object.assign({
                 status: 'Closed',
-                sessionId: (order && order.sessionId) || '',
-                closedSessionId: (order && order.sessionId) || '',
+                sessionId: sessionId,
+                closedSessionId: sessionId,
                 closedAt: Date.now(),
                 closedReason: reason || 'paid'
             }, extra || {});
@@ -3013,6 +3046,17 @@
                     if (!order.sessionId || order.sessionId === current.closedSessionId) {
                         console.warn('Blocked stale cart write for ' + tableKey + ': bill already settled.');
                         return;
+                    }
+                    // Very old markers may have no closedSessionId (legacy bug).
+                    // For those, require the incoming cart to be demonstrably newer
+                    // than the settlement; otherwise a stale cart could reopen it.
+                    if (!current.closedSessionId) {
+                        const orderStamp = Number(order.lastUpdatedAt || order.seatedAt || order.createdAt) || 0;
+                        const closedAt = Number(current.closedAt) || 0;
+                        if (!orderStamp || !closedAt || orderStamp <= closedAt) {
+                            console.warn('Blocked stale cart write for ' + tableKey + ': legacy settled marker.');
+                            return;
+                        }
                     }
                     return order;
                 }
@@ -3404,7 +3448,9 @@
         }
 
         db.ref('activeOrders').on('value', (snapshot) => {
-            const raw = stripClosedOrders(snapshot.val() || {});
+            const snapshotOrders = snapshot.val() || {};
+            cleanupOldTakeawayTombstones(snapshotOrders);
+            const raw = stripClosedOrders(snapshotOrders);
             const now = Date.now();
             let missingSeatedUpdates = {};
 
@@ -4919,6 +4965,13 @@
 
         async function openTable(tableKey) {
             if (isCustomerMode && currentTableKey && currentTableKey !== tableKey) {
+                return;
+            }
+            // A payment may still be syncing for this table. Opening it now could
+            // put a brand-new order on top of the about-to-be-closed bill.
+            const pendingKey = getMasterTableKey(tableKey);
+            if (pendingPaymentTables.has(tableKey) || pendingPaymentTables.has(pendingKey)) {
+                showToast('⏳ Payment is still saving for ' + pendingKey + ' — please wait a moment');
                 return;
             }
             if (isLinkedSlaveTable(tableKey)) {
@@ -8169,8 +8222,13 @@
                     const serverOrder = checkResult.snap.val();
                     const serverClosed = isClosedOrder(serverOrder);
                     const localSid = currentOrder.sessionId || '';
-                    const serverOtherSession = serverOrder && typeof serverOrder === 'object' &&
-                        !serverClosed && serverOrder.sessionId && localSid && serverOrder.sessionId !== localSid;
+                    const serverSid = (serverOrder && typeof serverOrder === 'object' && !serverClosed)
+                        ? (serverOrder.sessionId || '')
+                        : '';
+                    // If either side has a session id, a mismatch means the cart
+                    // belongs to a different seating. This also covers a local
+                    // legacy cart with no sessionId pointed at a re-seated table.
+                    const serverOtherSession = Boolean(serverSid) && serverSid !== localSid;
                     if (serverClosed || serverOtherSession) {
                         alert('This table was settled or re-seated on another device. The latest table data will be reloaded — please check the order before charging.');
                         if (serverOrder && !serverClosed) activeOrders[paidOrderKey] = serverOrder;
@@ -8185,6 +8243,15 @@
                 } else if (checkResult && checkResult.error) {
                     console.error('Could not verify the table before payment:', checkResult.error);
                 }
+
+                // A legacy cart may have no sessionId. Adopt one now so the
+                // tombstone below always gets a real closedSessionId and cannot
+                // be bypassed by a stale cart later.
+                if (!order.sessionId) order.sessionId = newOrderSessionId();
+                // Fill receipt fields now; printing may happen after the write
+                // acknowledgement, when currentTableKey is already cleared.
+                order.paymentMethod = chosenPaymentMethod;
+                order.source = paidOrderKey;
 
                 // Save the sale and close the table atomically. A tiny "Closed" marker
                 // stays behind instead of a hard delete, so an old cart from a sleeping
@@ -8204,8 +8271,55 @@
                 // cache immediately, so the cashier can take the next order while
                 // the bill syncs. The promise below only handles confirmation and
                 // the rare failure (rules/connection) to restore the table.
+                pendingPaymentTables.add(paidOrderKey);
+                const pendingPaymentTimer = setTimeout(function () {
+                    pendingPaymentTables.delete(paidOrderKey);
+                }, 15000);
+                const clearPendingPayment = function () {
+                    clearTimeout(pendingPaymentTimer);
+                    pendingPaymentTables.delete(paidOrderKey);
+                };
+
+                const isCashPayment = String(chosenPaymentMethod).trim().toLowerCase() === 'cash';
+                const drawerShouldOpen = isCashPayment && hasPermission('billing') &&
+                    drawerConfig.openOnPayNow !== false;
+                const drawerPulse = drawerShouldOpen
+                    ? pulseCashDrawer(false).then(function (opened) { return opened === true; })
+                        .catch(function () { return false; })
+                    : Promise.resolve(false);
+                // Receipts are printed only after Firebase acknowledges the bill,
+                // so a failed write can never leave the customer holding a receipt
+                // for a payment that was not saved. Exactly one drawer pulse:
+                // hardware first, receipt kick only as the fallback.
+                const printPaidReceipt = function () {
+                    if (!shouldPrint) return;
+                    populateCustomerReceipt(order, paid, change);
+                    let receiptStarted = false;
+                    const startReceipt = function (drawerOpened) {
+                        if (receiptStarted) return;
+                        receiptStarted = true;
+                        triggerPrint("print-customer", null, {
+                            drawerKick: drawerShouldOpen && !drawerOpened
+                        });
+                    };
+                    if (drawerShouldOpen) {
+                        drawerPulse.then(startReceipt);
+                        setTimeout(function () { startReceipt(false); }, 1800);
+                    } else {
+                        startReceipt(false);
+                    }
+                };
+
                 const paymentWrite = db.ref().update(updates);
                 paymentWrite.then(function () {
+                    clearPendingPayment();
+                    // A receipt/DOM problem must never turn a saved payment into a
+                    // "failed" rollback.
+                    try {
+                        printPaidReceipt();
+                    } catch (printError) {
+                        console.error('Payment saved, but the receipt could not be prepared:', printError);
+                    }
                     // Shift totals are updated only after the bill is confirmed.
                     if (activeShift) {
                         db.ref('activeShift').transaction(function (shift) {
@@ -8256,7 +8370,8 @@
                             });
                         }
                     }
-                }).catch(function (writeError) {
+                }, function (writeError) {
+                    clearPendingPayment();
                     console.error('Payment could not be saved:', writeError);
                     // Put the unpaid cart back (only if the table is still on this
                     // seating) so the cashier can retry instead of losing the order.
@@ -8267,22 +8382,15 @@
                         }
                     }
                     requestRenderBigTablesGrid();
+                    if (paidOrderKey && currentTableKey === paidOrderKey) {
+                        renderCart({ skipInputSync: true });
+                    }
                     alert('Payment could not be saved. Please check the connection — the table has been restored so you can try again.');
                 });
-
-                // Open the cash drawer immediately for a cash bill; the write is
-                // already queued locally, so this no longer waits on the network.
-                if (String(chosenPaymentMethod).trim().toLowerCase() === 'cash' &&
-                    hasPermission('billing') && drawerConfig.openOnPayNow !== false) {
-                    pulseCashDrawer(false).then(function (opened) {
-                        if (!opened) showToast('Drawer not connected - open Admin > Cash Drawer Setup');
-                    });
-                }
 
                 if (activeOrders && paidOrderKey) delete activeOrders[paidOrderKey];
                 if (previousActiveOrdersMap && paidOrderKey) delete previousActiveOrdersMap[paidOrderKey];
 
-                order.paymentMethod = chosenPaymentMethod;
                 closePaymentModal(true);
                 pushCustomerDisplayState({
                     type: 'done',
@@ -8293,15 +8401,14 @@
                     table: paidOrderKey || ''
                 });
 
-                // Leave the table screen first; the receipt print runs afterwards.
-                if (shouldPrint) {
-                    populateCustomerReceipt(order, paid, change);
-                    backToTableSelection();
-                    triggerPrint("print-customer", null, {
-                        drawerKick: String(chosenPaymentMethod).trim().toLowerCase() === 'cash'
+                // Leave the table screen immediately; the receipt prints from the
+                // success handler once Firebase confirms the bill.
+                backToTableSelection();
+
+                if (!shouldPrint && drawerShouldOpen) {
+                    drawerPulse.then(function (opened) {
+                        if (!opened) showToast('Drawer not connected - open Admin > Cash Drawer Setup');
                     });
-                } else {
-                    backToTableSelection();
                 }
             } catch (error) {
                 console.error("Payment save failed:", error);
@@ -8328,6 +8435,8 @@
                 let tKey = "Table " + i;
                 if (tKey === currentTableKey) continue;
                 if (isLinkedSlaveTable(tKey)) continue;
+                // Never offer a table whose payment is still syncing.
+                if (pendingPaymentTables.has(tKey)) continue;
 
                 let isOccupied = activeOrders[tKey] && activeOrders[tKey].items && activeOrders[tKey].items.length > 0;
                 let btn = document.createElement('button');
@@ -8357,6 +8466,11 @@
 
         function confirmMoveTable() {
             if (!targetMoveDestination) return alert("Please select a destination table!");
+            const pendingMoveKey = getMasterTableKey(targetMoveDestination);
+            if (pendingPaymentTables.has(targetMoveDestination) || pendingPaymentTables.has(pendingMoveKey)) {
+                alert('Payment is still saving for ' + pendingMoveKey + '. Please wait a moment and try again.');
+                return;
+            }
             const sourceKey = currentTableKey;
             if (activeOrders[targetMoveDestination] && activeOrders[targetMoveDestination].items && activeOrders[targetMoveDestination].items.length > 0) {
                 if (!confirm("Destination table already has an active order! Merge orders?")) return;
@@ -8438,6 +8552,12 @@
         // slave's items stay orphaned in Firebase: opening the slave redirects to the
         // master, the items look "missing", and they are never billed at payment.
         async function mergeOrdersIntoMasterOnLink(master, linkedKeys) {
+            const pendingLinkKey = linkedKeys.find(k =>
+                pendingPaymentTables.has(k) || pendingPaymentTables.has(getMasterTableKey(k)));
+            if (pendingLinkKey) {
+                alert('Payment is still saving for ' + pendingLinkKey + '. Please wait a moment and try again.');
+                return;
+            }
             try {
                 const snaps = await Promise.all(linkedKeys.map(k => db.ref('activeOrders/' + k).once('value')));
                 const orders = {};
