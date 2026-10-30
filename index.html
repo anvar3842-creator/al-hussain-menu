@@ -523,6 +523,7 @@
         .staff-alert-banner { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid #93c5fd; border-radius: 14px; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15); margin-bottom: 8px; gap: 10px; }
         .staff-alert-banner.waiter-type { background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: #fcd34d; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15); }
         .staff-alert-banner.update-type { background: linear-gradient(135deg, #fff7ed, #ffedd5); border-color: #fdba74; box-shadow: 0 4px 15px rgba(234, 88, 12, 0.15); }
+        .staff-alert-banner.qr-type { background: linear-gradient(135deg, #ecfeff, #cffafe); border-color: #67e8f9; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.18); }
         .sound-test-btn { background: #f1f5f9; border: 1.5px solid #cbd5e1; color: #1e293b; padding: 6px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s; }
         .sound-test-btn:hover { background: #e2e8f0; border-color: #94a3b8; }
         @media (max-width: 760px) { #btn-customer-display { display: none !important; } }
@@ -2141,11 +2142,15 @@
                     <h3 style="margin:0;font-size:18px;">🔔 Notification Settings</h3>
                     <p style="margin:4px 0 0;font-size:12px;color:#64748b;font-weight:700;">யாருக்கு எந்த notification வேண்டும் என்று தேர்வு செய்யுங்கள்</p>
                 </div>
-                <button class="close-modal" onclick="closeNotificationSettingsModal()">Close</button>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button type="button" class="btn-small" style="background:linear-gradient(135deg,#0891b2,#06b6d4);color:#fff;padding:8px 12px;font-size:12px;" onclick="testCustomerQrSound()">▶ Test QR Sound</button>
+                    <button class="close-modal" onclick="closeNotificationSettingsModal()">Close</button>
+                </div>
             </div>
             <div class="modal-body" style="max-height:70vh;">
                 <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 14px;font-size:12.5px;font-weight:700;color:#1e3a8a;line-height:1.7;margin-bottom:14px;">
-                    🔔 <b>Orders</b> = புது ஆர்டர் / ஆர்டர் update (சத்தம் + banner).<br>
+                    🔔 <b>Orders</b> = staff எடுக்கும் புது ஆர்டர் / update (சத்தம் + banner).<br>
+                    📱 <b>QR Order</b> = customer QR scan ஆர்டர் — தனி சத்தம் + <b>"Customer Order, Table …"</b> குரல். Default: எல்லா account-க்கும் ON.<br>
                     🙋 <b>Waiter</b> = customer "Call Waiter" (சத்தம் + banner).<br>
                     மாற்றம் உடனே எல்லா devices-க்கும் apply ஆகும்.
                 </div>
@@ -3247,9 +3252,10 @@
         });
 
         // Admin-controlled notification recipients. Shape:
-        //   { roleKey: { orders: true/false, waiter: true/false } }
+        //   { roleKey: { orders: true/false, customerQr: true/false, waiter: true/false } }
         // Missing entries fall back to the safe defaults (orders = admin only,
-        // waiter calls = everyone) so the app keeps working before it is configured.
+        // customer QR orders = everyone, waiter calls = everyone) so the app
+        // keeps working before it is configured.
         let notificationSettings = {};
         db.ref('settings/notificationSettings').on('value', (snap) => {
             notificationSettings = snap.val() || {};
@@ -3435,12 +3441,13 @@
                 const who = curOrd.takenBy || curOrd.lastUpdatedBy || '';
                 const total = getOrderGrandTotal(curOrd);
 
+                const qrOrder = isCustomerQrAlert(curOrd);
                 if (!prevOrd) {
                     // New order on table
-                    handleIncomingOrderAlert('order', tKey, who, curCount, total);
+                    handleIncomingOrderAlert('order', tKey, who, curCount, total, qrOrder);
                 } else if (curCount > prevCount || (curOrd.lastUpdatedAt && curOrd.lastUpdatedAt > (prevOrd.lastUpdatedAt || 0))) {
                     // Items added or order updated
-                    handleIncomingOrderAlert('update', tKey, who, curCount, total);
+                    handleIncomingOrderAlert('update', tKey, who, curCount, total, qrOrder);
                 }
             });
 
@@ -3692,6 +3699,11 @@
             }
         }
 
+        // Show the real state from the start. Before this, the button said
+        // "Sound" even while browser audio was still locked, so silence looked
+        // like a bug. Now it clearly says "Tap to Enable" until unlocked.
+        updateSoundButtonUI();
+
         function unlockAudio() {
             if (audioUnlocked) {
                 const ctx = getPosAudioContext();
@@ -3758,7 +3770,39 @@
                 if (ctx.state === 'suspended') {
                     ctx.resume().catch(() => {});
                 }
-                const now = ctx.currentTime;
+                const now = ctx.currentTime + 0.02;
+
+                // One reusable note envelope so every alert type sounds clean.
+                function playNote(freq, startAt, peak, endAt, wave) {
+                    try {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = wave || 'sine';
+                        osc.frequency.setValueAtTime(freq, startAt);
+                        gain.gain.setValueAtTime(0.0001, startAt);
+                        gain.gain.exponentialRampToValueAtTime(peak, startAt + 0.02);
+                        gain.gain.exponentialRampToValueAtTime(0.001, endAt);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(startAt);
+                        osc.stop(endAt + 0.03);
+                    } catch (e) { /* ignore a single bad note */ }
+                }
+
+                if (type === 'customer' || type === 'customerUpdate') {
+                    // Bright G5-C6-E6 rising motif played twice. The double
+                    // triplet is intentionally different from the staff order
+                    // and waiter chimes, so everyone recognises "QR order".
+                    const notes = [783.99, 1046.50, 1318.51]; // G5, C6, E6
+                    const rounds = [0, 0.72];
+                    rounds.forEach(function (roundStart) {
+                        notes.forEach(function (freq, i) {
+                            const startAt = now + roundStart + (i * 0.15);
+                            playNote(freq, startAt, 0.55, startAt + 0.22, 'triangle');
+                        });
+                    });
+                    return;
+                }
 
                 let f1 = 523.25; // C5
                 let f2 = 783.99; // G5
@@ -3777,29 +3821,8 @@
                     gainVal2 = 0.46;
                 }
 
-                // Tone 1: gentle sine chime
-                const osc1 = ctx.createOscillator();
-                const gain1 = ctx.createGain();
-                osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(f1, now);
-                gain1.gain.setValueAtTime(gainVal1, now);
-                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-                osc1.connect(gain1);
-                gain1.connect(ctx.destination);
-                osc1.start(now);
-                osc1.stop(now + 0.35);
-
-                // Tone 2: melodic harmonic chime
-                const osc2 = ctx.createOscillator();
-                const gain2 = ctx.createGain();
-                osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(f2, now + 0.16);
-                gain2.gain.setValueAtTime(gainVal2, now + 0.16);
-                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.70);
-                osc2.connect(gain2);
-                gain2.connect(ctx.destination);
-                osc2.start(now + 0.16);
-                osc2.stop(now + 0.70);
+                playNote(f1, now, gainVal1, now + 0.35, 'sine');
+                playNote(f2, now + 0.16, gainVal2, now + 0.70, 'sine');
             } catch (e) {
                 console.warn("Audio chime error:", e);
                 playFallbackBeep(type);
@@ -3881,6 +3904,10 @@
             let speechText = "";
             if (type === 'waiter') {
                 speechText = `Call Waiter, ${tableVoice}`;
+            } else if (type === 'customer') {
+                speechText = `Customer Order, ${tableVoice}`;
+            } else if (type === 'customerUpdate') {
+                speechText = `Customer Order Updated, ${tableVoice}`;
             } else if (type === 'update') {
                 speechText = `Order Updated, ${tableVoice}`;
             } else {
@@ -3900,6 +3927,15 @@
             showToast("🔊 Testing Audio: 'New Order, Table 1'");
         }
 
+        // Distinct "customer QR order" test used from Notification Settings so
+        // the owner can verify the sound on every POS device.
+        function testCustomerQrSound() {
+            unlockAudio();
+            updateSoundButtonUI();
+            playChimeAndVoice('customer', 'Table 1');
+            showToast("📱 Testing: 'Customer Order, Table 1'");
+        }
+
         // Per-account notification preferences. Admin can change these from
         // Admin > Notification Settings. Defaults keep the previous behaviour:
         // orders -> admin accounts only, waiter calls -> everyone.
@@ -3909,6 +3945,10 @@
                 (credentials[roleKey] && credentials[roleKey].roleType === 'admin');
             return {
                 orders: typeof cfg.orders === 'boolean' ? cfg.orders : isAdmin,
+                // Customer QR orders are shouted on every device by default so a
+                // QR order is never missed. The admin can still disable it per
+                // account from Admin > Notification Settings.
+                customerQr: typeof cfg.customerQr === 'boolean' ? cfg.customerQr : true,
                 waiter: typeof cfg.waiter === 'boolean' ? cfg.waiter : true
             };
         }
@@ -3918,31 +3958,60 @@
             return roleNotificationPrefs(loggedInRole).orders;
         }
 
+        function canReceiveCustomerQrNotifications() {
+            if (isCustomerMode) return false;
+            return roleNotificationPrefs(loggedInRole).customerQr;
+        }
+
         function canReceiveWaiterNotifications() {
             if (isCustomerMode) return false;
             return roleNotificationPrefs(loggedInRole).waiter;
         }
 
-        function handleIncomingOrderAlert(type, tableKey, byUser, itemsCount, total) {
+        // True when an alert came from a customer's phone (QR menu) instead of
+        // staff. Supports both the live event payload and a saved order object.
+        function isCustomerQrAlert(data) {
+            if (!data || typeof data !== 'object') return false;
+            return data.source === 'Customer QR' ||
+                data.orderSource === 'Customer QR' ||
+                data.by === 'Customer QR' ||
+                data.takenBy === 'Customer QR';
+        }
+
+        function handleIncomingOrderAlert(type, tableKey, byUser, itemsCount, total, isCustomerQr) {
             if (isCustomerMode) return;
-            // New-order / update chime + toast + banner follows the admin-managed
-            // per-account notification settings.
-            if (!canReceiveOrderNotifications()) return;
+            // Customer QR orders have their own per-account switch and their own
+            // unmistakable sound ("Customer Order, Table X"). Staff-entered
+            // orders and updates still follow the normal Orders switch.
+            const qrOrder = !!isCustomerQr;
+            if (qrOrder ? !canReceiveCustomerQrNotifications() : !canReceiveOrderNotifications()) return;
+            const alertType = qrOrder ? (type === 'update' ? 'customerUpdate' : 'customer') : type;
             const now = Date.now();
-            const debKey = type + '_' + tableKey;
-            if (lastAnnouncedTableActionTimes[debKey] && (now - lastAnnouncedTableActionTimes[debKey] < 3500)) {
+            // The same event arrives from liveOrderNotification,
+            // newCustomerOrderAlerts and activeOrders. One debounce key across
+            // all three paths prevents a triple announcement.
+            const debKey = alertType + '_' + tableKey;
+            if (lastAnnouncedTableActionTimes[debKey] && (now - lastAnnouncedTableActionTimes[debKey] < 4000)) {
                 return; // Debounced
             }
             lastAnnouncedTableActionTimes[debKey] = now;
 
-            playChimeAndVoice(type, tableKey, byUser);
+            playChimeAndVoice(alertType, tableKey, byUser);
 
-            const who = byUser ? ` from ${byUser}` : '';
             const tName = formatTableNameForVoice(tableKey);
-            if (type === 'update') {
-                showToast(`📝 Order Updated: ${tName}${who}`);
+            if (qrOrder) {
+                if (alertType === 'customerUpdate') {
+                    showToast(`📱 Customer QR Order Updated: ${tName}`);
+                } else {
+                    showToast(`📱 Customer QR Order: ${tName}`);
+                }
             } else {
-                showToast(`🔔 New Order: ${tName}${who}`);
+                const who = byUser ? ` from ${byUser}` : '';
+                if (type === 'update') {
+                    showToast(`📝 Order Updated: ${tName}${who}`);
+                } else {
+                    showToast(`🔔 New Order: ${tName}${who}`);
+                }
             }
 
             renderLiveStaffAlerts();
@@ -3959,7 +4028,9 @@
                 isUpdate: actionType === 'update',
                 itemsCount: itemCount,
                 total: totalDue,
-                by: loggedInDisplayName || (isCustomerMode ? "Customer QR" : "Staff"),
+                // A customer phone has no logged-in staff name. Without this
+                // guard the banner said "from Admin" for every QR order.
+                by: isCustomerMode ? "Customer QR" : (loggedInDisplayName || "Staff"),
                 source: isCustomerMode ? "Customer QR" : (loggedInDisplayName || "Staff"),
                 timestamp: Date.now(),
                 timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -3983,14 +4054,17 @@
         // Dedicated live order event broadcast listener
         db.ref('liveOrderNotification').on('value', (snapshot) => {
             const data = snapshot.val();
-            if (!data || !data.timestamp) return;
 
             if (!initialLiveNotificationLoaded) {
+                // Mark the baseline even when the node is empty. Previously an
+                // empty node left the flag false and silently swallowed the very
+                // first customer QR order after opening the POS.
                 initialLiveNotificationLoaded = true;
-                lastLiveNotificationTimestamp = data.timestamp;
+                lastLiveNotificationTimestamp = (data && data.timestamp) || 0;
                 return;
             }
 
+            if (!data || !data.timestamp) return;
             if (data.timestamp <= lastLiveNotificationTimestamp) return;
             lastLiveNotificationTimestamp = data.timestamp;
 
@@ -3999,7 +4073,7 @@
 
             if (!isCustomerMode) {
                 const actType = data.isUpdate || data.action === 'update' ? 'update' : 'order';
-                handleIncomingOrderAlert(actType, data.table, data.by, data.itemsCount, data.total);
+                handleIncomingOrderAlert(actType, data.table, data.by, data.itemsCount, data.total, isCustomerQrAlert(data));
             }
         });
 
@@ -4026,7 +4100,7 @@
                         lastNotifiedOrderAlerts[tKey] = ts;
                         if (item.originDeviceId !== posDeviceId) {
                             const actType = item.isUpdate ? 'update' : 'order';
-                            handleIncomingOrderAlert(actType, item.table || tKey, item.by, item.itemsCount, item.total);
+                            handleIncomingOrderAlert(actType, item.table || tKey, item.by, item.itemsCount, item.total, isCustomerQrAlert(item));
                         }
                     }
                 });
@@ -4117,7 +4191,15 @@
 
             const now = Date.now();
             // Banners follow the same per-account settings as the chime/toast.
-            const orderKeys = canReceiveOrderNotifications() ? Object.keys(newCustomerOrderAlerts) : [];
+            // Customer QR banners use the separate QR switch, so a counter
+            // account can see QR orders even when staff-entered orders are off.
+            const orderKeys = Object.keys(newCustomerOrderAlerts).filter(tKey => {
+                const al = newCustomerOrderAlerts[tKey];
+                if (!al) return false;
+                return isCustomerQrAlert(al)
+                    ? canReceiveCustomerQrNotifications()
+                    : canReceiveOrderNotifications();
+            });
             const waiterKeys = canReceiveWaiterNotifications() ? Object.keys(staffAlerts) : [];
 
             let visibleOrderCount = 0;
@@ -4141,15 +4223,20 @@
                 const remainingMins = Math.ceil(remainingSecs / 60);
 
                 const isUp = !!al.isUpdate;
+                const isQr = isCustomerQrAlert(al);
                 const sourceLabel = al.by ? al.by : (al.source || 'Customer');
                 const banner = document.createElement('div');
-                banner.className = 'staff-alert-banner' + (isUp ? ' update-type' : '');
+                banner.className = 'staff-alert-banner' + (isUp ? ' update-type' : '') + (isQr ? ' qr-type' : '');
+                const bannerTitle = isQr
+                    ? (isUp ? 'Customer QR Order Updated' : 'Customer QR Order')
+                    : (isUp ? 'Order Updated (' + sourceLabel + ')' : 'New Order (' + sourceLabel + ')');
+                const bannerIcon = isQr ? '📱' : (isUp ? '📝' : '🔔');
                 banner.innerHTML = `
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <span style="font-size:22px;">${isUp ? '📝' : '🔔'}</span>
+                        <span style="font-size:22px;">${bannerIcon}</span>
                         <div>
                             <div style="font-weight:900; color:${isUp ? '#9a3412' : '#1e3a8a'}; font-size:14px;">
-                                <strong>${tKey}</strong>: ${isUp ? 'Order Updated (' + sourceLabel + ')' : 'New Order (' + sourceLabel + ')'}
+                                <strong>${tKey}</strong>: ${bannerTitle}
                             </div>
                             <div style="font-size:12px; color:${isUp ? '#c2410c' : '#3b82f6'}; font-weight:700;">
                                 ${al.itemsCount || 1} items • $${Number(al.total || 0).toFixed(2)} • at ${al.timeStr || 'just now'} <span style="opacity:0.85; font-size:11px;">(⏱️ auto-clears in ${remainingMins}m)</span>
@@ -7351,24 +7438,36 @@
             return String((item && (item.cat || item.category)) || '').trim();
         }
 
-        function isDrinkOrderItem(item) {
-            const category = getOrderItemCategory(item).toLowerCase().replace(/[_-]+/g, ' ');
-            const name = String((item && item.name) || '').toLowerCase();
-            const drinkCategoryTerms = [
-                'drink', 'beverage', 'tea', 'teh', 'coffee', 'milo', 'milkshake',
-                'milk shake', 'fresh juice', 'juice', 'syrup', 'delina', 'sijoku', 'sizzoku', 'soft drink',
-                'hot drink', 'iced drink', 'ice blended', 'smoothie', 'soda'
-            ];
-            if (drinkCategoryTerms.some(term => category.includes(term))) return true;
+        // Categories that always print in the DRINKS block. These are the real
+        // Firebase category names used by the menu (Malay + English).
+        const DRINK_ORDER_CATEGORY_TERMS = [
+            'minuman', 'sejuk', 'hot drink', 'milk shake', 'milkshake',
+            'fresh juice', 'juice', 'drink', 'beverage'
+        ];
 
-            // Fallback for menus where the category field is generic or missing.
-            const drinkItemTerms = [
-                'teh tarik', 'teh c', 'teh o', 'tea', 'coffee', 'milo', 'nescafe',
-                'milkshake', 'milk shake', 'fresh juice', 'juice', 'sirap',
-                'soft drink', 'coke', 'cola', 'sprite', 'soda', 'lemonade',
-                'hot chocolate', 'iced chocolate', 'smoothie'
-            ];
-            return drinkItemTerms.some(term => name.includes(term));
+        function normalizeOrderCategory(value) {
+            return String(value || '').trim().toLowerCase()
+                .replace(/[_-]+/g, ' ').replace(/\s+/g, ' ');
+        }
+
+        function isDrinkOrderItem(item) {
+            const category = normalizeOrderCategory(getOrderItemCategory(item));
+            if (category) {
+                if (DRINK_ORDER_CATEGORY_TERMS.some(term => category.includes(term))) return true;
+
+                // A configured food category is authoritative. Without this,
+                // "Roti Milo" and "Nasi Ayam (Steam)" would print as DRINKS
+                // just because their names contain "milo" / "tea".
+                const knownCategories = (Array.isArray(categories) ? categories : [])
+                    .map(cat => normalizeOrderCategory(cat));
+                if (knownCategories.includes(category)) return false;
+            }
+
+            // Fallback only for items with a missing or unknown category.
+            // Word boundaries stop "Steam" from matching "tea".
+            const name = normalizeOrderCategory(item && item.name);
+            const drinkItemPattern = /\b(teh tarik|teh c|teh o|teh|kopi|tea|coffee|milo|nescafe|milkshake|milk shake|fresh juice|juice|sirap|soft drink|coke|cola|sprite|soda|lemonade|hot chocolate|iced chocolate|smoothie)\b/;
+            return drinkItemPattern.test(name);
         }
 
         function getSortedOrderItems(items) {
@@ -7845,6 +7944,10 @@
                             <input type="checkbox" style="width:18px;height:18px;accent-color:#2563eb;" ${prefs.orders ? 'checked' : ''} onchange="setRoleNotificationPref('${key}','orders',this.checked)">
                             🔔 Orders
                         </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#0e7490;cursor:pointer;">
+                            <input type="checkbox" style="width:18px;height:18px;accent-color:#0891b2;" ${prefs.customerQr ? 'checked' : ''} onchange="setRoleNotificationPref('${key}','customerQr',this.checked)">
+                            📱 QR Order
+                        </label>
                         <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#b45309;cursor:pointer;">
                             <input type="checkbox" style="width:18px;height:18px;accent-color:#d97706;" ${prefs.waiter ? 'checked' : ''} onchange="setRoleNotificationPref('${key}','waiter',this.checked)">
                             🙋 Waiter
@@ -7855,7 +7958,7 @@
 
         function setRoleNotificationPref(roleKey, field, value) {
             if (!isAdminAccount()) return;
-            if (field !== 'orders' && field !== 'waiter') return;
+            if (field !== 'orders' && field !== 'customerQr' && field !== 'waiter') return;
             if (!roleKey || !credentials[roleKey]) return;
             const patch = {};
             patch[field] = !!value;
