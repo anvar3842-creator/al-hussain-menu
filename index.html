@@ -1705,7 +1705,7 @@
         .big-table-card, .menu-card { box-shadow: none !important; transform: none !important; }
     }
     </style>
-<script src="/_aistudio-iframe.js?v=2c34bde1"></script></head>
+</head>
 <body>
 
     <div id="takeaway-details-modal" class="timeout-overlay" style="display: none; z-index: 9999; background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(8px);">
@@ -2549,7 +2549,29 @@
         </div>
     </div>
 
-    <div id="history-modal" class="modal-overlay"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3><div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div></div><div class="modal-body"><table class="admin-table"><thead><tr><th>Time</th><th>Ref</th><th>Source</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
+    <div id="history-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0; font-size:18px;">Sales History & Reprint</h3>
+                <div><button class="btn-small" onclick="printSalesHistory()">Print</button><button class="close-modal" onclick="closeHistoryModal()" style="margin-left: 5px;">X</button></div>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+                    <label for="history-date-filter" style="font-size:12px; font-weight:800; color:#475569;">Date:</label>
+                    <input type="date" id="history-date-filter" onchange="setHistoryDateFilter(this.value)" style="padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit; font-weight:700;">
+                    <button type="button" class="btn-small" onclick="clearHistoryDateFilter()">All Dates</button>
+                    <span id="history-count-note" style="font-size:12px; font-weight:800; color:#64748b; margin-left:auto;"></span>
+                </div>
+                <table class="admin-table">
+                    <thead><tr><th>Time</th><th>Ref</th><th>Source</th><th>Method</th><th style="text-align:right;">Amount</th><th style="text-align:center;">Action</th></tr></thead>
+                    <tbody id="history-table-body"></tbody>
+                </table>
+                <div id="history-pager" style="display:flex; justify-content:center; margin-top:12px;">
+                    <button type="button" class="btn-small" id="history-load-more-btn" onclick="loadMoreHistory()">Load More</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="history-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sale Details</h3><div><button class="btn-small" id="history-view-print-btn" onclick="printViewedSale()">Print</button><button class="close-modal" onclick="closeHistoryViewModal()" style="margin-left:5px;">X</button></div></div><div class="modal-body" id="history-view-body"></div></div></div>
 
     <div id="expense-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">View Expenses</h3><button class="close-modal" onclick="closeExpenseViewModal()">X</button></div><div class="modal-body"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"><div class="stat-box">Total: $<span id="view-expenses-total">0.00</span></div><div class="stat-box">This Month: $<span id="view-expenses-month-total">0.00</span></div><div class="stat-box">Daily Average: $<span id="view-expenses-month-average">0.00</span></div></div><table class="admin-table"><thead><tr><th>Date / Time</th><th>Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody id="view-expenses-tbody"></tbody></table><div id="view-expenses-empty" style="display:none;text-align:center;padding:20px;color:#64748b;">No expenses recorded.</div><h4 style="margin:18px 0 8px;">Monthly Trend</h4><div id="view-expenses-trend"></div></div></div></div>
@@ -3606,12 +3628,14 @@
             renderViewExpensesModal();
         });
 
-        // After every payment this listener re-fires with the FULL salesHistory (1MB+ and growing).
-        // Rendering all reports + the whole menu grid synchronously here freezes the POS right after
-        // each payment, so heavy renders are visibility-guarded and the menu grid is debounced.
+        // Load sales incrementally. A full 'value' listener re-sent the entire
+        // salesHistory (5k+ sales / 10MB+) after every payment, which froze the
+        // POS. Child events keep the same in-memory object but transfer only the
+        // sale that actually changed.
         let salesHistoryRenderTimer = null;
-        db.ref('salesHistory').on('value', (snapshot) => {
-            salesHistory = snapshot.val() || [];
+        let salesHistoryRefreshTimer = null;
+
+        function refreshSalesHistoryViews() {
             invalidateSalesMapCache();
             calculateTotalSales();
             const modalIsOpen = (id) => {
@@ -3628,7 +3652,30 @@
                 const posView = document.getElementById('pos-main-view');
                 if (posView && posView.style.display === 'flex') renderMenuGrid();
             }, 600);
-        });
+        }
+
+        function scheduleSalesHistoryRefresh() {
+            clearTimeout(salesHistoryRefreshTimer);
+            salesHistoryRefreshTimer = setTimeout(refreshSalesHistoryViews, 250);
+        }
+
+        function applySalesHistoryChild(key, value, removed) {
+            if (!key) return;
+            if (!salesHistory || typeof salesHistory !== 'object' || Array.isArray(salesHistory)) {
+                salesHistory = {};
+            }
+            if (removed) delete salesHistory[key];
+            else salesHistory[key] = value || {};
+            scheduleSalesHistoryRefresh();
+        }
+
+        const salesHistoryRef = db.ref('salesHistory');
+        const handleSalesHistorySyncError = (error) => {
+            console.error('Could not sync sales history:', error);
+        };
+        salesHistoryRef.on('child_added', (snap) => applySalesHistoryChild(snap.key, snap.val(), false), handleSalesHistorySyncError);
+        salesHistoryRef.on('child_changed', (snap) => applySalesHistoryChild(snap.key, snap.val(), false), handleSalesHistorySyncError);
+        salesHistoryRef.on('child_removed', (snap) => applySalesHistoryChild(snap.key, null, true), handleSalesHistorySyncError);
 
         db.ref('lastDayClose').on('value', (snapshot) => {
             lastDayClose = snapshot.val() || null;
@@ -5921,12 +5968,37 @@
         let __allTimeSalesMapCache = null;
         let __todaySalesMapCache = null;
         let __todaySalesMapCacheDay = null;
+        let __salesValuesCache = null;
+        let __salesEntriesCache = null;
+        let __historySortedEntriesCache = null;
+        let __historyFilteredEntriesCache = null;
+        let __historyFilterKey = '';
         let salesMapVersion = 0;
         function invalidateSalesMapCache() {
             __allTimeSalesMapCache = null;
             __todaySalesMapCache = null;
             __todaySalesMapCacheDay = null;
+            __salesValuesCache = null;
+            __salesEntriesCache = null;
+            __historySortedEntriesCache = null;
+            __historyFilteredEntriesCache = null;
+            __historyFilterKey = '';
             salesMapVersion++;
+        }
+
+        // One cached values/entries array per data version. Reports used to call
+        // Object.values(salesHistory) again and again; with 5k+ sales that added
+        // up on every click.
+        function getSalesValues() {
+            if (__salesValuesCache) return __salesValuesCache;
+            __salesValuesCache = Object.values(salesHistory || {});
+            return __salesValuesCache;
+        }
+
+        function getSalesEntries() {
+            if (__salesEntriesCache) return __salesEntriesCache;
+            __salesEntriesCache = Object.entries(salesHistory || {});
+            return __salesEntriesCache;
         }
 
         function getAllTimeItemSalesMap() {
@@ -5937,7 +6009,7 @@
             } catch(e) {
                 counts = {};
             }
-            const sales = Object.values(salesHistory || {});
+            const sales = getSalesValues();
             sales.forEach(sale => {
                 if (!sale || !sale.items) return;
                 const items = Array.isArray(sale.items) ? sale.items : Object.values(sale.items);
@@ -5962,7 +6034,7 @@
             const todayKey = new Date().toDateString();
             if (__todaySalesMapCache && __todaySalesMapCacheDay === todayKey) return __todaySalesMapCache;
             const counts = {};
-            const sales = Object.values(salesHistory || {});
+            const sales = getSalesValues();
             sales.forEach(sale => {
                 if (!sale || !sale.items) return;
                 if (!isRecordFromToday(sale.date, sale.timestamp)) return;
@@ -9425,7 +9497,7 @@ function deleteMenuItem(itemId) {
 
         // Sales Calculations & Reports
         function calculateTotalSales() {
-            const total = Object.values(salesHistory || {})
+            const total = getSalesValues()
                 .filter(x => isSaleInCurrentSession(x))
                 .reduce((acc, x) => acc + (Number(x.total) || 0), 0);
 
@@ -9434,40 +9506,137 @@ function deleteMenuItem(itemId) {
             if (salesElem) salesElem.innerText = totalSales.toFixed(2);
         }
 
+        const HISTORY_PAGE_SIZE = 100;
+        let historyDateFilter = '';
+        let historyRenderLimit = HISTORY_PAGE_SIZE;
+
+        function getHistorySortedEntries() {
+            if (__historySortedEntriesCache) return __historySortedEntriesCache;
+            __historySortedEntriesCache = getSalesEntries().slice().sort((a, b) => {
+                const at = new Date((a[1] && a[1].timestamp) || 0).getTime() || 0;
+                const bt = new Date((b[1] && b[1].timestamp) || 0).getTime() || 0;
+                return bt - at;
+            });
+            return __historySortedEntriesCache;
+        }
+
+        function saleMatchesHistoryDate(sale, yyyymmdd) {
+            if (!sale || !yyyymmdd) return true;
+            const parts = String(yyyymmdd).split('-');
+            if (parts.length !== 3) return true;
+            const yyyy = parts[0], mm = parts[1], dd = parts[2];
+            const expected = `${dd}/${mm}/${yyyy}`;
+            if (sale.date && sale.date === expected) return true;
+            if (sale.timestamp) {
+                const d = new Date(sale.timestamp);
+                if (!isNaN(d.getTime())) {
+                    const sy = d.getFullYear();
+                    const sm = String(d.getMonth() + 1).padStart(2, '0');
+                    const sd = String(d.getDate()).padStart(2, '0');
+                    if (`${sy}-${sm}-${sd}` === yyyymmdd) return true;
+                }
+            }
+            return false;
+        }
+
+        function getHistoryEntries() {
+            const filter = historyDateFilter;
+            if (__historyFilteredEntriesCache && __historyFilterKey === filter) {
+                return __historyFilteredEntriesCache;
+            }
+            const all = getHistorySortedEntries();
+            __historyFilteredEntriesCache = filter
+                ? all.filter(([, sale]) => saleMatchesHistoryDate(sale, filter))
+                : all;
+            __historyFilterKey = filter;
+            return __historyFilteredEntriesCache;
+        }
+
         function openHistoryModal() {
             if (!hasPermission('sales_history')) {
                 alert("Permission denied: You do not have permission to view Sales History.");
                 return;
             }
+            historyDateFilter = '';
+            historyRenderLimit = HISTORY_PAGE_SIZE;
+            const dateInput = document.getElementById('history-date-filter');
+            if (dateInput) dateInput.value = '';
             renderSalesHistoryTable();
             document.getElementById('history-modal').style.display = 'flex';
         }
 
         function closeHistoryModal() {
             document.getElementById('history-modal').style.display = 'none';
+            // Releasing the rendered rows keeps later clicks fast. The old code
+            // left thousands of rows (10MB+ of HTML) alive in the document.
+            const tbody = document.getElementById('history-table-body');
+            if (tbody) tbody.innerHTML = '';
+        }
+
+        function setHistoryDateFilter(value) {
+            historyDateFilter = value || '';
+            historyRenderLimit = HISTORY_PAGE_SIZE;
+            renderSalesHistoryTable();
+        }
+
+        function clearHistoryDateFilter() {
+            const input = document.getElementById('history-date-filter');
+            if (input) input.value = '';
+            setHistoryDateFilter('');
+        }
+
+        function loadMoreHistory() {
+            historyRenderLimit += HISTORY_PAGE_SIZE;
+            renderSalesHistoryTable();
         }
 
         function renderSalesHistoryTable() {
             const tbody = document.getElementById('history-table-body');
             if (!tbody) return;
-            tbody.innerHTML = "";
 
-            let salesArr = Object.values(salesHistory || {}).sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+            const entries = getHistoryEntries();
+            const visible = entries.slice(0, historyRenderLimit);
+            const fragment = document.createDocumentFragment();
 
-            salesArr.forEach(s => {
-                let tr = document.createElement('tr');
+            visible.forEach(([key, sale]) => {
+                const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${s.time || ''}</td>
-                    <td style="font-weight:bold;">${s.ref || ''}</td>
-                    <td>${s.source || ''}${s.intake ? ' • ' + (s.intake === 'phone' ? '📞 Phone' : '🚶 Walk-in') : ''}</td>
-                    <td>${s.paymentMethod || ''}</td>
-                    <td style="text-align:right; font-weight:bold; color:var(--success);">$ ${Number(s.total).toFixed(2)}</td>
+                    <td>${sale.time || ''}</td>
+                    <td style="font-weight:bold;">${sale.ref || ''}</td>
+                    <td>${sale.source || ''}${sale.intake ? ' • ' + (sale.intake === 'phone' ? '📞 Phone' : '🚶 Walk-in') : ''}</td>
+                    <td>${sale.paymentMethod || ''}</td>
+                    <td style="text-align:right; font-weight:bold; color:var(--success);">$ ${Number(sale.total).toFixed(2)}</td>
                     <td style="text-align:center;">
-                        <button class="btn-small" onclick='viewSaleDetails(${JSON.stringify(s).replace(/'/g, "&apos;")})'>View</button>
+                        <button class="btn-small">View</button>
                     </td>
                 `;
-                tbody.appendChild(tr);
+                const viewBtn = tr.querySelector('button');
+                if (viewBtn) viewBtn.addEventListener('click', () => viewSaleDetailsByKey(key));
+                fragment.appendChild(tr);
             });
+
+            if (visible.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="6" style="text-align:center; padding:24px; color:#64748b; font-weight:700;">No sales found for the selected date.</td>`;
+                fragment.appendChild(tr);
+            }
+
+            tbody.innerHTML = '';
+            tbody.appendChild(fragment);
+
+            const note = document.getElementById('history-count-note');
+            if (note) {
+                note.innerText = entries.length === 0
+                    ? 'No sales found'
+                    : `Showing ${visible.length} of ${entries.length} sales`;
+            }
+            const moreBtn = document.getElementById('history-load-more-btn');
+            if (moreBtn) moreBtn.style.display = visible.length < entries.length ? '' : 'none';
+        }
+
+        function viewSaleDetailsByKey(key) {
+            const sale = salesHistory && salesHistory[key];
+            if (sale) viewSaleDetails(sale);
         }
 
         function viewSaleDetails(sale) {
@@ -9513,7 +9682,7 @@ function deleteMenuItem(itemId) {
         function printSalesHistory() {
             const tbody = document.getElementById('print-history-items');
             tbody.innerHTML = "";
-            let salesArr = Object.values(salesHistory || {}).sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+            let salesArr = getSalesValues().slice().sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
             let sum = 0;
 
             salesArr.forEach(s => {
@@ -9553,7 +9722,7 @@ function deleteMenuItem(itemId) {
             container.innerHTML = "";
 
             let dailyMap = {};
-            Object.values(salesHistory || {}).forEach(s => {
+            getSalesValues().forEach(s => {
                 let d = s.date || "Unknown";
                 if (!dailyMap[d]) dailyMap[d] = 0;
                 dailyMap[d] += Number(s.total) || 0;
@@ -9673,7 +9842,7 @@ function deleteMenuItem(itemId) {
             // Aggregate items
             const itemMap = {}; // key -> { name, cat, unitPrice, qty, totalSales }
 
-            const matchingSales = Object.values(salesHistory || {}).filter(s => isSaleMatchingReportScope(s));
+            const matchingSales = getSalesValues().filter(s => isSaleMatchingReportScope(s));
 
             matchingSales.forEach(sale => {
                 if (!sale || !sale.items) return;
@@ -9846,7 +10015,7 @@ function deleteMenuItem(itemId) {
             }
             let totals = { Cash: 0, Card: 0, "QR Pay": 0, Total: 0 };
 
-            Object.values(salesHistory || {}).filter(s => isSaleInCurrentSession(s)).forEach(s => {
+            getSalesValues().filter(s => isSaleInCurrentSession(s)).forEach(s => {
                 let amt = Number(s.total) || 0;
                 let method = (s.paymentMethod || "Cash").trim();
                 if (/card/i.test(method)) {
@@ -9920,7 +10089,7 @@ function deleteMenuItem(itemId) {
             const dateBadge = document.getElementById('dc-modal-date-badge');
             if (dateBadge) dateBadge.innerText = todayStr;
 
-            const curSalesEntries = Object.entries(salesHistory || {}).filter(([k, s]) => isSaleInCurrentSession(s));
+            const curSalesEntries = getSalesEntries().filter(([k, s]) => isSaleInCurrentSession(s));
             const curExpEntries = Object.entries(expenses || {}).filter(([k, e]) => isExpenseInCurrentSession(e));
 
             let totalS = curSalesEntries.reduce((sum, [k, s]) => sum + (Number(s.total) || 0), 0);
@@ -9975,7 +10144,7 @@ function deleteMenuItem(itemId) {
                 return;
             }
 
-            const curSalesEntries = Object.entries(salesHistory || {}).filter(([k, s]) => isSaleInCurrentSession(s));
+            const curSalesEntries = getSalesEntries().filter(([k, s]) => isSaleInCurrentSession(s));
             const curExpEntries = Object.entries(expenses || {}).filter(([k, e]) => isExpenseInCurrentSession(e));
             const totalS = curSalesEntries.reduce((sum, [k, s]) => sum + (Number(s.total) || 0), 0);
             const totalE = curExpEntries.reduce((sum, [k, e]) => sum + (Number(e.amount) || 0), 0);
@@ -9996,7 +10165,7 @@ function deleteMenuItem(itemId) {
             const closeTimestamp = Date.now();
             const closeTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            const curSalesEntries = Object.entries(salesHistory || {}).filter(([k, s]) => isSaleInCurrentSession(s));
+            const curSalesEntries = getSalesEntries().filter(([k, s]) => isSaleInCurrentSession(s));
             const curExpEntries = Object.entries(expenses || {}).filter(([k, e]) => isExpenseInCurrentSession(e));
 
             let totalS = curSalesEntries.reduce((sum, [k, s]) => sum + (Number(s.total) || 0), 0);
@@ -10042,7 +10211,7 @@ function deleteMenuItem(itemId) {
             });
 
             // Also mark any past unclosed sales from today (fail-safe for previously stuck amounts!)
-            Object.entries(salesHistory || {}).forEach(([k, s]) => {
+            getSalesEntries().forEach(([k, s]) => {
                 if (s && s.date === todayStr && !s.dayClosed) {
                     updates['salesHistory/' + k + '/dayClosed'] = true;
                     updates['salesHistory/' + k + '/dayClosedAt'] = closeTimestamp;
