@@ -492,6 +492,9 @@
         .modal-content { background: var(--card-bg); width: 100%; max-width: 850px; max-height: 85vh; border-radius: 24px; padding: 30px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #f1f5f9; padding-bottom: 15px; }
         .modal-body { overflow-y: auto; margin-top: 20px; max-height: 60vh; padding-right: 5px; }
+        .pay-correct-label { display: block; font-size: 12px; font-weight: 800; color: #475569; margin: 12px 0 5px; }
+        .pay-correct-input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 700; box-sizing: border-box; background: #fff; color: #0f172a; }
+        .pay-correct-input:disabled { background: #f1f5f9; color: #94a3b8; }
         .close-modal { background: #fef2f2; color: var(--danger); border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 900; transition: 0.2s; }
         .close-modal:hover { background: var(--danger); color: white; }
 
@@ -529,6 +532,20 @@
         @media (max-width: 760px) { #btn-customer-display { display: none !important; } }
         .staff-alert-btn-view { background: #2563eb; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer; }
         .staff-alert-btn-dismiss { background: transparent; color: #64748b; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; }
+        .staff-alert-new-items { margin-top: 3px; font-size: 12px; font-weight: 900; color: #0e7490; background: #ffffffb3; border-radius: 7px; padding: 3px 7px; display: inline-block; max-width: 100%; }
+        .tc-new-items { margin: 4px 0 2px; padding: 4px 7px; border-radius: 8px; background: #ecfdf5; border: 1px dashed #6ee7b7; color: #047857; font-size: 10px; font-weight: 900; line-height: 1.35; position: relative; z-index: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cart-new-badge { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: #dcfce7; border: 1px solid #86efac; color: #15803d; font-size: 9.5px; font-weight: 900; vertical-align: middle; letter-spacing: 0.02em; }
+        .customer-order-rounds { margin: 4px 0 10px; padding: 10px 12px; border: 1.5px solid #bae6fd; background: #f0f9ff; border-radius: 12px; }
+        .cust-rounds-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; font-weight: 900; color: #0369a1; margin-bottom: 6px; }
+        .cust-rounds-head span { font-size: 10.5px; font-weight: 800; color: #0284c7; background: #e0f2fe; border-radius: 999px; padding: 1px 8px; }
+        .cust-round + .cust-round { margin-top: 7px; padding-top: 7px; border-top: 1px dashed #bae6fd; }
+        .cust-round-head { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+        .cust-round-tag { font-size: 9.5px; font-weight: 900; letter-spacing: 0.04em; border-radius: 999px; padding: 1px 7px; }
+        .cust-round-tag.new { background: #dcfce7; border: 1px solid #86efac; color: #15803d; }
+        .cust-round-tag.old { background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; }
+        .cust-round-time { font-size: 11px; font-weight: 800; color: #475569; }
+        .cust-round-total { margin-left: auto; font-size: 11.5px; font-weight: 900; color: #0369a1; }
+        .cust-round-items { margin-top: 3px; font-size: 12.5px; font-weight: 800; color: #0f172a; line-height: 1.4; }
 
         .qr-card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 10px; }
         .qr-card { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 15px; text-align: center; }
@@ -1910,7 +1927,9 @@
                         <button type="button" id="intake-phone-btn" class="intake-chip" role="checkbox" aria-checked="false" onclick="toggleOrderIntake('phone')" title="Customer called and ordered over the phone">📞 Phone Order</button>
                         <button type="button" id="intake-walkin-btn" class="intake-chip" role="checkbox" aria-checked="false" onclick="toggleOrderIntake('walkin')" title="Customer came in person and gave the order">🚶 Walk-in</button>
                     </div>
-                    
+
+                    <div id="customer-order-rounds" class="customer-order-rounds" style="display:none;"></div>
+
                     <div class="cart-table-wrapper">
                         <table>
                             <thead><tr><th>Item & Notes</th><th>Qty</th><th style="text-align:right;">Price ($)</th></tr></thead>
@@ -2572,7 +2591,39 @@
             </div>
         </div>
     </div>
-    <div id="history-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sale Details</h3><div><button class="btn-small" id="history-view-print-btn" onclick="printViewedSale()">Print</button><button class="close-modal" onclick="closeHistoryViewModal()" style="margin-left:5px;">X</button></div></div><div class="modal-body" id="history-view-body"></div></div></div>
+    <div id="history-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Sale Details</h3><div><button class="btn-small" id="history-view-correct-btn" onclick="openPaymentCorrectionModal()" style="display:none; margin-right:5px;">Correct Payment</button><button class="btn-small" id="history-view-print-btn" onclick="printViewedSale()">Print</button><button class="close-modal" onclick="closeHistoryViewModal()" style="margin-left:5px;">X</button></div></div><div class="modal-body" id="history-view-body"></div></div></div>
+
+    <div id="payment-correct-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width:460px;">
+            <div class="modal-header">
+                <h3 style="margin:0; font-size:18px;">Correct Payment</h3>
+                <button class="close-modal" onclick="closePaymentCorrectionModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <div id="payment-correct-sale-info" style="font-size:12.5px; font-weight:800; color:#475569; background:#f1f5f9; border-radius:12px; padding:10px 12px; line-height:1.7;"></div>
+                <div id="payment-correct-warning" style="display:none; font-size:12px; font-weight:800; color:#b45309; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:8px 10px; margin-top:10px;"></div>
+                <label class="pay-correct-label" for="payment-correct-method">Payment Method</label>
+                <select class="pay-correct-input" id="payment-correct-method" onchange="syncPaymentCorrectionFields()">
+                    <option value="Cash">Cash</option>
+                    <option value="Card">Card</option>
+                    <option value="QR Pay">QR Pay</option>
+                </select>
+                <label class="pay-correct-label" for="payment-correct-total">Corrected Total ($)</label>
+                <input class="pay-correct-input" type="number" id="payment-correct-total" min="0" step="0.01" inputmode="decimal" oninput="syncPaymentCorrectionFields()">
+                <div id="payment-correct-paid-wrap">
+                    <label class="pay-correct-label" for="payment-correct-paid">Amount Received ($)</label>
+                    <input class="pay-correct-input" type="number" id="payment-correct-paid" min="0" step="0.01" inputmode="decimal">
+                </div>
+                <label class="pay-correct-label" for="payment-correct-note">Reason (optional)</label>
+                <input class="pay-correct-input" type="text" id="payment-correct-note" maxlength="160" placeholder="e.g. Marked as Card instead of Cash">
+                <div id="payment-correct-status" style="display:none; font-size:12.5px; font-weight:800; border-radius:10px; padding:9px 12px; margin-top:12px;"></div>
+                <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
+                    <button type="button" class="btn-small" onclick="closePaymentCorrectionModal()">Cancel</button>
+                    <button type="button" class="btn-small" id="payment-correct-save-btn" onclick="savePaymentCorrection()">Save Correction</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="expense-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">View Expenses</h3><button class="close-modal" onclick="closeExpenseViewModal()">X</button></div><div class="modal-body"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"><div class="stat-box">Total: $<span id="view-expenses-total">0.00</span></div><div class="stat-box">This Month: $<span id="view-expenses-month-total">0.00</span></div><div class="stat-box">Daily Average: $<span id="view-expenses-month-average">0.00</span></div></div><table class="admin-table"><thead><tr><th>Date / Time</th><th>Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody id="view-expenses-tbody"></tbody></table><div id="view-expenses-empty" style="display:none;text-align:center;padding:20px;color:#64748b;">No expenses recorded.</div><h4 style="margin:18px 0 8px;">Monthly Trend</h4><div id="view-expenses-trend"></div></div></div></div>
 
@@ -2969,6 +3020,7 @@
         let loggedInRole = "admin";
         let loggedInDisplayName = "Admin";
         let currentViewingSale = null;
+        let currentViewingSaleKey = '';
         let tableLinks = {};
         let pendingLinkSelection = [];
         let isProcessingPayment = false;
@@ -4066,9 +4118,10 @@
             requestRenderBigTablesGrid();
         }
 
-        function broadcastLiveOrderEvent(tableKey, actionType, order) {
+        function broadcastLiveOrderEvent(tableKey, actionType, order, customerBatch) {
             const itemCount = order && order.items ? order.items.reduce((sum, it) => sum + (Number(it.qty) || 1), 0) : 1;
             const totalDue = order ? getOrderGrandTotal(order) : 0;
+            const newItems = (customerBatch && Array.isArray(customerBatch.items)) ? customerBatch.items : [];
             const alertData = {
                 eventId: Date.now() + '_' + Math.random().toString(36).substring(2, 7),
                 table: tableKey,
@@ -4076,6 +4129,10 @@
                 isUpdate: actionType === 'update',
                 itemsCount: itemCount,
                 total: totalDue,
+                // Only the items added by this scan. Empty for staff-entered orders.
+                newItems: newItems,
+                newItemsTotal: newItems.length ? (Number(customerBatch.total) || 0) : 0,
+                newItemsTime: newItems.length ? (customerBatch.timeStr || '') : '',
                 // A customer phone has no logged-in staff name. Without this
                 // guard the banner said "from Admin" for every QR order.
                 by: isCustomerMode ? "Customer QR" : (loggedInDisplayName || "Staff"),
@@ -4273,6 +4330,7 @@
                 const isUp = !!al.isUpdate;
                 const isQr = isCustomerQrAlert(al);
                 const sourceLabel = al.by ? al.by : (al.source || 'Customer');
+                const newItemsText = formatCustomerBatchItems(al.newItems, 4);
                 const banner = document.createElement('div');
                 banner.className = 'staff-alert-banner' + (isUp ? ' update-type' : '') + (isQr ? ' qr-type' : '');
                 const bannerTitle = isQr
@@ -4289,6 +4347,7 @@
                             <div style="font-size:12px; color:${isUp ? '#c2410c' : '#3b82f6'}; font-weight:700;">
                                 ${al.itemsCount || 1} items • $${Number(al.total || 0).toFixed(2)} • at ${al.timeStr || 'just now'} <span style="opacity:0.85; font-size:11px;">(⏱️ auto-clears in ${remainingMins}m)</span>
                             </div>
+                            ${newItemsText ? `<div class="staff-alert-new-items">${isUp ? '➕ New: ' : '📝 Order: '}${escapeHtml(newItemsText)}</div>` : ''}
                         </div>
                     </div>
                     <div style="display:flex; gap:8px;">
@@ -5503,7 +5562,8 @@
 
                 let alertBadgeHtml = '';
                 if (orderAlert) {
-                    alertBadgeHtml = `<div class="tc-alert order"><span>🔔</span> New Customer Order</div>`;
+                    const alertIsUpdate = !!(orderAlertData && orderAlertData.isUpdate);
+                    alertBadgeHtml = `<div class="tc-alert order"><span>🔔</span> ${alertIsUpdate ? 'Customer Added More' : 'New Customer Order'}</div>`;
                 } else if (waiterAlert) {
                     alertBadgeHtml = `<div class="tc-alert waiter"><span>🙋</span> Waiter Called</div>`;
                 }
@@ -5515,6 +5575,20 @@
                     const linkedTables = getLinkedTablesForMaster(tableKey);
                     if (linkedTables.length > 1) {
                         linkedBadge = `<div class="tc-link-chip">🔗 Linked (${linkedTables.length})</div>`;
+                    }
+                }
+
+                // Show the latest customer QR round on the card while the alert is
+                // active, so staff can see WHAT was just added without opening it.
+                let cardNewItemsHtml = '';
+                if (orderAlert && orderData) {
+                    const latestBatch = getLatestCustomerOrderBatch(orderData);
+                    if (latestBatch) {
+                        const shortText = formatCustomerBatchItems(latestBatch.items, 2);
+                        const fullText = formatCustomerBatchItems(latestBatch.items);
+                        if (shortText) {
+                            cardNewItemsHtml = `<div class="tc-new-items" title="${escapeHtml(fullText)}">➕ ${escapeHtml(shortText)}</div>`;
+                        }
                     }
                 }
 
@@ -5536,6 +5610,7 @@
                         </div>
                     </div>
                     ${alertBadgeHtml}
+                    ${cardNewItemsHtml}
                     ${seatedBannerHtml}
                     ${isOccupied ? `
                         <div class="tc-summary">
@@ -5621,6 +5696,12 @@
                             custInfoHtml = `<div class="takeaway-customer">${orderData.customerName} (${orderData.customerPhone || ''})</div>`;
                         }
 
+                        const tkLatestBatch = getLatestCustomerOrderBatch(orderData);
+                        const tkBatchAlert = newCustomerOrderAlerts[key];
+                        const tkBatchAlertActive = tkBatchAlert && (!tkBatchAlert.timestamp || (Date.now() - tkBatchAlert.timestamp <= ALERT_TIMEOUT_MS));
+                        const tkNewItemsText = (tkBatchAlertActive && tkLatestBatch) ? formatCustomerBatchItems(tkLatestBatch.items, 2) : '';
+                        const tkNewItemsFull = (tkBatchAlertActive && tkLatestBatch) ? formatCustomerBatchItems(tkLatestBatch.items) : '';
+
                         card.innerHTML = `
                             <div class="takeaway-order-head">
                                 <div class="takeaway-order-name">
@@ -5631,6 +5712,7 @@
                             </div>
                             ${custInfoHtml}
                             ${waitBannerHtml}
+                            ${tkNewItemsText ? `<div class="tc-new-items" title="${escapeHtml(tkNewItemsFull)}">➕ ${escapeHtml(tkNewItemsText)}</div>` : ''}
                             <p class="takeaway-total">$${orderTotal.toFixed(2)} <small>(${itemCount} Items)</small></p>
                             <div class="takeaway-foot">
                                 <span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; ${(orderData.takenBy === 'Customer' || orderData.takenBy === 'Customer QR') ? 'background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd;' : 'background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff;'}">
@@ -6908,6 +6990,79 @@
             flashLiveSyncSuccess();
         }
 
+        // ---- Customer QR order rounds (new vs old) -------------------------
+        // Every customer "Send Order" appends one batch to the table order, so
+        // staff can see exactly what was just added and what was ordered before.
+        function getCustomerOrderBatches(order) {
+            if (!order || !Array.isArray(order.customerOrderBatches)) return [];
+            return order.customerOrderBatches.filter(b => b && Array.isArray(b.items) && b.items.length > 0);
+        }
+
+        function getLatestCustomerOrderBatch(order) {
+            const batches = getCustomerOrderBatches(order);
+            return batches.length ? batches[batches.length - 1] : null;
+        }
+
+        function formatCustomerBatchItems(items, maxItems) {
+            const list = Array.isArray(items)
+                ? items.filter(it => it && it.name && (Number(it.qty) || 0) > 0)
+                : [];
+            const limit = maxItems === undefined ? list.length : Math.max(1, Number(maxItems) || 1);
+            const shown = list.slice(0, limit).map(it => {
+                const note = it.note ? ' (' + it.note + ')' : '';
+                return `${Number(it.qty) || 0}× ${it.name}${note}`;
+            });
+            if (list.length > limit) shown.push(`+${list.length - limit} more`);
+            return shown.join(', ');
+        }
+
+        function getCustomerBatchQtyForItem(batch, item) {
+            if (!batch || !item) return 0;
+            const itemId = item.id != null ? String(item.id) : '';
+            const itemName = String(item.name || '').trim().toLowerCase();
+            return (batch.items || []).reduce((sum, bi) => {
+                if (!bi) return sum;
+                const bId = bi.id != null ? String(bi.id) : '';
+                const bName = String(bi.name || '').trim().toLowerCase();
+                // Match by id whenever both sides have one; fall back to name for
+                // legacy lines that were saved before ids were assigned.
+                const sameLine = (itemId && bId) ? (itemId === bId) : (!!itemName && itemName === bName);
+                if (!sameLine) return sum;
+                return sum + (Number(bi.qty) || 0);
+            }, 0);
+        }
+
+        function renderCustomerOrderRounds(order) {
+            const el = document.getElementById('customer-order-rounds');
+            if (!el) return;
+            if (isCustomerMode) {
+                el.style.display = 'none';
+                el.innerHTML = '';
+                return;
+            }
+            const batches = getCustomerOrderBatches(order);
+            if (!batches.length) {
+                el.style.display = 'none';
+                el.innerHTML = '';
+                return;
+            }
+            const newestFirst = batches.slice().reverse();
+            el.innerHTML = `<div class="cust-rounds-head"><strong>📱 Customer QR Orders</strong><span>${batches.length} round${batches.length === 1 ? '' : 's'}</span></div>` +
+                newestFirst.map((b, idx) => {
+                    const isNew = idx === 0;
+                    const itemsText = formatCustomerBatchItems(b.items);
+                    return `<div class="cust-round">
+                        <div class="cust-round-head">
+                            <span class="cust-round-tag ${isNew ? 'new' : 'old'}">${isNew ? 'NEW' : 'OLD'}</span>
+                            <span class="cust-round-time">${escapeHtml(b.timeStr || '')}</span>
+                            <span class="cust-round-total">$${Number(b.total || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="cust-round-items">${escapeHtml(itemsText)}</div>
+                    </div>`;
+                }).join('');
+            el.style.display = 'block';
+        }
+
         function renderCart(options = {}) {
             const tbody = document.getElementById('cart-items');
             if (!tbody) return;
@@ -6940,6 +7095,9 @@
             assignMissingItemIds(getOrderItemsArray(order));
             const items = getSortedOrderItems(getOrderItemsArray(order));
             const totalItemCount = items.reduce((s, x) => s + (Number(x.qty) || 1), 0);
+
+            renderCustomerOrderRounds(order);
+            const latestCustomerBatch = getLatestCustomerOrderBatch(order);
 
             const mobBadge = document.getElementById('mob-cart-badge');
             const deskBadge = document.getElementById('desktop-cart-badge');
@@ -6981,6 +7139,9 @@
                 const tkQty = Math.max(0, Math.min(totalQty, Number(item.takeawayQty) || 0));
                 const tr = document.createElement('tr');
                 const lineTotal = getItemLineTotal(item);
+                const newFromCustomer = (!isCustomerMode && latestCustomerBatch)
+                    ? getCustomerBatchQtyForItem(latestCustomerBatch, item)
+                    : 0;
 
                 const catOpts = getOptionsForItem(item);
 
@@ -7036,7 +7197,7 @@
 
                 tr.innerHTML = `
                     <td>
-                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-name">${item.name}${newFromCustomer > 0 ? ` <span class="cart-new-badge" title="Added by customer at ${escapeHtml(latestCustomerBatch.timeStr || '')}">NEW +${newFromCustomer}</span>` : ''}</div>
                         ${customOptsHtml}
                         ${isDedicatedTakeaway ? `
                         <div style="margin-top: 5px; margin-bottom: 5px; display: inline-flex; align-items: center; gap: 6px; background: #fffbeb; border: 1.5px solid #fde68a; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 800; color: #b45309;">
@@ -7247,6 +7408,21 @@
             const tableKeyForSend = currentTableKey;
             const submittedItems = JSON.parse(JSON.stringify(order.items || []));
             const submittedOrderMeta = { ...order };
+            // Snapshot this round so staff can tell the new items apart from the
+            // items that were ordered on earlier scans.
+            const customerBatchAt = Date.now();
+            const customerBatchTime = new Date(customerBatchAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            const customerBatchItems = submittedItems
+                .filter(it => it && it.name && (Number(it.qty) || 0) > 0)
+                .map(it => ({
+                    id: it.id != null ? String(it.id) : '',
+                    name: String(it.name),
+                    qty: Number(it.qty) || 0,
+                    note: getItemNotesList(it).join(', ')
+                }));
+            const customerBatchTotal = Math.round(
+                submittedItems.reduce((sum, it) => sum + getItemLineTotal(it), 0) * 100
+            ) / 100;
             // A Firebase transaction serializes simultaneous sends from different phones.
             // Merge only this phone's private draft into the latest shared table order.
             db.ref("activeOrders/" + tableKeyForSend).transaction(current => {
@@ -7307,11 +7483,26 @@
                     merged.customerName = submittedOrderMeta.customerName || merged.customerName || "Takeaway Customer";
                     merged.customerPhone = submittedOrderMeta.customerPhone || merged.customerPhone || "";
                 }
+                // Append this scan as a numbered round (newest last) so the staff
+                // screen can separate "NEW" items from the earlier "OLD" rounds.
+                const previousBatches = Array.isArray(latest.customerOrderBatches) ? latest.customerOrderBatches : [];
+                merged.customerOrderBatches = previousBatches.concat([{
+                    at: customerBatchAt,
+                    timeStr: customerBatchTime,
+                    items: customerBatchItems,
+                    total: customerBatchTotal,
+                    isUpdate: !!isUpdate,
+                    by: "Customer QR"
+                }]).slice(-20);
                 return merged;
             }).then(result => {
                 if (!result.committed) throw new Error("Order could not be saved. Please try again.");
                 const savedOrder = result.snapshot.val() || order;
-                broadcastLiveOrderEvent(tableKeyForSend, isUpdate ? "update" : "order", savedOrder);
+                broadcastLiveOrderEvent(tableKeyForSend, isUpdate ? "update" : "order", savedOrder, {
+                    items: customerBatchItems,
+                    total: customerBatchTotal,
+                    timeStr: customerBatchTime
+                });
 
                 const modalTitle = document.querySelector("#customer-success-screen h2");
                 const modalDesc = document.getElementById("customer-success-desc") || document.querySelector("#customer-success-screen p");
@@ -7762,6 +7953,12 @@
             let sub = getOrderSubtotal(order);
             let disc = Math.max(0, Number(order.discount) || 0);
             let grand = Math.max(0, sub - disc);
+            // A corrected reprint must show the corrected amount, even though the
+            // saved item lines still add up to the original subtotal.
+            const correctedTotal = Number(order.total);
+            if (order.paymentCorrected && isFinite(correctedTotal) && correctedTotal >= 0) {
+                grand = correctedTotal;
+            }
 
             document.getElementById('p-subtotal').innerText = sub.toFixed(2);
             document.getElementById('p-total').innerText = grand.toFixed(2);
@@ -9604,7 +9801,7 @@ function deleteMenuItem(itemId) {
                     <td>${sale.time || ''}</td>
                     <td style="font-weight:bold;">${sale.ref || ''}</td>
                     <td>${sale.source || ''}${sale.intake ? ' • ' + (sale.intake === 'phone' ? '📞 Phone' : '🚶 Walk-in') : ''}</td>
-                    <td>${sale.paymentMethod || ''}</td>
+                    <td>${sale.paymentMethod || ''}${sale.paymentCorrected ? ' ✏️' : ''}</td>
                     <td style="text-align:right; font-weight:bold; color:var(--success);">$ ${Number(sale.total).toFixed(2)}</td>
                     <td style="text-align:center;">
                         <button class="btn-small">View</button>
@@ -9636,18 +9833,51 @@ function deleteMenuItem(itemId) {
 
         function viewSaleDetailsByKey(key) {
             const sale = salesHistory && salesHistory[key];
-            if (sale) viewSaleDetails(sale);
+            if (sale) {
+                currentViewingSaleKey = key;
+                viewSaleDetails(sale);
+            }
+        }
+
+        // Old sales store the method as free text ("Cash", "CARD", "QR Pay"...).
+        function saleMethodLabel(method) {
+            const value = String(method || '').trim();
+            if (/card/i.test(value)) return 'Card';
+            if (/qr/i.test(value)) return 'QR Pay';
+            return 'Cash';
+        }
+
+        // Only an admin account may correct a completed payment. Staff with
+        // sales-history access can still view and reprint the sale.
+        function canCorrectSalePayment() {
+            if (isCustomerMode) return false;
+            return isAdminAccount();
         }
 
         function viewSaleDetails(sale) {
             currentViewingSale = sale;
             const body = document.getElementById('history-view-body');
+            const correctBtn = document.getElementById('history-view-correct-btn');
+            if (correctBtn) correctBtn.style.display = canCorrectSalePayment() ? '' : 'none';
+
             let itemsHtml = "";
             (sale.items || []).forEach(it => {
                 const nList = getItemNotesList(it);
                 const nStr = nList.length > 0 ? `<div style="font-size:12px; color:var(--primary); font-weight:bold; margin-top:1px;">[ ${nList.join(', ')} ]</div>` : '';
                 itemsHtml += `<div style="margin-bottom:6px;"><div style="display:flex; justify-content:space-between;"><span>${it.qty}x ${it.name}</span><span>$${getItemLineTotal(it).toFixed(2)}</span></div>${nStr}</div>`;
             });
+
+            let correctionHtml = '';
+            if (sale.paymentCorrected) {
+                const before = sale.originalPaymentMethod
+                    ? `${escapeHtml(sale.originalPaymentMethod)} $${Number(sale.originalTotal || 0).toFixed(2)} → ${escapeHtml(sale.paymentMethod || '')} $${Number(sale.total || 0).toFixed(2)}`
+                    : `${escapeHtml(sale.paymentMethod || '')} $${Number(sale.total || 0).toFixed(2)}`;
+                correctionHtml = `<div style="font-size:12px; font-weight:800; color:#b45309; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:8px 10px; margin-bottom:12px;">
+                    <div>✏️ Payment corrected by ${escapeHtml(sale.paymentCorrectedBy || 'Admin')} on ${escapeHtml(sale.paymentCorrectedDate || '')} ${escapeHtml(sale.paymentCorrectedTime || '')}</div>
+                    <div style="margin-top:3px;">${before}</div>
+                    ${sale.paymentCorrectionNote ? `<div style="margin-top:3px; font-weight:700;">Reason: ${escapeHtml(sale.paymentCorrectionNote)}</div>` : ''}
+                </div>`;
+            }
 
             body.innerHTML = `
                 <div style="font-size:14px; font-weight:bold; margin-bottom:10px;">
@@ -9658,6 +9888,7 @@ function deleteMenuItem(itemId) {
                     <div>Payment Method: ${sale.paymentMethod}</div>
                     ${sale.customerName ? `<div>Customer: ${sale.customerName} (${sale.customerPhone || ''})</div>` : ''}
                 </div>
+                ${correctionHtml}
                 <hr style="border-top:1px dashed #cbd5e1; margin:10px 0;">
                 ${itemsHtml}
                 <hr style="border-top:1px dashed #cbd5e1; margin:10px 0;">
@@ -9665,12 +9896,165 @@ function deleteMenuItem(itemId) {
                     <span>Total Paid:</span>
                     <span>$${Number(sale.total).toFixed(2)}</span>
                 </div>
+                ${sale.paid != null && Number(sale.paid) !== Number(sale.total) ? `<div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:800; color:#64748b; margin-top:4px;"><span>Received: $${Number(sale.paid).toFixed(2)}</span><span>Change: $${Number(sale.change || 0).toFixed(2)}</span></div>` : ''}
             `;
             document.getElementById('history-view-modal').style.display = 'flex';
         }
 
         function closeHistoryViewModal() {
             document.getElementById('history-view-modal').style.display = 'none';
+            closePaymentCorrectionModal();
+        }
+
+        function setPaymentCorrectionStatus(message, isError) {
+            const status = document.getElementById('payment-correct-status');
+            if (!status) return;
+            if (!message) {
+                status.style.display = 'none';
+                status.innerText = '';
+                return;
+            }
+            status.style.display = 'block';
+            status.innerText = message;
+            status.style.background = isError ? '#fef2f2' : '#ecfdf5';
+            status.style.color = isError ? '#b91c1c' : '#047857';
+            status.style.border = '1px solid ' + (isError ? '#fecaca' : '#a7f3d0');
+        }
+
+        function openPaymentCorrectionModal() {
+            if (!canCorrectSalePayment()) {
+                alert('Permission denied: only an admin can correct a payment.');
+                return;
+            }
+            const key = currentViewingSaleKey;
+            const sale = (salesHistory && salesHistory[key]) || currentViewingSale;
+            if (!sale || !key) return;
+
+            const info = document.getElementById('payment-correct-sale-info');
+            const warning = document.getElementById('payment-correct-warning');
+            const methodSel = document.getElementById('payment-correct-method');
+            const totalInput = document.getElementById('payment-correct-total');
+            const paidInput = document.getElementById('payment-correct-paid');
+            const noteInput = document.getElementById('payment-correct-note');
+
+            if (info) {
+                info.innerHTML = `Ref: <b>${escapeHtml(sale.ref || '')}</b><br>${escapeHtml(sale.source || '')} • ${escapeHtml(sale.date || '')} ${escapeHtml(sale.time || '')}<br>Current: <b>${escapeHtml(sale.paymentMethod || 'Cash')}</b> • $${Number(sale.total || 0).toFixed(2)}`;
+            }
+            if (warning) {
+                if (sale.dayClosed) {
+                    warning.style.display = 'block';
+                    warning.innerText = 'This sale is already included in a closed day. The correction updates live reports; the saved Day Close record stays unchanged.';
+                } else {
+                    warning.style.display = 'none';
+                    warning.innerText = '';
+                }
+            }
+            methodSel.value = saleMethodLabel(sale.paymentMethod);
+            totalInput.value = Number(sale.total || 0).toFixed(2);
+            paidInput.value = sale.paid != null ? Number(sale.paid).toFixed(2) : Number(sale.total || 0).toFixed(2);
+            noteInput.value = '';
+            setPaymentCorrectionStatus('', false);
+            syncPaymentCorrectionFields();
+            document.getElementById('payment-correct-modal').style.display = 'flex';
+            setTimeout(() => { try { totalInput.focus(); totalInput.select(); } catch (e) {} }, 60);
+        }
+
+        function syncPaymentCorrectionFields() {
+            const methodSel = document.getElementById('payment-correct-method');
+            const paidWrap = document.getElementById('payment-correct-paid-wrap');
+            const paidInput = document.getElementById('payment-correct-paid');
+            const totalInput = document.getElementById('payment-correct-total');
+            if (!methodSel || !paidInput || !totalInput) return;
+            const isCash = saleMethodLabel(methodSel.value) === 'Cash';
+            if (paidWrap) paidWrap.style.display = isCash ? '' : 'none';
+            paidInput.disabled = !isCash;
+            if (!isCash) paidInput.value = (Number(totalInput.value) || 0).toFixed(2);
+        }
+
+        function closePaymentCorrectionModal() {
+            const modal = document.getElementById('payment-correct-modal');
+            if (modal) modal.style.display = 'none';
+            setPaymentCorrectionStatus('', false);
+        }
+
+        async function savePaymentCorrection() {
+            if (!canCorrectSalePayment()) {
+                alert('Permission denied: only an admin can correct a payment.');
+                return;
+            }
+            const key = currentViewingSaleKey;
+            const sale = salesHistory && salesHistory[key];
+            if (!sale) {
+                setPaymentCorrectionStatus('This sale is no longer available. Close and reopen the history.', true);
+                return;
+            }
+
+            const method = saleMethodLabel(document.getElementById('payment-correct-method').value);
+            const total = Math.round((Number(document.getElementById('payment-correct-total').value) || 0) * 100) / 100;
+            if (!isFinite(total) || total < 0) {
+                setPaymentCorrectionStatus('Enter a valid total amount.', true);
+                return;
+            }
+            let paid = total;
+            let change = 0;
+            if (method === 'Cash') {
+                paid = Math.round((Number(document.getElementById('payment-correct-paid').value) || 0) * 100) / 100;
+                if (!isFinite(paid) || paid < total) {
+                    setPaymentCorrectionStatus('Amount received cannot be less than the corrected total.', true);
+                    return;
+                }
+                change = Math.round((paid - total) * 100) / 100;
+            }
+            const note = (document.getElementById('payment-correct-note').value || '').trim().slice(0, 160);
+            const now = new Date();
+            const update = {
+                paymentMethod: method,
+                total: total,
+                paid: paid,
+                change: change,
+                paymentCorrected: true,
+                paymentCorrectedAt: now.toISOString(),
+                paymentCorrectedBy: loggedInDisplayName || 'Admin',
+                paymentCorrectedDate: now.toLocaleDateString('en-GB'),
+                paymentCorrectedTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                paymentCorrectionCount: (Number(sale.paymentCorrectionCount) || 0) + 1
+            };
+            if (note) update.paymentCorrectionNote = note;
+            // Keep the very first values for the audit trail, even after the
+            // same bill is corrected more than once.
+            if (!sale.paymentCorrected) {
+                update.originalPaymentMethod = sale.paymentMethod || '';
+                update.originalTotal = Number(sale.total) || 0;
+                update.originalPaid = Number(sale.paid) || 0;
+                update.originalChange = Number(sale.change) || 0;
+            }
+
+            const saveBtn = document.getElementById('payment-correct-save-btn');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Saving…';
+            }
+            setPaymentCorrectionStatus('', false);
+            try {
+                await db.ref('salesHistory/' + key).update(update);
+                salesHistory[key] = Object.assign({}, salesHistory[key] || sale, update);
+                invalidateSalesMapCache();
+                calculateTotalSales();
+                currentViewingSale = salesHistory[key];
+                const historyModal = document.getElementById('history-modal');
+                if (historyModal && historyModal.style.display === 'flex') renderSalesHistoryTable();
+                viewSaleDetailsByKey(key);
+                setPaymentCorrectionStatus('Payment corrected successfully.', false);
+                setTimeout(closePaymentCorrectionModal, 800);
+            } catch (error) {
+                console.error('Could not correct payment:', error);
+                setPaymentCorrectionStatus('Could not save the correction. Check the connection and try again.', true);
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Save Correction';
+                }
+            }
         }
 
         function printViewedSale() {
