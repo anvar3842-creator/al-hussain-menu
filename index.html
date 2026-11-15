@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Al Hussain Restaurant point-of-sale system: table management, ordering, kitchen KOT, billing, payments, stock, expenses and daily reports.">
-    <title>Al Hussain Restaurant - POS System v2.3</title>
+    <title>Al Hussain Restaurant - POS System v2.4</title>
     
     <!-- Instant Customer QR Detection to prevent any login or table selection screen flash -->
     <script>
@@ -1608,6 +1608,16 @@
         box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
     }
     .takeaway-customer { font-size: 12px; font-weight: 900; color: #4f46e5; margin-bottom: 2px; overflow-wrap: anywhere; }
+    .btn-wa-confirm {
+        display: block; width: 100%; margin: 6px 0 2px; padding: 7px 10px;
+        border: none; border-radius: 10px;
+        background: linear-gradient(135deg, #25d366, #128c7e);
+        color: #ffffff; font-family: inherit; font-size: 12px; font-weight: 900; line-height: 1.3;
+        cursor: pointer; box-shadow: 0 3px 8px rgba(18, 140, 126, 0.28);
+    }
+    .btn-wa-confirm:hover { filter: brightness(1.06); }
+    .btn-wa-confirm:active { transform: scale(0.98); }
+    body.is-staff-role .btn-wa-confirm { padding: 5px 8px; font-size: 11px; margin: 5px 0 2px; }
     .takeaway-card .table-seated-banner { background-color: rgba(255, 255, 255, 0.72); border-style: dashed; }
     .big-table-card .takeaway-total { font-weight: 900; font-size: 15px; color: #b45309; margin: 6px 0 0; }
     .takeaway-ready .takeaway-total { color: #047857; }
@@ -1739,7 +1749,7 @@
                 </div>
                 <div style="margin-bottom: 20px;">
                     <label style="font-size: 13px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Phone Number:</label>
-                    <input type="tel" id="tk-cust-phone" placeholder="e.g. 81234567" required style="width: 100%; padding: 12px 14px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; font-size: 15px; font-weight: 700; font-family: inherit; outline: none;">
+                    <input type="tel" id="tk-cust-phone" placeholder="e.g. 8123456" inputmode="tel" autocomplete="tel" required style="width: 100%; padding: 12px 14px; border: 2px solid #cbd5e1; border-radius: 12px; box-sizing: border-box; font-size: 15px; font-weight: 700; font-family: inherit; outline: none;">
                 </div>
                 <button type="submit" class="btn-login" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 900; border-radius: 12px; background: linear-gradient(135deg, #7c3aed, #4f46e5); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);">
                     🍽️ Start Ordering
@@ -1765,7 +1775,7 @@
 
     <div id="login-screen" class="login-overlay" style="display: none;">
         <div class="login-box">
-            <h2>Al Hussain Restaurant</h2>
+            <h2 id="login-shop-name">Al Hussain Restaurant</h2>
             <form onsubmit="handleLogin(event)">
                 <input type="text" id="login-user" placeholder="Username / Name (e.g. admin, user1)" required autocomplete="username">
                 <input type="password" id="login-pass" placeholder="Password" required autocomplete="current-password">
@@ -1876,6 +1886,7 @@
                     <button class="admin-btn menu-repair-btn" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);" onclick="repairCategoriesNow()">🛠️ Fix Menu Categories</button>
                     <button class="admin-btn drawer-setup-btn" style="background:linear-gradient(135deg,#0f766e,#0d9488);" onclick="openDrawerSetupModal()">Cash Drawer Setup</button>
                     <button class="admin-btn notif-settings-btn" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);" onclick="openNotificationSettingsModal()">🔔 Notification Settings</button>
+                    <button class="admin-btn settings-btn" style="background:linear-gradient(135deg,#0f172a,#334155);" onclick="openSettingsModal()">⚙️ Manual Settings</button>
                     <button class="admin-btn close-day-btn" onclick="closeDay()">Day Close</button>
                 </div>
             </div>
@@ -1940,7 +1951,7 @@
                     <div class="bill-summary" id="bill-summary-container">
                         <div class="summary-row">
                             <span>Subtotal</span>
-                            <span>$<span id="sub-total">0.00</span></span>
+                            <span><span class="cur">$</span><span id="sub-total">0.00</span></span>
                         </div>
                         <div class="summary-row" id="discount-row-elem">
                             <span>Discount ($)</span>
@@ -1948,7 +1959,7 @@
                         </div>
                         <div class="total-row">
                             <span>Grand Total</span>
-                            <span style="color: var(--primary);">$<span id="total-amount">0.00</span></span>
+                            <span style="color: var(--primary);"><span class="cur">$</span><span id="total-amount">0.00</span></span>
                         </div>
                         
                         <div id="payment-method-row" style="display: flex; align-items: center; justify-content: space-between; margin-top: 12px; border-top: 1px dashed #cbd5e1; padding-top: 12px;">
@@ -2039,12 +2050,12 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; border-top: 1px dashed #cbd5e1; padding-top: 8px; margin-top: 6px; font-size: 16px;">
                     <span style="font-weight: 800; color: #0f172a;">Total Paid:</span>
-                    <strong style="color: var(--primary); font-size: 18px;">$<span id="cust-paid-total-val">0.00</span></strong>
+                    <strong style="color: var(--primary); font-size: 18px;"><span class="cur">$</span><span id="cust-paid-total-val">0.00</span></strong>
                 </div>
             </div>
 
             <div style="font-size: 13.5px; color: #475569; font-weight: 700; margin-bottom: 18px; line-height: 1.4;">
-                Thank you for dining at Al Hussain! 🙏<br><span style="color: #475569; font-size: 12.5px;">Have a wonderful day ahead.</span>
+                <span id="paid-thankyou-line">Thank you for dining at Al Hussain!</span> 🙏<br><span style="color: #475569; font-size: 12.5px;">Have a wonderful day ahead.</span>
             </div>
 
             <button onclick="resetCustomerTableSessionForNextGuest()" style="width: 100%; padding: 13px; background: #0f172a; color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s;">
@@ -2067,7 +2078,7 @@
             
             <div class="pay-row" style="background:#e0e7ff; border-color:#c7d2fe; margin-bottom: 14px;">
                 <span style="color:#3730a3;">Total Due:</span>
-                <span class="val" style="color:#3730a3;">$<span id="modal-grand-total">0.00</span></span>
+                <span class="val" style="color:#3730a3;"><span class="cur">$</span><span id="modal-grand-total">0.00</span></span>
             </div>
 
             <div style="text-align: left; font-size: 13px; font-weight: 800; color: #64748b; margin-bottom: 6px;">Payment Method:</div>
@@ -2088,14 +2099,7 @@
 
             <div id="modal-quick-cash-section">
                 <div style="text-align: left; font-size: 13px; font-weight: 800; color: #64748b; margin-bottom: 6px;">Quick Cash:</div>
-                <div class="quick-cash-grid">
-                    <button class="quick-cash-btn" onclick="setQuickCash('exact')">Exact</button>
-                    <button class="quick-cash-btn" onclick="setQuickCash(5)">$5</button>
-                    <button class="quick-cash-btn" onclick="setQuickCash(10)">$10</button>
-                    <button class="quick-cash-btn" onclick="setQuickCash(20)">$20</button>
-                    <button class="quick-cash-btn" onclick="setQuickCash(50)">$50</button>
-                    <button class="quick-cash-btn" onclick="setQuickCash(100)">$100</button>
-                </div>
+                <div class="quick-cash-grid" id="quick-cash-grid"></div>
             </div>
 
             <div style="text-align: left; font-size: 13px; font-weight: 800; color: #64748b; margin-bottom: 6px;">Amount Paid:</div>
@@ -2103,7 +2107,7 @@
 
             <div class="pay-row" style="background: #dcfce7; border-color: #bbf7d0; margin-bottom: 12px;">
                 <span style="color: #166534;">Change:</span>
-                <span class="val" style="color: #166534;">$<span id="modal-change-amount">0.00</span></span>
+                <span class="val" style="color: #166534;"><span class="cur">$</span><span id="modal-change-amount">0.00</span></span>
             </div>
 
             <div style="text-align: left; background: #f8fafc; padding: 12px 16px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
@@ -2178,6 +2182,65 @@
             </div>
         </div>
     </div>
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 680px; width: 96%; max-height: 92vh; display: flex; flex-direction: column; padding: 18px 22px;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">
+                <div>
+                    <h3 style="margin:0;font-size:19px;font-weight:900;color:#0f172a;display:flex;align-items:center;gap:8px;">⚙️ Manual Settings</h3>
+                    <p style="margin:4px 0 0;font-size:12px;color:#64748b;font-weight:700;">ரசீது, கரன்சி, சவுண்ட் எல்லாம் நீங்களே இங்கே மாத்திக்கலாம்.</p>
+                </div>
+                <button class="close-modal" onclick="closeSettingsModal()">Close</button>
+            </div>
+            <div class="modal-body" style="overflow-y:auto; flex:1; padding-top:14px;">
+                <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;padding:10px 14px;font-size:12.5px;font-weight:700;color:#5b21b6;margin-bottom:14px;">
+                    <b>Shop-wide (எல்லா POS + customer QR):</b> Shop Name, Address, Company, Thank-you messages, Currency — Firebase-ல sync ஆகும்.<br>
+                    <b>இந்த device-க்கு மட்டும்:</b> Quick Cash, Print Receipt default, Sound, QR Base URL. மாத்துனதும் <b>Save Settings</b> அழுத்துங்க.
+                </div>
+
+                <div style="font-weight:900;font-size:14px;color:#7c3aed;margin-bottom:8px;">🧾 ரசீது / பில் (Receipt & Bill)</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+                    <label style="font-size:12px;font-weight:800;color:#334155;">Shop Name<input type="text" id="set-shop-name" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
+                    <label style="font-size:12px;font-weight:800;color:#334155;">Address Line<input type="text" id="set-address-line" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
+                    <label style="font-size:12px;font-weight:800;color:#334155;">Company / Account Line<input type="text" id="set-company-line" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
+                    <label style="font-size:12px;font-weight:800;color:#334155;">Currency Symbol<input type="text" id="set-currency" maxlength="4" placeholder="$" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
+                    <label style="font-size:12px;font-weight:800;color:#334155;">Receipt Thank-you Message<input type="text" id="set-receipt-thanks" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
+                    <label style="font-size:12px;font-weight:800;color:#334155;">Paid-screen Thank-you Message<input type="text" id="set-paid-thanks" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
+                </div>
+
+                <div style="font-weight:900;font-size:14px;color:#7c3aed;margin-bottom:8px;">💳 ஆர்டர் & பேமென்ட் (Order & Payment)</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+                    <label style="font-size:12px;font-weight:800;color:#334155;">Quick Cash Amounts (comma separated)<input type="text" id="set-quick-cash" placeholder="5,10,20,50,100" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
+                    <label style="font-size:12px;font-weight:800;color:#334155;display:flex;flex-direction:column;gap:8px;">Print Receipt by default
+                        <span style="display:flex;align-items:center;gap:8px;font-weight:700;color:#334155;">
+                            <input type="checkbox" id="set-print-default" style="width:18px;height:18px;accent-color:#7c3aed;">
+                            <span>Pre-tick "Print Receipt" when paying</span>
+                        </span>
+                    </label>
+                </div>
+
+                <div style="font-weight:900;font-size:14px;color:#7c3aed;margin-bottom:8px;">📱 QR & Tables</div>
+                <div style="margin-bottom:16px;">
+                    <label style="font-size:12px;font-weight:800;color:#334155;">QR Base URL<input type="text" id="set-qr-url" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
+                    <p style="margin:4px 0 0;font-size:11px;color:#64748b;font-weight:700;">Table count-ஐ Admin Dashboard-ல மேலே "Number of Tables"ல மாத்துங்க.</p>
+                </div>
+
+                <div style="font-weight:900;font-size:14px;color:#7c3aed;margin-bottom:8px;">🔊 சவுண்ட் (Sound)</div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800;color:#334155;cursor:pointer;">
+                        <input type="checkbox" id="set-sound-enabled" style="width:18px;height:18px;accent-color:#7c3aed;">
+                        Master sound &amp; voice ON (order alerts, QR sound, call waiter)
+                    </label>
+                </div>
+
+                <div style="display:flex;gap:8px;flex-wrap:wrap;border-top:2px solid #e2e8f0;padding-top:14px;">
+                    <button type="button" class="btn-small" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;padding:11px 18px;font-size:14px;font-weight:900;" onclick="saveSettingsFromForm()">💾 Save Settings</button>
+                    <button type="button" class="btn-small" style="background:#f1f5f9;color:#334155;padding:11px 18px;font-size:14px;font-weight:900;" onclick="resetSettingsFromForm()">↺ Reset to Defaults</button>
+                    <button type="button" class="btn-small" style="background:#e2e8f0;color:#334155;padding:11px 18px;font-size:14px;font-weight:900;" onclick="closeSettingsModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="credentials-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 880px; width: 96%; max-height: 92vh; display: flex; flex-direction: column; padding: 18px 22px;">
             <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">
@@ -2534,7 +2597,7 @@
                     </div>
                     <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:10px 14px; text-align:center;">
                         <span style="display:block; font-size:11px; font-weight:800; color:#1e40af;">TOTAL SALES VALUE</span>
-                        <strong style="font-size:22px; color:#1d4ed8;">$<span id="item-rep-total-amt">0.00</span></strong>
+                        <strong style="font-size:22px; color:#1d4ed8;"><span class="cur">$</span><span id="item-rep-total-amt">0.00</span></strong>
                     </div>
                     <div style="background:#f5f3ff; border:1.5px solid #ddd6fe; border-radius:12px; padding:10px 14px; text-align:center;">
                         <span style="display:block; font-size:11px; font-weight:800; color:#5b21b6;">UNIQUE ITEMS</span>
@@ -2625,9 +2688,9 @@
         </div>
     </div>
 
-    <div id="expense-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">View Expenses</h3><button class="close-modal" onclick="closeExpenseViewModal()">X</button></div><div class="modal-body"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"><div class="stat-box">Total: $<span id="view-expenses-total">0.00</span></div><div class="stat-box">This Month: $<span id="view-expenses-month-total">0.00</span></div><div class="stat-box">Daily Average: $<span id="view-expenses-month-average">0.00</span></div></div><table class="admin-table"><thead><tr><th>Date / Time</th><th>Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody id="view-expenses-tbody"></tbody></table><div id="view-expenses-empty" style="display:none;text-align:center;padding:20px;color:#64748b;">No expenses recorded.</div><h4 style="margin:18px 0 8px;">Monthly Trend</h4><div id="view-expenses-trend"></div></div></div></div>
+    <div id="expense-view-modal" class="modal-overlay"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">View Expenses</h3><button class="close-modal" onclick="closeExpenseViewModal()">X</button></div><div class="modal-body"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"><div class="stat-box">Total: <span class="cur">$</span><span id="view-expenses-total">0.00</span></div><div class="stat-box">This Month: <span class="cur">$</span><span id="view-expenses-month-total">0.00</span></div><div class="stat-box">Daily Average: <span class="cur">$</span><span id="view-expenses-month-average">0.00</span></div></div><table class="admin-table"><thead><tr><th>Date / Time</th><th>Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody id="view-expenses-tbody"></tbody></table><div id="view-expenses-empty" style="display:none;text-align:center;padding:20px;color:#64748b;">No expenses recorded.</div><h4 style="margin:18px 0 8px;">Monthly Trend</h4><div id="view-expenses-trend"></div></div></div></div>
 
-    <div id="payment-summary-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">Daily Payment Summary</h3><button class="close-modal" onclick="closePaymentSummaryModal()">X</button></div><div class="modal-body"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;"><div class="stat-box">Cash: $<span id="pay-summary-cash">0.00</span></div><div class="stat-box">Card: $<span id="pay-summary-card">0.00</span></div><div class="stat-box">QR Pay: $<span id="pay-summary-qr">0.00</span></div><div class="stat-box">Total: $<span id="pay-summary-total">0.00</span></div></div></div></div></div>
+    <div id="payment-summary-modal" class="modal-overlay"><div class="modal-content" style="max-width:620px;"><div class="modal-header"><h3 style="margin:0;font-size:18px;">Daily Payment Summary</h3><button class="close-modal" onclick="closePaymentSummaryModal()">X</button></div><div class="modal-body"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;"><div class="stat-box">Cash: <span class="cur">$</span><span id="pay-summary-cash">0.00</span></div><div class="stat-box">Card: <span class="cur">$</span><span id="pay-summary-card">0.00</span></div><div class="stat-box">QR Pay: <span class="cur">$</span><span id="pay-summary-qr">0.00</span></div><div class="stat-box">Total: <span class="cur">$</span><span id="pay-summary-total">0.00</span></div></div></div></div></div>
 
     <div id="day-close-modal" class="modal-overlay">
       <div class="modal-content" style="max-width:640px;">
@@ -2646,39 +2709,39 @@
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px;">
               <div class="stat-box" style="border-left:4px solid #10b981;">
                 <span style="font-size:11px; color:#64748b; font-weight:700;">Active Sales</span>
-                <span style="font-size:18px; font-weight:900; color:#0f766e;">$<span id="dc-modal-sales">0.00</span></span>
+                <span style="font-size:18px; font-weight:900; color:#0f766e;"><span class="cur">$</span><span id="dc-modal-sales">0.00</span></span>
                 <span style="font-size:11px; color:#64748b;"><span id="dc-modal-bills">0</span> bills</span>
               </div>
               <div class="stat-box" style="border-left:4px solid #ef4444;">
                 <span style="font-size:11px; color:#64748b; font-weight:700;">Active Expenses</span>
-                <span style="font-size:18px; font-weight:900; color:#b91c1c;">$<span id="dc-modal-expenses">0.00</span></span>
+                <span style="font-size:18px; font-weight:900; color:#b91c1c;"><span class="cur">$</span><span id="dc-modal-expenses">0.00</span></span>
                 <span style="font-size:11px; color:#64748b;"><span id="dc-modal-exp-count">0</span> items</span>
               </div>
               <div class="stat-box" style="border-left:4px solid #3b82f6;">
                 <span style="font-size:11px; color:#64748b; font-weight:700;">Net Settlement</span>
-                <span style="font-size:18px; font-weight:900; color:#1d4ed8;">$<span id="dc-modal-net">0.00</span></span>
+                <span style="font-size:18px; font-weight:900; color:#1d4ed8;"><span class="cur">$</span><span id="dc-modal-net">0.00</span></span>
                 <span style="font-size:11px; color:#64748b;">(Sales - Expenses)</span>
               </div>
             </div>
 
             <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:8px; border-top:1px dashed #cbd5e1; font-size:13px; font-weight:700; color:#475569;">
-              <span>Cash: $<strong id="dc-modal-cash">0.00</strong></span>
-              <span>Card: $<strong id="dc-modal-card">0.00</strong></span>
-              <span>QR Pay: $<strong id="dc-modal-qr">0.00</strong></span>
+              <span>Cash: <span class="cur">$</span><strong id="dc-modal-cash">0.00</strong></span>
+              <span>Card: <span class="cur">$</span><strong id="dc-modal-card">0.00</strong></span>
+              <span>QR Pay: <span class="cur">$</span><strong id="dc-modal-qr">0.00</strong></span>
             </div>
           </div>
 
           <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13px; color:#92400e; font-weight:600;">
-            ℹ️ <b>Note:</b> Performing Day Close will archive today's transactions and <b>reset all active Sales & Expense counters back to $0.00</b> so the next shift/day starts fresh.
+            ℹ️ <b>Note:</b> Performing Day Close will archive today's transactions and <b>reset all active Sales & Expense counters back to <span class="cur">$</span>0.00</b> so the next shift/day starts fresh.
           </div>
 
           <div style="display:flex; flex-direction:column; gap:10px;">
             <button type="button" class="btn-primary" onclick="confirmExecuteDayClose(true)" style="background:linear-gradient(135deg, #059669, #047857); padding:12px; font-size:15px; font-weight:900; border-radius:8px; border:0; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-              🖨️ Print Report & Close Day (Reset to $0.00)
+              🖨️ Print Report & Close Day (Reset to <span class="cur">$</span>0.00)
             </button>
             <div style="display:flex; gap:10px;">
               <button type="button" onclick="confirmExecuteDayClose(false)" style="flex:1; background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; padding:10px; font-size:13px; font-weight:800; border-radius:8px; cursor:pointer;">
-                ⚡ Reset Counters to $0.00 (No Print)
+                ⚡ Reset Counters to <span class="cur">$</span>0.00 (No Print)
               </button>
               <button type="button" onclick="toggleDayCloseHistoryView()" style="flex:1; background:#f8fafc; color:#475569; border:1px solid #cbd5e1; padding:10px; font-size:13px; font-weight:800; border-radius:8px; cursor:pointer;">
                 📜 Past Close Records
@@ -2694,16 +2757,16 @@
       </div>
     </div>
 
-    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div><b>Order By:</b> <span id="p-taken-by" class="print-ref-strong"></span></div><div id="p-intake" style="display:none; margin-top:2px;"><b>Intake:</b> <span id="p-intake-val" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span><br><b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span></div><div><b>Date:</b> <span id="p-date"></span> | <b>Time:</b> <span id="p-time"></span></div><div id="p-seated-info" style="display:none; font-size:14px; margin-top:2px;"><b>Seated:</b> <span id="p-seated-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span>$<span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span>$<span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span>$<span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span>$<span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p>Thank you! Please come again.</p></div><div id="receipt-kick" style="display:none;"></div></div>
+    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;" class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;" id="r-shop-addr">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;" id="r-company">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div><b>Order By:</b> <span id="p-taken-by" class="print-ref-strong"></span></div><div id="p-intake" style="display:none; margin-top:2px;"><b>Intake:</b> <span id="p-intake-val" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span><br><b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span></div><div><b>Date:</b> <span id="p-date"></span> | <b>Time:</b> <span id="p-time"></span></div><div id="p-seated-info" style="display:none; font-size:14px; margin-top:2px;"><b>Seated:</b> <span id="p-seated-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span><span class="cur">$</span><span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span><span class="cur">$</span><span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span><span class="cur">$</span><span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span><span class="cur">$</span><span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p id="r-thanks">Thank you! Please come again.</p></div><div id="receipt-kick" style="display:none;"></div></div>
     
     <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div><b>Order By:</b> <span id="k-taken-by" class="print-ref-strong"></span></div><div id="k-intake" style="display:none; margin-top:2px;"><b>Intake:</b> <span id="k-intake-val" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div><div><b>Date:</b> <span id="k-date"></span> | <b>Time:</b> <span id="k-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
     
     <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div id="drawer-kick" style="display:none;"></div></div>
-    <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>SALES HISTORY REPORT</b></p><p id="print-history-time" style="margin:2px 0; font-size:12px; font-weight:900;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span>$<span id="print-history-grand-total">0.00</span></span></div></div>
-    <div id="print-day-close"><div style="text-align: center; margin-bottom: 6px;"><h2>AL HUSSAIN RESTAURANT</h2><p><b>DAY CLOSE REPORT</b></p><p id="dc-date" style="margin:2px 0; font-size:13px;"></p><p id="dc-closed-by" style="margin:2px 0; font-size:13px; font-weight:bold;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 15px; font-weight: 900; margin-bottom: 8px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Sales:</span><span>$<span id="dc-sales">0.00</span></span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Expenses:</span><span>$<span id="dc-expenses">0.00</span></span></div><hr style="border-top: 2px dashed black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Net Balance:</span><span>$<span id="dc-net">0.00</span></span></div><div style="margin-top: 6px; font-size: 13px; border-top: 1px dotted black; padding-top: 4px;"><div style="display:flex; justify-content:space-between;"><span>Cash Sales:</span><span>$<span id="dc-cash">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>Card Sales:</span><span>$<span id="dc-card">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>QR Pay Sales:</span><span>$<span id="dc-qr">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>Total Bills Count:</span><span id="dc-bills-count">0</span></div></div></div><div><p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>EXPENSES:</b></p><table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900; margin-top: 4px;"><tbody id="dc-expenses-list"></tbody></table></div></div>
+    <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2 class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p><b>SALES HISTORY REPORT</b></p><p id="print-history-time" style="margin:2px 0; font-size:12px; font-weight:900;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span><span class="cur">$</span><span id="print-history-grand-total">0.00</span></span></div></div>
+    <div id="print-day-close"><div style="text-align: center; margin-bottom: 6px;"><h2 class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p><b>DAY CLOSE REPORT</b></p><p id="dc-date" style="margin:2px 0; font-size:13px;"></p><p id="dc-closed-by" style="margin:2px 0; font-size:13px; font-weight:bold;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 15px; font-weight: 900; margin-bottom: 8px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Sales:</span><span><span class="cur">$</span><span id="dc-sales">0.00</span></span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Expenses:</span><span><span class="cur">$</span><span id="dc-expenses">0.00</span></span></div><hr style="border-top: 2px dashed black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Net Balance:</span><span><span class="cur">$</span><span id="dc-net">0.00</span></span></div><div style="margin-top: 6px; font-size: 13px; border-top: 1px dotted black; padding-top: 4px;"><div style="display:flex; justify-content:space-between;"><span>Cash Sales:</span><span><span class="cur">$</span><span id="dc-cash">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>Card Sales:</span><span><span class="cur">$</span><span id="dc-card">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>QR Pay Sales:</span><span><span class="cur">$</span><span id="dc-qr">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>Total Bills Count:</span><span id="dc-bills-count">0</span></div></div></div><div><p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>EXPENSES:</b></p><table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900; margin-top: 4px;"><tbody id="dc-expenses-list"></tbody></table></div></div>
     <div id="print-item-report">
         <div style="text-align: center; margin-bottom: 6px;">
-            <h2 style="margin: 0; font-size: 20px; font-weight: 900;">AL HUSSAIN RESTAURANT</h2>
+            <h2 style="margin: 0; font-size: 20px; font-weight: 900;" class="print-shop-name">AL HUSSAIN RESTAURANT</h2>
             <p style="margin: 2px 0; font-size: 14px; font-weight: 900;">DAILY ITEM SOLD REPORT</p>
             <p id="print-item-report-scope" style="margin: 2px 0; font-size: 13px; font-weight: bold;"></p>
             <hr style="border-top: 3px solid black; margin: 4px 0;">
@@ -2725,13 +2788,13 @@
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;">
             <span>TOTAL REVENUE:</span>
-            <span>$<span id="print-item-report-total-amt">0.00</span></span>
+            <span><span class="cur">$</span><span id="print-item-report-total-amt">0.00</span></span>
         </div>
         <div style="text-align: center; margin-top: 8px; font-size: 11px; font-weight: 700;">
             <p style="margin: 0;">Printed on: <span id="print-item-report-time"></span></p>
         </div>
     </div>
-    <div id="print-qr-batch"><div style="text-align: center; margin-bottom: 20px;"><h2>AL HUSSAIN RESTAURANT - QR CODES</h2><p id="print-qr-time" style="margin:4px 0 0; font-size:12px; font-weight:900;"></p></div><div id="print-qr-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;"></div></div>
+    <div id="print-qr-batch"><div style="text-align: center; margin-bottom: 20px;"><h2><span class="print-shop-name">AL HUSSAIN RESTAURANT</span> - QR CODES</h2><p id="print-qr-time" style="margin:4px 0 0; font-size:12px; font-weight:900;"></p></div><div id="print-qr-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;"></div></div>
 
     <div id="table-link-modal">
       <div class="table-link-box">
@@ -2758,6 +2821,344 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        // ================= MANUAL SETTINGS (Admin Settings page) =================
+        // Every value below can be changed by the shop owner from the
+        // Admin Dashboard -> "⚙️ Manual Settings" button.
+        //
+        // Branch 1 and branch 2 are hosted on the same GitHub Pages origin, so
+        // browser storage is shared. Keep branch 2's device settings in their
+        // own keys; branch 1 keeps the original keys so existing devices do
+        // not lose their saved choices.
+        const STORAGE_BRANCH_SUFFIX = (typeof firebaseConfig !== 'undefined' && firebaseConfig.projectId === 'al-hussain-pos-branch2') ? '_branch2' : '';
+        const SETTINGS_STORAGE_KEY = 'al_hussain_settings' + STORAGE_BRANCH_SUFFIX;
+        const QR_BASE_STORAGE_KEY = 'al_hussain_qr_base_url' + STORAGE_BRANCH_SUFFIX;
+
+        // Shop-wide display values are also saved to Firebase so every POS and
+        // every customer QR phone shows the same shop name, receipt text and
+        // currency. Device-only choices stay in localStorage.
+        const PUBLIC_DISPLAY_SETTINGS_PATH = 'settings/publicDisplay';
+        const PUBLIC_DISPLAY_KEYS = ['shopName', 'addressLine', 'companyLine', 'receiptThankYou', 'paidThankYou', 'currencySymbol'];
+
+        const DEFAULT_SETTINGS = {
+            shopName: "Al Hussain Restaurant",
+            addressLine: "Nagara Brunei Darussalam.",
+            companyLine: "Company Acc: Al Hussain Enterprise",
+            receiptThankYou: "Thank you! Please come again.",
+            paidThankYou: "Thank you for dining at Al Hussain!",
+            currencySymbol: "$",
+            quickCash: [5, 10, 20, 50, 100],
+            printReceiptDefault: true,
+            soundEnabled: true
+        };
+
+        function sanitizeShopName(raw) {
+            const clean = String(raw === undefined || raw === null ? '' : raw)
+                .replace(/[\u0000-\u001f\u007f]/g, ' ')
+                .trim();
+            return clean || DEFAULT_SETTINGS.shopName;
+        }
+
+        function sanitizeCurrencySymbol(raw) {
+            let clean = String(raw === undefined || raw === null ? '' : raw)
+                .replace(/[\u0000-\u001f\u007f]/g, '')
+                .replace(/[<>&"']/g, '')
+                .trim()
+                .slice(0, 4);
+            return clean || DEFAULT_SETTINGS.currencySymbol;
+        }
+
+        function normalizeQRBaseUrl(raw, fallbackUrl) {
+            const fallback = fallbackUrl || '';
+            let value = String(raw === undefined || raw === null ? '' : raw).trim();
+            if (!value) return fallback;
+            if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(value)) value = 'https://' + value;
+            try {
+                const url = new URL(value);
+                if (url.protocol !== 'http:' && url.protocol !== 'https:') return fallback;
+                // The QR base is only a prefix for ?table=N links, so drop any
+                // query/hash the admin may have pasted by mistake.
+                url.search = '';
+                url.hash = '';
+                let clean = url.href;
+                if (!clean.endsWith('/')) clean += '/';
+                return clean;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function getSettings() {
+            try {
+                const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    const merged = {};
+                    for (const k in DEFAULT_SETTINGS) {
+                        merged[k] = (parsed[k] !== undefined) ? parsed[k] : DEFAULT_SETTINGS[k];
+                    }
+                    merged.shopName = sanitizeShopName(merged.shopName);
+                    merged.currencySymbol = sanitizeCurrencySymbol(merged.currencySymbol);
+                    return merged;
+                }
+            } catch (e) {}
+            return Object.assign({}, DEFAULT_SETTINGS);
+        }
+
+        function saveSettings(patch) {
+            const next = Object.assign({}, getSettings(), patch);
+            next.shopName = sanitizeShopName(next.shopName);
+            next.currencySymbol = sanitizeCurrencySymbol(next.currencySymbol);
+            localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(next));
+            return next;
+        }
+
+        function resetSettingsToDefaults() {
+            localStorage.removeItem(SETTINGS_STORAGE_KEY);
+            localStorage.removeItem(QR_BASE_STORAGE_KEY);
+            return Object.assign({}, DEFAULT_SETTINGS);
+        }
+
+        function curSym() {
+            return sanitizeCurrencySymbol(getSettings().currencySymbol);
+        }
+
+        // Push only the shop-wide display values to Firebase. Quick cash,
+        // print default, sound and the QR base URL are deliberately excluded:
+        // those are per-device choices.
+        function writePublicDisplaySettings(settings) {
+            if (!settings || typeof db === 'undefined' || !db || typeof db.ref !== 'function') return;
+            const payload = {};
+            PUBLIC_DISPLAY_KEYS.forEach(k => {
+                payload[k] = (k === 'shopName')
+                    ? sanitizeShopName(settings[k])
+                    : (k === 'currencySymbol')
+                        ? sanitizeCurrencySymbol(settings[k])
+                        : String(settings[k] === undefined || settings[k] === null ? '' : settings[k]).trim();
+            });
+            db.ref(PUBLIC_DISPLAY_SETTINGS_PATH).update(payload).catch(err => {
+                console.warn('Public display settings could not be saved:', err && err.message ? err.message : err);
+            });
+        }
+
+        // Receive shop-wide changes from Firebase (admin save or reset). This
+        // runs on POS tablets and customer QR phones alike. It only updates
+        // display values; device-only settings are left untouched.
+        function applyPublicDisplaySettings(values) {
+            if (!values || typeof values !== 'object') return;
+            const patch = {};
+            let changed = false;
+            const current = getSettings();
+            PUBLIC_DISPLAY_KEYS.forEach(k => {
+                if (!Object.prototype.hasOwnProperty.call(values, k)) return;
+                let nextVal;
+                if (k === 'shopName') {
+                    nextVal = sanitizeShopName(values[k]);
+                } else if (k === 'currencySymbol') {
+                    nextVal = sanitizeCurrencySymbol(values[k]);
+                } else {
+                    nextVal = String(values[k] === undefined || values[k] === null ? '' : values[k])
+                        .replace(/[\u0000-\u001f\u007f]/g, ' ')
+                        .trim();
+                }
+                if (current[k] !== nextVal) {
+                    patch[k] = nextVal;
+                    changed = true;
+                }
+            });
+            if (!changed) return;
+            saveSettings(patch);
+            applySettingsToUI();
+            // Menu cards and cart lines embed the symbol in generated text,
+            // so rebuild them when the shop-wide currency changes.
+            if (Object.prototype.hasOwnProperty.call(patch, 'currencySymbol')) {
+                refreshCurrencyDependentViews();
+            }
+        }
+
+        function isCustomerQrUi() {
+            return document.documentElement.classList.contains('is-customer-qr');
+        }
+
+        function applySettingsToUI() {
+            const s = getSettings();
+            const shopName = sanitizeShopName(s.shopName);
+
+            const headerTitle = document.getElementById('app-header-title');
+            // Customer QR screens show the table/order name in the header;
+            // never replace it with the shop name when the sync arrives late.
+            if (headerTitle && !isCustomerQrUi()) headerTitle.textContent = shopName + " POS";
+
+            const loginName = document.getElementById('login-shop-name');
+            if (loginName) loginName.textContent = shopName;
+
+            document.querySelectorAll('.print-shop-name').forEach(el => {
+                el.textContent = String(shopName).toUpperCase();
+            });
+
+            const addr = document.getElementById('r-shop-addr');
+            if (addr) addr.textContent = s.addressLine;
+            const comp = document.getElementById('r-company');
+            if (comp) comp.textContent = s.companyLine;
+            const thanks = document.getElementById('r-thanks');
+            if (thanks) thanks.textContent = s.receiptThankYou;
+            const paidThanks = document.getElementById('paid-thankyou-line');
+            if (paidThanks) paidThanks.textContent = s.paidThankYou;
+
+            applyCurrencySymbols();
+            renderQuickCashButtons();
+        }
+
+        function applyCurrencySymbols() {
+            const sym = curSym();
+            document.querySelectorAll('span.cur').forEach(el => {
+                el.textContent = sym;
+            });
+        }
+
+        function refreshCurrencyDependentViews() {
+            // The menu grid caches its own signature, which does not include
+            // the currency symbol. Clear it so prices are rebuilt with the
+            // new symbol instead of keeping the old one.
+            try {
+                lastMenuGridSignature = null;
+                if (typeof renderMenuGrid === 'function') renderMenuGrid();
+            } catch (e) {}
+            try {
+                if (typeof currentTableKey !== 'undefined' && currentTableKey &&
+                    typeof activeOrders !== 'undefined' && activeOrders[currentTableKey] &&
+                    document.getElementById('cart-items')) {
+                    if (typeof syncCartInputsToMemory === 'function') syncCartInputsToMemory();
+                    if (typeof renderCart === 'function') renderCart({ skipInputSync: true });
+                }
+            } catch (e) {}
+        }
+
+        function renderQuickCashButtons() {
+            const grid = document.getElementById('quick-cash-grid');
+            if (!grid) return;
+            const s = getSettings();
+            const cur = escapeHtml(sanitizeCurrencySymbol(s.currencySymbol));
+            let html = '<button class="quick-cash-btn" onclick="setQuickCash(\'exact\')">Exact</button>';
+            const amounts = Array.isArray(s.quickCash) ? s.quickCash : DEFAULT_SETTINGS.quickCash;
+            amounts.forEach(v => {
+                const n = Number(v);
+                if (!isNaN(n)) html += '<button class="quick-cash-btn" onclick="setQuickCash(' + n + ')">' + cur + n + '</button>';
+            });
+            grid.innerHTML = html;
+        }
+
+        // ================= MANUAL SETTINGS MODAL =================
+        function openSettingsModal() {
+            if (isCustomerQrUi() || (typeof isAdminAccount === 'function' && !isAdminAccount())) {
+                alert('Only the Admin account can change Manual Settings.');
+                return;
+            }
+            fillSettingsForm();
+            const modal = document.getElementById('settings-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeSettingsModal() {
+            const modal = document.getElementById('settings-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function fillSettingsForm() {
+            const s = getSettings();
+            setFieldVal('set-shop-name', s.shopName);
+            setFieldVal('set-address-line', s.addressLine);
+            setFieldVal('set-company-line', s.companyLine);
+            setFieldVal('set-receipt-thanks', s.receiptThankYou);
+            setFieldVal('set-paid-thanks', s.paidThankYou);
+            setFieldVal('set-currency', s.currencySymbol);
+            setFieldVal('set-quick-cash', (s.quickCash || []).join(','));
+            const pc = document.getElementById('set-print-default');
+            if (pc) pc.checked = !!s.printReceiptDefault;
+            const se = document.getElementById('set-sound-enabled');
+            if (se) se.checked = !!s.soundEnabled;
+            setFieldVal('set-qr-url', getQRBaseUrl());
+        }
+
+        function setFieldVal(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.value = (val === undefined || val === null) ? '' : val;
+        }
+
+        function saveSettingsFromForm() {
+            if (isCustomerQrUi() || (typeof isAdminAccount === 'function' && !isAdminAccount())) {
+                alert('Only the Admin account can change Manual Settings.');
+                return;
+            }
+            const s = getSettings();
+            const previousCurrency = s.currencySymbol;
+            const next = {
+                shopName: sanitizeShopName(getFieldVal('set-shop-name', s.shopName)),
+                addressLine: getFieldVal('set-address-line', s.addressLine),
+                companyLine: getFieldVal('set-company-line', s.companyLine),
+                receiptThankYou: getFieldVal('set-receipt-thanks', s.receiptThankYou),
+                paidThankYou: getFieldVal('set-paid-thanks', s.paidThankYou),
+                currencySymbol: sanitizeCurrencySymbol(getFieldVal('set-currency', s.currencySymbol)),
+                quickCash: parseQuickCash(getFieldVal('set-quick-cash', (s.quickCash || []).join(','))),
+                printReceiptDefault: document.getElementById('set-print-default') ? document.getElementById('set-print-default').checked : s.printReceiptDefault,
+                soundEnabled: document.getElementById('set-sound-enabled') ? document.getElementById('set-sound-enabled').checked : s.soundEnabled
+            };
+
+            saveSettings(next);
+
+            const cleanQr = normalizeQRBaseUrl(getFieldVal('set-qr-url', ''), '');
+            if (cleanQr) {
+                localStorage.setItem(QR_BASE_STORAGE_KEY, cleanQr);
+            } else {
+                localStorage.removeItem(QR_BASE_STORAGE_KEY);
+            }
+
+            writePublicDisplaySettings(getSettings());
+            applySettingsToUI();
+            if (getSettings().currencySymbol !== previousCurrency) refreshCurrencyDependentViews();
+            closeSettingsModal();
+            alert('✅ Settings saved!');
+        }
+
+        function getFieldVal(id, fallback) {
+            const el = document.getElementById(id);
+            return el ? el.value : fallback;
+        }
+
+        function parseQuickCash(str) {
+            const out = [];
+            String(str || '').split(',').forEach(p => {
+                const n = Number(p.trim());
+                if (!isNaN(n) && n >= 0) out.push(n);
+            });
+            return out.length > 0 ? out : DEFAULT_SETTINGS.quickCash;
+        }
+
+        function resetSettingsFromForm() {
+            if (isCustomerQrUi() || (typeof isAdminAccount === 'function' && !isAdminAccount())) {
+                alert('Only the Admin account can change Manual Settings.');
+                return;
+            }
+            if (!confirm('Reset all Manual Settings back to defaults?')) return;
+            const previousCurrency = getSettings().currencySymbol;
+            resetSettingsToDefaults();
+            writePublicDisplaySettings(DEFAULT_SETTINGS);
+            fillSettingsForm();
+            applySettingsToUI();
+            if (getSettings().currencySymbol !== previousCurrency) refreshCurrencyDependentViews();
+            alert('Settings reset to defaults.');
+        }
+
+        applySettingsToUI();
+
+        // Keep every POS and customer QR phone in sync with the shop-wide
+        // display settings. If this node does not exist yet, local defaults
+        // stay in place until an admin saves Manual Settings.
+        db.ref(PUBLIC_DISPLAY_SETTINGS_PATH).on('value', (snapshot) => {
+            applyPublicDisplaySettings(snapshot.val());
+        }, (err) => {
+            console.warn('Public display settings could not be loaded:', err && err.message ? err.message : err);
+        });
 
         // Security: Salted SHA-256 password encryption
         const CRED_SALT = "alhussain_pos_secure_salt_2026";
@@ -3995,8 +4396,9 @@
             }
         }
 
-        function playChimeAndVoice(type, tableKey, byUser = '') {
+        function playChimeAndVoice(type, tableKey, byUser = '', force = false) {
             if (isCustomerMode) return; // Do not voice announce on customer phone
+            if (!force && !getSettings().soundEnabled) return; // Master sound switch (Manual Settings)
             unlockAudio();
             playChimeTone(type);
 
@@ -4023,7 +4425,7 @@
         function testPosSound() {
             unlockAudio();
             updateSoundButtonUI();
-            playChimeAndVoice('order', 'Table 1');
+            playChimeAndVoice('order', 'Table 1', '', true);
             showToast("🔊 Testing Audio: 'New Order, Table 1'");
         }
 
@@ -4032,7 +4434,7 @@
         function testCustomerQrSound() {
             unlockAudio();
             updateSoundButtonUI();
-            playChimeAndVoice('customer', 'Table 1');
+            playChimeAndVoice('customer', 'Table 1', '', true);
             showToast("📱 Testing: 'Customer Order, Table 1'");
         }
 
@@ -4345,7 +4747,7 @@
                                 <strong>${tKey}</strong>: ${bannerTitle}
                             </div>
                             <div style="font-size:12px; color:${isUp ? '#c2410c' : '#3b82f6'}; font-weight:700;">
-                                ${al.itemsCount || 1} items • $${Number(al.total || 0).toFixed(2)} • at ${al.timeStr || 'just now'} <span style="opacity:0.85; font-size:11px;">(⏱️ auto-clears in ${remainingMins}m)</span>
+                                ${al.itemsCount || 1} items • ${curSym()}${Number(al.total || 0).toFixed(2)} • at ${al.timeStr || 'just now'} <span style="opacity:0.85; font-size:11px;">(⏱️ auto-clears in ${remainingMins}m)</span>
                             </div>
                             ${newItemsText ? `<div class="staff-alert-new-items">${isUp ? '➕ New: ' : '📝 Order: '}${escapeHtml(newItemsText)}</div>` : ''}
                         </div>
@@ -4513,6 +4915,7 @@
             const name = document.getElementById('tk-cust-name').value.trim();
             const phone = document.getElementById('tk-cust-phone').value.trim();
             if (!name || !phone) return alert("Please fill customer name and phone number!");
+            if (!toWhatsAppNumber(phone)) return alert('Please enter a valid phone number: 8123456 or +673 8123456. For other countries, include the country code.');
 
             const submitBtn = event.target ? event.target.querySelector('button[type="submit"]') : null;
             if (submitBtn) {
@@ -4936,6 +5339,9 @@
                 // Notification Settings: admin login only, never staff
                 const btnNotifSettings = adminSection.querySelector('.notif-settings-btn');
                 if (btnNotifSettings) btnNotifSettings.style.display = 'none';
+                // Manual Settings: admin login only, never staff
+                const btnManualSettings = adminSection.querySelector('.settings-btn');
+                if (btnManualSettings) btnManualSettings.style.display = 'none';
 
                 // Stats toggles
                 const statBoxes = adminSection.querySelectorAll('.stat-toggle-box');
@@ -5615,7 +6021,7 @@
                     ${isOccupied ? `
                         <div class="tc-summary">
                             ${hasItems
-                                ? `<p class="tc-total">$${orderTotal.toFixed(2)} <span>${itemCount} items</span></p>`
+                                ? `<p class="tc-total">${curSym()}${orderTotal.toFixed(2)} <span>${itemCount} items</span></p>`
                                 : `<p class="tc-total tc-total-muted">Seated <span>Waiting to order</span></p>`}
                             <div class="tc-meta">
                                 <span class="tc-staff${isCustomerTaken ? ' is-customer' : ''}">
@@ -5693,7 +6099,12 @@
 
                         let custInfoHtml = "";
                         if (orderData.customerName) {
-                            custInfoHtml = `<div class="takeaway-customer">${orderData.customerName} (${orderData.customerPhone || ''})</div>`;
+                            custInfoHtml = `<div class="takeaway-customer">${escapeHtml(orderData.customerName)} (${escapeHtml(orderData.customerPhone || '')})</div>`;
+                        }
+
+                        let tkWaBtnHtml = "";
+                        if (orderData.customerPhone && orderData.customerSent) {
+                            tkWaBtnHtml = `<button type="button" class="btn-wa-confirm" title="Send order-received confirmation on WhatsApp" onclick="event.stopPropagation(); sendWhatsAppConfirmation(${escapeHtml(JSON.stringify(key))})">WhatsApp Confirm</button>`;
                         }
 
                         const tkLatestBatch = getLatestCustomerOrderBatch(orderData);
@@ -5706,14 +6117,15 @@
                             <div class="takeaway-order-head">
                                 <div class="takeaway-order-name">
                                     <span class="tk-bag">🥡</span>
-                                    <span class="tk-no">${key}</span>
+                                    <span class="tk-no">${escapeHtml(key)}</span>
                                 </div>
                                 <span class="takeaway-type-tag${isReady ? ' is-ready' : ''}">${isReady ? 'READY' : 'PARCEL'}</span>
                             </div>
                             ${custInfoHtml}
                             ${waitBannerHtml}
                             ${tkNewItemsText ? `<div class="tc-new-items" title="${escapeHtml(tkNewItemsFull)}">➕ ${escapeHtml(tkNewItemsText)}</div>` : ''}
-                            <p class="takeaway-total">$${orderTotal.toFixed(2)} <small>(${itemCount} Items)</small></p>
+                            <p class="takeaway-total">${curSym()}${orderTotal.toFixed(2)} <small>(${itemCount} Items)</small></p>
+                            ${tkWaBtnHtml}
                             <div class="takeaway-foot">
                                 <span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; ${(orderData.takenBy === 'Customer' || orderData.takenBy === 'Customer QR') ? 'background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd;' : 'background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff;'}">
                                     ${(orderData.takenBy === 'Customer' || orderData.takenBy === 'Customer QR') ? '📱 Customer Order' : ('👤 ' + (orderData.takenBy || 'Staff'))}
@@ -5854,6 +6266,91 @@
             let sub = getOrderSubtotal(orderData);
             let disc = Math.max(0, Number(orderData.discount) || 0);
             return Math.max(0, sub - disc);
+        }
+
+        function toWhatsAppNumber(raw) {
+            const value = String(raw || '').trim();
+            if (!/^\+?[\d\s()-]+$/.test(value)) return '';
+            const hasInternationalPrefix = value.startsWith('+') || value.startsWith('00');
+            let digits = value.replace(/\D/g, '');
+            if (digits.startsWith('00')) digits = digits.slice(2);
+            else if (!hasInternationalPrefix && /^0(?:[1-9]\d{6}|673[1-9]\d{6})$/.test(digits)) digits = digits.slice(1);
+            if (!hasInternationalPrefix && /^[1-9]\d{6}$/.test(digits)) return '673' + digits;
+            if (digits.startsWith('673')) return /^673[1-9]\d{6}$/.test(digits) ? digits : '';
+            return (hasInternationalPrefix ? /^[1-9]\d{6,14}$/ : /^[1-9]\d{8,14}$/).test(digits) ? digits : '';
+        }
+
+        function buildWhatsAppConfirmText(orderKey, order) {
+            const name = (order && order.customerName) || 'Customer';
+            const shopName = sanitizeShopName(getSettings().shopName);
+            const allItemLines = getOrderItemsArray(order)
+                .filter(it => it && it.name && (Number(it.qty) || 0) > 0)
+                .map(it => `• ${Number(it.qty) || 0}x ${it.name}`);
+            const MAX_LINES = 30;
+            const itemLines = allItemLines.slice(0, MAX_LINES);
+            if (allItemLines.length > MAX_LINES) {
+                itemLines.push(`…and ${allItemLines.length - MAX_LINES} more item(s)`);
+            }
+            const total = getOrderGrandTotal(order);
+            const parts = [
+                `Hello ${name}, thank you for your order at ${shopName} 🥡`,
+                '',
+                `Order: ${orderKey}`,
+                ...itemLines,
+                '',
+                `Total: ${curSym()}${total.toFixed(2)}`,
+                '',
+                order && order.isReady
+                    ? `Your order is ready for collection. Please show this message at the counter.`
+                    : `Your order has been received. We will let you know when it is ready. Please show this message at the counter.`
+            ];
+            return parts.join('\n');
+        }
+
+        async function sendWhatsAppConfirmation(orderKey) {
+            const cachedOrder = activeOrders[orderKey];
+            if (!orderKey.startsWith('Order-') || !cachedOrder || isClosedOrder(cachedOrder) || !getOrderItemsArray(cachedOrder).length) {
+                alert('Order not found or already closed. Please refresh and try again.');
+                return;
+            }
+            if (!cachedOrder.customerSent) {
+                alert('The customer has not sent this order yet. Wait for their Send Order confirmation.');
+                return;
+            }
+            const win = window.open('about:blank', '_blank');
+            if (!win) {
+                alert('WhatsApp could not open. Please allow pop-ups for this page.');
+                return;
+            }
+            win.opener = null;
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 10000);
+            try {
+                const response = await fetch(firebaseConfig.databaseURL + '/activeOrders/' + encodeURIComponent(orderKey) + '.json', {
+                    cache: 'no-store', signal: controller.signal
+                });
+                if (!response.ok) throw new Error('Order verification failed');
+                const order = await response.json();
+                if (!order || typeof order !== 'object' || isClosedOrder(order) || !order.customerSent || !getOrderItemsArray(order).length) {
+                    win.close();
+                    alert('This order is no longer available for confirmation. Please refresh.');
+                    return;
+                }
+                const num = toWhatsAppNumber(order.customerPhone);
+                if (!num) {
+                    win.close();
+                    alert('No valid phone number on this order.\n\nAsk the customer for their number.\nExample: 8123456 or +673 8123456');
+                    return;
+                }
+                if (win.closed) return;
+                win.location.href = 'https://wa.me/' + num + '?text=' + encodeURIComponent(buildWhatsAppConfirmText(orderKey, order));
+                if (typeof showToast === 'function') showToast('WhatsApp opened — press Send');
+            } catch (error) {
+                win.close();
+                alert('Could not verify this order. Please check your internet connection and try again.');
+            } finally {
+                clearTimeout(timeout);
+            }
         }
 
         let isCategoryWrapMode = false;
@@ -6283,7 +6780,7 @@
                             <span class="card-code">${item.code || ''}</span>
                             <div class="card-title">${item.name}</div>
                             <div class="card-bottom">
-                                <span class="card-price">$${Number(item.price).toFixed(2)}</span>
+                                <span class="card-price">${curSym()}${Number(item.price).toFixed(2)}</span>
                                 <div class="btn-add" onclick="event.stopPropagation(); addToCartById('${item.id}')">+</div>
                             </div>
                         `;
@@ -6353,7 +6850,7 @@
                             <span class="card-code">${item.code || ''}</span>
                             <div class="card-title">${item.name}</div>
                             <div class="card-bottom">
-                                <span class="card-price">$${Number(item.price).toFixed(2)}</span>
+                                <span class="card-price">${curSym()}${Number(item.price).toFixed(2)}</span>
                                 <div class="btn-add" onclick="event.stopPropagation(); addToCartById('${item.id}')">+</div>
                             </div>
                         `;
@@ -7055,7 +7552,7 @@
                         <div class="cust-round-head">
                             <span class="cust-round-tag ${isNew ? 'new' : 'old'}">${isNew ? 'NEW' : 'OLD'}</span>
                             <span class="cust-round-time">${escapeHtml(b.timeStr || '')}</span>
-                            <span class="cust-round-total">$${Number(b.total || 0).toFixed(2)}</span>
+                            <span class="cust-round-total">${curSym()}${Number(b.total || 0).toFixed(2)}</span>
                         </div>
                         <div class="cust-round-items">${escapeHtml(itemsText)}</div>
                     </div>`;
@@ -7161,7 +7658,7 @@
                                 <label class="note-label" style="margin:0; cursor:pointer; display:flex; align-items:center; gap:6px; font-weight:800; font-size:13px; color:${isChecked ? '#1e40af' : '#334155'};">
                                     <input type="checkbox" class="custom-opt-checkbox" data-item-id="${item.id}" data-opt-name="${safeOptName}" data-opt-price="${unitPrice}" ${isChecked ? 'checked' : ''} onchange="handleCheckboxToggle(this)">
                                     <span>${opt.name}</span>
-                                    <span style="color:#64748b; font-size:11.5px; font-weight:700;">(+$${unitPrice.toFixed(2)})</span>
+                                    <span style="color:#64748b; font-size:11.5px; font-weight:700;">(+${curSym()}${unitPrice.toFixed(2)})</span>
                                 </label>
                                 ${isChecked ? `
                                     <div style="display:flex; align-items:center; gap:6px;">
@@ -7174,7 +7671,7 @@
                                             <button type="button" data-item-id="${item.id}" data-opt-name="${safeOptName}" data-total-qty="${totalQty}" style="font-size:11px; font-weight:800; border:1px solid #bfdbfe; background:#dbeafe; color:#1e40af; border-radius:6px; padding:2px 7px; cursor:pointer;" onclick="handleOptionAllBtn(this)" title="Set option for all ${totalQty}">All ${totalQty}</button>
                                         ` : ''}
                                         ${totalOptCost > 0 ? `
-                                            <span style="font-size:12px; font-weight:900; color:#059669;">+$${totalOptCost.toFixed(2)}</span>
+                                            <span style="font-size:12px; font-weight:900; color:#059669;">+${curSym()}${totalOptCost.toFixed(2)}</span>
                                         ` : ''}
                                     </div>
                                 ` : ''}
@@ -7268,10 +7765,10 @@
                     </td>
                     <td style="text-align: right;">
                         ${isCustomerMode ? 
-                            `<div style="font-size:14px; font-weight:800; color:var(--text);">$${Number(item.customPrice).toFixed(2)}</div>` : 
+                            `<div style="font-size:14px; font-weight:800; color:var(--text);">${curSym()}${Number(item.customPrice).toFixed(2)}</div>` : 
                             `<input type="number" class="price-input" data-item-id="${item.id}" aria-label="Unit price for ${escapeHtml(item.name)}" value="${Number(item.customPrice).toFixed(2)}" step="0.50" min="0" onchange="updateItemPrice('${item.id}', this.value)">`
                         }
-                        <div style="font-size:12px; font-weight:bold; color:var(--text-muted); margin-top:3px;">Tot: $${lineTotal.toFixed(2)}</div>
+                        <div style="font-size:12px; font-weight:bold; color:var(--text-muted); margin-top:3px;">Tot: ${curSym()}${lineTotal.toFixed(2)}</div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -7945,7 +8442,7 @@
                 tr.innerHTML = `
                     <td style="padding: 4px 0; font-size:16px; font-weight:900; color:#000 !important;">${item.name}${notesStr}</td>
                     <td style="text-align: center; padding: 4px 0; font-size:16px; font-weight:900; color:#000 !important;">${item.qty}</td>
-                    <td style="text-align: right; padding: 4px 0; font-size:16px; font-weight:900; color:#000 !important;">$${getItemLineTotal(item).toFixed(2)}</td>
+                    <td style="text-align: right; padding: 4px 0; font-size:16px; font-weight:900; color:#000 !important;">${curSym()}${getItemLineTotal(item).toFixed(2)}</td>
                 `;
                 ptbody.appendChild(tr);
             });
@@ -8458,7 +8955,7 @@
             document.getElementById('modal-change-amount').innerText = "0.00";
             
             const printCheck = document.getElementById('modal-print-checkbox');
-            if (printCheck) printCheck.checked = false;
+            if (printCheck) printCheck.checked = !!getSettings().printReceiptDefault;
 
             selectModalPaymentMethod('Cash');
             document.getElementById('payment-modal').style.display = 'flex';
@@ -9067,22 +9564,23 @@
         }
 
         function getQRBaseUrl() {
-            let saved = localStorage.getItem('al_hussain_qr_base_url');
-            if (saved && saved.trim()) return saved.trim();
-            return "https://anvar3842-creator.github.io/al-hussain-menu/";
+            const saved = localStorage.getItem(QR_BASE_STORAGE_KEY);
+            return normalizeQRBaseUrl(saved || '', "https://anvar3842-creator.github.io/al-hussain-menu/");
         }
 
         function updateQRBaseUrl(val) {
-            if (!val || !val.trim()) return;
-            let clean = val.trim();
-            if (!clean.endsWith('/')) clean += '/';
-            localStorage.setItem('al_hussain_qr_base_url', clean);
+            const clean = normalizeQRBaseUrl(val, '');
+            if (!clean) {
+                alert('Please enter a valid http(s) QR Base URL.');
+                return;
+            }
+            localStorage.setItem(QR_BASE_STORAGE_KEY, clean);
             openCustomerQRModal();
         }
 
         function resetQRBaseUrlToGitHub() {
             const githubUrl = "https://anvar3842-creator.github.io/al-hussain-menu/";
-            localStorage.setItem('al_hussain_qr_base_url', githubUrl);
+            localStorage.setItem(QR_BASE_STORAGE_KEY, githubUrl);
             const input = document.getElementById('qr-custom-base-url');
             if (input) input.value = githubUrl;
             openCustomerQRModal();
@@ -9098,7 +9596,7 @@
                     cur += '/';
                 }
             }
-            localStorage.setItem('al_hussain_qr_base_url', cur);
+            localStorage.setItem(QR_BASE_STORAGE_KEY, cur);
             const input = document.getElementById('qr-custom-base-url');
             if (input) input.value = cur;
             openCustomerQRModal();
@@ -9186,9 +9684,9 @@
             if (qrTimeEl) qrTimeEl.innerText = getPrintTimestampText();
 
             setTimeout(() => {
-                document.body.className = "print-qr-mode";
+                document.body.classList.add('print-qr-mode');
                 window.print();
-                setTimeout(() => { document.body.className = ""; }, 1000);
+                setTimeout(() => { document.body.classList.remove('print-qr-mode'); }, 1000);
             }, 500);
         }
 
@@ -9442,7 +9940,7 @@ function deleteMenuItem(itemId) {
                     opts.forEach((o, i) => {
                         sec.innerHTML += `
                             <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #e2e8f0;">
-                                <span style="font-size:13px; font-weight:bold;">${escapeHtml(o.name)} (+$ ${Number(o.price).toFixed(2)})</span>
+                                <span style="font-size:13px; font-weight:bold;">${escapeHtml(o.name)} (+${curSym()} ${Number(o.price).toFixed(2)})</span>
                                 <button class="btn-small" style="background:#ef4444; padding:3px 8px;" onclick="deleteCategoryCheckboxOption(decodeURIComponent('${encodeURIComponent(cat)}'), ${i})">Delete</button>
                             </div>
                         `;
@@ -9476,7 +9974,7 @@ function deleteMenuItem(itemId) {
                     groups[itemId].forEach(g => {
                         sec.innerHTML += `
                             <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #c7d2fe;">
-                                <span style="font-size:13px; font-weight:bold;">${escapeHtml(g.opt.name)} (+$ ${Number(g.opt.price).toFixed(2)})</span>
+                                <span style="font-size:13px; font-weight:bold;">${escapeHtml(g.opt.name)} (+${curSym()} ${Number(g.opt.price).toFixed(2)})</span>
                                 <button class="btn-small" style="background:#ef4444; padding:3px 8px;" onclick="deleteItemCheckboxOption(${g.index})">Delete</button>
                             </div>
                         `;
@@ -9682,7 +10180,7 @@ function deleteMenuItem(itemId) {
                 tr.innerHTML = `
                     <td>${x.date || ''} ${x.time || ''}</td>
                     <td style="font-weight:bold;">${x.desc || ''}</td>
-                    <td style="text-align:right; font-weight:bold; color:var(--danger);">$ ${Number(x.amount).toFixed(2)}</td>
+                    <td style="text-align:right; font-weight:bold; color:var(--danger);">${curSym()} ${Number(x.amount).toFixed(2)}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -9802,7 +10300,7 @@ function deleteMenuItem(itemId) {
                     <td style="font-weight:bold;">${sale.ref || ''}</td>
                     <td>${sale.source || ''}${sale.intake ? ' • ' + (sale.intake === 'phone' ? '📞 Phone' : '🚶 Walk-in') : ''}</td>
                     <td>${sale.paymentMethod || ''}${sale.paymentCorrected ? ' ✏️' : ''}</td>
-                    <td style="text-align:right; font-weight:bold; color:var(--success);">$ ${Number(sale.total).toFixed(2)}</td>
+                    <td style="text-align:right; font-weight:bold; color:var(--success);">${curSym()} ${Number(sale.total).toFixed(2)}</td>
                     <td style="text-align:center;">
                         <button class="btn-small">View</button>
                     </td>
@@ -9864,14 +10362,14 @@ function deleteMenuItem(itemId) {
             (sale.items || []).forEach(it => {
                 const nList = getItemNotesList(it);
                 const nStr = nList.length > 0 ? `<div style="font-size:12px; color:var(--primary); font-weight:bold; margin-top:1px;">[ ${nList.join(', ')} ]</div>` : '';
-                itemsHtml += `<div style="margin-bottom:6px;"><div style="display:flex; justify-content:space-between;"><span>${it.qty}x ${it.name}</span><span>$${getItemLineTotal(it).toFixed(2)}</span></div>${nStr}</div>`;
+                itemsHtml += `<div style="margin-bottom:6px;"><div style="display:flex; justify-content:space-between;"><span>${it.qty}x ${it.name}</span><span>${curSym()}${getItemLineTotal(it).toFixed(2)}</span></div>${nStr}</div>`;
             });
 
             let correctionHtml = '';
             if (sale.paymentCorrected) {
                 const before = sale.originalPaymentMethod
-                    ? `${escapeHtml(sale.originalPaymentMethod)} $${Number(sale.originalTotal || 0).toFixed(2)} → ${escapeHtml(sale.paymentMethod || '')} $${Number(sale.total || 0).toFixed(2)}`
-                    : `${escapeHtml(sale.paymentMethod || '')} $${Number(sale.total || 0).toFixed(2)}`;
+                    ? `${escapeHtml(sale.originalPaymentMethod)} ${curSym()}${Number(sale.originalTotal || 0).toFixed(2)} → ${escapeHtml(sale.paymentMethod || '')} ${curSym()}${Number(sale.total || 0).toFixed(2)}`
+                    : `${escapeHtml(sale.paymentMethod || '')} ${curSym()}${Number(sale.total || 0).toFixed(2)}`;
                 correctionHtml = `<div style="font-size:12px; font-weight:800; color:#b45309; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:8px 10px; margin-bottom:12px;">
                     <div>✏️ Payment corrected by ${escapeHtml(sale.paymentCorrectedBy || 'Admin')} on ${escapeHtml(sale.paymentCorrectedDate || '')} ${escapeHtml(sale.paymentCorrectedTime || '')}</div>
                     <div style="margin-top:3px;">${before}</div>
@@ -9894,9 +10392,9 @@ function deleteMenuItem(itemId) {
                 <hr style="border-top:1px dashed #cbd5e1; margin:10px 0;">
                 <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:900;">
                     <span>Total Paid:</span>
-                    <span>$${Number(sale.total).toFixed(2)}</span>
+                    <span>${curSym()}${Number(sale.total).toFixed(2)}</span>
                 </div>
-                ${sale.paid != null && Number(sale.paid) !== Number(sale.total) ? `<div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:800; color:#64748b; margin-top:4px;"><span>Received: $${Number(sale.paid).toFixed(2)}</span><span>Change: $${Number(sale.change || 0).toFixed(2)}</span></div>` : ''}
+                ${sale.paid != null && Number(sale.paid) !== Number(sale.total) ? `<div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:800; color:#64748b; margin-top:4px;"><span>Received: ${curSym()}${Number(sale.paid).toFixed(2)}</span><span>Change: ${curSym()}${Number(sale.change || 0).toFixed(2)}</span></div>` : ''}
             `;
             document.getElementById('history-view-modal').style.display = 'flex';
         }
@@ -9938,7 +10436,7 @@ function deleteMenuItem(itemId) {
             const noteInput = document.getElementById('payment-correct-note');
 
             if (info) {
-                info.innerHTML = `Ref: <b>${escapeHtml(sale.ref || '')}</b><br>${escapeHtml(sale.source || '')} • ${escapeHtml(sale.date || '')} ${escapeHtml(sale.time || '')}<br>Current: <b>${escapeHtml(sale.paymentMethod || 'Cash')}</b> • $${Number(sale.total || 0).toFixed(2)}`;
+                info.innerHTML = `Ref: <b>${escapeHtml(sale.ref || '')}</b><br>${escapeHtml(sale.source || '')} • ${escapeHtml(sale.date || '')} ${escapeHtml(sale.time || '')}<br>Current: <b>${escapeHtml(sale.paymentMethod || 'Cash')}</b> • ${curSym()}${Number(sale.total || 0).toFixed(2)}`;
             }
             if (warning) {
                 if (sale.dayClosed) {
@@ -10074,7 +10572,7 @@ function deleteMenuItem(itemId) {
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${s.date ? s.date + ' ' : ''}${s.time} - ${s.ref} (${s.source})${s.intake ? ' [' + (s.intake === 'phone' ? 'Phone' : 'Walk-in') + ']' : ''}</td>
-                    <td style="text-align:right;">$${Number(s.total).toFixed(2)}</td>
+                    <td style="text-align:right;">${curSym()}${Number(s.total).toFixed(2)}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -10082,9 +10580,9 @@ function deleteMenuItem(itemId) {
             document.getElementById('print-history-grand-total').innerText = sum.toFixed(2);
             const historyTimeEl = document.getElementById('print-history-time');
             if (historyTimeEl) historyTimeEl.innerText = getPrintTimestampText();
-            document.body.className = "print-history-mode";
+            document.body.classList.add('print-history-mode');
             window.print();
-            setTimeout(() => { document.body.className = ""; }, 1000);
+            setTimeout(() => { document.body.classList.remove('print-history-mode'); }, 1000);
         }
 
         function openMonthlyReportModal() {
@@ -10114,7 +10612,7 @@ function deleteMenuItem(itemId) {
 
             let tableHtml = '<table class="admin-table"><thead><tr><th>Date</th><th style="text-align:right;">Total Sales</th></tr></thead><tbody>';
             Object.keys(dailyMap).sort().reverse().forEach(d => {
-                tableHtml += `<tr><td style="font-weight:bold;">${d}</td><td style="text-align:right; font-weight:bold; color:var(--primary);">$ ${dailyMap[d].toFixed(2)}</td></tr>`;
+                tableHtml += `<tr><td style="font-weight:bold;">${d}</td><td style="text-align:right; font-weight:bold; color:var(--primary);">${curSym()} ${dailyMap[d].toFixed(2)}</td></tr>`;
             });
             tableHtml += '</tbody></table>';
             container.innerHTML = tableHtml;
@@ -10330,12 +10828,12 @@ function deleteMenuItem(itemId) {
                         <div style="font-weight:900; font-size:14px; color:#0f172a;">${item.name}</div>
                         <span style="display:inline-block; font-size:11px; background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:6px; font-weight:700; margin-top:2px;">${item.cat}</span>
                     </td>
-                    <td style="text-align:right; font-weight:700; color:#334155;">$${item.unitPrice.toFixed(2)}</td>
+                    <td style="text-align:right; font-weight:700; color:#334155;">${curSym()}${item.unitPrice.toFixed(2)}</td>
                     <td style="text-align:right; font-weight:900; font-size:15px; color:#059669;">
                         ${item.qty} <span style="font-size:11px; font-weight:700; color:#065f46;">pcs</span>
                     </td>
                     <td style="text-align:right; font-weight:900; font-size:15px; color:#1e40af;">
-                        $${item.totalSales.toFixed(2)}
+                        ${curSym()}${item.totalSales.toFixed(2)}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -10375,7 +10873,7 @@ function deleteMenuItem(itemId) {
                             <tr style="border-bottom: 1px dashed #ccc;">
                                 <td style="padding: 4px 0; font-weight: 900;">${name}</td>
                                 <td style="text-align: center; padding: 4px 0; font-weight: 900;">${qty}</td>
-                                <td style="text-align: right; padding: 4px 0; font-weight: 900;">$${amt.toFixed(2)}</td>
+                                <td style="text-align: right; padding: 4px 0; font-weight: 900;">${curSym()}${amt.toFixed(2)}</td>
                             </tr>
                         `;
                     }
@@ -10387,9 +10885,9 @@ function deleteMenuItem(itemId) {
                 if (pAmt) pAmt.innerText = totalAmt.toFixed(2);
             }
 
-            document.body.className = "print-item-report-mode";
+            document.body.classList.add('print-item-report-mode');
             window.print();
-            setTimeout(() => { document.body.className = ""; }, 1000);
+            setTimeout(() => { document.body.classList.remove('print-item-report-mode'); }, 1000);
         }
 
         function openPaymentSummaryModal() {
@@ -10448,7 +10946,7 @@ function deleteMenuItem(itemId) {
                     <td style="font-weight:bold; color:var(--primary);">${activeShift.role} (Current)</td>
                     <td>${activeShift.loginTime}</td>
                     <td style="text-align:center; font-weight:bold;">${activeShift.billsCount || 0}</td>
-                    <td style="text-align:right; font-weight:bold; color:var(--success);">$ ${(activeShift.totalCollected || 0).toFixed(2)}</td>
+                    <td style="text-align:right; font-weight:bold; color:var(--success);">${curSym()} ${(activeShift.totalCollected || 0).toFixed(2)}</td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -10534,10 +11032,10 @@ function deleteMenuItem(itemId) {
             const totalE = curExpEntries.reduce((sum, [k, e]) => sum + (Number(e.amount) || 0), 0);
 
             const confirmMsg = `Are you sure you want to ${printReceipt ? 'Print Report and ' : ''}perform Day Close?\n\n` +
-                `• Current Active Sales: $${totalS.toFixed(2)} (${curSalesEntries.length} bills)\n` +
-                `• Current Active Expenses: $${totalE.toFixed(2)}\n` +
-                `• Net Settlement: $${(totalS - totalE).toFixed(2)}\n\n` +
-                `This will save the records to Day Close History and RESET all Sales and Expense amounts back to $0.00.`;
+                `• Current Active Sales: ${curSym()}${totalS.toFixed(2)} (${curSalesEntries.length} bills)\n` +
+                `• Current Active Expenses: ${curSym()}${totalE.toFixed(2)}\n` +
+                `• Net Settlement: ${curSym()}${(totalS - totalE).toFixed(2)}\n\n` +
+                `This will save the records to Day Close History and RESET all Sales and Expense amounts back to ${curSym()}0.00.`;
 
             if (!confirm(confirmMsg)) return;
 
@@ -10667,7 +11165,7 @@ function deleteMenuItem(itemId) {
                 if (expList) {
                     expList.innerHTML = "";
                     dayCloseRecord.expensesList.forEach(e => {
-                        expList.innerHTML += `<tr><td>${e.desc}</td><td style="text-align:right;">$${Number(e.amount).toFixed(2)}</td></tr>`;
+                        expList.innerHTML += `<tr><td>${e.desc}</td><td style="text-align:right;">${curSym()}${Number(e.amount).toFixed(2)}</td></tr>`;
                     });
                     if (dayCloseRecord.expensesList.length === 0) {
                         expList.innerHTML = `<tr><td colspan="2" style="color:#64748b; text-align:center;">No expenses recorded</td></tr>`;
@@ -10677,16 +11175,16 @@ function deleteMenuItem(itemId) {
                 closeDayCloseModal();
 
                 if (printReceipt) {
-                    document.body.className = "print-day-close-mode";
+                    document.body.classList.add('print-day-close-mode');
                     window.print();
                     setTimeout(() => {
-                        document.body.className = "";
-                        if (confirm("✓ Day Close successfully processed!\n\nAll counters have been reset to $0.00.\nWould you like to log out now?")) {
+                        document.body.classList.remove('print-day-close-mode');
+                        if (confirm("✓ Day Close successfully processed!\n\nAll counters have been reset to " + curSym() + "0.00.\nWould you like to log out now?")) {
                             logout();
                         }
                     }, 1200);
                 } else {
-                    alert("✓ Day Close completed!\n\nSales and Expense amounts have been successfully reset to $0.00 for the new session.");
+                    alert("✓ Day Close completed!\n\nSales and Expense amounts have been successfully reset to " + curSym() + "0.00 for the new session.");
                 }
             } catch (err) {
                 console.error("Day close error:", err);
@@ -10722,9 +11220,9 @@ function deleteMenuItem(itemId) {
                     <tr>
                         <td><b>${r.dateStr || ''}</b> ${r.timeStr || ''}</td>
                         <td>${r.closedBy || 'Admin'}</td>
-                        <td style="text-align:right; font-weight:bold; color:var(--success);">$${Number(r.totalSales || 0).toFixed(2)}</td>
-                        <td style="text-align:right; font-weight:bold; color:var(--danger);">$${Number(r.totalExpenses || 0).toFixed(2)}</td>
-                        <td style="text-align:right; font-weight:900; color:var(--primary);">$${Number(r.netBalance || 0).toFixed(2)}</td>
+                        <td style="text-align:right; font-weight:bold; color:var(--success);">${curSym()}${Number(r.totalSales || 0).toFixed(2)}</td>
+                        <td style="text-align:right; font-weight:bold; color:var(--danger);">${curSym()}${Number(r.totalExpenses || 0).toFixed(2)}</td>
+                        <td style="text-align:right; font-weight:900; color:var(--primary);">${curSym()}${Number(r.netBalance || 0).toFixed(2)}</td>
                         <td style="text-align:center;">
                             <button type="button" class="btn-small" onclick='reprintPastDayClose(${JSON.stringify(r).replace(/'/g, "&apos;")})'>🖨️</button>
                         </td>
@@ -10760,17 +11258,17 @@ function deleteMenuItem(itemId) {
             if (expList) {
                 expList.innerHTML = "";
                 (r.expensesList || []).forEach(e => {
-                    expList.innerHTML += `<tr><td>${e.desc}</td><td style="text-align:right;">$${Number(e.amount).toFixed(2)}</td></tr>`;
+                    expList.innerHTML += `<tr><td>${e.desc}</td><td style="text-align:right;">${curSym()}${Number(e.amount).toFixed(2)}</td></tr>`;
                 });
                 if (!r.expensesList || r.expensesList.length === 0) {
                     expList.innerHTML = `<tr><td colspan="2" style="color:#64748b; text-align:center;">No expenses recorded</td></tr>`;
                 }
             }
 
-            document.body.className = "print-day-close-mode";
+            document.body.classList.add('print-day-close-mode');
             window.print();
             setTimeout(() => {
-                document.body.className = "";
+                document.body.classList.remove('print-day-close-mode');
             }, 1000);
         }
 
