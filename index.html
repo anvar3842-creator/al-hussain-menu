@@ -535,6 +535,7 @@
         .staff-alert-new-items { margin-top: 3px; font-size: 12px; font-weight: 900; color: #0e7490; background: #ffffffb3; border-radius: 7px; padding: 3px 7px; display: inline-block; max-width: 100%; }
         .tc-new-items { margin: 4px 0 2px; padding: 4px 7px; border-radius: 8px; background: #ecfdf5; border: 1px dashed #6ee7b7; color: #047857; font-size: 10px; font-weight: 900; line-height: 1.35; position: relative; z-index: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .cart-new-badge { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: #dcfce7; border: 1px solid #86efac; color: #15803d; font-size: 9.5px; font-weight: 900; vertical-align: middle; letter-spacing: 0.02em; }
+        .cart-old-badge { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; font-size: 9.5px; font-weight: 900; vertical-align: middle; letter-spacing: 0.02em; }
         .customer-order-rounds { margin: 4px 0 10px; padding: 10px 12px; border: 1.5px solid #bae6fd; background: #f0f9ff; border-radius: 12px; }
         .cust-rounds-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; font-weight: 900; color: #0369a1; margin-bottom: 6px; }
         .cust-rounds-head span { font-size: 10.5px; font-weight: 800; color: #0284c7; background: #e0f2fe; border-radius: 999px; padding: 1px 8px; }
@@ -5472,6 +5473,7 @@
                 const ord = activeOrders[currentTableKey];
                 if (ord && ord.items && ord.items.length > 0 && ord.lastDeviceId === posDeviceId) {
                     if (!ord.sentToKitchen) {
+                        recordKitchenRound(ord, loggedInDisplayName || 'Staff');
                         ord.sentToKitchen = true;
                         ord.lastUpdatedAt = Date.now();
                         writeActiveOrder(currentTableKey, ord);
@@ -7487,9 +7489,10 @@
             flashLiveSyncSuccess();
         }
 
-        // ---- Customer QR order rounds (new vs old) -------------------------
-        // Every customer "Send Order" appends one batch to the table order, so
-        // staff can see exactly what was just added and what was ordered before.
+        // ---- Order rounds (new vs old) -------------------------------------
+        // Every "send to kitchen" (customer QR or staff) appends one batch to the
+        // table order, so staff can see exactly what was just added and what was
+        // ordered before.
         function getCustomerOrderBatches(order) {
             if (!order || !Array.isArray(order.customerOrderBatches)) return [];
             return order.customerOrderBatches.filter(b => b && Array.isArray(b.items) && b.items.length > 0);
@@ -7498,6 +7501,80 @@
         function getLatestCustomerOrderBatch(order) {
             const batches = getCustomerOrderBatches(order);
             return batches.length ? batches[batches.length - 1] : null;
+        }
+
+        // Records the quantities added since the previous send as one round and
+        // marks every line as sent. Used by staff "Send to Kitchen" and auto-save.
+        function recordKitchenRound(order, byLabel) {
+            if (!order) return;
+            const roundAt = Date.now();
+            const roundTimeStr = new Date(roundAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const batches = getCustomerOrderBatches(order);
+            // An order already sent on the old version has no rounds and no per-line
+            // sentQty: take what is on the table right now as the baseline round
+            // instead of marking the whole order as NEW.
+            const legacyInFlight = batches.length === 0 && !order.legacySentBaseline &&
+                !!(order.sentToKitchen || order.customerSent);
+            if (legacyInFlight) {
+                const baselineItems = [];
+                let baselineTotal = 0;
+                getOrderItemsArray(order).forEach(it => {
+                    if (!it || !it.name) return;
+                    const qty = Math.max(0, Number(it.qty) || 0);
+                    if (!qty) return;
+                    it.sentQty = qty;
+                    baselineItems.push({
+                        id: it.id != null ? String(it.id) : '',
+                        name: String(it.name),
+                        qty,
+                        note: getItemNotesList(it).join(', ')
+                    });
+                    baselineTotal += getItemLineTotal(it);
+                });
+                order.legacySentBaseline = true;
+                if (baselineItems.length) {
+                    order.customerOrderBatches = batches.concat([{
+                        at: roundAt,
+                        timeStr: roundTimeStr,
+                        items: baselineItems,
+                        total: Math.round(baselineTotal * 100) / 100,
+                        by: byLabel || 'Staff',
+                        baseline: true
+                    }]).slice(-20);
+                }
+                return;
+            }
+            const roundItems = [];
+            let roundTotal = 0;
+            getOrderItemsArray(order).forEach(it => {
+                if (!it || !it.name) return;
+                const qty = Math.max(0, Number(it.qty) || 0);
+                if (!qty) return;
+                if (it.sentQty == null) {
+                    // Lines saved before sentQty tracking existed: trust what the
+                    // recorded rounds already cover; anything beyond that is new.
+                    it.sentQty = Math.min(qty, batches.reduce((sum, b) => sum + getCustomerBatchQtyForItem(b, it), 0));
+                }
+                const alreadySent = Math.max(0, Math.min(qty, Number(it.sentQty) || 0));
+                const addedQty = Math.round((qty - alreadySent) * 100) / 100;
+                it.sentQty = qty;
+                if (addedQty <= 0) return;
+                roundItems.push({
+                    id: it.id != null ? String(it.id) : '',
+                    name: String(it.name),
+                    qty: addedQty,
+                    note: getItemNotesList(it).join(', ')
+                });
+                roundTotal += getItemLineTotal(it) * (addedQty / qty);
+            });
+            if (roundItems.length === 0) return;
+            order.customerOrderBatches = batches.concat([{
+                at: roundAt,
+                timeStr: roundTimeStr,
+                items: roundItems,
+                total: Math.round(roundTotal * 100) / 100,
+                by: byLabel || 'Staff'
+            }]).slice(-20);
         }
 
         function formatCustomerBatchItems(items, maxItems) {
@@ -7529,6 +7606,20 @@
             }, 0);
         }
 
+        // How much of a line is already "sent" when two orders are merged/moved.
+        // A line with no sentQty may be a fresh never-sent line (keep it new) or a
+        // pre-tracking line from an order that was already sent (trust the rounds).
+        function defaultSentQtyForMerge(line, order) {
+            const qty = Math.max(0, Number(line.qty) || 0);
+            if (line.sentQty != null) return Math.max(0, Number(line.sentQty) || 0);
+            const ownBatches = (order && Array.isArray(order.customerOrderBatches)) ? order.customerOrderBatches : [];
+            if (ownBatches.length > 0) {
+                const cover = ownBatches.reduce((sum, b) => sum + getCustomerBatchQtyForItem(b, line), 0);
+                return Math.min(qty, cover);
+            }
+            return (order && (order.sentToKitchen || order.customerSent)) ? qty : 0;
+        }
+
         function renderCustomerOrderRounds(order) {
             const el = document.getElementById('customer-order-rounds');
             if (!el) return;
@@ -7544,14 +7635,15 @@
                 return;
             }
             const newestFirst = batches.slice().reverse();
-            el.innerHTML = `<div class="cust-rounds-head"><strong>📱 Customer QR Orders</strong><span>${batches.length} round${batches.length === 1 ? '' : 's'}</span></div>` +
+            el.innerHTML = `<div class="cust-rounds-head"><strong>🔁 Order Rounds (NEW / OLD)</strong><span>${batches.length} round${batches.length === 1 ? '' : 's'}</span></div>` +
                 newestFirst.map((b, idx) => {
-                    const isNew = idx === 0;
+                    const isNew = idx === 0 && !b.baseline;
                     const itemsText = formatCustomerBatchItems(b.items);
+                    const byText = b.by ? ` • ${escapeHtml(String(b.by))}` : '';
                     return `<div class="cust-round">
                         <div class="cust-round-head">
                             <span class="cust-round-tag ${isNew ? 'new' : 'old'}">${isNew ? 'NEW' : 'OLD'}</span>
-                            <span class="cust-round-time">${escapeHtml(b.timeStr || '')}</span>
+                            <span class="cust-round-time">${escapeHtml(b.timeStr || '')}${byText}</span>
                             <span class="cust-round-total">${curSym()}${Number(b.total || 0).toFixed(2)}</span>
                         </div>
                         <div class="cust-round-items">${escapeHtml(itemsText)}</div>
@@ -7594,7 +7686,10 @@
             const totalItemCount = items.reduce((s, x) => s + (Number(x.qty) || 1), 0);
 
             renderCustomerOrderRounds(order);
-            const latestCustomerBatch = getLatestCustomerOrderBatch(order);
+            const customerBatches = getCustomerOrderBatches(order);
+            const latestCustomerBatch = customerBatches.length ? customerBatches[customerBatches.length - 1] : null;
+            const latestIsBaseline = !!(latestCustomerBatch && latestCustomerBatch.baseline);
+            const earlierCustomerBatches = latestIsBaseline ? customerBatches : customerBatches.slice(0, -1);
 
             const mobBadge = document.getElementById('mob-cart-badge');
             const deskBadge = document.getElementById('desktop-cart-badge');
@@ -7636,8 +7731,14 @@
                 const tkQty = Math.max(0, Math.min(totalQty, Number(item.takeawayQty) || 0));
                 const tr = document.createElement('tr');
                 const lineTotal = getItemLineTotal(item);
-                const newFromCustomer = (!isCustomerMode && latestCustomerBatch)
-                    ? getCustomerBatchQtyForItem(latestCustomerBatch, item)
+                const newFromCustomer = (!isCustomerMode && latestCustomerBatch && !latestIsBaseline)
+                    ? Math.min(totalQty, getCustomerBatchQtyForItem(latestCustomerBatch, item))
+                    : 0;
+                const oldFromRounds = (!isCustomerMode && earlierCustomerBatches.length)
+                    ? Math.min(
+                        Math.max(0, totalQty - newFromCustomer),
+                        earlierCustomerBatches.reduce((sum, b) => sum + getCustomerBatchQtyForItem(b, item), 0)
+                    )
                     : 0;
 
                 const catOpts = getOptionsForItem(item);
@@ -7694,7 +7795,7 @@
 
                 tr.innerHTML = `
                     <td>
-                        <div class="cart-item-name">${item.name}${newFromCustomer > 0 ? ` <span class="cart-new-badge" title="Added by customer at ${escapeHtml(latestCustomerBatch.timeStr || '')}">NEW +${newFromCustomer}</span>` : ''}</div>
+                        <div class="cart-item-name">${item.name}${newFromCustomer > 0 ? ` <span class="cart-new-badge" title="Added at ${escapeHtml(latestCustomerBatch.timeStr || '')}${latestCustomerBatch.by ? ' by ' + escapeHtml(String(latestCustomerBatch.by)) : ''}">NEW +${newFromCustomer}</span>` : ''}${oldFromRounds > 0 ? ` <span class="cart-old-badge" title="Ordered in an earlier round">OLD ${oldFromRounds}</span>` : ''}</div>
                         ${customOptsHtml}
                         ${isDedicatedTakeaway ? `
                         <div style="margin-top: 5px; margin-bottom: 5px; display: inline-flex; align-items: center; gap: 6px; background: #fffbeb; border: 1.5px solid #fde68a; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 800; color: #b45309;">
@@ -7955,10 +8056,13 @@
                         String(it.id) === String(incoming.id) && variantKey(it) === incomingVariant
                     );
                     if (existing) {
-                        existing.qty = (Number(existing.qty) || 0) + qty;
+                        const priorQty = Number(existing.qty) || 0;
+                        const priorSentQty = defaultSentQtyForMerge(existing, latest);
+                        existing.qty = priorQty + qty;
+                        existing.sentQty = priorSentQty + qty;
                         if (incoming.takeawayQty) existing.takeawayQty = (Number(existing.takeawayQty) || 0) + Number(incoming.takeawayQty || 0);
                     } else {
-                        mergedItems.push({ ...incoming, qty });
+                        mergedItems.push({ ...incoming, qty, sentQty: qty });
                     }
                 });
                 merged.items = mergedItems;
@@ -8086,6 +8190,7 @@
                 return alert("No items in cart to send! Please add items first.");
             }
             const isUpdate = !!(order.sentToKitchen || order.customerSent);
+            recordKitchenRound(order, loggedInDisplayName || 'Staff');
             order.sentToKitchen = true;
             order.sentToKitchenAt = Date.now();
             order.lastUpdatedAt = Date.now();
@@ -8821,7 +8926,7 @@
            ============================================================ */
         const CUSTOMER_DISPLAY_CHANNEL = 'al_hussain_customer_display_v1';
         const CUSTOMER_DISPLAY_STORAGE = 'al_hussain_customer_display_state';
-        const CUSTOMER_DISPLAY_DONE_MS = 15000;
+        const CUSTOMER_DISPLAY_DONE_MS = 60000;
 
         let customerDisplayChannel = null;
         let customerDisplayIdleTimer = null;
@@ -9284,6 +9389,16 @@
                     if (paidOrderKey && currentTableKey === paidOrderKey) {
                         renderCart({ skipInputSync: true });
                     }
+                    // The "thank you" already went out optimistically; take it back
+                    // so the customer screen does not claim a payment that failed.
+                    pushCustomerDisplayState({
+                        type: 'pay',
+                        total: grand,
+                        paid: paid,
+                        change: change,
+                        method: chosenPaymentMethod,
+                        table: paidOrderKey || ''
+                    });
                     alert('Payment could not be saved. Please check the connection — the table has been restored so you can try again.');
                 });
 
@@ -9381,9 +9496,30 @@
                 }
                 currentOrder.items.forEach(it => {
                     let ex = destOrder.items.find(x => x.id === it.id);
-                    if (ex) ex.qty += it.qty;
-                    else destOrder.items.push(it);
+                    if (ex) {
+                        const priorQty = Number(ex.qty) || 0;
+                        const incomingQty = Number(it.qty) || 0;
+                        const incomingSentQty = defaultSentQtyForMerge(it, currentOrder);
+                        const priorSentQty = defaultSentQtyForMerge(ex, destOrder);
+                        ex.qty = priorQty + incomingQty;
+                        ex.sentQty = priorSentQty + incomingSentQty;
+                    } else {
+                        const moved = { ...it };
+                        moved.sentQty = defaultSentQtyForMerge(it, currentOrder);
+                        destOrder.items.push(moved);
+                    }
                 });
+                const combinedBatches = [];
+                [destOrder, currentOrder].forEach(o => {
+                    (Array.isArray(o.customerOrderBatches) ? o.customerOrderBatches : []).forEach(b => {
+                        if (b && Array.isArray(b.items) && b.items.length) combinedBatches.push(b);
+                    });
+                });
+                if (combinedBatches.length) {
+                    destOrder.customerOrderBatches = combinedBatches
+                        .sort((a, b) => (Number(a.at) || 0) - (Number(b.at) || 0))
+                        .slice(-20);
+                }
                 writeActiveOrder(targetMoveDestination, destOrder).then(result => {
                     if (!isCustomerMode && (!result || result.committed !== false)) {
                         clearActiveOrder(sourceKey, currentOrder);
@@ -9500,10 +9636,16 @@
                             const incomingVariant = variantKey(incoming);
                             const existing = mergedItems.find(it => String(it.id) === String(incoming.id) && variantKey(it) === incomingVariant);
                             if (existing) {
-                                existing.qty = (Number(existing.qty) || 0) + qty;
+                                const priorQty = Number(existing.qty) || 0;
+                                const incomingSentQty = defaultSentQtyForMerge(incoming, slaveOrder);
+                                const priorSentQty = defaultSentQtyForMerge(existing, masterOrder);
+                                existing.qty = priorQty + qty;
+                                existing.sentQty = priorSentQty + incomingSentQty;
                                 if (incoming.takeawayQty) existing.takeawayQty = (Number(existing.takeawayQty) || 0) + Number(incoming.takeawayQty || 0);
                             } else {
-                                mergedItems.push({ ...incoming, qty });
+                                const newLine = { ...incoming, qty };
+                                newLine.sentQty = defaultSentQtyForMerge(incoming, slaveOrder);
+                                mergedItems.push(newLine);
                             }
                         });
 
@@ -9530,6 +9672,18 @@
 
                         updates['activeOrders/' + slaveKey] = null;
                     });
+
+                    const combinedBatches = [];
+                    [masterOrder, ...slaveEntries.map(([, o]) => o)].forEach(o => {
+                        (o && Array.isArray(o.customerOrderBatches) ? o.customerOrderBatches : []).forEach(b => {
+                            if (b && Array.isArray(b.items) && b.items.length) combinedBatches.push(b);
+                        });
+                    });
+                    if (combinedBatches.length) {
+                        merged.customerOrderBatches = combinedBatches
+                            .sort((a, b) => (Number(a.at) || 0) - (Number(b.at) || 0))
+                            .slice(-20);
+                    }
 
                     merged.customerSent = anyCustomerSent;
                     merged.lastUpdatedAt = Date.now();
