@@ -337,7 +337,7 @@
   var STORAGE_KEY = isBranch2
     ? "al_hussain_customer_display_state_branch2"
     : "al_hussain_customer_display_state";
-  var DONE_AUTO_IDLE_MS = 15000;
+  var DONE_AUTO_IDLE_MS = 60000;
 
   if (isBranch2) {
     var tagEl = document.querySelector(".brand .tag");
@@ -591,6 +591,9 @@
     var storedTs = Number(stored.ts) || 0;
     // Never keep an old payment on screen after the POS was closed or reloaded.
     if (stored.type === "pay" && storedTs && (Date.now() - storedTs > 10 * 60 * 1000)) {
+      stored = { type: "idle" };
+    }
+    if (stored.type === "done" && storedTs && (Date.now() - storedTs > DONE_AUTO_IDLE_MS)) {
       stored = { type: "idle" };
     }
     render(stored);
