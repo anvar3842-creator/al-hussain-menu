@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Al Hussain Restaurant point-of-sale system: table management, ordering, kitchen KOT, billing, payments, stock, expenses and daily reports.">
-    <title>Al Hussain Restaurant - POS System v2.4</title>
+    <title>Al Hussain Restaurant - POS System v2.5</title>
     
     <!-- Instant Customer QR Detection to prevent any login or table selection screen flash -->
     <script>
@@ -1713,6 +1713,7 @@
     .tc-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
     .tc-staff { display: inline-flex; align-items: center; gap: 4px; font-size: 9.5px; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .tc-staff.is-customer { background: #e0f2fe; color: #0284c7; border-color: #bae6fd; }
+    .tc-round-chip { display: inline-flex; align-items: center; gap: 3px; font-size: 9.5px; font-weight: 900; padding: 2px 7px; border-radius: 999px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; white-space: nowrap; }
     .tc-empty { margin: auto 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; position: relative; z-index: 1; }
     .tc-empty-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; background: #ecfdf5; border: 1px solid #bbf7d0; box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.6); }
     .tc-empty-text { font-size: 12px; font-weight: 900; color: #047857; letter-spacing: 0.01em; }
@@ -4481,6 +4482,16 @@
                 data.takenBy === 'Customer QR';
         }
 
+        // One place for the per-account alert switch, used by both the live
+        // banners and the table/takeaway cards. QR orders must follow the QR
+        // switch, not the staff-order switch, on every account.
+        function canReceiveAlertForOrder(data) {
+            if (isCustomerMode || !data) return false;
+            return isCustomerQrAlert(data)
+                ? canReceiveCustomerQrNotifications()
+                : canReceiveOrderNotifications();
+        }
+
         function handleIncomingOrderAlert(type, tableKey, byUser, itemsCount, total, isCustomerQr) {
             if (isCustomerMode) return;
             // Customer QR orders have their own per-account switch and their own
@@ -5472,12 +5483,20 @@
             if (currentTableKey && activeOrders[currentTableKey]) {
                 const ord = activeOrders[currentTableKey];
                 if (ord && ord.items && ord.items.length > 0 && ord.lastDeviceId === posDeviceId) {
-                    if (!ord.sentToKitchen) {
-                        recordKitchenRound(ord, loggedInDisplayName || 'Staff');
+                    const wasSent = !!ord.sentToKitchen;
+                    // Always check for added quantities, even on an order that was
+                    // sent before. Leaving the table used to skip the round update
+                    // for a re-order, so the extra items never appeared as Round 2.
+                    // The return value survives the 20-round history cap, where the
+                    // list length stays the same even though a new round was added.
+                    const roundAdded = recordKitchenRound(ord, loggedInDisplayName || 'Staff');
+                    if (!wasSent || roundAdded) {
                         ord.sentToKitchen = true;
                         ord.lastUpdatedAt = Date.now();
+                        ord.lastDeviceId = posDeviceId;
+                        ord.lastUpdatedBy = loggedInDisplayName || 'Staff';
                         writeActiveOrder(currentTableKey, ord);
-                        broadcastLiveOrderEvent(currentTableKey, 'order', ord);
+                        broadcastLiveOrderEvent(currentTableKey, wasSent ? 'update' : 'order', ord);
                     }
                 }
             }
@@ -5609,6 +5628,23 @@
             }
 
             switchMobileTab('menu');
+            // First open after upgrading an already-sent order: snapshot its CURRENT
+            // items as Round 1 before anyone adds an extra. Without this, the extra
+            // would be swallowed into the baseline and no Round 2 would appear.
+            if (!isCustomerMode && activeOrders[currentTableKey]) {
+                const openingLegacy = activeOrders[currentTableKey];
+                if ((openingLegacy.sentToKitchen || openingLegacy.customerSent) &&
+                    getCustomerOrderBatches(openingLegacy).length === 0) {
+                    const legacyAt = Date.now();
+                    appendLegacyBaselineRound(
+                        openingLegacy,
+                        legacyAt,
+                        new Date(legacyAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        openingLegacy.takenBy || 'Staff'
+                    );
+                    writeActiveOrder(currentTableKey, openingLegacy);
+                }
+            }
             // Paint the locally cached cart immediately, then refresh this table from
             // Firebase in the background. Waiting for the network here made opening
             // a table feel slow on every click.
@@ -5637,6 +5673,20 @@
                     const freshOrder = freshSnapshot.val();
                     if (freshOrder && typeof freshOrder === 'object' && !isClosedOrder(freshOrder)) {
                         getOrderItemsArray(freshOrder);
+                        // Same legacy protection for the first network snapshot of
+                        // an already-sent table opened after the upgrade.
+                        if ((freshOrder.sentToKitchen || freshOrder.customerSent) &&
+                            getCustomerOrderBatches(freshOrder).length === 0) {
+                            const freshLegacyAt = Date.now();
+                            if (appendLegacyBaselineRound(
+                                freshOrder,
+                                freshLegacyAt,
+                                new Date(freshLegacyAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                                freshOrder.takenBy || 'Staff'
+                            )) {
+                                writeActiveOrder(openingKey, freshOrder);
+                            }
+                        }
                         activeOrders[openingKey] = freshOrder;
                     } else {
                         delete activeOrders[openingKey];
@@ -5953,9 +6003,11 @@
                 card.className = `big-table-card ${isOccupied ? 'occupied' : 'free'} ${isLinked ? 'linked-table-card' : ''}`;
                 card.onclick = () => openTable(tableKey);
 
-                let orderAlertData = canReceiveOrderNotifications() ? newCustomerOrderAlerts[tableKey] : null;
-                let isOrderAlertActive = orderAlertData && (!orderAlertData.timestamp || (Date.now() - orderAlertData.timestamp <= ALERT_TIMEOUT_MS));
-                let orderAlert = canReceiveOrderNotifications() && (isOrderAlertActive || (orderData && orderData.customerSent && !orderData.staffAcknowledged && (!orderData.customerSentAt || (Date.now() - orderData.customerSentAt <= ALERT_TIMEOUT_MS))));
+                const rawOrderAlert = newCustomerOrderAlerts[tableKey];
+                const orderAlertAllowed = canReceiveAlertForOrder(rawOrderAlert || orderData);
+                const orderAlertData = orderAlertAllowed ? rawOrderAlert : null;
+                const isOrderAlertActive = orderAlertData && (!orderAlertData.timestamp || (Date.now() - orderAlertData.timestamp <= ALERT_TIMEOUT_MS));
+                let orderAlert = orderAlertAllowed && (isOrderAlertActive || (orderData && orderData.customerSent && !orderData.staffAcknowledged && (!orderData.customerSentAt || (Date.now() - orderData.customerSentAt <= ALERT_TIMEOUT_MS))));
 
                 let waiterAlertData = staffAlerts[tableKey];
                 let waiterAlert = canReceiveWaiterNotifications() && waiterAlertData && (!waiterAlertData.timestamp || (Date.now() - waiterAlertData.timestamp <= ALERT_TIMEOUT_MS));
@@ -5988,14 +6040,20 @@
 
                 // Show the latest customer QR round on the card while the alert is
                 // active, so staff can see WHAT was just added without opening it.
+                const cardBatches = orderData ? getCustomerOrderBatches(orderData) : [];
+                const cardRoundNo = cardBatches.length
+                    ? getOrderRoundNo(cardBatches[cardBatches.length - 1], cardBatches.length - 1)
+                    : 0;
                 let cardNewItemsHtml = '';
                 if (orderAlert && orderData) {
                     const latestBatch = getLatestCustomerOrderBatch(orderData);
-                    if (latestBatch) {
+                    // A baseline is the old balance from before this build, not a
+                    // newly placed round. Never show it as "just added".
+                    if (latestBatch && !latestBatch.baseline) {
                         const shortText = formatCustomerBatchItems(latestBatch.items, 2);
                         const fullText = formatCustomerBatchItems(latestBatch.items);
                         if (shortText) {
-                            cardNewItemsHtml = `<div class="tc-new-items" title="${escapeHtml(fullText)}">➕ ${escapeHtml(shortText)}</div>`;
+                            cardNewItemsHtml = `<div class="tc-new-items" title="${escapeHtml(fullText)}">➕ Round ${cardRoundNo}: ${escapeHtml(shortText)}</div>`;
                         }
                     }
                 }
@@ -6030,6 +6088,7 @@
                                     ${isCustomerTaken ? '📱 Customer Order' : ('👤 ' + (orderData.takenBy || 'Staff'))}
                                 </span>
                                 ${intakeBadge}
+                                ${cardRoundNo > 0 ? `<span class="tc-round-chip">🔁 Round ${cardRoundNo}</span>` : ''}
                             </div>
                         </div>` : `
                         <div class="tc-empty">
@@ -6110,10 +6169,18 @@
                         }
 
                         const tkLatestBatch = getLatestCustomerOrderBatch(orderData);
+                        const tkBatches = getCustomerOrderBatches(orderData);
+                        const tkRoundNo = tkBatches.length
+                            ? getOrderRoundNo(tkBatches[tkBatches.length - 1], tkBatches.length - 1)
+                            : 0;
                         const tkBatchAlert = newCustomerOrderAlerts[key];
-                        const tkBatchAlertActive = tkBatchAlert && (!tkBatchAlert.timestamp || (Date.now() - tkBatchAlert.timestamp <= ALERT_TIMEOUT_MS));
-                        const tkNewItemsText = (tkBatchAlertActive && tkLatestBatch) ? formatCustomerBatchItems(tkLatestBatch.items, 2) : '';
-                        const tkNewItemsFull = (tkBatchAlertActive && tkLatestBatch) ? formatCustomerBatchItems(tkLatestBatch.items) : '';
+                        const tkAlertAllowed = canReceiveAlertForOrder(tkBatchAlert || orderData);
+                        const tkBatchAlertActive = tkAlertAllowed && tkBatchAlert && (!tkBatchAlert.timestamp || (Date.now() - tkBatchAlert.timestamp <= ALERT_TIMEOUT_MS));
+                        // Baseline rounds are an old saved balance, not a fresh QR
+                        // re-order, so they must never appear as "just added".
+                        const tkFreshBatch = tkBatchAlertActive && tkLatestBatch && !tkLatestBatch.baseline ? tkLatestBatch : null;
+                        const tkNewItemsText = tkFreshBatch ? formatCustomerBatchItems(tkFreshBatch.items, 2) : '';
+                        const tkNewItemsFull = tkFreshBatch ? formatCustomerBatchItems(tkFreshBatch.items) : '';
 
                         card.innerHTML = `
                             <div class="takeaway-order-head">
@@ -6125,7 +6192,7 @@
                             </div>
                             ${custInfoHtml}
                             ${waitBannerHtml}
-                            ${tkNewItemsText ? `<div class="tc-new-items" title="${escapeHtml(tkNewItemsFull)}">➕ ${escapeHtml(tkNewItemsText)}</div>` : ''}
+                            ${tkNewItemsText ? `<div class="tc-new-items" title="${escapeHtml(tkNewItemsFull)}">➕ Round ${tkRoundNo}: ${escapeHtml(tkNewItemsText)}</div>` : ''}
                             <p class="takeaway-total">${curSym()}${orderTotal.toFixed(2)} <small>(${itemCount} Items)</small></p>
                             ${tkWaBtnHtml}
                             <div class="takeaway-foot">
@@ -6133,6 +6200,7 @@
                                     ${(orderData.takenBy === 'Customer' || orderData.takenBy === 'Customer QR') ? '📱 Customer Order' : ('👤 ' + (orderData.takenBy || 'Staff'))}
                                 </span>
                                 ${orderData.orderIntake ? ' ' + getOrderIntakeBadgeHtml(orderData.orderIntake) : ''}
+                                ${tkRoundNo > 0 ? `<span class="tc-round-chip" style="font-size:10px; padding:2px 7px;">🔁 Round ${tkRoundNo}</span>` : ''}
                             </div>
                         `;
                         takeawayCards.push(card);
@@ -7503,46 +7571,141 @@
             return batches.length ? batches[batches.length - 1] : null;
         }
 
+        // Round numbers are persisted on every batch so the label stays correct
+        // when the 20-round history cap drops the oldest entries. Batches saved
+        // by older builds have no roundNo: they fall back to their 1-based
+        // position, which matches the numbers assigned to the new rounds.
+        function getOrderRoundNo(batch, index) {
+            const n = Number(batch && batch.roundNo);
+            if (Number.isFinite(n) && n > 0) return Math.floor(n);
+            return (Number(index) || 0) + 1;
+        }
+
+        function getNextOrderRoundNo(order) {
+            const batches = getCustomerOrderBatches(order);
+            const maxBatchNo = batches.reduce((max, b) => {
+                const n = Number(b && b.roundNo);
+                return Number.isFinite(n) && n > 0 ? Math.max(max, Math.floor(n)) : max;
+            }, 0);
+            const seq = Number(order && order.roundSeq);
+            return Math.max(maxBatchNo, Number.isFinite(seq) ? Math.floor(seq) : 0, batches.length) + 1;
+        }
+
+        // Live orders from the previous build have rounds but no saved numbers.
+        // Stamp them before the 20-round cap starts dropping history, otherwise
+        // the surviving rounds would be renumbered from 1 on screen.
+        function ensureOrderRoundNumbers(order) {
+            const batches = getCustomerOrderBatches(order);
+            let maxNo = 0;
+            batches.forEach((b, i) => {
+                const n = Number(b && b.roundNo);
+                if (Number.isFinite(n) && n > 0) maxNo = Math.max(maxNo, Math.floor(n));
+                else b.roundNo = i + 1;
+            });
+            const seq = Number(order && order.roundSeq);
+            const savedSeq = Number.isFinite(seq) ? Math.floor(seq) : 0;
+            if (batches.length || savedSeq) {
+                order.roundSeq = Math.max(savedSeq, maxNo, batches.length);
+            }
+            return batches;
+        }
+
+        // Move/link merges combine two histories. Renumber the merged list so
+        // two tables cannot both contribute "Round 2" to the same order.
+        function renumberOrderRounds(order) {
+            const batches = getCustomerOrderBatches(order);
+            batches.forEach((b, i) => { b.roundNo = i + 1; });
+            if (batches.length) order.roundSeq = batches.length;
+            return batches;
+        }
+
+        // A batch line only stores id/name/qty, which cannot tell two variants of
+        // the same menu item apart (same id, different add-ons or notes). New
+        // rounds store this stable signature too, so a NEW/OLD badge can never
+        // count another variant's quantity on the wrong cart line.
+        function getOrderLineSignature(line) {
+            if (!line) return '';
+            const options = (line.options && typeof line.options === 'object') ? line.options : {};
+            const notes = (line.notes && typeof line.notes === 'object') ? line.notes : {};
+            const optionParts = Object.keys(options).sort().map(k => {
+                const o = options[k] || {};
+                return [
+                    String(k),
+                    String(o.name || ''),
+                    Math.round((Number(o.price) || 0) * 100) / 100,
+                    Number(o.qty) || 0
+                ];
+            });
+            const noteParts = Object.keys(notes).filter(k => notes[k]).sort();
+            // Use the same effective price as getItemLineTotal so the signature
+            // stays identical whether or not renderCart already filled customPrice
+            // in from price. Without this, a not-yet-rendered legacy line and the
+            // same line after rendering would produce different signatures.
+            const basePrice = Number(line.customPrice != null ? line.customPrice : line.price) || 0;
+            return JSON.stringify([
+                optionParts,
+                noteParts,
+                String(line.comment || ''),
+                Math.round(basePrice * 100) / 100
+            ]);
+        }
+
+        // An order that was already sent by the previous build has items but no
+        // rounds and no per-line sentQty. Take the items on the table as a
+        // baseline round instead of showing the whole order as a fake NEW round.
+        // Returns true only when this call handled the legacy order.
+        function appendLegacyBaselineRound(order, roundAt, roundTimeStr, byLabel) {
+            if (!order) return false;
+            const batches = getCustomerOrderBatches(order);
+            if (batches.length > 0 || order.legacySentBaseline) return false;
+            if (!(order.sentToKitchen || order.customerSent)) return false;
+            const baselineItems = [];
+            let baselineTotal = 0;
+            getOrderItemsArray(order).forEach(it => {
+                if (!it || !it.name) return;
+                const qty = Math.max(0, Number(it.qty) || 0);
+                if (!qty) return;
+                it.sentQty = qty;
+                baselineItems.push({
+                    id: it.id != null ? String(it.id) : '',
+                    name: String(it.name),
+                    qty,
+                    note: getItemNotesList(it).join(', '),
+                    sig: getOrderLineSignature(it)
+                });
+                baselineTotal += getItemLineTotal(it);
+            });
+            order.legacySentBaseline = true;
+            if (!baselineItems.length) return true;
+            const baselineRoundNo = getNextOrderRoundNo(order);
+            const baselineAt = Number(order.seatedAt) || Number(order.customerSentAt) ||
+                Number(order.sentToKitchenAt) || roundAt;
+            const baselineTimeStr = order.seatedTime || order.customerSentTime || roundTimeStr;
+            order.customerOrderBatches = batches.concat([{
+                roundNo: baselineRoundNo,
+                at: baselineAt,
+                timeStr: baselineTimeStr,
+                items: baselineItems,
+                total: Math.round(baselineTotal * 100) / 100,
+                by: order.takenBy || byLabel || 'Staff',
+                baseline: true
+            }]).slice(-20);
+            order.roundSeq = baselineRoundNo;
+            return true;
+        }
+
         // Records the quantities added since the previous send as one round and
-        // marks every line as sent. Used by staff "Send to Kitchen" and auto-save.
+        // marks every line as sent. Returns true when a round was appended.
+        // Used by staff "Send to Kitchen" and auto-save.
         function recordKitchenRound(order, byLabel) {
-            if (!order) return;
+            if (!order) return false;
             const roundAt = Date.now();
             const roundTimeStr = new Date(roundAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const batches = getCustomerOrderBatches(order);
-            // An order already sent on the old version has no rounds and no per-line
-            // sentQty: take what is on the table right now as the baseline round
-            // instead of marking the whole order as NEW.
-            const legacyInFlight = batches.length === 0 && !order.legacySentBaseline &&
-                !!(order.sentToKitchen || order.customerSent);
-            if (legacyInFlight) {
-                const baselineItems = [];
-                let baselineTotal = 0;
-                getOrderItemsArray(order).forEach(it => {
-                    if (!it || !it.name) return;
-                    const qty = Math.max(0, Number(it.qty) || 0);
-                    if (!qty) return;
-                    it.sentQty = qty;
-                    baselineItems.push({
-                        id: it.id != null ? String(it.id) : '',
-                        name: String(it.name),
-                        qty,
-                        note: getItemNotesList(it).join(', ')
-                    });
-                    baselineTotal += getItemLineTotal(it);
-                });
-                order.legacySentBaseline = true;
-                if (baselineItems.length) {
-                    order.customerOrderBatches = batches.concat([{
-                        at: roundAt,
-                        timeStr: roundTimeStr,
-                        items: baselineItems,
-                        total: Math.round(baselineTotal * 100) / 100,
-                        by: byLabel || 'Staff',
-                        baseline: true
-                    }]).slice(-20);
-                }
-                return;
+            const batches = ensureOrderRoundNumbers(order);
+            // Legacy order sent by the previous build: record the current items
+            // as a baseline, never as a fake NEW round.
+            if (appendLegacyBaselineRound(order, roundAt, roundTimeStr, byLabel)) {
+                return getCustomerOrderBatches(order).length > batches.length;
             }
             const roundItems = [];
             let roundTotal = 0;
@@ -7563,18 +7726,23 @@
                     id: it.id != null ? String(it.id) : '',
                     name: String(it.name),
                     qty: addedQty,
-                    note: getItemNotesList(it).join(', ')
+                    note: getItemNotesList(it).join(', '),
+                    sig: getOrderLineSignature(it)
                 });
                 roundTotal += getItemLineTotal(it) * (addedQty / qty);
             });
-            if (roundItems.length === 0) return;
+            if (roundItems.length === 0) return false;
+            const roundNo = getNextOrderRoundNo(order);
             order.customerOrderBatches = batches.concat([{
+                roundNo: roundNo,
                 at: roundAt,
                 timeStr: roundTimeStr,
                 items: roundItems,
                 total: Math.round(roundTotal * 100) / 100,
                 by: byLabel || 'Staff'
             }]).slice(-20);
+            order.roundSeq = roundNo;
+            return true;
         }
 
         function formatCustomerBatchItems(items, maxItems) {
@@ -7594,6 +7762,7 @@
             if (!batch || !item) return 0;
             const itemId = item.id != null ? String(item.id) : '';
             const itemName = String(item.name || '').trim().toLowerCase();
+            const itemSig = getOrderLineSignature(item);
             return (batch.items || []).reduce((sum, bi) => {
                 if (!bi) return sum;
                 const bId = bi.id != null ? String(bi.id) : '';
@@ -7602,6 +7771,9 @@
                 // legacy lines that were saved before ids were assigned.
                 const sameLine = (itemId && bId) ? (itemId === bId) : (!!itemName && itemName === bName);
                 if (!sameLine) return sum;
+                // New rounds carry a variant signature. Old rounds do not, so they
+                // keep the previous id/name matching for backwards compatibility.
+                if (bi.sig && String(bi.sig) !== itemSig) return sum;
                 return sum + (Number(bi.qty) || 0);
             }, 0);
         }
@@ -7634,15 +7806,17 @@
                 el.innerHTML = '';
                 return;
             }
-            const newestFirst = batches.slice().reverse();
-            el.innerHTML = `<div class="cust-rounds-head"><strong>🔁 Order Rounds (NEW / OLD)</strong><span>${batches.length} round${batches.length === 1 ? '' : 's'}</span></div>` +
-                newestFirst.map((b, idx) => {
+            const latestRoundNo = getOrderRoundNo(batches[batches.length - 1], batches.length - 1);
+            const newestFirst = batches.map((b, i) => ({ b, roundNo: getOrderRoundNo(b, i) })).reverse();
+            el.innerHTML = `<div class="cust-rounds-head"><strong>🔁 Order Rounds</strong><span>Latest: Round ${latestRoundNo} • ${batches.length} round${batches.length === 1 ? '' : 's'}</span></div>` +
+                newestFirst.map((entry, idx) => {
+                    const b = entry.b;
                     const isNew = idx === 0 && !b.baseline;
                     const itemsText = formatCustomerBatchItems(b.items);
                     const byText = b.by ? ` • ${escapeHtml(String(b.by))}` : '';
                     return `<div class="cust-round">
                         <div class="cust-round-head">
-                            <span class="cust-round-tag ${isNew ? 'new' : 'old'}">${isNew ? 'NEW' : 'OLD'}</span>
+                            <span class="cust-round-tag ${isNew ? 'new' : 'old'}">ROUND ${entry.roundNo} • ${isNew ? 'NEW' : 'OLD'}</span>
                             <span class="cust-round-time">${escapeHtml(b.timeStr || '')}${byText}</span>
                             <span class="cust-round-total">${curSym()}${Number(b.total || 0).toFixed(2)}</span>
                         </div>
@@ -7690,6 +7864,9 @@
             const latestCustomerBatch = customerBatches.length ? customerBatches[customerBatches.length - 1] : null;
             const latestIsBaseline = !!(latestCustomerBatch && latestCustomerBatch.baseline);
             const earlierCustomerBatches = latestIsBaseline ? customerBatches : customerBatches.slice(0, -1);
+            const latestRoundNo = latestCustomerBatch
+                ? getOrderRoundNo(latestCustomerBatch, customerBatches.length - 1)
+                : 0;
 
             const mobBadge = document.getElementById('mob-cart-badge');
             const deskBadge = document.getElementById('desktop-cart-badge');
@@ -7740,6 +7917,12 @@
                         earlierCustomerBatches.reduce((sum, b) => sum + getCustomerBatchQtyForItem(b, item), 0)
                     )
                     : 0;
+                const oldRoundNos = oldFromRounds > 0
+                    ? earlierCustomerBatches.map((b, idx) => ({
+                        no: getOrderRoundNo(b, idx),
+                        qty: getCustomerBatchQtyForItem(b, item)
+                    })).filter(x => x.qty > 0).map(x => x.no)
+                    : [];
 
                 const catOpts = getOptionsForItem(item);
 
@@ -7795,7 +7978,7 @@
 
                 tr.innerHTML = `
                     <td>
-                        <div class="cart-item-name">${item.name}${newFromCustomer > 0 ? ` <span class="cart-new-badge" title="Added at ${escapeHtml(latestCustomerBatch.timeStr || '')}${latestCustomerBatch.by ? ' by ' + escapeHtml(String(latestCustomerBatch.by)) : ''}">NEW +${newFromCustomer}</span>` : ''}${oldFromRounds > 0 ? ` <span class="cart-old-badge" title="Ordered in an earlier round">OLD ${oldFromRounds}</span>` : ''}</div>
+                        <div class="cart-item-name">${item.name}${newFromCustomer > 0 ? ` <span class="cart-new-badge" title="Added in Round ${latestRoundNo} at ${escapeHtml(latestCustomerBatch.timeStr || '')}${latestCustomerBatch.by ? ' by ' + escapeHtml(String(latestCustomerBatch.by)) : ''}">NEW R${latestRoundNo} +${newFromCustomer}</span>` : ''}${oldFromRounds > 0 ? ` <span class="cart-old-badge" title="Ordered in ${oldRoundNos.length === 1 ? 'Round ' + oldRoundNos[0] : 'Rounds ' + oldRoundNos.join(', ')}">OLD ${oldFromRounds}</span>` : ''}</div>
                         ${customOptsHtml}
                         ${isDedicatedTakeaway ? `
                         <div style="margin-top: 5px; margin-bottom: 5px; display: inline-flex; align-items: center; gap: 6px; background: #fffbeb; border: 1.5px solid #fde68a; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 800; color: #b45309;">
@@ -7983,7 +8166,6 @@
                 order.customerPhone = sessionStorage.getItem("myTkPhone") || order.customerPhone || "";
             }
 
-            const isUpdate = !!(order.customerSent && order.customerSentAt);
             order.customerSent = true;
             order.customerSentAt = Date.now();
             order.customerSentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -8016,11 +8198,16 @@
                     id: it.id != null ? String(it.id) : '',
                     name: String(it.name),
                     qty: Number(it.qty) || 0,
-                    note: getItemNotesList(it).join(', ')
+                    note: getItemNotesList(it).join(', '),
+                    sig: getOrderLineSignature(it)
                 }));
             const customerBatchTotal = Math.round(
                 submittedItems.reduce((sum, it) => sum + getItemLineTotal(it), 0) * 100
             ) / 100;
+            // A fresh QR scan starts with customerSent=false in its private draft,
+            // so the local flag cannot tell a re-order from a first order. Decide
+            // from the shared order inside the transaction instead.
+            let qrOrderIsUpdate = false;
             // A Firebase transaction serializes simultaneous sends from different phones.
             // Merge only this phone's private draft into the latest shared table order.
             db.ref("activeOrders/" + tableKeyForSend).transaction(current => {
@@ -8037,6 +8224,14 @@
                     seatedAt: submittedOrderMeta.seatedAt || Date.now(),
                     seatedTime: submittedOrderMeta.seatedTime || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
                 };
+                // An active order from the previous build has no rounds. Snapshot
+                // its existing items as Round 1 before this scan is appended, so a
+                // customer QR re-order never labels the whole table as NEW.
+                appendLegacyBaselineRound(latest, customerBatchAt, customerBatchTime, latest.takenBy || "Customer QR");
+                // Sent flags cover normal QR re-orders; a baseline/staff-sent order
+                // with rounds is also an update because this scan becomes Round 2.
+                qrOrderIsUpdate = !!(latest.customerSent || latest.sentToKitchen) ||
+                    getCustomerOrderBatches(latest).length > 0;
                 const merged = { ...latest };
                 const mergedItems = Array.isArray(latest.items) ? latest.items.map(it => ({ ...it })) : [];
                 submittedItems.forEach(incoming => {
@@ -8086,20 +8281,25 @@
                 }
                 // Append this scan as a numbered round (newest last) so the staff
                 // screen can separate "NEW" items from the earlier "OLD" rounds.
-                const previousBatches = Array.isArray(latest.customerOrderBatches) ? latest.customerOrderBatches : [];
+                const previousBatches = Array.isArray(latest.customerOrderBatches)
+                    ? ensureOrderRoundNumbers(latest)
+                    : [];
+                const nextRoundNo = getNextOrderRoundNo(latest);
                 merged.customerOrderBatches = previousBatches.concat([{
+                    roundNo: nextRoundNo,
                     at: customerBatchAt,
                     timeStr: customerBatchTime,
                     items: customerBatchItems,
                     total: customerBatchTotal,
-                    isUpdate: !!isUpdate,
+                    isUpdate: qrOrderIsUpdate,
                     by: "Customer QR"
                 }]).slice(-20);
+                merged.roundSeq = nextRoundNo;
                 return merged;
             }).then(result => {
                 if (!result.committed) throw new Error("Order could not be saved. Please try again.");
                 const savedOrder = result.snapshot.val() || order;
-                broadcastLiveOrderEvent(tableKeyForSend, isUpdate ? "update" : "order", savedOrder, {
+                broadcastLiveOrderEvent(tableKeyForSend, qrOrderIsUpdate ? "update" : "order", savedOrder, {
                     items: customerBatchItems,
                     total: customerBatchTotal,
                     timeStr: customerBatchTime
@@ -9519,6 +9719,7 @@
                     destOrder.customerOrderBatches = combinedBatches
                         .sort((a, b) => (Number(a.at) || 0) - (Number(b.at) || 0))
                         .slice(-20);
+                    renumberOrderRounds(destOrder);
                 }
                 writeActiveOrder(targetMoveDestination, destOrder).then(result => {
                     if (!isCustomerMode && (!result || result.committed !== false)) {
@@ -9683,6 +9884,7 @@
                         merged.customerOrderBatches = combinedBatches
                             .sort((a, b) => (Number(a.at) || 0) - (Number(b.at) || 0))
                             .slice(-20);
+                        renumberOrderRounds(merged);
                     }
 
                     merged.customerSent = anyCustomerSent;
