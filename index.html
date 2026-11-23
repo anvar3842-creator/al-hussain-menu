@@ -114,6 +114,9 @@
 
         .header { background: rgba(255,255,255,.94); border: 1px solid rgba(226,232,240,.9); box-shadow: 0 6px 20px rgba(15,23,42,.06); backdrop-filter: blur(12px); padding: 12px 18px; margin: 12px 16px 0; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .header-title { display: flex; align-items: center; gap: 10px; }
+        .header-title-main { display: flex; flex-direction: column; min-width: 0; }
+        .header-shop-contact { font-size: 10px; font-weight: 700; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .login-shop-contact { margin: 4px 0 12px; font-size: 11.5px; font-weight: 700; color: #475569; text-align: center; }
         .header h2 { margin: 0; font-size: 20px; font-weight: 900; background: linear-gradient(135deg, #4f46e5, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 8px; letter-spacing: .2px; }
         .header-home-btn { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; padding: 7px 14px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; font-family: inherit; }
         .header-home-btn:hover { background: #6d28d9; color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(109, 40, 217, 0.25); }
@@ -1778,6 +1781,7 @@
     <div id="login-screen" class="login-overlay" style="display: none;">
         <div class="login-box">
             <h2 id="login-shop-name">Al Hussain Restaurant</h2>
+            <div id="login-shop-contact" class="login-shop-contact">Nagara Brunei Darussalam.</div>
             <form onsubmit="handleLogin(event)">
                 <input type="text" id="login-user" placeholder="Username / Name (e.g. admin, user1)" required autocomplete="username">
                 <input type="password" id="login-pass" placeholder="Password" required autocomplete="current-password">
@@ -1797,7 +1801,10 @@
     <div id="main-app" role="main" style="display: none; height: 100vh; flex-direction: column;">
         <div class="header">
             <div class="header-title">
-                <h2 id="app-header-title">Al Hussain Restaurant POS</h2>
+                <div class="header-title-main">
+                    <h2 id="app-header-title">Al Hussain Restaurant POS</h2>
+                    <div id="header-shop-contact" class="header-shop-contact">Nagara Brunei Darussalam.</div>
+                </div>
                 <span class="live-sync-badge" id="live-sync-indicator" title="Cloud synchronization active"><span class="live-dot"></span> Live Sync</span>
                 <span class="badge" id="display-user">Admin</span>
             </div>
@@ -2195,7 +2202,7 @@
             </div>
             <div class="modal-body" style="overflow-y:auto; flex:1; padding-top:14px;">
                 <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;padding:10px 14px;font-size:12.5px;font-weight:700;color:#5b21b6;margin-bottom:14px;">
-                    <b>Shop-wide (எல்லா POS + customer QR):</b> Shop Name, Address, Company, Thank-you messages, Currency — Firebase-ல sync ஆகும்.<br>
+                    <b>Shop-wide (எல்லா POS + customer QR):</b> Shop Name, Address, Shop Phone, Company, Thank-you messages, Currency — Firebase-ல sync ஆகும்.<br>
                     <b>இந்த device-க்கு மட்டும்:</b> Quick Cash, Print Receipt default, Sound, QR Base URL. மாத்துனதும் <b>Save Settings</b> அழுத்துங்க.
                 </div>
 
@@ -2203,6 +2210,7 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
                     <label style="font-size:12px;font-weight:800;color:#334155;">Shop Name<input type="text" id="set-shop-name" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
                     <label style="font-size:12px;font-weight:800;color:#334155;">Address Line<input type="text" id="set-address-line" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
+                    <label style="font-size:12px;font-weight:800;color:#334155;">Shop Phone (e.g. +673 712 3456)<input type="tel" inputmode="tel" id="set-shop-phone" placeholder="+673 ..." style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
                     <label style="font-size:12px;font-weight:800;color:#334155;">Company / Account Line<input type="text" id="set-company-line" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
                     <label style="font-size:12px;font-weight:800;color:#334155;">Currency Symbol<input type="text" id="set-currency" maxlength="4" placeholder="$" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
                     <label style="font-size:12px;font-weight:800;color:#334155;">Receipt Thank-you Message<input type="text" id="set-receipt-thanks" style="width:100%;padding:9px 11px;margin-top:4px;border:2px solid #e2e8f0;border-radius:9px;box-sizing:border-box;font-family:inherit;font-weight:700;font-size:13px;outline:none;"></label>
@@ -2759,16 +2767,18 @@
       </div>
     </div>
 
-    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;" class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;" id="r-shop-addr">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;" id="r-company">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div><b>Order By:</b> <span id="p-taken-by" class="print-ref-strong"></span></div><div id="p-intake" style="display:none; margin-top:2px;"><b>Intake:</b> <span id="p-intake-val" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span><br><b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span></div><div><b>Date:</b> <span id="p-date"></span> | <b>Time:</b> <span id="p-time"></span></div><div id="p-seated-info" style="display:none; font-size:14px; margin-top:2px;"><b>Seated:</b> <span id="p-seated-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span><span class="cur">$</span><span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span><span class="cur">$</span><span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span><span class="cur">$</span><span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span><span class="cur">$</span><span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p id="r-thanks">Thank you! Please come again.</p></div><div id="receipt-kick" style="display:none;"></div></div>
+    <div id="print-receipt"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 22px; font-weight: 900;" class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p style="margin: 2px 0; font-size: 16px; font-weight: 900;" id="r-shop-addr" class="print-shop-addr">Nagara Brunei Darussalam.</p><p style="margin: 2px 0; font-size: 14px; font-weight: 900;" id="r-shop-phone" class="print-shop-phone"></p><p style="margin: 2px 0; font-size: 13px; font-weight: 900;" id="r-company">Company Acc: Al Hussain Enterprise</p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 16px; font-weight: 900; margin-bottom: 6px;"><div><b>Type:</b> <span id="p-order-type"></span> | <b>No:</b> <span id="p-table" class="print-ref-strong"></span></div><div><b>Order By:</b> <span id="p-taken-by" class="print-ref-strong"></span></div><div id="p-intake" style="display:none; margin-top:2px;"><b>Intake:</b> <span id="p-intake-val" class="print-ref-strong"></span></div><div id="p-cust-info" style="display:none; margin-top:2px;"><b>Customer:</b> <span id="p-cust-name-val"></span><br><b>Phone:</b> <span id="p-cust-phone-val"></span></div><div><b>Pay:</b> <span id="p-method"></span></div><div><b>Date:</b> <span id="p-date"></span> | <b>Time:</b> <span id="p-time"></span></div><div id="p-seated-info" style="display:none; font-size:14px; margin-top:2px;"><b>Seated:</b> <span id="p-seated-val"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 17px; font-weight: 900; margin-bottom: 6px;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Qty</th><th style="text-align: right; padding: 4px 0; font-size: 17px; font-weight: 900; color: #000;">Price</th></tr></thead><tbody id="p-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="font-size: 17px; font-weight: 900; display: flex; justify-content: space-between;"><span>Subtotal:</span><span><span class="cur">$</span><span id="p-subtotal">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 4px;"><span>TOTAL:</span><span><span class="cur">$</span><span id="p-total">0.00</span></span></div><div style="font-size: 17px; font-weight: 900; margin-top: 6px; border-top: 3px solid black; padding-top: 4px;"><div style="display: flex; justify-content: space-between;"><span>Paid:</span><span><span class="cur">$</span><span id="p-paid">0.00</span></span></div><div style="display: flex; justify-content: space-between; font-size: 19px;"><span>Change:</span><span><span class="cur">$</span><span id="p-change">0.00</span></span></div></div><div style="text-align: center; margin-top: 8px; font-size: 17px; font-weight: 900;"><p id="r-thanks">Thank you! Please come again.</p></div><div id="receipt-kick" style="display:none;"></div></div>
     
     <div id="print-kitchen"><div style="text-align: center; margin-bottom: 6px;"><h2 style="margin: 0; font-size: 24px; font-weight: 900;">*** KITCHEN ORDER ***</h2><hr style="border-top: 4px solid black; margin: 4px 0;"></div><div style="font-size: 18px; font-weight: 900; margin-bottom: 8px;"><div><b>Type:</b> <span id="k-order-type"></span> | <b>No:</b> <span id="k-table" class="print-ref-strong"></span></div><div><b>Order By:</b> <span id="k-taken-by" class="print-ref-strong"></span></div><div id="k-intake" style="display:none; margin-top:2px;"><b>Intake:</b> <span id="k-intake-val" class="print-ref-strong"></span></div><div id="k-cust-info" style="display:none; margin-top:2px;"><b>Customer Name:</b> <span id="k-cust-name-val"></span></div><div><b>Date:</b> <span id="k-date"></span> | <b>Time:</b> <span id="k-time"></span></div></div><table style="width: 100%; border-collapse: collapse; font-size: 20px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left; font-size: 20px; font-weight: 900; color: #000;">Item & Notes</th><th style="text-align: center; font-size: 20px; font-weight: 900; color: #000;">Qty</th></tr></thead><tbody id="k-items"></tbody></table></div>
     
     <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div id="drawer-kick" style="display:none;"></div></div>
-    <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2 class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p><b>SALES HISTORY REPORT</b></p><p id="print-history-time" style="margin:2px 0; font-size:12px; font-weight:900;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span><span class="cur">$</span><span id="print-history-grand-total">0.00</span></span></div></div>
-    <div id="print-day-close"><div style="text-align: center; margin-bottom: 6px;"><h2 class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p><b>DAY CLOSE REPORT</b></p><p id="dc-date" style="margin:2px 0; font-size:13px;"></p><p id="dc-closed-by" style="margin:2px 0; font-size:13px; font-weight:bold;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 15px; font-weight: 900; margin-bottom: 8px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Sales:</span><span><span class="cur">$</span><span id="dc-sales">0.00</span></span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Expenses:</span><span><span class="cur">$</span><span id="dc-expenses">0.00</span></span></div><hr style="border-top: 2px dashed black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Net Balance:</span><span><span class="cur">$</span><span id="dc-net">0.00</span></span></div><div style="margin-top: 6px; font-size: 13px; border-top: 1px dotted black; padding-top: 4px;"><div style="display:flex; justify-content:space-between;"><span>Cash Sales:</span><span><span class="cur">$</span><span id="dc-cash">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>Card Sales:</span><span><span class="cur">$</span><span id="dc-card">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>QR Pay Sales:</span><span><span class="cur">$</span><span id="dc-qr">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>Total Bills Count:</span><span id="dc-bills-count">0</span></div></div></div><div><p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>EXPENSES:</b></p><table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900; margin-top: 4px;"><tbody id="dc-expenses-list"></tbody></table></div></div>
+    <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2 class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p class="print-shop-addr" style="margin:2px 0; font-size:12px; font-weight:900;">Nagara Brunei Darussalam.</p><p class="print-shop-phone" style="margin:2px 0; font-size:12px; font-weight:900;"></p><p><b>SALES HISTORY REPORT</b></p><p id="print-history-time" style="margin:2px 0; font-size:12px; font-weight:900;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span><span class="cur">$</span><span id="print-history-grand-total">0.00</span></span></div></div>
+    <div id="print-day-close"><div style="text-align: center; margin-bottom: 6px;"><h2 class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p class="print-shop-addr" style="margin:2px 0; font-size:12px; font-weight:900;">Nagara Brunei Darussalam.</p><p class="print-shop-phone" style="margin:2px 0; font-size:12px; font-weight:900;"></p><p><b>DAY CLOSE REPORT</b></p><p id="dc-date" style="margin:2px 0; font-size:13px;"></p><p id="dc-closed-by" style="margin:2px 0; font-size:13px; font-weight:bold;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 15px; font-weight: 900; margin-bottom: 8px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Sales:</span><span><span class="cur">$</span><span id="dc-sales">0.00</span></span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Expenses:</span><span><span class="cur">$</span><span id="dc-expenses">0.00</span></span></div><hr style="border-top: 2px dashed black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Net Balance:</span><span><span class="cur">$</span><span id="dc-net">0.00</span></span></div><div style="margin-top: 6px; font-size: 13px; border-top: 1px dotted black; padding-top: 4px;"><div style="display:flex; justify-content:space-between;"><span>Cash Sales:</span><span><span class="cur">$</span><span id="dc-cash">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>Card Sales:</span><span><span class="cur">$</span><span id="dc-card">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>QR Pay Sales:</span><span><span class="cur">$</span><span id="dc-qr">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>Total Bills Count:</span><span id="dc-bills-count">0</span></div></div></div><div><p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>EXPENSES:</b></p><table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900; margin-top: 4px;"><tbody id="dc-expenses-list"></tbody></table></div></div>
     <div id="print-item-report">
         <div style="text-align: center; margin-bottom: 6px;">
             <h2 style="margin: 0; font-size: 20px; font-weight: 900;" class="print-shop-name">AL HUSSAIN RESTAURANT</h2>
+            <p class="print-shop-addr" style="margin: 2px 0; font-size: 12px; font-weight: 900;">Nagara Brunei Darussalam.</p>
+            <p class="print-shop-phone" style="margin: 2px 0; font-size: 12px; font-weight: 900;"></p>
             <p style="margin: 2px 0; font-size: 14px; font-weight: 900;">DAILY ITEM SOLD REPORT</p>
             <p id="print-item-report-scope" style="margin: 2px 0; font-size: 13px; font-weight: bold;"></p>
             <hr style="border-top: 3px solid black; margin: 4px 0;">
@@ -2796,7 +2806,7 @@
             <p style="margin: 0;">Printed on: <span id="print-item-report-time"></span></p>
         </div>
     </div>
-    <div id="print-qr-batch"><div style="text-align: center; margin-bottom: 20px;"><h2><span class="print-shop-name">AL HUSSAIN RESTAURANT</span> - QR CODES</h2><p id="print-qr-time" style="margin:4px 0 0; font-size:12px; font-weight:900;"></p></div><div id="print-qr-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;"></div></div>
+    <div id="print-qr-batch"><div style="text-align: center; margin-bottom: 20px;"><h2><span class="print-shop-name">AL HUSSAIN RESTAURANT</span> - QR CODES</h2><p class="print-shop-addr" style="margin:4px 0; font-size:12px; font-weight:900;">Nagara Brunei Darussalam.</p><p class="print-shop-phone" style="margin:4px 0; font-size:12px; font-weight:900;"></p><p id="print-qr-time" style="margin:4px 0 0; font-size:12px; font-weight:900;"></p></div><div id="print-qr-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;"></div></div>
 
     <div id="table-link-modal">
       <div class="table-link-box">
@@ -2840,11 +2850,12 @@
         // every customer QR phone shows the same shop name, receipt text and
         // currency. Device-only choices stay in localStorage.
         const PUBLIC_DISPLAY_SETTINGS_PATH = 'settings/publicDisplay';
-        const PUBLIC_DISPLAY_KEYS = ['shopName', 'addressLine', 'companyLine', 'receiptThankYou', 'paidThankYou', 'currencySymbol'];
+        const PUBLIC_DISPLAY_KEYS = ['shopName', 'addressLine', 'shopPhone', 'companyLine', 'receiptThankYou', 'paidThankYou', 'currencySymbol'];
 
         const DEFAULT_SETTINGS = {
             shopName: "Al Hussain Restaurant",
             addressLine: "Nagara Brunei Darussalam.",
+            shopPhone: "",
             companyLine: "Company Acc: Al Hussain Enterprise",
             receiptThankYou: "Thank you! Please come again.",
             paidThankYou: "Thank you for dining at Al Hussain!",
@@ -2859,6 +2870,16 @@
                 .replace(/[\u0000-\u001f\u007f]/g, ' ')
                 .trim();
             return clean || DEFAULT_SETTINGS.shopName;
+        }
+
+        // Phone numbers are display text, not a dialling link. Keep +, digits,
+        // spaces and common separators so mobile keyboards can enter "+673 ...".
+        function sanitizeShopPhone(raw) {
+            return String(raw === undefined || raw === null ? '' : raw)
+                .replace(/[^0-9+\-()\s]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .slice(0, 40);
         }
 
         function sanitizeCurrencySymbol(raw) {
@@ -2900,6 +2921,7 @@
                         merged[k] = (parsed[k] !== undefined) ? parsed[k] : DEFAULT_SETTINGS[k];
                     }
                     merged.shopName = sanitizeShopName(merged.shopName);
+                    merged.shopPhone = sanitizeShopPhone(merged.shopPhone);
                     merged.currencySymbol = sanitizeCurrencySymbol(merged.currencySymbol);
                     return merged;
                 }
@@ -2910,6 +2932,7 @@
         function saveSettings(patch) {
             const next = Object.assign({}, getSettings(), patch);
             next.shopName = sanitizeShopName(next.shopName);
+            next.shopPhone = sanitizeShopPhone(next.shopPhone);
             next.currencySymbol = sanitizeCurrencySymbol(next.currencySymbol);
             localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(next));
             return next;
@@ -2934,9 +2957,11 @@
             PUBLIC_DISPLAY_KEYS.forEach(k => {
                 payload[k] = (k === 'shopName')
                     ? sanitizeShopName(settings[k])
-                    : (k === 'currencySymbol')
-                        ? sanitizeCurrencySymbol(settings[k])
-                        : String(settings[k] === undefined || settings[k] === null ? '' : settings[k]).trim();
+                    : (k === 'shopPhone')
+                        ? sanitizeShopPhone(settings[k])
+                        : (k === 'currencySymbol')
+                            ? sanitizeCurrencySymbol(settings[k])
+                            : String(settings[k] === undefined || settings[k] === null ? '' : settings[k]).trim();
             });
             db.ref(PUBLIC_DISPLAY_SETTINGS_PATH).update(payload).catch(err => {
                 console.warn('Public display settings could not be saved:', err && err.message ? err.message : err);
@@ -2956,6 +2981,8 @@
                 let nextVal;
                 if (k === 'shopName') {
                     nextVal = sanitizeShopName(values[k]);
+                } else if (k === 'shopPhone') {
+                    nextVal = sanitizeShopPhone(values[k]);
                 } else if (k === 'currencySymbol') {
                     nextVal = sanitizeCurrencySymbol(values[k]);
                 } else {
@@ -2985,21 +3012,41 @@
         function applySettingsToUI() {
             const s = getSettings();
             const shopName = sanitizeShopName(s.shopName);
+            const addressLine = String(s.addressLine === undefined || s.addressLine === null ? '' : s.addressLine).trim();
+            const shopPhone = sanitizeShopPhone(s.shopPhone);
+            const contactText = [addressLine, shopPhone].filter(Boolean).join('  •  ');
 
             const headerTitle = document.getElementById('app-header-title');
             // Customer QR screens show the table/order name in the header;
             // never replace it with the shop name when the sync arrives late.
             if (headerTitle && !isCustomerQrUi()) headerTitle.textContent = shopName + " POS";
 
+            const headerContact = document.getElementById('header-shop-contact');
+            if (headerContact) {
+                headerContact.textContent = contactText;
+                headerContact.style.display = contactText ? '' : 'none';
+            }
+
             const loginName = document.getElementById('login-shop-name');
             if (loginName) loginName.textContent = shopName;
+            const loginContact = document.getElementById('login-shop-contact');
+            if (loginContact) {
+                loginContact.textContent = contactText;
+                loginContact.style.display = contactText ? '' : 'none';
+            }
 
             document.querySelectorAll('.print-shop-name').forEach(el => {
                 el.textContent = String(shopName).toUpperCase();
             });
+            document.querySelectorAll('.print-shop-addr').forEach(el => {
+                el.textContent = addressLine;
+                el.style.display = addressLine ? '' : 'none';
+            });
+            document.querySelectorAll('.print-shop-phone').forEach(el => {
+                el.textContent = shopPhone;
+                el.style.display = shopPhone ? '' : 'none';
+            });
 
-            const addr = document.getElementById('r-shop-addr');
-            if (addr) addr.textContent = s.addressLine;
             const comp = document.getElementById('r-company');
             if (comp) comp.textContent = s.companyLine;
             const thanks = document.getElementById('r-thanks');
@@ -3070,6 +3117,7 @@
             const s = getSettings();
             setFieldVal('set-shop-name', s.shopName);
             setFieldVal('set-address-line', s.addressLine);
+            setFieldVal('set-shop-phone', s.shopPhone);
             setFieldVal('set-company-line', s.companyLine);
             setFieldVal('set-receipt-thanks', s.receiptThankYou);
             setFieldVal('set-paid-thanks', s.paidThankYou);
@@ -3097,6 +3145,7 @@
             const next = {
                 shopName: sanitizeShopName(getFieldVal('set-shop-name', s.shopName)),
                 addressLine: getFieldVal('set-address-line', s.addressLine),
+                shopPhone: sanitizeShopPhone(getFieldVal('set-shop-phone', s.shopPhone)),
                 companyLine: getFieldVal('set-company-line', s.companyLine),
                 receiptThankYou: getFieldVal('set-receipt-thanks', s.receiptThankYou),
                 paidThankYou: getFieldVal('set-paid-thanks', s.paidThankYou),
