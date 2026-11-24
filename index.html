@@ -555,6 +555,45 @@
         .qr-card { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 15px; text-align: center; }
         .qr-card h4 { margin: 5px 0 10px 0; color: var(--primary); font-size: 16px; font-weight: 800; }
 
+        /* Monthly History: month picker, day cards and per-order details */
+        .monthly-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+        .monthly-toolbar input[type="month"] { padding: 8px 10px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-weight: 800; font-size: 13px; color: #0f172a; outline: none; background: #fff; }
+        .monthly-nav-btn { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 12px; font-family: inherit; font-weight: 900; font-size: 13px; cursor: pointer; }
+        .monthly-nav-btn:hover { background: #e2e8f0; }
+        .monthly-toolbar-label { margin-left: auto; font-size: 13px; font-weight: 900; color: #0f766e; }
+        .monthly-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 14px; }
+        .monthly-summary-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; }
+        .monthly-summary-box .ms-label { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: .02em; }
+        .monthly-summary-box .ms-value { font-size: 17px; font-weight: 900; color: #0f172a; margin-top: 2px; }
+        .monthly-summary-box.ms-total { background: #ecfdf5; border-color: #a7f3d0; }
+        .monthly-summary-box.ms-total .ms-value { color: #047857; }
+        .monthly-day-card { border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; margin-bottom: 12px; background: #fff; }
+        .monthly-day-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; background: linear-gradient(135deg, #f0fdfa, #ecfeff); border-bottom: 1px solid #ccfbf1; padding: 10px 14px; }
+        .monthly-day-date { font-size: 14px; font-weight: 900; color: #0f172a; }
+        .monthly-day-count { font-size: 11px; font-weight: 800; color: #0f766e; background: #ccfbf1; border-radius: 999px; padding: 2px 8px; margin-left: 8px; }
+        .monthly-day-total { font-size: 15px; font-weight: 900; color: #047857; }
+        .monthly-day-body { padding: 0 12px 10px; }
+        .monthly-order { border-bottom: 1px dashed #e2e8f0; padding: 10px 0; }
+        .monthly-order:last-child { border-bottom: none; padding-bottom: 2px; }
+        .monthly-order-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        .monthly-order-main { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+        .monthly-order-time { font-size: 13px; font-weight: 900; color: #1d4ed8; }
+        .monthly-order-ref { font-size: 12px; font-weight: 800; color: #475569; }
+        .monthly-order-total { font-size: 14px; font-weight: 900; color: #0f172a; }
+        .monthly-order-meta { font-size: 11px; font-weight: 800; color: #64748b; margin-top: 2px; display: flex; gap: 5px; flex-wrap: wrap; }
+        .monthly-order-items { margin-top: 6px; background: #f8fafc; border-radius: 9px; padding: 6px 9px; }
+        .monthly-item-line { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 700; color: #334155; padding: 1px 0; }
+        .monthly-item-line span:last-child { white-space: nowrap; font-weight: 800; }
+        .monthly-item-notes { font-size: 10.5px; font-weight: 800; color: #7c3aed; padding-left: 4px; }
+        .monthly-order-actions { margin-top: 6px; text-align: right; }
+        .monthly-view-btn { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 8px; padding: 5px 10px; font-family: inherit; font-size: 11.5px; font-weight: 900; cursor: pointer; }
+        .monthly-view-btn:hover { background: #dbeafe; }
+        .monthly-empty { text-align: center; padding: 28px 16px; color: #64748b; font-size: 13px; font-weight: 800; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 14px; }
+        @media (max-width: 560px) {
+            .monthly-toolbar-label { width: 100%; margin-left: 0; }
+            .monthly-summary-grid { grid-template-columns: 1fr 1fr; }
+        }
+
         table.admin-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
         table.admin-table th { background: #f8fafc; color: var(--text-muted); padding: 12px; text-align: left; font-weight: 900; border-bottom: 2px solid var(--border-light); border-radius: 8px 8px 0 0; }
         table.admin-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
@@ -564,7 +603,7 @@
         .btn-cat-add { background: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; font-family: inherit; transition: 0.2s; }
         .btn-cat-add:hover { transform: translateY(-1px); opacity: 0.9; }
 
-        #print-receipt, #print-kitchen, #print-drawer, #print-sales-history, #print-item-report, #print-qr-batch, #print-day-close { display: none; }
+        #print-receipt, #print-kitchen, #print-drawer, #print-sales-history, #print-item-report, #print-qr-batch, #print-day-close, #print-monthly-history { display: none; }
         @media print {
             @page { size: auto; margin: 10mm; }
             body { background: white !important; margin: 0 !important; padding: 0 !important; font-family: 'Courier New', Courier, monospace !important; height: auto !important; }
@@ -581,6 +620,8 @@
             body.print-item-report-mode #print-item-report { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-day-close-mode #print-day-close, body.print-day-close-mode #print-day-close * { visibility: visible !important; }
             body.print-day-close-mode #print-day-close { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 15px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
+            body.print-monthly-mode #print-monthly-history, body.print-monthly-mode #print-monthly-history * { visibility: visible !important; }
+            body.print-monthly-mode #print-monthly-history { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 78mm !important; font-weight: 900 !important; font-size: 13px !important; color: #000 !important; background: white !important; margin: 0 !important; padding: 2mm !important; }
             body.print-qr-mode #print-qr-batch, body.print-qr-mode #print-qr-batch * { visibility: visible !important; }
             body.print-qr-mode #print-qr-batch { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: white !important; }
             
@@ -2148,6 +2189,15 @@
                     Open cash drawer on Cash payments (Confirm &amp; Pay)
                 </label>
 
+                <div style="border-top:2px solid #e2e8f0; margin:0 0 12px; padding-top:12px;">
+                    <div style="font-weight:900; font-size:14px; color:#0f766e; margin-bottom:3px;">👤 யாருக்கு Open Drawer வேண்டும்?</div>
+                    <p style="margin:0 0 9px; font-size:11.5px; color:#64748b; font-weight:700; line-height:1.6;">
+                        தேர்ந்தெடுத்த account-க்கு மட்டும் <b>Open Drawer</b> button + Cash payment drawer திறக்கும்.
+                        Main Admin எப்போதும் access வைத்திருக்கும். Admin3, Admin4 போன்ற account-களையும் இங்கே தனித்தனியாக select செய்யலாம்.
+                    </p>
+                    <div id="drawer-access-list"></div>
+                </div>
+
                 <div style="display:flex; gap:8px; margin-bottom:10px;">
                     <input type="text" id="drawer-helper-url" placeholder="http://127.0.0.1:8787" style="flex:1; padding:10px 12px; border:2px solid #e2e8f0; border-radius:10px; font-size:13px; font-family:inherit; font-weight:700; outline:none; box-sizing:border-box;">
                     <button type="button" class="btn-small" style="padding:10px 14px; font-size:13px; background:#0f766e;" onclick="saveDrawerHelperUrl()">Save</button>
@@ -2158,6 +2208,7 @@
                     <button type="button" class="btn-small" style="padding:11px; font-size:13px;" onclick="connectDrawerUSB()">Connect USB Printer</button>
                     <button type="button" class="btn-small" style="padding:11px; font-size:13px; background:#0ea5e9;" onclick="connectDrawerSerial()">Connect Serial Port</button>
                     <button type="button" class="btn-small" style="padding:11px; font-size:13px; background:#059669;" onclick="testCashDrawer()">Test Drawer</button>
+                    <button type="button" class="btn-small" style="padding:11px; font-size:13px; background:#7c3aed;" onclick="testDrawerVoice()">🔊 Test Voice</button>
                     <button type="button" class="btn-small" style="padding:11px; font-size:13px; background:#64748b;" onclick="forgetDrawerDevice()">Forget Device</button>
                 </div>
 
@@ -2549,7 +2600,20 @@
         </div>
     </div>
 
-    <div id="monthly-report-modal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><div class="modal-header"><h3 style="margin:0; font-size:18px;">Daily & Monthly History</h3><button class="close-modal" onclick="closeMonthlyReportModal()">X</button></div><div class="modal-body"><div id="monthly-report-container"></div></div></div></div>
+    <div id="monthly-report-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 900px; width: 96%; max-height: 92vh; display:flex; flex-direction:column;">
+            <div class="modal-header">
+                <h3 style="margin:0; font-size:18px;">📅 Monthly History</h3>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button type="button" class="btn-small" style="padding:8px 14px; background:#0f766e;" onclick="printMonthlyHistory()">🖨️ Print</button>
+                    <button class="close-modal" onclick="closeMonthlyReportModal()">X</button>
+                </div>
+            </div>
+            <div class="modal-body" style="overflow-y:auto; flex:1;">
+                <div id="monthly-report-container"></div>
+            </div>
+        </div>
+    </div>
     
     <div id="item-report-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 820px; width: 95%;">
@@ -2774,6 +2838,7 @@
     <div id="print-drawer"><div style="text-align: center; font-size: 16px; font-weight: 900;"><p>*** OPEN CASH DRAWER ***</p></div><div id="drawer-kick" style="display:none;"></div></div>
     <div id="print-sales-history"><div style="text-align: center; margin-bottom: 6px;"><h2 class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p class="print-shop-addr" style="margin:2px 0; font-size:12px; font-weight:900;">Nagara Brunei Darussalam.</p><p class="print-shop-phone" style="margin:2px 0; font-size:12px; font-weight:900;"></p><p><b>SALES HISTORY REPORT</b></p><p id="print-history-time" style="margin:2px 0; font-size:12px; font-weight:900;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><table style="width: 100%; border-collapse: collapse; font-size: 14px; font-weight: 900;"><thead><tr style="border-bottom: 3px solid black;"><th style="text-align: left;">Time / Ref</th><th style="text-align: right;">Amount</th></tr></thead><tbody id="print-history-items"></tbody></table><hr style="border-top: 3px solid black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 900;"><span>TOTAL:</span><span><span class="cur">$</span><span id="print-history-grand-total">0.00</span></span></div></div>
     <div id="print-day-close"><div style="text-align: center; margin-bottom: 6px;"><h2 class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p class="print-shop-addr" style="margin:2px 0; font-size:12px; font-weight:900;">Nagara Brunei Darussalam.</p><p class="print-shop-phone" style="margin:2px 0; font-size:12px; font-weight:900;"></p><p><b>DAY CLOSE REPORT</b></p><p id="dc-date" style="margin:2px 0; font-size:13px;"></p><p id="dc-closed-by" style="margin:2px 0; font-size:13px; font-weight:bold;"></p><hr style="border-top: 3px solid black; margin: 4px 0;"></div><div style="font-size: 15px; font-weight: 900; margin-bottom: 8px;"><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Sales:</span><span><span class="cur">$</span><span id="dc-sales">0.00</span></span></div><div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Total Expenses:</span><span><span class="cur">$</span><span id="dc-expenses">0.00</span></span></div><hr style="border-top: 2px dashed black; margin: 4px 0;"><div style="display: flex; justify-content: space-between; font-size: 18px;"><span>Net Balance:</span><span><span class="cur">$</span><span id="dc-net">0.00</span></span></div><div style="margin-top: 6px; font-size: 13px; border-top: 1px dotted black; padding-top: 4px;"><div style="display:flex; justify-content:space-between;"><span>Cash Sales:</span><span><span class="cur">$</span><span id="dc-cash">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>Card Sales:</span><span><span class="cur">$</span><span id="dc-card">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>QR Pay Sales:</span><span><span class="cur">$</span><span id="dc-qr">0.00</span></span></div><div style="display:flex; justify-content:space-between;"><span>Total Bills Count:</span><span id="dc-bills-count">0</span></div></div></div><div><p style="margin: 2px 0; font-size: 14px; font-weight: 900;"><b>EXPENSES:</b></p><table style="width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 900; margin-top: 4px;"><tbody id="dc-expenses-list"></tbody></table></div></div>
+    <div id="print-monthly-history"><div style="text-align:center; margin-bottom:6px;"><h2 class="print-shop-name">AL HUSSAIN RESTAURANT</h2><p class="print-shop-addr" style="margin:2px 0; font-size:12px; font-weight:900;">Nagara Brunei Darussalam.</p><p class="print-shop-phone" style="margin:2px 0; font-size:12px; font-weight:900;"></p><p style="margin:4px 0; font-size:14px; font-weight:900;">MONTHLY SALES REPORT</p><p id="print-monthly-time" style="margin:2px 0; font-size:11px; font-weight:900;"></p><hr style="border-top:3px solid black; margin:4px 0;"></div><div id="print-monthly-content"></div></div>
     <div id="print-item-report">
         <div style="text-align: center; margin-bottom: 6px;">
             <h2 style="margin: 0; font-size: 20px; font-weight: 900;" class="print-shop-name">AL HUSSAIN RESTAURANT</h2>
@@ -3430,6 +3495,9 @@
                 if (document.getElementById('credentials-modal') && document.getElementById('credentials-modal').style.display === 'flex') {
                     if (typeof renderCredentialOverview === 'function') renderCredentialOverview();
                 }
+                if (document.getElementById('drawer-setup-modal') && document.getElementById('drawer-setup-modal').style.display === 'flex') {
+                    if (typeof renderDrawerAccessList === 'function') renderDrawerAccessList();
+                }
                 if (typeof applyRolePermissionsUI === 'function') {
                     applyRolePermissionsUI();
                 }
@@ -3784,6 +3852,10 @@
         // customer QR orders = everyone, waiter calls = everyone) so the app
         // keeps working before it is configured.
         let notificationSettings = {};
+        // Admin-selected accounts that may use the cash drawer. Declared here
+        // so the login/role UI can read it safely before the drawer section
+        // below finishes loading.
+        let drawerAccess = {};
         db.ref('settings/notificationSettings').on('value', (snap) => {
             notificationSettings = snap.val() || {};
             const modal = document.getElementById('notification-settings-modal');
@@ -5315,7 +5387,7 @@
                 const btnPrintBill = document.getElementById('btn-print-bill-elem');
                 if (btnPrintBill) btnPrintBill.style.display = '';
                 const btnDrawer = document.getElementById('btn-drawer-elem');
-                if (btnDrawer) btnDrawer.style.display = '';
+                if (btnDrawer) btnDrawer.style.display = canUseCashDrawer() ? '' : 'none';
                 return;
             }
 
@@ -5428,7 +5500,7 @@
             const btnPrintBill = document.getElementById('btn-print-bill-elem');
             if (btnPrintBill) btnPrintBill.style.display = canBill ? '' : 'none';
             const btnDrawer = document.getElementById('btn-drawer-elem');
-            if (btnDrawer) btnDrawer.style.display = canBill ? '' : 'none';
+            if (btnDrawer) btnDrawer.style.display = canUseCashDrawer() ? '' : 'none';
         }
 
         function logout() {
@@ -8836,6 +8908,39 @@
         })();
         let drawerPulseBusy = false;
 
+        // Admin-selected accounts that may use the drawer. The main 'admin'
+        // login always has access; every other login (including extra admin
+        // accounts such as admin3/admin4) is controlled here and synced
+        // through Firebase so every POS device follows the same choice.
+        db.ref('settings/drawerAccess').on('value', (snap) => {
+            drawerAccess = snap.val() || {};
+            const modal = document.getElementById('drawer-setup-modal');
+            if (modal && modal.style.display === 'flex') renderDrawerAccessList();
+            refreshDrawerButtonVisibility();
+        });
+
+        function canUseCashDrawer() {
+            if (isCustomerMode) return false;
+            if (!loggedInRole) return false;
+            if (loggedInRole === 'admin') return true;
+            return drawerAccess && drawerAccess[loggedInRole] === true;
+        }
+
+        function refreshDrawerButtonVisibility() {
+            const btn = document.getElementById('btn-drawer-elem');
+            if (!btn) return;
+            btn.style.display = canUseCashDrawer() ? '' : 'none';
+        }
+
+        function announceCashDrawerOpen() {
+            try {
+                if (isCustomerMode) return;
+                if (!getSettings().soundEnabled) return;
+                unlockAudio();
+                speakAnnouncement('Cash Drawer Open');
+            } catch (e) { /* voice is optional */ }
+        }
+
         function saveDrawerConfig() {
             try {
                 localStorage.setItem(DRAWER_CFG_KEY, JSON.stringify({
@@ -8984,13 +9089,27 @@
             drawerPulseBusy = true;
             try {
                 if (window.AndroidPOS && typeof window.AndroidPOS.openCashDrawer === 'function') {
-                    try { window.AndroidPOS.openCashDrawer(); return true; } catch (e) { }
+                    try {
+                        window.AndroidPOS.openCashDrawer();
+                        announceCashDrawerOpen();
+                        return true;
+                    } catch (e) { }
                 }
-                if (await tryDrawerHelper()) return true;
-                if (drawerConfig.mode !== 'serial' && await tryDrawerUSB()) return true;
-                if (await tryDrawerSerial()) return true;
+                if (await tryDrawerHelper()) {
+                    announceCashDrawerOpen();
+                    return true;
+                }
+                if (drawerConfig.mode !== 'serial' && await tryDrawerUSB()) {
+                    announceCashDrawerOpen();
+                    return true;
+                }
+                if (await tryDrawerSerial()) {
+                    announceCashDrawerOpen();
+                    return true;
+                }
                 if (allowPrintFallback !== false) {
                     triggerPrint('print-drawer-mode');
+                    announceCashDrawerOpen();
                     return true;
                 }
                 return false;
@@ -9130,11 +9249,85 @@
                 return;
             }
             updateDrawerSetupStatus();
+            renderDrawerAccessList();
             const cb = document.getElementById('drawer-open-on-pay');
             if (cb) cb.checked = drawerConfig.openOnPayNow !== false;
             const modal = document.getElementById('drawer-setup-modal');
             if (modal) modal.style.display = 'flex';
             pingDrawerHelper();
+        }
+
+        function renderDrawerAccessList() {
+            const container = document.getElementById('drawer-access-list');
+            if (!container) return;
+            if (!isAdminAccount()) {
+                container.innerHTML = '<p style="font-size:12.5px;font-weight:700;color:#64748b;">Only the Admin account can change drawer access.</p>';
+                return;
+            }
+
+            const keys = Object.keys(credentials || {});
+            keys.sort((a, b) => {
+                const aMain = a === 'admin';
+                const bMain = b === 'admin';
+                if (aMain !== bMain) return aMain ? -1 : 1;
+                const aAdmin = credentials[a] && credentials[a].roleType === 'admin';
+                const bAdmin = credentials[b] && credentials[b].roleType === 'admin';
+                if (aAdmin !== bAdmin) return aAdmin ? -1 : 1;
+                return String((credentials[a] && credentials[a].name) || a)
+                    .localeCompare(String((credentials[b] && credentials[b].name) || b));
+            });
+
+            if (keys.length === 0) {
+                container.innerHTML = '<p style="font-size:12.5px;font-weight:700;color:#64748b;">No accounts found.</p>';
+                return;
+            }
+
+            container.innerHTML = keys.map(key => {
+                const cred = credentials[key] || {};
+                const isMainAdmin = key === 'admin';
+                const isAdminRole = isMainAdmin || cred.roleType === 'admin';
+                const checked = isMainAdmin || drawerAccess[key] === true;
+                return `
+                    <label style="display:flex;align-items:center;gap:9px;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;margin-bottom:6px;background:${checked ? '#f0fdfa' : '#fff'};cursor:${isMainAdmin ? 'default' : 'pointer'};">
+                        <input type="checkbox" style="width:18px;height:18px;accent-color:#0f766e;" ${checked ? 'checked' : ''} ${isMainAdmin ? 'disabled' : ''} data-role-key="${escapeHtml(key)}" onchange="setDrawerAccessFromCheckbox(this)">
+                        <span style="flex:1;min-width:120px;">
+                            <span style="display:block;font-size:13px;font-weight:900;color:#0f172a;">${isAdminRole ? '👑' : '👤'} ${escapeHtml(cred.name || key)}</span>
+                            <span style="display:block;font-size:11px;font-weight:700;color:#64748b;">${escapeHtml(cred.user || key)} · ${escapeHtml((cred.roleType || (isAdminRole ? 'admin' : 'supplier')).toUpperCase())}</span>
+                        </span>
+                        <span style="font-size:10.5px;font-weight:900;color:${checked ? '#047857' : '#94a3b8'};white-space:nowrap;">${isMainAdmin ? 'ALWAYS ON' : (checked ? 'ALLOWED' : 'NO ACCESS')}</span>
+                    </label>`;
+            }).join('');
+        }
+
+        function setDrawerAccessFromCheckbox(input) {
+            if (!input) return;
+            setDrawerAccess(input.getAttribute('data-role-key'), !!input.checked);
+        }
+
+        function setDrawerAccess(roleKey, value) {
+            if (!isAdminAccount()) return;
+            if (!roleKey || !credentials[roleKey]) return;
+            if (roleKey === 'admin') {
+                showToast('Main Admin always has drawer access.');
+                renderDrawerAccessList();
+                return;
+            }
+            db.ref('settings/drawerAccess/' + roleKey).set(!!value).then(() => {
+                drawerAccess[roleKey] = !!value;
+                showToast((value ? 'Drawer access ON for ' : 'Drawer access OFF for ') + (credentials[roleKey].name || roleKey));
+                refreshDrawerButtonVisibility();
+                renderDrawerAccessList();
+            }).catch((err) => {
+                alert('Could not save drawer access: ' + (err && err.message ? err.message : err));
+                renderDrawerAccessList();
+            });
+        }
+
+        function testDrawerVoice() {
+            try {
+                unlockAudio();
+                speakAnnouncement('Cash Drawer Open');
+            } catch (e) { /* voice is optional */ }
         }
 
         function closeDrawerSetupModal() {
@@ -9159,8 +9352,8 @@
         }
 
         function openCashDrawerOnly() {
-            if (!hasPermission('billing')) {
-                alert("Permission denied: You do not have permission to open the cash drawer.");
+            if (!canUseCashDrawer()) {
+                alert("Permission denied: This account is not allowed to open the cash drawer. Ask the Admin to enable it in Cash Drawer Setup.");
                 return;
             }
             pulseCashDrawer(true);
@@ -9534,7 +9727,7 @@
                 };
 
                 const isCashPayment = String(chosenPaymentMethod).trim().toLowerCase() === 'cash';
-                const drawerShouldOpen = isCashPayment && hasPermission('billing') &&
+                const drawerShouldOpen = isCashPayment && canUseCashDrawer() &&
                     drawerConfig.openOnPayNow !== false;
                 const drawerPulse = drawerShouldOpen
                     ? pulseCashDrawer(false).then(function (opened) { return opened === true; })
@@ -11003,24 +11196,330 @@ function deleteMenuItem(itemId) {
             document.getElementById('monthly-report-modal').style.display = 'none';
         }
 
+        // ================= MONTHLY HISTORY =================
+        // Older sales store the date as a locale string ("23/11/2026") while
+        // newer ones also have an ISO timestamp. Grouping by the raw string
+        // duplicated days and made the order jump around, so every sale is
+        // first converted to one stable local YYYY-MM-DD key.
+        let monthlyHistoryMonth = '';
+
+        function monthlyPad2(n) {
+            return String(n).padStart(2, '0');
+        }
+
+        function getCurrentMonthKey() {
+            const now = new Date();
+            return `${now.getFullYear()}-${monthlyPad2(now.getMonth() + 1)}`;
+        }
+
+        function ensureMonthlyHistoryMonth() {
+            if (!/^\d{4}-\d{2}$/.test(String(monthlyHistoryMonth || ''))) {
+                monthlyHistoryMonth = getCurrentMonthKey();
+            }
+            return monthlyHistoryMonth;
+        }
+
+        function getSaleCanonicalDay(sale) {
+            if (!sale || typeof sale !== 'object') return null;
+
+            function buildDay(y, m, d) {
+                y = Number(y); m = Number(m); d = Number(d);
+                if (!isFinite(y) || !isFinite(m) || !isFinite(d)) return null;
+                if (y < 2000 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) return null;
+                const dt = new Date(y, m - 1, d);
+                if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
+                return {
+                    key: `${y}-${monthlyPad2(m)}-${monthlyPad2(d)}`,
+                    date: dt,
+                    time: null
+                };
+            }
+
+            if (sale.timestamp) {
+                const dt = new Date(sale.timestamp);
+                if (!isNaN(dt.getTime())) {
+                    return {
+                        key: `${dt.getFullYear()}-${monthlyPad2(dt.getMonth() + 1)}-${monthlyPad2(dt.getDate())}`,
+                        date: new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()),
+                        time: dt
+                    };
+                }
+            }
+
+            const raw = String(sale.date || '').trim();
+            if (!raw) return null;
+
+            // ISO: 2026-11-23 (also accepts / and .)
+            let match = raw.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+            if (match) return buildDay(match[1], match[2], match[3]);
+
+            // en-GB: 23/11/2026 (also accepts - and .)
+            match = raw.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+            if (match) {
+                let d = Number(match[1]);
+                let m = Number(match[2]);
+                const y = Number(match[3]);
+                // A few old records were saved in US order (11/23/2026).
+                if (m > 12 && d <= 12) {
+                    const swap = d;
+                    d = m;
+                    m = swap;
+                }
+                return buildDay(y, m, d);
+            }
+
+            const parsed = new Date(raw);
+            if (!isNaN(parsed.getTime())) {
+                return {
+                    key: `${parsed.getFullYear()}-${monthlyPad2(parsed.getMonth() + 1)}-${monthlyPad2(parsed.getDate())}`,
+                    date: new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()),
+                    time: parsed
+                };
+            }
+            return null;
+        }
+
+        function getSaleReportTime(sale, dayInfo) {
+            if (sale && sale.time) return String(sale.time);
+            const dt = (dayInfo && (dayInfo.time || dayInfo.date)) || null;
+            if (dt && !isNaN(dt.getTime())) {
+                return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            return '';
+        }
+
+        function formatMonthlyDayLabel(dayKey) {
+            const parts = String(dayKey || '').split('-').map(Number);
+            if (parts.length !== 3 || parts.some(n => !isFinite(n))) return String(dayKey || '');
+            const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+            const weekday = dt.toLocaleDateString('en-GB', { weekday: 'short' });
+            return `${monthlyPad2(parts[2])}/${monthlyPad2(parts[1])}/${parts[0]} (${weekday})`;
+        }
+
+        function formatMonthlyMonthLabel(monthKey) {
+            const parts = String(monthKey || '').split('-').map(Number);
+            if (parts.length !== 2 || parts.some(n => !isFinite(n))) return String(monthKey || '');
+            return new Date(parts[0], parts[1] - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+        }
+
+        function getSaleItemsArray(sale) {
+            if (!sale || !sale.items) return [];
+            return Array.isArray(sale.items) ? sale.items : Object.values(sale.items);
+        }
+
+        function getMonthlyHistoryGroups(monthKey) {
+            const grouped = {};
+            getSalesEntries().forEach(([key, sale]) => {
+                const dayInfo = getSaleCanonicalDay(sale);
+                if (!dayInfo || dayInfo.key.slice(0, 7) !== monthKey) return;
+                if (!grouped[dayInfo.key]) grouped[dayInfo.key] = [];
+                grouped[dayInfo.key].push({ key, sale, dayInfo });
+            });
+
+            return Object.keys(grouped).sort().reverse().map(dayKey => {
+                const orders = grouped[dayKey].slice().sort((a, b) => {
+                    const at = a.dayInfo.time ? a.dayInfo.time.getTime() : 0;
+                    const bt = b.dayInfo.time ? b.dayInfo.time.getTime() : 0;
+                    if (at !== bt) return at - bt;
+                    return String(a.sale.ref || '').localeCompare(String(b.sale.ref || ''));
+                });
+                return { dayKey, orders };
+            });
+        }
+
+        function setMonthlyHistoryMonth(value) {
+            const next = String(value || '');
+            if (!/^\d{4}-\d{2}$/.test(next)) return;
+            monthlyHistoryMonth = next;
+            renderMonthlyReport();
+        }
+
+        function shiftMonthlyHistoryMonth(delta) {
+            ensureMonthlyHistoryMonth();
+            const parts = monthlyHistoryMonth.split('-').map(Number);
+            const dt = new Date(parts[0], parts[1] - 1 + Number(delta || 0), 1);
+            monthlyHistoryMonth = `${dt.getFullYear()}-${monthlyPad2(dt.getMonth() + 1)}`;
+            renderMonthlyReport();
+        }
+
+        function viewMonthlySale(btn) {
+            const key = btn && btn.getAttribute ? btn.getAttribute('data-sale-key') : '';
+            if (key) viewSaleDetailsByKey(key);
+        }
+
         function renderMonthlyReport() {
             const container = document.getElementById('monthly-report-container');
             if (!container) return;
-            container.innerHTML = "";
+            ensureMonthlyHistoryMonth();
+            // A live sale can refresh this modal while it is open. Keep the
+            // cashier's scroll position so checking an order does not jump away.
+            const scrollHost = container.parentElement;
+            const scrollTop = scrollHost ? scrollHost.scrollTop : 0;
 
-            let dailyMap = {};
-            getSalesValues().forEach(s => {
-                let d = s.date || "Unknown";
-                if (!dailyMap[d]) dailyMap[d] = 0;
-                dailyMap[d] += Number(s.total) || 0;
+            const groups = getMonthlyHistoryGroups(monthlyHistoryMonth);
+            let grandTotal = 0;
+            let billCount = 0;
+            let itemCount = 0;
+            let cashTotal = 0;
+            let cardTotal = 0;
+            let qrTotal = 0;
+
+            groups.forEach(group => {
+                group.orders.forEach(order => {
+                    const sale = order.sale || {};
+                    const amount = Number(sale.total) || 0;
+                    grandTotal += amount;
+                    billCount += 1;
+                    const method = saleMethodLabel(sale.paymentMethod);
+                    if (method === 'Card') cardTotal += amount;
+                    else if (method === 'QR Pay') qrTotal += amount;
+                    else cashTotal += amount;
+                    getSaleItemsArray(sale).forEach(it => {
+                        itemCount += Number(it && it.qty) || 0;
+                    });
+                });
             });
 
-            let tableHtml = '<table class="admin-table"><thead><tr><th>Date</th><th style="text-align:right;">Total Sales</th></tr></thead><tbody>';
-            Object.keys(dailyMap).sort().reverse().forEach(d => {
-                tableHtml += `<tr><td style="font-weight:bold;">${d}</td><td style="text-align:right; font-weight:bold; color:var(--primary);">${curSym()} ${dailyMap[d].toFixed(2)}</td></tr>`;
+            const monthLabel = formatMonthlyMonthLabel(monthlyHistoryMonth);
+            let html = `
+                <div class="monthly-toolbar">
+                    <button type="button" class="monthly-nav-btn" onclick="shiftMonthlyHistoryMonth(-1)" title="Previous month">◀</button>
+                    <input type="month" id="monthly-history-month" value="${monthlyHistoryMonth}" onchange="setMonthlyHistoryMonth(this.value)">
+                    <button type="button" class="monthly-nav-btn" onclick="shiftMonthlyHistoryMonth(1)" title="Next month">▶</button>
+                    <button type="button" class="monthly-nav-btn" onclick="setMonthlyHistoryMonth(getCurrentMonthKey())">This Month</button>
+                    <span class="monthly-toolbar-label">${escapeHtml(monthLabel)}</span>
+                </div>
+                <div class="monthly-summary-grid">
+                    <div class="monthly-summary-box ms-total"><div class="ms-label">Total Sales</div><div class="ms-value">${curSym()}${grandTotal.toFixed(2)}</div></div>
+                    <div class="monthly-summary-box"><div class="ms-label">Bills</div><div class="ms-value">${billCount}</div></div>
+                    <div class="monthly-summary-box"><div class="ms-label">Items</div><div class="ms-value">${itemCount}</div></div>
+                    <div class="monthly-summary-box"><div class="ms-label">Cash</div><div class="ms-value">${curSym()}${cashTotal.toFixed(2)}</div></div>
+                    <div class="monthly-summary-box"><div class="ms-label">Card</div><div class="ms-value">${curSym()}${cardTotal.toFixed(2)}</div></div>
+                    <div class="monthly-summary-box"><div class="ms-label">QR Pay</div><div class="ms-value">${curSym()}${qrTotal.toFixed(2)}</div></div>
+                </div>`;
+
+            if (groups.length === 0) {
+                html += `<div class="monthly-empty">No sales found for ${escapeHtml(monthLabel)}.<br>(இந்த மாதத்தில் விற்பனை பதிவுகள் இல்லை)</div>`;
+                container.innerHTML = html;
+                if (scrollHost) scrollHost.scrollTop = scrollTop;
+                return;
+            }
+
+            groups.forEach(group => {
+                const dayTotal = group.orders.reduce((sum, order) => sum + (Number(order.sale && order.sale.total) || 0), 0);
+                html += `
+                    <div class="monthly-day-card">
+                        <div class="monthly-day-head">
+                            <div>
+                                <span class="monthly-day-date">${escapeHtml(formatMonthlyDayLabel(group.dayKey))}</span>
+                                <span class="monthly-day-count">${group.orders.length} bill${group.orders.length === 1 ? '' : 's'}</span>
+                            </div>
+                            <div class="monthly-day-total">${curSym()}${dayTotal.toFixed(2)}</div>
+                        </div>
+                        <div class="monthly-day-body">`;
+
+                group.orders.forEach(order => {
+                    const sale = order.sale || {};
+                    const items = getSaleItemsArray(sale);
+                    let itemsHtml = '';
+                    items.forEach(it => {
+                        if (!it) return;
+                        const notes = getItemNotesList(it);
+                        itemsHtml += `<div class="monthly-item-line"><span>${escapeHtml(it.qty || 0)}x ${escapeHtml(it.name || 'Item')}</span><span>${curSym()}${getItemLineTotal(it).toFixed(2)}</span></div>`;
+                        if (notes.length > 0) {
+                            itemsHtml += `<div class="monthly-item-notes">[ ${escapeHtml(notes.join(', '))} ]</div>`;
+                        }
+                    });
+                    if (!itemsHtml) {
+                        itemsHtml = '<div class="monthly-item-line"><span>No item details saved</span><span></span></div>';
+                    }
+
+                    const metaParts = [saleMethodLabel(sale.paymentMethod)];
+                    if (sale.source) metaParts.push(sale.source);
+                    if (sale.servedBy) metaParts.push('by ' + sale.servedBy);
+                    if (sale.intake) metaParts.push(sale.intake === 'phone' ? 'Phone' : 'Walk-in');
+
+                    html += `
+                        <div class="monthly-order">
+                            <div class="monthly-order-head">
+                                <div class="monthly-order-main">
+                                    <span class="monthly-order-time">${escapeHtml(getSaleReportTime(sale, order.dayInfo))}</span>
+                                    <span class="monthly-order-ref">${escapeHtml(sale.ref || '—')}</span>
+                                </div>
+                                <div class="monthly-order-total">${curSym()}${(Number(sale.total) || 0).toFixed(2)}</div>
+                            </div>
+                            <div class="monthly-order-meta">${metaParts.map(part => `<span>${escapeHtml(part)}</span>`).join('<span>•</span>')}</div>
+                            <div class="monthly-order-items">${itemsHtml}</div>
+                            <div class="monthly-order-actions">
+                                <button type="button" class="monthly-view-btn" data-sale-key="${escapeHtml(order.key)}" onclick="viewMonthlySale(this)">👁 View / Print</button>
+                            </div>
+                        </div>`;
+                });
+
+                html += `</div></div>`;
             });
-            tableHtml += '</tbody></table>';
-            container.innerHTML = tableHtml;
+
+            container.innerHTML = html;
+            if (scrollHost) scrollHost.scrollTop = scrollTop;
+        }
+
+        function printMonthlyHistory() {
+            if (!hasPermission('monthly_reports')) {
+                alert("Permission denied: You do not have permission to print Monthly History.");
+                return;
+            }
+            ensureMonthlyHistoryMonth();
+            const content = document.getElementById('print-monthly-content');
+            const timeEl = document.getElementById('print-monthly-time');
+            if (!content) return;
+
+            const groups = getMonthlyHistoryGroups(monthlyHistoryMonth);
+            let grandTotal = 0;
+            let billCount = 0;
+            let html = `<div style="text-align:center;font-size:13px;font-weight:900;margin:2px 0 5px;">Month: ${escapeHtml(formatMonthlyMonthLabel(monthlyHistoryMonth))}</div>`;
+
+            if (groups.length === 0) {
+                html += `<div style="text-align:center;font-size:12px;font-weight:800;padding:8px 0;">No sales in this month.</div>`;
+            } else {
+                groups.forEach(group => {
+                    const dayTotal = group.orders.reduce((sum, order) => sum + (Number(order.sale && order.sale.total) || 0), 0);
+                    grandTotal += dayTotal;
+                    billCount += group.orders.length;
+                    html += `
+                        <div style="margin-top:6px;border-top:2px dashed #000;padding-top:4px;">
+                            <div style="display:flex;justify-content:space-between;gap:6px;font-size:12.5px;font-weight:900;">
+                                <span>${escapeHtml(formatMonthlyDayLabel(group.dayKey))}</span>
+                                <span>${curSym()}${dayTotal.toFixed(2)}</span>
+                            </div>`;
+
+                    group.orders.forEach(order => {
+                        const sale = order.sale || {};
+                        html += `
+                            <div style="font-size:11px;font-weight:900;margin-top:4px;">
+                                ${escapeHtml(getSaleReportTime(sale, order.dayInfo))} ${escapeHtml(sale.ref || '')} · ${escapeHtml(saleMethodLabel(sale.paymentMethod))}
+                            </div>`;
+                        getSaleItemsArray(sale).forEach(it => {
+                            if (!it) return;
+                            html += `<div style="display:flex;justify-content:space-between;gap:6px;font-size:10.5px;padding-left:4px;"><span>${escapeHtml(it.qty || 0)}x ${escapeHtml(it.name || 'Item')}</span><span>${curSym()}${getItemLineTotal(it).toFixed(2)}</span></div>`;
+                            const notes = getItemNotesList(it);
+                            if (notes.length > 0) {
+                                html += `<div style="font-size:9.5px;padding-left:8px;">[ ${escapeHtml(notes.join(', '))} ]</div>`;
+                            }
+                        });
+                        html += `<div style="display:flex;justify-content:space-between;gap:6px;font-size:11.5px;font-weight:900;border-top:1px dotted #000;margin-top:2px;padding-top:1px;"><span>Order Total</span><span>${curSym()}${(Number(sale.total) || 0).toFixed(2)}</span></div>`;
+                    });
+
+                    html += `</div>`;
+                });
+
+                html += `<div style="border-top:3px solid #000;margin-top:8px;padding-top:4px;display:flex;justify-content:space-between;gap:6px;font-size:14px;font-weight:900;"><span>TOTAL (${billCount} bills)</span><span>${curSym()}${grandTotal.toFixed(2)}</span></div>`;
+            }
+
+            content.innerHTML = html;
+            if (timeEl) timeEl.innerText = getPrintTimestampText();
+            document.body.classList.add('print-monthly-mode');
+            window.print();
+            setTimeout(() => { document.body.classList.remove('print-monthly-mode'); }, 1000);
         }
 
         let itemReportScope = 'session'; // 'session' | 'date' | 'all'
