@@ -2192,8 +2192,8 @@
                 <div style="border-top:2px solid #e2e8f0; margin:0 0 12px; padding-top:12px;">
                     <div style="font-weight:900; font-size:14px; color:#0f766e; margin-bottom:3px;">👤 யாருக்கு Open Drawer வேண்டும்?</div>
                     <p style="margin:0 0 9px; font-size:11.5px; color:#64748b; font-weight:700; line-height:1.6;">
-                        தேர்ந்தெடுத்த account-க்கு மட்டும் <b>Open Drawer</b> button + Cash payment drawer திறக்கும்.
-                        Main Admin எப்போதும் access வைத்திருக்கும். Admin3, Admin4 போன்ற account-களையும் இங்கே தனித்தனியாக select செய்யலாம்.
+                        தேர்ந்தெடுத்த account-க்கு <b>Open Drawer</b> button காட்டப்படும். Cash payment-ல் <b>Confirm &amp; Pay</b> செய்தால் எல்லா account-க்கும் drawer திறக்கும்.
+                        Main Admin எப்போதும் button access வைத்திருக்கும். Admin3, Admin4 போன்ற account-களையும் இங்கே தனித்தனியாக select செய்யலாம்.
                     </p>
                     <div id="drawer-access-list"></div>
                 </div>
@@ -8908,10 +8908,11 @@
         })();
         let drawerPulseBusy = false;
 
-        // Admin-selected accounts that may use the drawer. The main 'admin'
-        // login always has access; every other login (including extra admin
-        // accounts such as admin3/admin4) is controlled here and synced
-        // through Firebase so every POS device follows the same choice.
+        // Admin-selected accounts that may see the manual Open Drawer button.
+        // The main 'admin' login always has access; every other login
+        // (including extra admin accounts such as admin3/admin4) is controlled
+        // here and synced through Firebase. Cash payments on Confirm & Pay open
+        // the drawer for every logged-in POS account, regardless of this list.
         db.ref('settings/drawerAccess').on('value', (snap) => {
             drawerAccess = snap.val() || {};
             const modal = document.getElementById('drawer-setup-modal');
@@ -8924,6 +8925,13 @@
             if (!loggedInRole) return false;
             if (loggedInRole === 'admin') return true;
             return drawerAccess && drawerAccess[loggedInRole] === true;
+        }
+
+        function canOpenDrawerOnPayment() {
+            // Cash payments must open the drawer even when the manual Open
+            // Drawer button is hidden for this account. Customer phones and
+            // signed-out screens never trigger the physical drawer.
+            return !isCustomerMode && !!loggedInRole;
         }
 
         function refreshDrawerButtonVisibility() {
@@ -9294,7 +9302,7 @@
                             <span style="display:block;font-size:13px;font-weight:900;color:#0f172a;">${isAdminRole ? '👑' : '👤'} ${escapeHtml(cred.name || key)}</span>
                             <span style="display:block;font-size:11px;font-weight:700;color:#64748b;">${escapeHtml(cred.user || key)} · ${escapeHtml((cred.roleType || (isAdminRole ? 'admin' : 'supplier')).toUpperCase())}</span>
                         </span>
-                        <span style="font-size:10.5px;font-weight:900;color:${checked ? '#047857' : '#94a3b8'};white-space:nowrap;">${isMainAdmin ? 'ALWAYS ON' : (checked ? 'ALLOWED' : 'NO ACCESS')}</span>
+                        <span style="font-size:10.5px;font-weight:900;color:${checked ? '#047857' : '#94a3b8'};white-space:nowrap;">${isMainAdmin ? 'ALWAYS ON' : (checked ? 'BUTTON ON' : 'BUTTON HIDDEN')}</span>
                     </label>`;
             }).join('');
         }
@@ -9314,7 +9322,7 @@
             }
             db.ref('settings/drawerAccess/' + roleKey).set(!!value).then(() => {
                 drawerAccess[roleKey] = !!value;
-                showToast((value ? 'Drawer access ON for ' : 'Drawer access OFF for ') + (credentials[roleKey].name || roleKey));
+                showToast((value ? 'Open Drawer button ON for ' : 'Open Drawer button hidden for ') + (credentials[roleKey].name || roleKey));
                 refreshDrawerButtonVisibility();
                 renderDrawerAccessList();
             }).catch((err) => {
@@ -9727,7 +9735,7 @@
                 };
 
                 const isCashPayment = String(chosenPaymentMethod).trim().toLowerCase() === 'cash';
-                const drawerShouldOpen = isCashPayment && canUseCashDrawer() &&
+                const drawerShouldOpen = isCashPayment && canOpenDrawerOnPayment() &&
                     drawerConfig.openOnPayNow !== false;
                 const drawerPulse = drawerShouldOpen
                     ? pulseCashDrawer(false).then(function (opened) { return opened === true; })
@@ -12647,7 +12655,7 @@ async function repairCategoriesNow() {
         body { height: 100vh; height: 100dvh; min-height: 100dvh; }
         .header { margin: 8px 8px 0; padding: 10px; gap: 8px; flex-wrap: wrap; }
         .header-title { flex: 1 1 100%; min-width: 0; flex-wrap: wrap; gap: 7px; }
-        .header h2 { font-size: 17px; flex: 1 1 140px; min-width: 0; }
+        .header h2 { font-size: 17px; flex: 0 0 auto; min-width: 0; }
         .header-home-btn, .live-sync-badge, .badge, .btn-logout { padding: 6px 9px; font-size: 11px; }
         .main-layout { min-width: 0; width: 100%; padding: 8px; gap: 8px; }
         .left-panel, .right-panel { min-width: 0; }
